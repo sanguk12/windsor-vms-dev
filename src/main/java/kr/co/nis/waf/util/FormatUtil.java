@@ -4,32 +4,25 @@
 
 package kr.co.nis.waf.util;
 
-import java.math.BigDecimal;
-import java.text.FieldPosition;
-import java.text.MessageFormat;
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
-import java.util.Locale;
-import java.text.DecimalFormat;
-import java.util.StringTokenizer;
 import java.io.UnsupportedEncodingException;
-import java.text.DateFormat;
+import java.math.BigDecimal;
 import java.sql.Date;
-import java.util.Calendar;
+import java.text.DateFormat;
+import java.text.DecimalFormat;
+import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
-import ch.qos.logback.classic.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.*;
 
 public class FormatUtil
 {
-    private static Logger logger;
+//    private static Logger logger;
     public static SimpleDateFormat checkSdf;
     public static final String CHECK_DATE_FORMAT = "yyyyMMdd";
     public static final String DASH = "-";
     public static final String SLASH = "/";
     
     static {
-        FormatUtil.logger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger((Class)FormatUtil.class);
+//        FormatUtil.logger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger((Class)FormatUtil.class);
         FormatUtil.checkSdf = null;
     }
     
@@ -1005,7 +998,7 @@ public class FormatUtil
                     }
                 }
                 catch (final UnsupportedEncodingException ex) {
-                    FormatUtil.logger.error("Fatal Error: KSC5601 encoding is not supported.");
+                    System.out.println("Fatal Error: KSC5601 encoding is not supported.");
                 }
             }
         }

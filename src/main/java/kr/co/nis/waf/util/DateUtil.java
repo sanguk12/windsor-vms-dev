@@ -4,21 +4,13 @@
 
 package kr.co.nis.waf.util;
 
-import java.util.ArrayList;
-import java.util.StringTokenizer;
-import java.util.GregorianCalendar;
-import java.util.Locale;
-import java.util.Calendar;
-import java.util.TimeZone;
 import java.text.DateFormat;
-import java.util.Date;
 import java.text.SimpleDateFormat;
-import ch.qos.logback.classic.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.*;
 
 public class DateUtil
 {
-    private static Logger logger;
+//    private static Logger logger;
     public static SimpleDateFormat dateSqlFormat;
     public static SimpleDateFormat dateFormat;
     public static final int FORMAT_UNKNOWN = 0;
@@ -1018,7 +1010,7 @@ public class DateUtil
     }
     
     static {
-        DateUtil.logger = (ch.qos.logback.classic.Logger)LoggerFactory.getLogger((Class)DateUtil.class);
+//        DateUtil.logger = (ch.qos.logback.classic.Logger)LoggerFactory.getLogger((Class)DateUtil.class);
         DateUtil.dateSqlFormat = new SimpleDateFormat("yyyy.MM.dd");
         DateUtil.dateFormat = new SimpleDateFormat("yyyyMMdd");
     }
