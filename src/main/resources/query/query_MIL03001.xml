@@ -1,0 +1,338 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="MIL03001">
+	
+	<!-- 마일리지 현황 조회 -->
+	<select id="MIL0300101S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			mileageID as "mileageID"
+			, venueCD as "venueCD"
+			, venueNm as "venueNm"
+			, to_char(to_date(contractDateFrom, 'yyyymmdd'), 'yyyy.mm.dd')||'~'||to_char(to_date(contractDateTo, 'yyyymmdd'), 'yyyy.mm.dd') as "contractDate"
+			, contractMonthCt as "contractMonthCt"
+			, msTargetRate as "msTargetRate"
+			, tcontractQty as "tcontractQty"
+			, gsvAmt as "gsvAmt"
+			, gsvRate as "gsvRate"
+			, stipulationAmt as "stipulationAmt"
+			, contractAmt as "contractAmt"
+			, subtractAmt as "subtractAmt"
+			, targetRate as "targetRate"
+			, addAmt as "addAmt"
+		from (
+			select
+				 t3.*
+				 , (
+					select attrib02
+					from F_CODE
+					where
+						useYN='Y'
+						and activeFlg='U'
+						and codediv='OFFICECD'
+						and comCode=t3.officeCD
+				 ) as rageSphereCD
+			from (
+				select
+					 t2.*
+					 , (
+						select attrib02
+						from F_CODE
+						where
+							useYN='Y'
+							and activeFlg='U'
+							and codediv='TEAMCD'
+							and comCode=t2.teamCD
+					 ) as officeCD
+				from (
+					select
+						 t1.*
+						 , (
+							select attrib02
+							from F_CODE
+							where
+								useYN='Y'
+								and activeFlg='U'
+								and codediv='TERRITORYCD'
+								and comCode=t1.territoryCD
+						 ) as teamCD
+					from (
+						select
+							a.mileageID
+							, a.venueCD
+							, c.venueNm
+							, a.contractDateFrom
+							, a.contractDateTo
+							, a.contractMonthCt
+							, a.msTargetRate
+							, a.tcontractQty
+							, a.gsvAmt
+							, a.gsvRate
+							, a.stipulationAmt
+							, a.contractAmt
+							, a.subtractAmt
+							, (
+								case when a.contractAmt = 0 then 0
+								else round((nvl(a.subtractAmt,0) / nvl(a.contractAmt,0))*100)
+								end
+							) as targetRate
+							, nvl(b.addAmt,0) as addAmt
+							, (
+								case when nvl(a.contractAmt,0) > nvl(a.subtractAmt,0) then 'Y'
+								else 'N'
+								end
+							) as contractOverYN
+							, (
+								select territoryCD from GVEN01MT where venueCD=a.venueCD
+							) as territoryCD
+						from GMIL01MT a
+						left outer join GMIL02MT b
+							on a.mileageID = b.mileageID
+							and b.mileageStateCD = '60'
+						inner join GVEN01MT c
+							on a.venueCD = c.venueCD
+						where
+							a.mileageStateCD = '60'
+							<![CDATA[
+							and a.contractDateTo >= #contractDateFrom#
+							and a.contractDateFrom <= #contractDateTo#
+							]]>
+							<isPropertyAvailable property="dkmdTpCD">
+								<isNotEqual prepend="and" property="dkmdTpCD" compareValue="DK">
+									c.dkmdTpCD = #dkmdTpCD#
+								</isNotEqual>
+							</isPropertyAvailable>
+					) t1
+				) t2
+			) t3
+		) t
+		where 1=1
+			<isPropertyAvailable property="contractOverYN">
+				<isNotEmpty prepend="and" property="contractOverYN">
+					contractOverYN = #contractOverYN#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="rageSphereCD">
+				<isNotEmpty prepend="and" property="rageSphereCD">
+					rageSphereCD = #rageSphereCD#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="officeCD">
+				<isNotEmpty prepend="and" property="officeCD">
+					officeCD = #officeCD#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="teamCD">
+				<isNotEmpty prepend="and" property="teamCD">
+					teamCD = #teamCD#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="territoryCD">
+				<isNotEmpty prepend="and" property="territoryCD">
+					territoryCD = #territoryCD#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="periodLongTerm">
+				<isNotEmpty prepend="and" property="periodLongTerm">
+					contractMonthCt <![CDATA[>=]]> #periodLongTerm#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="periodShortTerm">
+				<isNotEmpty prepend="and" property="periodShortTerm">
+					contractMonthCt <![CDATA[<]]> #periodShortTerm#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="venue_S">
+				<isNotEmpty prepend="and" property="venue_S">
+					venueCD = #venue_S#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="rageSphereCD_S">
+				<isNotEmpty prepend="and" property="rageSphereCD_S">
+					rageSphereCD = #rageSphereCD_S#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="officeCD_S">
+				<isNotEmpty prepend="and" property="officeCD_S">
+					officeCD = #officeCD_S#
+				</isNotEmpty>
+			</isPropertyAvailable>
+		order by mileageID
+	</select>
+	
+	<!-- 마일리지 현황 엑셀 조회 -->
+	<select id="MIL0300102S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			mileageID as "mileageID"
+			, venueCD as "venueCD"
+			, venueNm as "venueNm"
+			, to_char(to_date(contractDateFrom, 'yyyymmdd'), 'yyyy.mm.dd')||'~'||to_char(to_date(contractDateTo, 'yyyymmdd'), 'yyyy.mm.dd') as "contractDate"
+			, contractMonthCt as "contractMonthCt"
+			, msTargetRate as "msTargetRate"
+			, tcontractQty as "tcontractQty"
+			, gsvAmt as "gsvAmt"
+			, gsvRate as "gsvRate"
+			, stipulationAmt as "stipulationAmt"
+			, contractAmt as "contractAmt"
+			, subtractAmt as "subtractAmt"
+			, targetRate as "targetRate"
+			, addAmt as "addAmt"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','PAYTPCD',payTpCD,null) as "payTpCDName"
+			, keymanID as "keymanID"
+			, keymanNm as "keymanNm"
+			, birthDate as "birthDate"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','BANKCD',bankCD,null) as "bankCDName"
+			, accountNo as "accountNo"
+			, payAmt as "payAmt"
+		from (
+			select
+				 t3.*
+				 , (
+					select attrib02
+					from F_CODE
+					where
+						useYN='Y'
+						and activeFlg='U'
+						and codediv='OFFICECD'
+						and comCode=t3.officeCD
+				 ) as rageSphereCD
+			from (
+				select
+					 t2.*
+					 , (
+						select attrib02
+						from F_CODE
+						where
+							useYN='Y'
+							and activeFlg='U'
+							and codediv='TEAMCD'
+							and comCode=t2.teamCD
+					 ) as officeCD
+				from (
+					select
+						 t1.*
+						 , (
+							select attrib02
+							from F_CODE
+							where
+								useYN='Y'
+								and activeFlg='U'
+								and codediv='TERRITORYCD'
+								and comCode=t1.territoryCD
+						 ) as teamCD
+					from (
+						select
+							a.mileageID
+							, a.venueCD
+							, c.venueNm
+							, a.contractDateFrom
+							, a.contractDateTo
+							, a.contractMonthCt
+							, a.msTargetRate
+							, a.tcontractQty
+							, a.gsvAmt
+							, a.gsvRate
+							, a.stipulationAmt
+							, a.contractAmt
+							, a.subtractAmt
+							, (
+									case when a.contractAmt = 0 then 0
+								else round((nvl(a.subtractAmt,0) / a.contractAmt)*100)
+								end
+							) as targetRate
+							, nvl(b.addAmt,0) as addAmt
+							, (
+								case when a.contractAmt > nvl(a.subtractAmt,0) then 'Y'
+								else 'N'
+								end
+							) as contractOverYN
+							, d.payTpCD
+							, d.keymanID
+							, e.keymanNm
+							, e.birthDate
+							, d.accountNo
+							, d.bankCD
+							, d.payAmt
+							, (
+								select territoryCD from GVEN01MT where venueCD=a.venueCD
+							) as territoryCD
+						from GMIL01MT a
+						left outer join GMIL02MT b
+							on a.mileageID = b.mileageID
+							and b.mileageStateCD = '60'
+						inner join GVEN01MT c
+							on a.venueCD = c.venueCD
+						left outer join GMIL03MT d
+							on a.mileageID = d.mileageID
+						left outer join GKEY01MT e
+							on d.keymanID = e.keymanID
+						where
+							a.mileageStateCD = '60'
+							<![CDATA[
+							and a.contractDateTo >= #contractDateFrom#
+							and a.contractDateFrom <= #contractDateTo#
+							]]>
+							<isPropertyAvailable property="dkmdTpCD">
+								<isNotEqual prepend="and" property="dkmdTpCD" compareValue="DK">
+									c.dkmdTpCD = #dkmdTpCD#
+								</isNotEqual>
+							</isPropertyAvailable>
+					) t1
+				) t2
+			) t3
+		) t
+		where 1=1
+			<isPropertyAvailable property="contractOverYN">
+				<isNotEmpty prepend="and" property="contractOverYN">
+					contractOverYN = #contractOverYN#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="rageSphereCD">
+				<isNotEmpty prepend="and" property="rageSphereCD">
+					rageSphereCD = #rageSphereCD#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="officeCD">
+				<isNotEmpty prepend="and" property="officeCD">
+					officeCD = #officeCD#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="teamCD">
+				<isNotEmpty prepend="and" property="teamCD">
+					teamCD = #teamCD#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="territoryCD">
+				<isNotEmpty prepend="and" property="territoryCD">
+					territoryCD = #territoryCD#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="periodLongTerm">
+				<isNotEmpty prepend="and" property="periodLongTerm">
+					contractMonthCt <![CDATA[>=]]> #periodLongTerm#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="periodShortTerm">
+				<isNotEmpty prepend="and" property="periodShortTerm">
+					contractMonthCt <![CDATA[<]]> #periodShortTerm#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="venue_S">
+				<isNotEmpty prepend="and" property="venue_S">
+					venueCD = #venue_S#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="rageSphereCD_S">
+				<isNotEmpty prepend="and" property="rageSphereCD_S">
+					rageSphereCD = #rageSphereCD_S#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="officeCD_S">
+				<isNotEmpty prepend="and" property="officeCD_S">
+					officeCD = #officeCD_S#
+				</isNotEmpty>
+			</isPropertyAvailable>
+		order by mileageID, keymanID
+	</select>
+	
+</sqlMap>

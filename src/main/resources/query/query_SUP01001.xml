@@ -1,0 +1,637 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="SUP01001">
+	
+	<!-- 선지원등록/지급요청 리스트 조회 -->
+	<select id="SUP0100101S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			supportID as "supportID"
+			, venueCD as "venueCD"
+			, venueNm as "venueNm"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','VENUEGRADCD',venueGradCD,null) as "venueGradCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SEGMENTCD',segmentCD,null) as "segmentCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SUBSEGMENTCD',subSegmentCD,null) as "subSegmentCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD1',addrTpCD1,null) as "addrTpCD1Name"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD2',addrTpCD2,null) as "addrTpCD2Name"
+			, contractDateFrom as "contractDateFrom"
+			, contractDateTo as "contractDateTo"
+			, contractMonthCt as "contractMonthCt"
+			, apAmt as "apAmt"
+			, msTargetRate as "msTargetRate"
+			, tcontractQty as "tcontractQty"
+			, gsvAmt as "gsvAmt"
+			, gsvRate as "gsvRate"
+			, contractAmt as "contractAmt"
+			, contractTaxAmt as "contractTaxAmt"
+			<!-- 약정금액추가 2016.10.10 -->
+			, stipulationAmt as "stipulationAmt"
+			, keymanAmt as "keymanAmt"
+			, payRequestDate as "payRequestDate"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SUPPORTSTATECD',supportStateCD,null) as "supportStateCDName"
+			, transferDate as "transferDate"
+			, commt as "commt"
+			, supportStateCD as "supportStateCD"
+		from (
+			select
+				a.supportID
+				, a.venueCD
+				, b.venueNm
+				, b.venueGradCD
+				, b.segmentCD
+				, b.subSegmentCD
+				, b.addrTpCD1
+				, b.addrTpCD2
+				, a.contractDateFrom
+				, a.contractDateTo
+				, a.contractMonthCt
+				, a.apAmt
+				, a.msTargetRate
+				, a.tcontractQty
+				, a.gsvAmt
+				, a.gsvRate
+				, a.contractAmt
+				, a.contractTaxAmt
+				, a.stipulationAmt
+				, (select sum(payAmt) from GSUP03MT where supportID=a.supportID and payTpCD='ORG') as keymanAmt
+				, a.payRequestDate
+				, a.supportStateCD
+				, a.transferDate
+				, a.commt
+			from GSUP01MT a
+			inner join GVEN01MT b
+				on a.venueCD = b.venueCD
+			where
+				empID = #empID#
+				<![CDATA[
+				and a.contractDateTo >= #contractDateFrom#
+				and a.contractDateFrom <= #contractDateTo#
+				]]>
+				<isPropertyAvailable property="payRequestDate">
+					<isNotEmpty prepend="and" property="payRequestDate">
+						payRequestDate = #payRequestDate#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="supportStateCD">
+					<isNotEmpty prepend="and" property="supportStateCD">
+						supportStateCD = #supportStateCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="periodLongTerm">
+					<isNotEmpty prepend="and" property="periodLongTerm">
+						a.contractMonthCt <![CDATA[>=]]> #periodLongTerm#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="periodShortTerm">
+					<isNotEmpty prepend="and" property="periodShortTerm">
+						a.contractMonthCt <![CDATA[<]]> #periodShortTerm#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="venue_S">
+					<isNotEmpty prepend="and" property="venue_S">
+						b.venueCD = #venue_S#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="rageSphereCD_S">
+					<isNotEmpty prepend="and" property="rageSphereCD_S">
+						a.rageSphereCD = #rageSphereCD_S#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="officeCD_S">
+					<isNotEmpty prepend="and" property="officeCD_S">
+						a.officeCD = #officeCD_S#
+					</isNotEmpty>
+				</isPropertyAvailable>
+		) t
+	</select>
+	
+	<!-- 선지원등록/지급요청 상세정보 -->
+	<select id="SUP0100102S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			supportID as "supportID"
+			, venueCD as "venueCD"
+			, venueNm as "venueNm"
+			, contractDateFrom as "contractDateFrom"
+			, contractDateTo as "contractDateTo"
+			, contractMonthCt as "contractMonthCt"
+			, apAmt as "apAmt"
+			, msTargetRate as "msTargetRate"
+			, tcontractQty as "tcontractQty"
+			, gsvAmt as "gsvAmt"
+			, gsvRate as "gsvRate"
+			, contractAmt as "contractAmt"
+			, contractTaxAmt as "contractTaxAmt"
+			<!-- 약정금액추가 2016.10.10 -->
+			, stipulationAmt as "stipulationAmt"
+			, payRequestDate as "payRequestDate"
+			, supportStateCD as "supportStateCD"
+			, keymanAmt as "keymanAmt"
+		from (
+			select
+				a.supportID
+				, a.venueCD
+				, b.venueNm
+				, a.contractDateFrom
+				, a.contractDateTo
+				, a.contractMonthCt
+				, a.apAmt
+				, a.msTargetRate
+				, a.tcontractQty
+				, a.gsvAmt
+				, a.gsvRate
+				, a.contractAmt
+				, a.contractTaxAmt
+				, a.stipulationAmt
+				, a.payRequestDate
+				, a.supportStateCD
+				, (select sum(payAmt) from GSUP03MT where supportID=a.supportID and payTpCD='ORG') as keymanAmt
+			from GSUP01MT a
+			inner join GVEN01MT b
+				on a.venueCD = b.venueCD
+			where
+				a.supportID = #supportID#
+		)
+	</select>
+	
+	<!-- 선지원등록/지급요청 상세 제품정보 -->
+	<select id="SUP0100103S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			getLangDesc(#companyID#,#languageCD#,'F_CODE','KINDTPCD5',kindTpCD5,null) as "kindTpCD5Name"
+			, prdNm as "prdNm"
+			, factoryPrice as "factoryPrice"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','QTYUNITCD',qtyUnitCD,null) as "qtyUnitCDName"
+			, contractQty as "contractQty"
+			, enterQty as "enterQty"
+			, enterUnitAmt as "enterUnitAmt"
+			, payAmt as "payAmt"
+			, prdCD as "prdCD"
+			, eu as "eu"
+		from (
+			select
+				b.kindTpCD5
+				, b.prdNm
+				, a.factoryPrice
+				, b.qtyUnitCD
+				, a.contractQty
+				, a.enterQty
+				, a.enterUnitAmt
+				, a.payAmt
+				, b.prdCD
+				, b.eu
+			from GSUP01DT a
+			inner join GPRD01MT b
+				on a.prdCD = b.prdCD
+			where
+				a.supportID = #supportID#
+		) t
+	</select>
+	
+	<!-- 선지원계약ID
+	<insert id="SUP0100100I" parameterClass="com.kia.sup.model.GSUP01MT">
+		insert into GSUP01MT (
+			supportID
+			, dkmdTpcD
+			, empID
+			, rageSphereCD
+			, officeCD
+			, teamCD
+			, regID
+			, regDate
+		)
+		select
+			supportID
+			, dkmdTpcD
+			, empID
+			, rageSphereCD
+			, officeCD
+			, teamCD
+			, #userID#
+			, sysdate
+		from (
+			select
+				nvl(max(supportID)+1, rpad(to_char(sysdate, 'yyyymm'), 10, '0')+1) as supportID
+			from GSUP01MT
+			where
+				substr(supportID, 0, 6) = to_char(sysdate, 'yyyymm')
+		) a
+		, GEMP01MT b
+		where
+			b.empID = #empID#
+	</insert>
+	 -->
+	
+	<!-- 선지원계약ID -->
+	<select id="SUP0100100S" parameterClass="com.kia.sup.model.GSUP01MT" resultClass="java.util.LinkedHashMap">
+		select
+			nvl(max(supportID)+1, rpad(to_char(sysdate, 'yyyymm'), 10, '0')+1) as "supportID"
+		from GSUP01MT
+		where
+			substr(supportID, 0, 6) = to_char(sysdate, 'yyyymm')
+	</select>
+	
+	<!-- 선지원 정보 등록  -->
+	<insert id="SUP0100101I" parameterClass="com.kia.sup.model.GSUP01MT">
+		insert into GSUP01MT (
+			supportID
+			, venueCD
+			, dkmdTpcD
+			, empID
+			, rageSphereCD
+			, officeCD
+			, teamCD
+			, contractDateFrom
+			, contractDateTo
+			, contractMonthCt
+			, apAmt
+			, msTargetRate
+			, tcontractQty
+			, gsvAmt
+			, gsvRate
+			, contractAmt
+			, contractTaxAmt
+			, stipulationAmt	<!-- 지급금액과 약정금액분리로인한 약정금액추가 2016.10.10 -->
+			, subtractAmt
+			, payRequestDate
+			, supportStateCD
+			, regID
+			, regDate
+		)
+		select
+			#supportID#
+			, #venueCD#
+			, dkmdTpcD
+			, empID
+			, rageSphereCD
+			, officeCD
+			, teamCD
+			, #contractDateFrom#
+			, #contractDateTo#
+			, #contractMonthCt#
+			, #apAmt#
+			, #msTargetRate#
+			, #tcontractQty#
+			, #gsvAmt#
+			, #gsvRate#
+			, #contractAmt#
+			, #contractTaxAmt#
+			, #stipulationAmt#
+			, 0
+			, #payRequestDate#
+			, #supportStateCD#
+			, #userID#
+			, sysdate
+		from GEMP01MT
+		where
+			empID = #empID#
+	</insert>
+	 
+	<!-- 선지원 제품 등록  -->
+	<insert id="SUP0100102I" parameterClass="com.kia.sup.model.GSUP01MT">
+		insert into GSUP01DT (
+			supportID
+			, prdCD
+			, factoryPrice
+			, contractQty
+			, enterQty
+			, enterUnitAmt
+			, payAmt
+			, regID
+			, regDate
+		)
+		values (
+			#supportID#
+			, #prdCD#
+			, #factoryPrice#
+			, #contractQty#
+			, #enterQty#
+			, #enterUnitAmt#
+			, #payAmt#
+			, #userID#
+			, sysdate
+		)
+	</insert>
+	
+	<!-- 선지원 정보 수정  -->
+	<update id="SUP0100101U" parameterClass="com.kia.sup.model.GSUP01MT">
+		update GSUP01MT
+		set
+			venueCD = #venueCD#
+			, contractDateFrom = #contractDateFrom#
+			, contractDateTo = #contractDateTo#
+			, contractMonthCt = #contractMonthCt#
+			, apAmt = #apAmt#
+			, msTargetRate = #msTargetRate#
+			, tcontractQty = #tcontractQty#
+			, gsvAmt = #gsvAmt#
+			, gsvRate = #gsvRate#
+			, contractAmt = #contractAmt#
+			, contractTaxAmt = #contractTaxAmt#
+			, stipulationAmt = #stipulationAmt#	<!-- 지급금액과 약정금액분리로인한 약정금액추가 2016.10.10 -->
+			, subtractAmt = 0
+			, payRequestDate = #payRequestDate#
+			, supportStateCD = #supportStateCD#
+			, commt = #commt#
+			, chgID = #userID#
+			, chgDate = sysdate
+		where
+			supportID = #supportID#
+	</update>
+	
+	<!-- 선지원 제품 수정  -->
+	<update id="SUP0100102U" parameterClass="com.kia.sup.model.GSUP01MT">
+		update GSUP01DT
+		set
+			factoryPrice = #factoryPrice#
+			, contractQty = #contractQty#
+			, enterQty = #enterQty#
+			, enterUnitAmt = #enterUnitAmt#
+			, payAmt = #payAmt#
+			, chgID = #userID#
+			, chgDate = sysdate
+		where
+			supportID = #supportID#
+			and prdCD = #prdCD#
+	</update>
+	
+	<!-- 선지원 정보 삭제  -->
+	<delete id="SUP0100101D" parameterClass="com.kia.sup.model.GSUP01MT">
+		delete from GSUP01MT
+		where
+			supportID = #supportID#
+	</delete>
+	
+	<!-- 선지원 제품 삭제  -->
+	<delete id="SUP0100102D" parameterClass="com.kia.sup.model.GSUP01MT">
+		delete from GSUP01DT
+		where
+			supportID = #supportID#
+			and prdCD = #prdCD#
+	</delete>
+	
+	<!-- 지급키맨등록 해당업소에 속한 키맨목록 -->
+	<select id="SUP0100104S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			keymanID as "keymanID"
+			, keymanNm as "keymanNm"
+			, birthDate as "birthDate"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','BANKCD',bankCD,null) as "bankCDName"
+			, accountNo as "accountNo"
+			, pkeymanYN as "pkeymanYN"
+			, holderNm as "holderNm"
+			, bankCD as "bankCD"
+		from (
+			select
+				keymanID
+				, keymanNm
+				, birthDate
+				, accountNo
+				, bankCD
+				, pkeymanYN
+				, holderNm
+			from GKEY01MT
+			where
+				venueCD = #venueCD#
+				and activeYN = 'Y'
+				and keymanID not in (
+					select keymanID
+					from GSUP03MT
+					where
+						supportID = #supportID#
+						and payTpCD = #payTpCD#
+				)
+		)
+		order by pkeymanYN desc, keymanID
+	</select>
+	
+	<!-- 지급키맨등록 키맨목록 -->
+	<select id="SUP0100105S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			keymanID as "keymanID"
+			, keymanNm as "keymanNm"
+			, birthDate as "birthDate"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','BANKCD',bankCD,null) as "bankCDName"
+			, accountNo as "accountNo"
+			, payAmt as "payAmt"
+			, pkeymanYN as "pkeymanYN"
+			, holderNm as "holderNm"
+			, bankCD as"bankCD"
+		from (
+			select
+				b.keymanID
+				, a.keymanNm
+				, a.birthDate
+				, b.accountNo
+				, b.bankCD
+				, b.payAmt
+				, a.pkeymanYN
+				, b.holderNm
+			from GKEY01MT a
+			inner join GSUP03MT b
+				on a.keymanID = b.keymanID
+			where
+				b.supportID = #supportID#
+				and b.payTpCD = #payTpCD#
+				and venueCD = #venueCD#
+		)
+		order by pkeymanYN desc, keymanID
+	</select>
+	
+	<!-- 지급키맨 등록 -->
+	<insert id="SUP0100103I" parameterClass="com.kia.sup.model.GSUP01MT">
+		insert into GSUP03MT (
+			supportID
+			, payTpCD
+			, keymanID
+			, bankCD
+			, accountNo
+			, payAmt
+			, regID
+			, regDate
+			, holderNm
+		)
+		values (
+			#supportID#
+			, #payTpCD#
+			, #keymanID#
+			, #bankCD#
+			, #accountNo#
+			, #payAmt#
+			, #userID#
+			, sysdate
+			, #holderNm#
+		)
+	</insert>
+	
+	<!-- 지급키맨 수정 -->
+	<update id="SUP0100103U" parameterClass="com.kia.sup.model.GSUP01MT">
+		update GSUP03MT
+		set
+			bankCD = #bankCD#
+			, accountNo = #accountNo#
+			, payAmt = #payAmt#
+			, holderNm = #holderNm#
+		where
+			supportID = #supportID#
+			and payTpCD = #payTpCD#
+			and keymanID = #keymanID#
+	</update>
+	
+	<!-- 지급키맨 삭제 -->
+	<delete id="SUP0100103D" parameterClass="com.kia.sup.model.GSUP01MT">
+		delete from GSUP03MT
+		where
+			supportID = #supportID#
+			and payTpCD = #payTpCD#
+			and keymanID = #keymanID#
+	</delete>
+	
+	<!-- 선지원 제품 전체삭제  -->
+	<delete id="SUP0100104D" parameterClass="com.kia.sup.model.GSUP01MT">
+		delete from GSUP01DT
+		where
+			supportID = #supportID#
+	</delete>
+	
+	<!-- 선지원 키맨 전체삭제  -->
+	<delete id="SUP0100105D" parameterClass="com.kia.sup.model.GSUP01MT">
+		delete from GSUP03MT
+		where
+			supportID = #supportID#
+			and payTpCD = #payTpCD#
+	</delete>
+	
+	<!-- 선지원 지급요청, 취소 -->
+	<update id="SUP0100104U" parameterClass="com.kia.sup.model.GSUP01MT">
+		update GSUP01MT
+		set
+			supportStateCD = #supportStateCD#
+			, commt = ''
+			, chgID = #userID#
+			, chgDate = sysdate
+		where
+			supportID = #supportID#
+	</update>
+	
+	<!-- 선지원등록/지급요청 엑셀 조회 -->
+	<select id="SUP0100106S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			supportID as "supportID"
+			, venueCD as "venueCD"
+			, venueNm as "venueNm"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','VENUEGRADCD',venueGradCD,null) as "venueGradCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SEGMENTCD',segmentCD,null) as "segmentCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SUBSEGMENTCD',subSegmentCD,null) as "subSegmentCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD1',addrTpCD1,null) as "addrTpCD1Name"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD2',addrTpCD2,null) as "addrTpCD2Name"
+			, contractDateFrom as "contractDateFrom"
+			, contractDateTo as "contractDateTo"
+			, contractMonthCt as "contractMonthCt"
+			, apAmt as "apAmt"
+			, msTargetRate as "msTargetRate"
+			, tcontractQty as "tcontractQty"
+			, gsvAmt as "gsvAmt"
+			, gsvRate as "gsvRate"
+			, contractAmt as "contractAmt"
+			, contractTaxAmt as "contractTaxAmt"
+			<!-- 약정금액추가 2016.10.10 -->
+			, stipulationAmt as "stipulationAmt"
+			, keymanAmt as "keymanAmt"
+			, payRequestDate as "payRequestDate"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SUPPORTSTATECD',supportStateCD,null) as "supportStateCDName"
+			, transferDate as "transferDate"
+			, commt as "commt"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','KINDTPCD5',kindTpCD5,null) as "kindTpCD5Name"
+			, prdNm as "prdNm"
+			, factoryPrice as "factoryPrice"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','QTYUNITCD',qtyUnitCD,null) as "qtyUnitCDName"
+			, contractQty as "contractQty"
+			, enterQty as "enterQty"
+			, enterUnitAmt as "enterUnitAmt"
+			, payAmt as "payAmt"
+		from (
+			select
+				a.supportID
+				, a.venueCD
+				, b.venueNm
+				, b.venueGradCD
+				, b.segmentCD
+				, b.subSegmentCD
+				, b.addrTpCD1
+				, b.addrTpCD2
+				, a.contractDateFrom
+				, a.contractDateTo
+				, a.contractMonthCt
+				, a.apAmt
+				, a.msTargetRate
+				, a.tcontractQty
+				, a.gsvAmt
+				, a.gsvRate
+				, a.contractAmt
+				, a.contractTaxAmt
+				, a.stipulationAmt
+				, (select sum(payAmt) from GSUP03MT where supportID=a.supportID and payTpCD='ORG') as keymanAmt
+				, a.payRequestDate
+				, a.supportStateCD
+				, a.transferDate
+				, a.commt
+				, d.kindTpCD5
+				, d.prdNm
+				, c.factoryPrice
+				, d.qtyUnitCD
+				, c.contractQty
+				, c.enterQty
+				, c.enterUnitAmt
+				, c.payAmt
+			from GSUP01MT a
+			inner join GVEN01MT b
+				on a.venueCD = b.venueCD
+			inner join GSUP01DT c
+				on a.supportID = c.supportID
+			inner join GPRD01MT d
+				on c.prdCD = d.prdCD
+			where
+				empID = #empID#
+				<![CDATA[
+				and a.contractDateTo >= #contractDateFrom#
+				and a.contractDateFrom <= #contractDateTo#
+				]]>
+				<isPropertyAvailable property="payRequestDate">
+					<isNotEmpty prepend="and" property="payRequestDate">
+						payRequestDate = #payRequestDate#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="supportStateCD">
+					<isNotEmpty prepend="and" property="supportStateCD">
+						supportStateCD = #supportStateCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="periodLongTerm">
+					<isNotEmpty prepend="and" property="periodLongTerm">
+						a.contractMonthCt <![CDATA[>=]]> #periodLongTerm#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="periodShortTerm">
+					<isNotEmpty prepend="and" property="periodShortTerm">
+						a.contractMonthCt <![CDATA[<]]> #periodShortTerm#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="venue_S">
+					<isNotEmpty prepend="and" property="venue_S">
+						b.venueCD = #venue_S#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="rageSphereCD_S">
+					<isNotEmpty prepend="and" property="rageSphereCD_S">
+						a.rageSphereCD = #rageSphereCD_S#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="officeCD_S">
+					<isNotEmpty prepend="and" property="officeCD_S">
+						a.officeCD = #officeCD_S#
+					</isNotEmpty>
+				</isPropertyAvailable>
+		) t
+		order by supportID, venueCD
+	</select>
+	
+</sqlMap>

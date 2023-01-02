@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="PLN02003">
+	
+	<!-- Plan승인내역 리스트 조회 -->
+	<select id="PLN0200301S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			getLangDesc(#companyID#,#languageCD#,'F_CODE','INCNTTPCD',incntTpCD,null) as "incntTpCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','RAGESPHERECD',rageSphereCD,null) as "rageSphereCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','OFFICECD',officeCD,null) as "officeCDName"
+			<isPropertyAvailable property="grpID">
+				<isNotEmpty property="grpID">
+			, (case when (select dkmdtpcd from GEMP01MT where empID=t.empID) != 'DK' then '' else (select empNm from GEMP01MT where empID=t.empID) end) as "empNm"
+				</isNotEmpty>
+				<isEmpty property="grpID">
+			, (select empNm from GEMP01MT where empID=t.empID) as "empNm"
+				</isEmpty>
+			</isPropertyAvailable>
+			, venueCount as "venueCount"
+			, tpayAmt as "tpayAmt"
+			, planTQty as "planTQty"
+			, countReq as "countReq"
+			, countNoAppr as "countNoAppr"
+			, countAppr as "countAppr"
+			, countClear as "countClear"
+		from (
+			select
+				incntTpCD
+				, max(rageSphereCD) as rageSphereCD
+				, max(officeCD) as officeCD
+				, empID
+				, count(venueCD) as venueCount
+				, sum(tpayAmt) as tpayAmt
+				, sum(planTQty) as planTQty
+				, sum(countReq) as countReq
+				, sum(countNoAppr) as countNoAppr
+				, sum(countAppr) as countAppr
+				, sum(countClear) as countClear
+			from (
+				select
+					incntTpCD
+					, rageSphereCD
+					, officeCD
+					, empID
+					, venueCD
+					, tpayAmt
+					, planTQty
+					, (
+						case when (apprStateCD = '20' or apprStateCD = '40' or apprStateCD = '50') then 1
+						else 0
+						end
+					) as countReq
+					, (
+						case when apprStateCD = '20' then 1
+						else 0
+						end
+					) as countNoAppr
+					, (
+						case when apprStateCD = '50' then 1
+						else 0
+						end
+					) as countAppr
+					, (
+						case when apprStateCD = '40' then 1
+						else 0
+						end
+					) as countClear
+				from (
+					select
+						'VEN' as incntTpCD
+						, (select rageSphereCD from GEMP01MT where empID=b.empID) as rageSphereCD
+						, (select officeCD from GEMP01MT where empID=b.empID) as officeCD
+						, b.empID
+						, a.venueCD
+						, b.tpayAmt
+						, b.planTQty
+						, a.apprStateCD
+					from GPLN03MT a
+					inner join GPLN01MT b
+						on a.eventYM = b.eventYM
+						and a.venueCD = b.venueCD
+					inner join GVEN01MT d
+						on a.venueCD = d.venueCD
+					where
+						a.eventYM = #eventYM#
+						and a.empID = #empID#
+						and a.apprStateCD in (
+							select comCode
+							from F_CODE
+							where
+								codediv='APPRSTATECD'
+								and activeFlg = 'U'
+								and useYN = 'Y'
+								and attrib02 = 'MNG'
+						)
+						<isPropertyAvailable property="activityCD">
+							<isNotEmpty prepend="and" property="activityCD">
+								activityCD = #activityCD#
+							</isNotEmpty>
+						</isPropertyAvailable>
+				)
+				where 1=1
+					<isPropertyAvailable property="rageSphereCD">
+						<isNotEmpty prepend="and" property="rageSphereCD">
+							rageSphereCD = #rageSphereCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+					<isPropertyAvailable property="officeCD">
+						<isNotEmpty prepend="and" property="officeCD">
+							officeCD = #officeCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+				union all
+				select
+					max(incntTpCD) as incntTpCD
+					, max(rageSphereCD) as rageSphereCD
+					, max(officeCD) as officeCD
+					, empID
+					, venueCD
+					, sum(payAmt) as payAmt
+					, sum(planQty) as planQty
+					, sum(countReq) as countReq
+					, sum(countNoAppr) as countNoAppr
+					, sum(countAppr) as countAppr
+					, sum(countClear) as countClear
+				from (
+					select
+						incntTpCD
+						, rageSphereCD
+						, officeCD
+						, empID
+						, venueCD
+						, payAmt
+						, planQty
+						, (
+							case when (apprStateCD = '20' or apprStateCD = '40' or apprStateCD = '50') then 1
+							else 0
+							end
+						) as countReq
+						, (
+							case when apprStateCD = '20' then 1
+							else 0
+							end
+						) as countNoAppr
+						, (
+							case when apprStateCD = '50' then 1
+							else 0
+							end
+						) as countAppr
+						, (
+							case when apprStateCD = '40' then 1
+							else 0
+							end
+						) as countClear
+					from (
+						select
+							a.eventYM
+							, 'PRD' as incntTpCD
+							, (select rageSphereCD from GEMP01MT where empID=b.empID) as rageSphereCD
+							, (select officeCD from GEMP01MT where empID=b.empID) as officeCD
+							, b.empID
+							, a.venueCD
+							, e.payAmt
+							, e.planQty
+							, a.apprStateCD
+						from GPLN04MT a
+						inner join GPLN02MT b
+							on a.eventYM = b.eventYM
+							and a.venueCD = b.venueCD
+						inner join GVEN01MT d
+							on a.venueCD = d.venueCD
+						inner join GPLN02DT e
+							on a.eventYM = e.eventYM
+							and a.venueCD = e.venueCD
+							and a.prdCD = e.prdCD
+						where
+							a.eventYM = #eventYM#
+							and a.empID = #empID#
+							and a.apprStateCD in (
+								select comCode
+								from F_CODE
+								where
+									codediv='APPRSTATECD'
+									and activeFlg = 'U'
+									and useYN = 'Y'
+									and attrib02 = 'MNG'
+							)
+							<isPropertyAvailable property="activityCD">
+								<isNotEmpty prepend="and" property="activityCD">
+									activityCD = #activityCD#
+								</isNotEmpty>
+							</isPropertyAvailable>
+					)
+					where 1=1
+						<isPropertyAvailable property="rageSphereCD">
+							<isNotEmpty prepend="and" property="rageSphereCD">
+								rageSphereCD = #rageSphereCD#
+							</isNotEmpty>
+						</isPropertyAvailable>
+						<isPropertyAvailable property="officeCD">
+							<isNotEmpty prepend="and" property="officeCD">
+								officeCD = #officeCD#
+							</isNotEmpty>
+						</isPropertyAvailable>
+				)
+				group by venueCD, empID
+			)
+			group by incntTpCD, empID
+		) t
+		order by
+			incntTpCD desc
+			, rageSphereCD desc
+			, officeCD desc
+			, empID desc
+	</select>
+	
+</sqlMap>

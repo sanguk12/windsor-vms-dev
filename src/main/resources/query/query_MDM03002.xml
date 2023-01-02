@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="MDM03002">
+    
+	<!-- 제품가이드라인조회 -->
+	<select id="MDM0300201S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+        select 
+        	t1.prdCD as "prdCD",
+        	t1.prdSAPCD as "prdSAPCD",
+		    t1.prdNm as "prdNm",
+		    t1.activeYN as "activeYN",
+		    t1.activeYNName as "activeYNName",
+		    t1.qtyUnitCD as "qtyUnitCD",
+		    t1.guidSeqNm as "guidSeqNm",
+		    t1.guidSeqCnt as "guidSeqCnt"
+        from
+	        (select
+			    t1.prdCD,
+			    t1.prdSAPCD,
+			    t1.prdNm,
+			    t1.activeYN,
+			    getLangDesc(#companyID#, #languageCD#, 'F_CODE', 'ACTIVEYN', t1.activeYN, NULL) as activeYNName,
+			    t1.qtyUnitCD,
+			    count(t2.guidSeq) as guidSeqCnt,
+			    case when count(t2.guidSeq) >= '1' then '등록' else '미등록' end as guidSeqNm
+			from
+			    GPRD01MT t1
+		    	left outer join GPRD02MT t2
+		    		on t1.prdCD = t2.prdCD
+			where 
+				t1.dkRivalTpCD = 'DK'
+	        <isPropertyAvailable property="prdNm_S" >
+	        	<isNotEmpty prepend="and" property="prdNm_S">
+	        		upper(t1.prdNm) like '%'||upper(#prdNm_S#)||'%'
+	        	</isNotEmpty>
+	        </isPropertyAvailable>
+	        <isPropertyAvailable property="activeYN" >
+	        	<isNotEmpty prepend="and" property="activeYN">
+	        		t1.activeYN = #activeYN#
+	        	</isNotEmpty>
+	        </isPropertyAvailable>
+	        group by
+	        	t1.prdCD,
+			    t1.prdSAPCD,
+			    t1.prdNm,
+			    t1.activeYN,
+			    t1.qtyUnitCD) t1
+			where 
+				1=1
+		    <isPropertyAvailable property="guidAmtYN" >
+		       	<isEqual property="guidAmtYN" compareValue='Y'>
+					and t1.guidSeqCnt >= '1'
+		       	</isEqual>
+		       	<isEqual property="guidAmtYN" compareValue='N'>
+					<![CDATA[and t1.guidSeqCnt < '1']]>
+		       	</isEqual>
+		  	</isPropertyAvailable>
+		order by prdCD
+    </select>
+    
+    
+    <!-- 제품가이드라인 상세조회 -->
+	<select id="MDM0300202S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+        select
+		    t1.overQty as "overQty",
+		    t1.underQty as "underQty",
+		    t1.guidAmt as "guidAmt"
+		from
+		    GPRD02MT t1
+		where 
+			t1.prdCD = #prdCD#
+		order by 
+			t1.overQty
+    </select>
+    
+	<!-- 제품가이드라인 삭제 -->
+	<insert id="MDM0300203D" parameterClass="com.kia.mdm.model.GPRD02MTs">
+		delete from GPRD02MT
+		where
+			prdCD = #prdCD#
+	</insert>
+	
+	<!-- 제품가이드라인 등록-->
+	<insert id="MDM0300204I" parameterClass="com.kia.mdm.model.GPRD02MT">    
+        insert into GPRD02MT (
+        	prdCD, 
+        	guidSeq, 
+        	overQty, 
+        	underQty, 
+        	guidAmt, 
+            regID, 
+            regDate
+        ) values (
+        	#prdCD#, 
+        	#guidSeq#, 
+        	#overQty#, 
+        	#underQty#, 
+        	#guidAmt#, 
+            #userID#,
+            SYSDATE
+        )
+    </insert>
+    
+    <!-- 제품정보수정 -->
+<!--     <update id="MDM0300204U" parameterClass="com.kia.mdm.model.GPRD01MT"> -->
+<!--         update GPRD01MT -->
+<!--         set -->
+<!--         	prdSAPCD = #prdSAPCD#, -->
+<!--         	prdNm = #prdNm#, -->
+<!--         	prdShCD = #prdShCD#, -->
+<!-- 			categoryCD1 = #categoryCD1#, -->
+<!--         	categoryCD2 = #categoryCD2#, -->
+<!-- 			categoryCD3 = #categoryCD3#, -->
+<!-- 			categoryCD4 = #categoryCD4#, -->
+<!-- 			categoryCD5 = #categoryCD5#, -->
+<!-- 			factoryPrice = #factoryPrice#, -->
+<!-- 			mi = #mi#, -->
+<!--         	unit = #unit#, -->
+<!--         	1eu = #eu#, -->
+<!--         	sdxYN = #sdxYN#, -->
+<!--         	qtyUnitCD = #qtyUnitCD#, -->
+<!--         	dkRivalTpCD = #dkRivalTpCD#, -->
+<!--         	kindTpCD1 = #kindTpCD1#, -->
+<!-- 			kindTpCD2 = #kindTpCD2#, -->
+<!-- 			kindTpCD3 = #kindTpCD3#, -->
+<!-- 			kindTpCD4 = #kindTpCD4#, -->
+<!--         	kindTpCD5 = #kindTpCD5#,  -->
+<!--         	activeYN = #activeYN#,  -->
+<!--         	angelPrd16CD = #angelPrd16CD#,  -->
+<!--         	angelPrdMiCD = #angelPrdMiCD#,  -->
+<!--         	chgID = #userID#,  -->
+<!--         	chgDate = SYSDATE -->
+<!--         where -->
+<!--         	prdCD = #prdCD# -->
+<!--     </update> -->
+    
+    <!-- 제품SAP코드 중복체크 -->
+<!-- 	<select id="MDM0300205S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">    -->
+<!--     	select -->
+<!-- 		    count(prdSAPCD) as "cnt" -->
+<!-- 		from -->
+<!-- 			GPRD01MT -->
+<!-- 		where -->
+<!-- 		    prdSAPCD = #prdSAPCD# -->
+<!-- 	</select> -->
+</sqlMap>

@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="MDM01002">
+
+	<!-- 승인라인 트리조회 -->
+	<select id="MDM0100201S" parameterClass="com.kia.mdm.model.GAPP01MT" resultClass="java.util.LinkedHashMap">
+		select
+			apprTpID as "apprTpID"
+			, apprTpNm as "apprTpNm"
+			, code as "code"
+			, name as "name"
+			, pcode as "pcode"
+			, apprGrpID as "apprGrpID"
+		  , seq as "seq"
+		from (
+			select
+				apprTpID
+				, apprTpNm
+				, apprTpID as code
+				, apprTpNm as name
+				, 'ROOT' as pcode
+				, 'ROOT' as apprGrpID
+				, to_number(apprTpID) as seq
+			from GAPP01MT
+			where
+				apprTpID like #apprTpID#||'%'
+			union all
+			select
+				a.apprTpID
+				, apprTpNm
+				, a.apprTpID||apprGrpID
+				, apprGrpNm
+				, (
+					case when b.papprGrpID = 'ROOT' then a.apprTpID
+					else a.apprTpID||b.papprGrpID
+					end
+				) as pcode
+				, apprGrpID
+				, sortSeq
+			from GAPP01MT a
+			inner join GAPP01DT b
+				on a.apprTpID = b.apprTpID
+			where
+				a.apprTpID like #apprTpID#||'%'
+		)
+		order by seq
+	</select>
+	
+	<!-- 승인라인구분 조회 -->
+	<select id="MDM0100202S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			'' as checkbox
+			, apprTpID
+			, apprTpNm
+			, remark
+			, (select count(*) from GAPP01DT where apprTpID=t.apprTpID) as delCount
+		from GAPP01MT t
+		order by to_number(apprTpID)
+	</select>
+	
+	<!-- 승인라인구분 상세조회 -->
+	<select id="MDM0100204S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			apprTpID
+			, apprTpNm
+			, remark
+		from GAPP01MT
+		where
+			apprTpID = #apprTpID#
+	</select>
+	
+	<!-- 승인라인 담당자 중복체크 -->
+	<select id="MDM0100207S" parameterClass="com.kia.mdm.model.GAPP01MT" resultClass="java.lang.Integer">
+		select
+			count(*) as "cnt"
+		from GAPP01DT
+		where
+			apprTpID = #apprTpID#
+			and empID = #empID#
+	</select>
+	
+	<!-- 승인라인구분 등록 -->
+	<insert id="MDM0100201I" parameterClass="com.kia.mdm.model.GAPP01MT">
+		insert into GAPP01MT (
+			apprTpID
+			, apprTpNm
+			, remark
+			, regID
+			, regDate
+		)
+		values (
+			#apprTpID#
+			, #apprTpNm#
+			, #remark#
+			, #userID#
+			, sysdate
+		)
+	</insert>
+	
+	<!-- 승인라인구분 수정 -->
+	<insert id="MDM0100201U" parameterClass="com.kia.mdm.model.GAPP01MT">
+		update GAPP01MT
+		set
+			apprTpNm = #apprTpNm#
+			, remark = #remark#
+			, chgID = #userID#
+			, chgDate = sysdate
+		where
+			apprTpID = #apprTpID#
+	</insert>
+	
+	<!-- 승인라인구분 삭제 -->
+	<delete id="MDM0100201D" parameterClass="com.kia.mdm.model.GAPP01MT">
+		delete from GAPP01DT
+		where
+			apprGrpID in (
+				select
+					code
+				from (
+					select
+						apprTpID as code
+						, apprTpNm as name
+						, 'ROOT' as pcode
+						, 'MT' as div
+					from GAPP01MT
+					union all
+					select
+						apprGrpID 
+						, apprGrpNm 
+						, (
+							case when b.papprGrpID = 'ROOT' then a.apprTpID
+							else b.papprGrpID
+							end
+						) as pcode
+						, 'DT' as div
+					from GAPP01MT a
+					inner join GAPP01DT b
+						on a.apprTpID = b.apprTpID
+				)
+				where
+					div = 'DT'
+				connect by prior code=pcode
+				start with code = #apprTpID#
+			)
+	</delete>
+	<delete id="MDM0100202D" parameterClass="com.kia.mdm.model.GAPP01MT">
+		delete from GAPP01MT
+		where
+			apprTpID = #apprTpID#
+	</delete>
+	
+	<!-- 승인라인그룹 조회 -->
+	<select id="MDM0100203S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			'' as checkbox
+			, papprGrpID
+			, apprGrpID
+			, apprGrpNm
+			, empID
+			, (select empNm from GEMP01MT where empID=b.empID) as empNm
+			, sortSeq
+			, (select count(*) from GAPP01DT where apprTpID=b.apprTpID and papprGrpID=b.apprGrpID) as delCount
+		from GAPP01MT a
+		inner join GAPP01DT b
+			on a.apprTpID = b.apprTpID
+		where
+			a.apprTpID = #apprTpID#
+			and b.papprGrpID = #papprGrpID#
+		order by sortSeq
+	</select>
+	
+	<!-- 승인그룹ID 중복체크 -->
+	<select id="MDM0100205S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			count(*) as "count"
+		from GAPP01DT
+		where
+			apprTpID = #apprTpID#
+			and apprGrpID = #apprGrpID#
+	</select>
+	
+	<!-- 승인그룹 상세조회 -->
+	<select id="MDM0100206S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			apprTpNm
+			, (
+			  case when papprGrpID='ROOT' then papprGrpID
+			  else (select apprGrpNm from GAPP01DT where apprTpID=t.apprTpID and apprGrpID=t.papprGrpID)
+			  end
+			) as papprGrpNm
+			, apprGrpID
+			, apprGrpNm
+			, empID
+			, (select empNm from GEMP01MT where empID=t.empID) as empNm
+			, sortSeq
+		from (
+			select
+				apprTpNm
+				, papprGrpID
+				, apprGrpID
+				, apprGrpNm
+				, empID
+				, sortSeq
+				, a.apprTpID
+			from GAPP01MT a
+			inner join GAPP01DT b
+				on a.apprTpID = b.apprTpID
+			where
+				a.apprTpID = #apprTpID#
+				and apprGrpID = #apprGrpID#
+		) t
+	</select>
+	
+	<!-- 승인그룹 등록 -->
+	<insert id="MDM0100202I" parameterClass="com.kia.mdm.model.GAPP01MT">
+		insert into GAPP01DT (
+			apprGrpID
+			, apprTpID
+			, apprGrpNm
+			, papprGrpID
+			, empID
+			, sortSeq
+			, regID
+			, regDate
+		)
+		values (
+			#apprGrpID#
+			, #apprTpID#
+			, #apprGrpNm#
+			, #papprGrpID#
+			, #empID#
+			, #sortSeq#
+			, #userID#
+			, sysdate
+		)
+	</insert>
+	
+	<!-- 승인그룹 수정 -->
+	<insert id="MDM0100202U" parameterClass="com.kia.mdm.model.GAPP01MT">
+		update GAPP01DT
+		set
+			apprGrpNm = #apprGrpNm#
+			, empID = #empID#
+			, sortSeq = #sortSeq#
+			, chgID = #userID#
+			, chgDate = sysdate
+		where
+			apprTpID = #apprTpID#
+			and apprGrpID = #apprGrpID#
+	</insert>
+	
+	<!-- 승인그룹 삭제 -->
+	<delete id="MDM0100203D" parameterClass="com.kia.mdm.model.GAPP01MT">
+		delete from GAPP01DT
+		where
+			apprGrpID in (
+				select
+					code
+				from (
+					select
+						apprTpID as code
+						, apprTpNm as name
+						, 'ROOT' as pcode
+						, 'MT' as div
+					from GAPP01MT
+					union all
+					select
+						apprGrpID 
+						, apprGrpNm 
+						, (
+							case when b.papprGrpID = 'ROOT' then a.apprTpID
+							else b.papprGrpID
+							end
+						) as pcode
+						, 'DT' as div
+					from GAPP01MT a
+					inner join GAPP01DT b
+						on a.apprTpID = b.apprTpID
+				)
+				where
+					div = 'DT'
+				connect by prior code=pcode
+				start with code = #apprGrpID#
+			)
+		and apprTpID = #apprTpID#
+	</delete>
+	
+</sqlMap>

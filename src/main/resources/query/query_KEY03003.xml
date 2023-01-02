@@ -1,0 +1,301 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="KEY03003">
+	
+	<!-- 키맨인증 리스트 조회 -->
+	<select id="KEY0300301S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+        rowNumber as "rowNum"    ,
+        empId,
+        empNm as "empNm"    , 																																	<!-- 담당자 -->
+        venueCD as "venueCD"    , 																																<!-- 업소코드 -->
+        venueNm as "venueNm"    , 																																<!-- 업소명 -->
+        keymanID as "keymanID"    , 																																<!-- 키맨id --> 
+        keymanNm as "keymanNm"    , 																															<!-- 키맨명 -->
+        '' as "keymanDocNeedFl"          , 																														<!-- 서류필요여부  유지보수팀에서 개발하면 보여주는 항목임 --> 
+        doc_100_prgs, 																																				<!-- 개인정보동의서    문서상태 코드 --> 
+        getLangDesc(#companyID#, #languageCD#, 'F_CODE', 'KEYMANPRGSCD', doc_100_prgs, null) as "doc_100_prgs_NM" , 	<!-- 개인정보동의서 문서상태명 -->
+        doc_200_prgs, 																																				<!-- 프로그램동의서    문서상태 코드 -->
+        getLangDesc(#companyID#, #languageCD#, 'F_CODE', 'KEYMANPRGSCD', doc_200_prgs, null) as "doc_200_prgs_NM" , 	<!-- 프로그램동의서 문서상태명 --> 
+        doc_300_prgs, 																																				<!-- 사업자등록증       문서상태 코드 --> 
+        getLangDesc(#companyID#, #languageCD#, 'F_CODE', 'KEYMANPRGSCD', doc_300_prgs, null) as "doc_300_prgs_NM" , 	<!-- 사업자등록증 문서상태명 --> 
+        doc_400_prgs, 																																				<!-- 대표권위임확인서  문서상태 코드 -->                   
+        getLangDesc(#companyID#, #languageCD#, 'F_CODE', 'KEYMANPRGSCD', doc_400_prgs, null) as "doc_400_prgs_NM" , 	<!-- 대표권위임확인서 문서상태명 -->
+        keymanTypeCD as "keymanTypeCD"    , 																												<!-- 키맨타입 -->
+        getLangDesc( '000001' /**P*/,'KR' /**P*/,'F_CODE','DOCFINSHFL',docfinshfl,null) as "docFinshFlNm"    , 																															<!-- 서류완료여부  유지보수팀에서 개발하면 보여주는 항목임 -->
+        getLangDesc(#companyID#, #languageCD#, 'F_CODE', 'KEYMANTYPECD', keymanTypeCD, null) as "keymanTypeCDName"    , <!-- 키맨타입명 -->
+        getLangDesc(#companyID#, #languageCD#, 'F_CODE', 'DOCMNGFL', docmngfl, null) as "docMngFl"    , <!-- 서류보관형태 -->
+        birthDate as "birthDate"    , 																																<!-- 생년월일 -->
+        dutyCD as "dutyCD"    ,      																																<!-- 직책코드 --> 
+        getLangDesc(#companyID#, #languageCD#, 'F_CODE', 'DUTYCD', dutyCD, null) as "dutyCDName"    , 							<!-- 직책명 -->
+        addr as "addr"    ,																																			<!-- 주소 --> 
+        phoneNo as "phoneNo"    ,																																<!-- 연락처 -->
+        bankCD as "bankCD"    , 																																	<!-- 은행코드 --> 
+        getLangDesc(#companyID#, #languageCD#, 'F_CODE', 'BANKCD', bankCD, null) as "bankCDName"    , 							<!-- 은행명 --> 
+        accountNo as "accountNo"    , 																															<!-- 계좌번호 --> 
+        holderNm as "holderNm"    , 																															<!-- 예금주명 --> 
+        PkeymanYN as "PkeymanYN"    ,  																														<!-- 대표키면 여부 -->
+        getLangDesc(#companyID#, #languageCD#, 'F_CODE', 'ACTIVEYN', activeYN, null) as "activeYNName"    ,
+        activeYN as "activeYN"    , 																																<!-- 관리여부 --> 
+        oldKeymanID as "oldKeymanID"    , 																													<!-- 구키맨id --> 
+        note as "note"    ,  																																			<!-- 비고 -->
+        lApplyDate as "lApplyDate"  																																<!-- 최종적용일자 --> 
+    from
+        (    
+        select
+        	rank() over(order by a.venueCD, a.keymanID) as rowNumber,
+            floor((rank() over(order by a.venueCD, a.keymanID)-1)/#displayNum#+1) as pageNum,
+            c.empid      ,
+            c.empNm     ,
+            a.venueCD     ,
+            b.venueNm     ,
+            a.keymanID     ,
+            a.keymanNm     ,
+            a.keymanTypeCD     ,
+            a.docfinshfl,
+            a.docmngfl     ,
+            a.birthDate     ,
+            a.dutyCD     ,
+            a.addr     ,
+            a.phoneNo     ,
+            a.bankCD     ,
+            a.accountNo     ,
+            a.holderNm     ,
+            a.PkeymanYN     ,
+            a.activeYN     ,
+            a.oldKeymanID     ,
+            a.note     ,
+            a.lApplyDate,
+            case when d.KeymanPrgsCd  is null then '999' else  d.KeymanPrgsCd end  as doc_100_prgs, <!-- 개인정보동의서  문서상태  값이 없으면 '999' 세팅 -->
+            case when e.KeymanPrgsCd  is null then '999' else  e.KeymanPrgsCd end  as doc_200_prgs, <!-- 프로그램동의서   문서상태  값이 없으면 '999' 세팅 -->
+            case when f.KeymanPrgsCd  is null then '999' else   f.KeymanPrgsCd end  as doc_300_prgs, <!-- 사업자등록증      문서상태  값이 없으면 '999' 세팅 -->
+            case when g.KeymanPrgsCd  is null then '999' else  g.KeymanPrgsCd end  as doc_400_prgs <!-- 대표권위임확인서  문서상태  값이 없으면 '999' 세팅 -->
+        from
+            GKEY01MT a     
+        inner join
+            GVEN01MT b     
+                on a.venueCD = b.venueCD     
+        left outer join
+            GEMP01MT c     
+                on b.territoryCD = c.territoryCD     
+         left outer join gkey05mt d                <!-- KEYMAN문서정보MASTER -->       
+         on    A.KEYMANID = d.KEYMANID
+         and  d.KEYMANDOCTPCD = '100'     <!-- 개인정보동의서 -->
+         left outer join gkey05mt e                <!-- KEYMAN문서정보MASTER -->       
+         on    A.KEYMANID = e.KEYMANID
+         and  e.KEYMANDOCTPCD = '200'     <!-- 프로그램동의서 -->
+         left outer join gkey05mt f                <!-- KEYMAN문서정보MASTER -->  
+         on    A.KEYMANID = f.KEYMANID
+         and  f.KEYMANDOCTPCD = '300'     <!-- 사업자등록증 -->
+         left outer join gkey05mt g                <!-- KEYMAN문서정보MASTER -->       
+         on    A.KEYMANID = g.KEYMANID
+         and  g.KEYMANDOCTPCD = '400'     <!-- 대표권위임확인 -->
+        where 1=1 and a.activeyn ='Y'   and c.WORKSTATCD='01'
+			AND a.lApplyDate between #lApplyDateFrom# and #lApplyDateTo#
+			<isPropertyAvailable property="venueGradCD">
+				<isNotEmpty prepend="and" property="venueGradCD">
+					b.venueGradCD = #venueGradCD#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="addrTpCD1">
+				<isNotEmpty prepend="and" property="addrTpCD1">
+					b.addrTpCD1 = #addrTpCD1#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="addrTpCD2">
+				<isNotEmpty prepend="and" property="addrTpCD2">
+					b.addrTpCD2 = #addrTpCD2#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="venueCD">
+				<isNotEmpty prepend="and" property="venueCD">
+					upper(a.venueCD) = upper(#venueCD#)
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="empNm">
+				<isNotEmpty prepend="and" property="empNm">
+					upper(c.empNm) like '%'||upper(#empNm#)||'%'
+				</isNotEmpty>
+			</isPropertyAvailable> 
+			<isPropertyAvailable property="keyManNm">
+				<isNotEmpty prepend="and" property="keyManNm">
+					a.keymanNm like  '%' || #keyManNm# || '%'
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="docuConfirmChk">
+				<isNotEmpty prepend="and" property="docuConfirmChk">
+					( d.KeymanPrgsCd IN ( '100' ,'200' ) or  e.KeymanPrgsCd IN ( '100' ,'200' ) or  f.KeymanPrgsCd IN ( '100' ,'200' ) or  g.KeymanPrgsCd IN ( '100' ,'200' )  ) <!-- 문서확인건 조회  체크 선택시 조건절 추가 -->
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="dCompValue">
+				<isNotEmpty property="dCompValue">
+					<isEqual prepend="and" property="dCompValue" compareValue="Y">
+						docfinshfl = 'Y'<!-- 문서확인건 조회  체크 선택시 조건절 추가 -->
+					</isEqual>
+					<isEqual prepend="and" property="dCompValue" compareValue="N">
+						docfinshfl = 'N'<!-- 문서확인건 조회  체크 선택시 조건절 추가 -->
+					</isEqual>
+				</isNotEmpty>
+			</isPropertyAvailable>
+		) t
+		where 1=1
+			<isPropertyAvailable property="pageNum">
+				and pageNum = #pageNum#
+			</isPropertyAvailable>
+	</select>
+	
+	<select id="KEY0300302S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			count(*) as "totalCount"
+		from GKEY01MT a
+		inner join GVEN01MT b
+			on a.venueCD = b.venueCD
+		left outer join GEMP01MT c
+			on b.territoryCD = c.territoryCD
+		and c.workStatCD = '01'
+		left outer join gkey05mt d                <!-- KEYMAN문서정보MASTER -->       
+        	on A.KEYMANID = d.KEYMANID
+         	and d.KEYMANDOCTPCD = '100'			<!-- 개인정보동의서 -->
+         left outer join gkey05mt e               	<!-- KEYMAN문서정보MASTER -->       
+         	on A.KEYMANID = e.KEYMANID
+         	and e.KEYMANDOCTPCD = '200'   			<!-- 프로그램동의서 -->
+         left outer join gkey05mt f                	<!-- KEYMAN문서정보MASTER -->  
+         	on A.KEYMANID = f.KEYMANID
+         	and f.KEYMANDOCTPCD = '300'			<!-- 사업자등록증 -->
+         left outer join gkey05mt g               	<!-- KEYMAN문서정보MASTER -->       
+         	on A.KEYMANID = g.KEYMANID
+         	and g.KEYMANDOCTPCD = '400'   			<!-- 대표권위임확인 -->	
+		where 1=1 and a.activeyn ='Y'   and c.WORKSTATCD='01' and
+			a.lApplyDate between #lApplyDateFrom# and #lApplyDateTo#
+			<isPropertyAvailable property="venueGradCD">
+				<isNotEmpty prepend="and" property="venueGradCD">
+					b.venueGradCD = #venueGradCD#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="addrTpCD1">
+				<isNotEmpty prepend="and" property="addrTpCD1">
+					b.addrTpCD1 = #addrTpCD1#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="addrTpCD2">
+				<isNotEmpty prepend="and" property="addrTpCD2">
+					b.addrTpCD2 = #addrTpCD2#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="venueCD">
+				<isNotEmpty prepend="and" property="venueCD">
+					upper(a.venueCD) = upper(#venueCD#)
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="empNm">
+				<isNotEmpty prepend="and" property="empNm">
+					upper(c.empNm) like '%'||upper(#empNm#)||'%'
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="keyManNm">
+					<isNotEmpty prepend="and" property="keyManNm">
+						a.keymanNm like  '%' || #keyManNm# || '%'
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="docuConfirmChk">
+					<isNotEmpty prepend="and" property="docuConfirmChk">
+						( d.KeymanDocTpCd IN ( '100' ,'200' ) or  e.KeymanDocTpCd IN ( '100' ,'200' ) or  f.KeymanDocTpCd IN ( '100' ,'200' ) or  g.KeymanDocTpCd IN ( '100' ,'200' )  ) <!-- 문서확인건 조회  체크 선택시 조건절 추가 -->
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="dCompValue">
+					<isNotEmpty property="dCompValue">
+						<isEqual prepend="and" property="dCompValue" compareValue="Y">
+							docfinshfl = 'Y'<!-- 문서확인건 조회  체크 선택시 조건절 추가 -->
+						</isEqual>
+						<isEqual prepend="and" property="dCompValue" compareValue="N">
+							docfinshfl = 'N'<!-- 문서확인건 조회  체크 선택시 조건절 추가 -->
+						</isEqual>
+					</isNotEmpty>
+				</isPropertyAvailable>
+	</select>
+	
+	<select id="KEY0300303S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			count(*) as "totalCount"
+		from GKEY01MT a
+			inner join GVEN01MT b
+			on a.venueCD = b.venueCD
+			left outer join GEMP01MT c
+			on b.territoryCD = c.territoryCD
+			and c.workStatCD = '01'
+		where
+			a.lApplyDate between #lApplyDateFrom# and #lApplyDateTo#
+		<isPropertyAvailable property="venueGradCD">
+			<isNotEmpty prepend="and" property="venueGradCD">
+				b.venueGradCD = #venueGradCD#
+			</isNotEmpty>
+		</isPropertyAvailable>
+		<isPropertyAvailable property="addrTpCD1">
+			<isNotEmpty prepend="and" property="addrTpCD1">
+				b.addrTpCD1 = #addrTpCD1#
+			</isNotEmpty>
+		</isPropertyAvailable>
+		<isPropertyAvailable property="addrTpCD2">
+			<isNotEmpty prepend="and" property="addrTpCD2">
+				b.addrTpCD2 = #addrTpCD2#
+			</isNotEmpty>
+		</isPropertyAvailable>
+		<isPropertyAvailable property="venueCD">
+			<isNotEmpty prepend="and" property="venueCD">
+				upper(a.venueCD) = upper(#venueCD#)
+			</isNotEmpty>
+		</isPropertyAvailable>
+		<isPropertyAvailable property="empNm">
+			<isNotEmpty prepend="and" property="empNm">
+				upper(c.empNm) like '%'||upper(#empNm#)||'%'
+			</isNotEmpty>
+		</isPropertyAvailable>
+		<isPropertyAvailable property="activeYN">
+			<isNotEmpty prepend="and" property="activeYN">
+				a.activeYN = #activeYN#
+			</isNotEmpty>
+		</isPropertyAvailable>
+		<isPropertyAvailable property="dCompValue">
+				<isEqual prepend="and" property="dCompValue" compareValue="Y">
+					docfinshfl = 'Y'
+				</isEqual>
+				<isEqual prepend="and" property="dCompValue" compareValue="N">
+					docfinshfl = 'N'
+				</isEqual>
+			</isPropertyAvailable>
+	</select>
+	
+	<!-- 키맨요청정보 수정 -->
+	<update id="KEY0300301U" parameterClass="com.kia.key.model.GKEY01MT">
+		update GKEY01MT
+		set
+			docFinshFl = #docFinshFl#
+			, chgID = #empID#
+			, chgDate = sysdate
+		where
+			keymanID = #keymanID#
+	</update>
+	
+	<!-- 키맨요청정보 수정 -->
+	<update id="KEY0300302U" parameterClass="com.kia.key.model.GKEY01MT">
+		update GKEY01MT
+		set
+			docMngFl = #docMngFl#
+			, chgID = #empID#
+			, chgDate = sysdate
+		where
+			keymanID = #keymanID#
+	</update>
+	
+	<select id="KEY0300304S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			keymanid as "keymanid",
+			keymannm as "keymannm",
+			docmngfl as "docmngfl"
+		from GKEY01MT
+		where
+			keymanid = #keymanID#
+	</select>
+	
+</sqlMap>

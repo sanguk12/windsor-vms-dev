@@ -1,0 +1,421 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="MDM01001">
+    
+    <!-- Paging 구현쿼리 Header 조각 -->
+    <sql id="MDM01001.paging.header">
+        <isPropertyAvailable property="pageNum">
+        select p.* from (
+            select
+<!--     		    ROWNUM as "rowNum", -->
+<!--     	        FLOOR((ROWNUM-1)/#displayNum#+1) as pageNum, -->
+    	        COUNT(*) OVER() as "totalCount",
+    	</isPropertyAvailable>
+    	<isNotPropertyAvailable property="pageNum">
+    		select
+    	</isNotPropertyAvailable>
+    </sql>
+    
+    <!-- Paging 구현쿼리 Header 조각 -->
+    <sql id="MDM01001.paging.footer">
+        <isPropertyAvailable property="pageNum">
+        ) p
+		where
+			p.pageNum = #pageNum#
+		</isPropertyAvailable>
+    </sql>
+	
+	<!-- 사원관리: 목록 조회 -->
+	<select id="MDM0100101S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+        <include refid="MDM01001.paging.header"/>
+        	rank() over(
+        		order by t1.dkmdTpCD,
+				t3.grpID,
+				t1.rageSphereCD,
+				t1.officeCD,
+				t1.teamCD,
+				t1.territoryCD,
+				t1.empID,
+				t1.regID,
+				t1.workStatCD
+			) as "rowNum",
+        	FLOOR((rank() over(
+        		order by t1.dkmdTpCD,
+				t3.grpID,
+				t1.rageSphereCD,
+				t1.officeCD,
+				t1.teamCD,
+				t1.territoryCD,
+				t1.empID,
+				t1.regID,
+				t1.workStatCD
+        	)-1)/#displayNum#+1) as pageNum,
+        	t1.regID as "regID",
+        	t1.rageSphereCD as "rageSphereCD",
+        	getLangDesc(#companyID#, #languageCD#, 'F_CODE', 'RAGESPHERECD', t1.rageSphereCD, NULL) as "rageSphereCDName",
+		    t1.officeCD as "officeCD",
+        	getLangDesc(#companyID#, #languageCD#, 'F_CODE', 'OFFICECD', t1.officeCD, NULL) as "officeCDName",
+		    t1.teamCD as "teamCD",
+        	getLangDesc(#companyID#, #languageCD#, 'F_CODE', 'TEAMCD', t1.teamCD, NULL) as "teamCDName",
+		    t1.territoryCD as "territoryCD",
+        	getLangDesc(#companyID#, #languageCD#, 'F_CODE', 'TERRITORYCD', t1.territoryCD, NULL) as "territoryCDName",
+		    t1.empID as "empID",
+		    t1.empNm as "empNm",
+		    t1.empTpCD as "empTpCD",
+        	getLangDesc(#companyID#, #languageCD#, 'F_CODE', 'EMPTPCD', t1.empTpCD, NULL) as "empTpCDName"
+        	, getLangDesc(#companyID#, #languageCD#, 'F_CODE', 'DKMDTPCD', t1.dkmdTpcD, NULL) as "dkmdTpCDName"
+        from
+        	GEMP01MT t1
+        	inner join F_USER_X_PACKAGE t2
+	            on t1.empID = t2.empID
+	        inner join F_GroupUser t3
+	        	on t2.companyID = t3.companyID
+	        	and t2.userID = t3.userID
+	        inner join F_Group t4
+	        	on t3.companyID = t4.companyID
+	        	and t3.grpID = t4.grpID
+        where
+            1=1
+         <isPropertyAvailable property="dkmdTpCD" >
+        	<isNotEmpty prepend="and" property="dkmdTpCD">
+        		t1.dkmdTpCD = #dkmdTpCD#
+        	</isNotEmpty>
+        </isPropertyAvailable>
+        <isPropertyAvailable property="rageSphereCD" >
+        	<isNotEmpty prepend="and" property="rageSphereCD">
+        		t1.rageSphereCD = #rageSphereCD#
+        	</isNotEmpty>
+        </isPropertyAvailable>
+        <isPropertyAvailable property="officeCD" >
+        	<isNotEmpty prepend="and" property="officeCD">
+        		t1.officeCD = #officeCD#
+        	</isNotEmpty>
+        </isPropertyAvailable>
+        <isPropertyAvailable property="empID" >
+        	<isNotEmpty prepend="and" property="empID">
+        		upper(t1.empID) = upper(#empID#)
+        	</isNotEmpty>
+        </isPropertyAvailable>
+        <isPropertyAvailable property="empNm" >
+        	<isNotEmpty prepend="and" property="empNm">
+        		upper(t1.empNm) like '%'||upper(#empNm#)||'%'
+        	</isNotEmpty>
+        </isPropertyAvailable>
+        <isPropertyAvailable property="empTpCD" >
+        	<isNotEmpty prepend="and" property="empTpCD">
+        		t1.empTpCD = #empTpCD#
+        	</isNotEmpty>
+        </isPropertyAvailable>
+		<include refid="MDM01001.paging.footer"/>
+    </select>
+    
+	<!-- 사원정보등록: 상세 조회 -->
+	<select id="MDM0100102S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+        select
+		    t1.empID as "empID",
+		    t1.empNm as "empNm", 
+		    t1.empTpCD as "empTpCD",
+		    getLangDesc(#companyID#, #languageCD#, 'F_CODE', 'EMPTPCD', t1.empTpCD, NULL) as "empTpCDName",
+		    t1.rageSphereCD as "rageSphereCD",
+		    getLangDesc(#companyID#, #languageCD#, 'F_CODE', 'RAGESPHERECD', t1.rageSphereCD, NULL) as "rageSphereCDName",
+		    t1.officeCD as "officeCD",
+		    getLangDesc(#companyID#, #languageCD#, 'F_CODE', 'OFFICECD', t1.officeCD, NULL) as "officeCDName",
+		    t1.teamCD as "teamCD",
+		    getLangDesc(#companyID#, #languageCD#, 'F_CODE', 'TEAMCD', t1.teamCD, NULL) as "teamCDName",
+		    t1.territoryCD as "territoryCD",
+		    getLangDesc(#companyID#, #languageCD#, 'F_CODE', 'TERRITORYCD', t1.territoryCD, NULL) as "territoryCDName",
+		    t1.dkmdTpCD as "dkmdTpCD",
+		    getLangDesc(#companyID#, #languageCD#, 'F_CODE', 'DKMDTPCD', t1.dkmdTpCD, NULL) as "dkmdTpCDName",
+		    t1.emailAddr as "emailAddr",
+		    t1.workStatCD as "workStatCD",
+		    getLangDesc(#companyID#, #languageCD#, 'F_CODE', 'WORKSTATCD', t1.workStatCD, NULL) as "workStatCDName",
+		    t3.grpID as "grpID",
+		    t4.grpName as "grpName",
+		    t3.userID as "userID",
+		    t1.regID as "regID",
+		    getLangDesc(#companyID#, #languageCD#, 'F_CODE', 'REGID', t1.regID, NULL) as "regID"
+		from
+		    GEMP01MT t1
+	        inner join F_USER_X_PACKAGE t2
+	            on t1.empID = t2.empID
+	        inner join F_GroupUser t3
+	        	on t2.companyID = t3.companyID
+	        	and t2.userID = t3.userID
+	        inner join F_Group t4
+	        	on t3.companyID = t4.companyID
+	        	and t3.grpID = t4.grpID
+		where 
+			1=1
+		<isPropertyAvailable property="dkmdTpCD" >
+        	<isNotEmpty prepend="and" property="dkmdTpCD">
+        		t1.dkmdTpCD = #dkmdTpCD#
+        	</isNotEmpty>
+        </isPropertyAvailable>
+        <isPropertyAvailable property="rageSphereCD" >
+        	<isNotEmpty prepend="and" property="rageSphereCD">
+        		t1.rageSphereCD = #rageSphereCD#
+        	</isNotEmpty>
+        </isPropertyAvailable>
+        <isPropertyAvailable property="officeCD" >
+        	<isNotEmpty prepend="and" property="officeCD">
+        		t1.officeCD = #officeCD#
+        	</isNotEmpty>
+        </isPropertyAvailable>
+        <isPropertyAvailable property="empID" >
+        	<isNotEmpty prepend="and" property="empID">
+        		upper(t1.empID) = upper(#empID#)
+        	</isNotEmpty>
+        </isPropertyAvailable>
+        <isPropertyAvailable property="empNm" >
+        	<isNotEmpty prepend="and" property="empNm">
+        		upper(t1.empNm) like '%'||upper(#empNm#)||'%'
+        	</isNotEmpty>
+        </isPropertyAvailable>
+        <isPropertyAvailable property="empTpCD" >
+        	<isNotEmpty prepend="and" property="empTpCD">
+        		t1.empTpCD = #empTpCD#
+        	</isNotEmpty>
+        </isPropertyAvailable>
+        order by t1.dkmdTpCD,
+       	t3.grpID,
+		t1.rageSphereCD,
+		t1.officeCD,
+		t1.teamCD,
+		t1.territoryCD,
+		t1.empID,
+		t1.workStatCD
+    </select>
+    
+	<!-- 사원ID 중복체크 -->
+	<select id="MDM0100103S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">   
+    	select
+		    count(empID) as "cnt"
+		from
+			GEMP01MT
+		where
+		    empID = #empID#
+	</select>
+	
+    <!-- 사원ID 체크 GEMP01MT -->
+    <select id="MDM0100104S" parameterClass="com.kia.mdm.model.GEMP01MT" resultClass="java.lang.Integer">
+		select
+		    count(empID) as "cnt"
+		from
+			GEMP01MT
+		where
+		    empID = #empID#
+	</select>
+	
+	<!-- 사원 신규등록  -->
+    <insert id="MDM0100105I" parameterClass="com.kia.mdm.model.GEMP01MT">
+		insert into GEMP01MT (
+			empID, 
+			empNm, 
+			empTpCD, 
+			rageSphereCD, 
+			officeCD, 
+			teamCD, 
+			territoryCD, 
+			dkmdTpCD, 
+			emailAddr, 
+			workStatCD, 
+			regID, 
+			regDate
+		) values (
+			#empID#, 
+			#empNm#, 
+			#empTpCD#, 
+			#rageSphereCD#, 
+			#officeCD#, 
+			#teamCD#, 
+			#territoryCD#, 
+			#dkmdTpCD#, 
+			#emailAddr#, 
+			#workStatCD#,
+			#userID#, 
+			SYSDATE
+		)
+	</insert>
+	
+	<!-- 사원 신규등록 F_USER -->
+    <insert id="MDM0100106I" parameterClass="com.kia.mdm.model.GEMP01MT">
+		insert into F_User (    
+        	companyID, 
+        	userID, 
+        	userName, 
+        	passWd, 
+        	useYN, 
+        	passWdChgDate,         
+            activeFlg,
+            regDate, 
+            regID, 
+            passWdErrCnt, 
+            initPassWdYN
+        ) values (
+            #companyID#, 
+            #empID#, 
+            #empNm#, 
+            F_MD5_CRIPT(#empID#||'123'), 
+            #useYN#, 
+            to_char(SYSDATE, 'YYYYMMDD'),  
+            'U', 
+            SYSDATE, 
+            #userID#, 
+            '0', 
+            'Y'
+        ) 
+	</insert>
+	
+	<!-- 사원 신규등록 F_User_X_Package --> 
+	<insert id="MDM0100107I" parameterClass="com.kia.mdm.model.GEMP01MT">
+		insert into F_User_X_Package (
+			COMPANYID, 
+			USERID, 
+			AUTHLEVELCD, 
+			EMPID, 
+			THEMECD, 
+            TIMEZONECD, 
+            LANGUAGECD, 
+            DATEFORMATCD
+        ) values (
+        	#companyID#, 
+        	#empID#, 
+        	'10', 
+        	#empID#, 
+        	'blue', 
+			#timezoneCD#, 
+			#languageCD#, 
+			#dateFormatCD#
+		)
+	</insert>
+	
+	<!-- 사원 신규등록 F_GroupUser  -->
+	<insert id="MDM0100108I" parameterClass="com.kia.mdm.model.GEMP01MT">
+		insert into F_GroupUser (
+			companyID, 
+			userID, 
+			grpID
+		) values (
+			#companyID#, 
+			#empID#, 
+			#grpID#
+		)
+	</insert>
+	
+	<!-- 사원 신규등록 F_GroupUser  -->
+	<insert id="MDM0100109I" parameterClass="com.kia.mdm.model.GEMP01MT">
+		insert into GLEG01MT (
+			empID, 
+			legalCD 
+		) values (
+			#empID#, 
+			#legalCD#
+		)
+	</insert>
+	
+	<!-- 사원정보등록: 마스터정보 수정 -->
+    <update id="MDM0100109U" parameterClass="com.kia.mdm.model.GEMP01MT">
+        update GEMP01MT
+        set
+        	empNm = #empNm#,
+        	empTpCD = #empTpCD#,
+        	rageSphereCD = #rageSphereCD#,
+			officeCD = #officeCD#,
+			teamCD = #teamCD#,
+			territoryCD = #territoryCD#,
+        	dkmdTpCD = #dkmdTpCD#,
+			emailAddr = #emailAddr#,
+			workStatCD = #workStatCD#,
+        	chgID = #userID#, 
+        	chgDate = SYSDATE
+        where
+        	empID = #empID#
+    </update>
+    
+	<!-- 사원정보등록: 사용자정보 수정 -->
+    <update id="MDM0100110U" parameterClass="com.kia.mdm.model.GEMP01MT">
+        update F_User
+        set
+        	useYN = #useYN#,
+        	userName = #empNm#,
+        	chgDate = SYSDATE,
+        	chgID = #userID#
+        where
+        	companyID = #companyID#
+        and userID = #empID#
+    </update>
+    
+	<!-- 사원정보등록: 그룹사용자정보 수정 -->
+    <update id="MDM0100111U" parameterClass="com.kia.mdm.model.GEMP01MT">
+        update F_GroupUser
+        set
+        	grpID = #grpID#
+        where
+        	companyID = #companyID#
+        and userID = #empID#
+    </update>
+
+    <!-- excel upload시 코드찾기 -->
+	<select id="MDM0100105S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			codeName as "codeName"
+		from F_CODE
+		where
+			useYN = 'Y'
+			and activeFlg = 'U'
+			and codeDiv = #codeDiv#
+			and comCode = #comCode#
+			<isPropertyAvailable property="attrib02" >
+				<isNotEmpty prepend="and" property="attrib02">
+					attrib02 = #attrib02#
+				</isNotEmpty>
+			</isPropertyAvailable>
+	</select>
+	
+	<!-- excel upload시 코드찾기 -->
+	<select id="MDM0100106S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			grpName as "grpName"
+		from F_GROUP
+		where
+			grpID = #grpID#
+	</select>
+	
+	<!-- TerritoryCD 체크 /사원정보신규저장 -->
+    <select id="MDM0100107S" parameterClass="com.kia.mdm.model.GEMP01MT" resultClass="java.lang.Integer">
+		select
+		    count(territoryCD) as "newTerritoryCnt"
+		from
+			GEMP01MT
+		where
+		    territoryCD = #territoryCD#
+	</select>
+	
+	<!-- TerritoryCD 체크 /사원정보수정 -->
+    <select id="MDM0100108S" parameterClass="com.kia.mdm.model.GEMP01MT" resultClass="java.lang.Integer">
+		select
+		    count(territoryCD) as "chgTerritoryCnt"
+		from
+			GEMP01MT
+		where
+		    territoryCD = #territoryCD#
+		and empID != #empID#    
+	</select>
+	
+    <select id="MDM0100109S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+		    legalCD as "legalCD"
+		from
+			GLEG01MT
+		where
+			empID = #empID#    
+	</select>
+	
+	
+	<delete id="MDM0100101D" parameterClass="com.kia.mdm.model.GEMP01MT">
+		delete from GLEG01MT where empID =  #empID#
+	</delete>
+	
+       
+</sqlMap>

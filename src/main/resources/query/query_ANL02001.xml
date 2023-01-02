@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="ANL02001">
+	
+	<!-- ************** -->
+	<!-- *** SELECT *** -->
+	<!-- ************** -->
+	
+	<!-- 조건: Data구분 조회 -->
+    <select id="ANL0200101S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+        select
+        	t1.comCode as "comCode", 
+            NVL(t2.pkDesc,t1.codeName) as "codeName"
+        from
+        	F_Code t1
+        	left outer join (
+        		select *
+        		from
+        			F_LangDescription
+        		where
+        		languageCD = #languageCD#
+        		and tableID = 'F_CODE'
+        		and pkID1 = #codeDiv#
+        		)  t2
+        	  on t1.codeDiv = t2.pkID1
+        	  and t1.comCode = t2.pkID2
+        where
+        	t1.codeDiv = #codeDiv#
+        and t1.comCode in ('1','2','3','4')
+        and t1.useYN = 'Y'
+        and t1.activeFlg = 'U'
+        order by
+            t1.seq, t1.comCode
+    </select>
+	
+	
+	<!-- ************** -->
+	<!-- *** DELETE *** -->
+	<!-- ************** -->
+	
+	<!-- Shipment Master업로드 : 지점정보 삭제 -->
+	<delete id="ANL0200101D" parameterClass="com.kia.anl.model.ESLT_BRANCH_MT">
+	   delete
+	     from ESLT_BRANCH_MT
+	    where
+	    	1=1
+	</delete>
+			
+	<!-- Shipment Master업로드 : 거래처정보 삭제 -->
+	<delete id="ANL0200102D" parameterClass="com.kia.anl.model.ESLT_CUSTOMER_MT">
+	   delete
+	     from ESLT_CUSTOMER_MT
+	    where
+	    	1=1
+	</delete>
+	
+	<!-- Shipment Master업로드 : 제품정보 삭제 -->
+	<delete id="ANL0200103D" parameterClass="com.kia.anl.model.ESLT_PRODUCT_MT">
+	   delete
+	     from ESLT_PRODUCT_MT
+	    where
+	    	1=1
+	</delete>
+	
+	<!-- Shipment Master업로드 : 대표품목정보 삭제 -->
+	<delete id="ANL0200104D" parameterClass="com.kia.anl.model.ESLT_PRODUCT_SEQ">
+	   delete
+	     from ESLT_PRODUCT_SEQ
+	    where
+	    	1=1
+	</delete>
+	
+	<!-- Shipment Master업로드 : 대표품목정보 삭제 -->
+	<delete id="ANL0200105D" parameterClass="com.kia.anl.model.ESLT_PRODUCT_SEQ">
+	   delete
+	     from ESLT_PRODUCT_SEQ_TEMP
+	    where
+	    	1=1
+	</delete>
+	
+	
+	<!-- ************** -->
+	<!-- *** INSERT *** -->
+	<!-- ************** -->
+	
+	<!-- Shipment Master업로드 : 지점정보 추가 -->
+	<insert id="ANL0200101I" parameterClass="com.kia.anl.model.ESLT_BRANCH_MT">
+	    insert into ESLT_BRANCH_MT (
+	    	branch, region, channel, empid, empid1, dispseq, useyn,
+	    	regID, regDate, chgID, chgDate
+	    ) values (
+	    	UPPER(#branch#), UPPER(#region#), UPPER(#channel#), UPPER(#empid#), UPPER(#empid1#), UPPER(#dispseq#), UPPER(#useyn#),
+	    	#userID#, sysdate, #userID#, sysdate
+	    )
+	</insert>
+	
+	<!-- Shipment Master업로드 : 거래처정보 추가 -->
+	<insert id="ANL0200102I" parameterClass="com.kia.anl.model.ESLT_CUSTOMER_MT">
+	    insert into ESLT_CUSTOMER_MT (
+	    	customerCd, branch, 
+	    	regID, regDate, chgID, chgDate
+	    ) values (
+	    	UPPER(#customerCd#), UPPER(#branch#), 
+	    	#userID#, sysdate, #userID#, sysdate
+	    )
+	</insert>
+	
+	<!-- Shipment Master업로드 : 제품정보 추가 -->
+	<insert id="ANL0200103I" parameterClass="com.kia.anl.model.ESLT_PRODUCT_MT">
+	    insert into ESLT_PRODUCT_MT (
+	    	productL7, productL2, productL3, productL6, esltProduct, esltProduct2,
+	    	regID, regDate, chgID, chgDate
+	    ) values (
+	    	UPPER(#productL7#), UPPER(#productL2#), UPPER(#productL3#), UPPER(#productL6#), UPPER(#esltProduct#), UPPER(#esltProduct2#),
+	    	#userID#, sysdate, #userID#, sysdate
+	    )
+	</insert>
+	
+	<!-- Shipment Master업로드 : 대표품목정보 추가 -->
+	<insert id="ANL0200104I" parameterClass="com.kia.anl.model.ESLT_PRODUCT_SEQ">
+	    insert into ESLT_PRODUCT_SEQ (
+	    	datalv2, esltProduct, dispSeq, 
+	    	regID, regDate, chgID, chgDate
+	    ) values (
+	    	UPPER(#dataLv2#), UPPER(#esltProduct#), UPPER(#dispSeq#), 
+	    	#userID#, sysdate, #userID#, sysdate
+	    )
+	</insert>
+	
+	<!-- Shipment Master업로드 : 대표품목정보 추가 -->
+	<insert id="ANL0200105I" parameterClass="com.kia.anl.model.ESLT_PRODUCT_SEQ">
+	    insert into ESLT_PRODUCT_SEQ_TEMP (
+	    	datalv2, esltProduct, dispSeq, 
+	    	regID, regDate, chgID, chgDate
+	    ) values (
+	    	UPPER(#dataLv2#), UPPER(#esltProduct#), UPPER(#dispSeq#), 
+	    	#userID#, sysdate, #userID#, sysdate
+	    )
+	</insert>
+	
+</sqlMap>

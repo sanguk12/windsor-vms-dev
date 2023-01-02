@@ -1,0 +1,358 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="ANL01004">
+	
+	<!-- Result현황 리스트 조회 -->
+	<select id="ANL0100401S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			(
+				case when rageSphereCD_reg is null then '합계'
+				else getLangDesc(#companyID#,#languageCD#,'F_CODE','RAGESPHERECD',rageSphereCD_reg,null)
+				end
+			) as "rageSphereCDName"
+			, (
+				case when rageSphereCD_reg is null then ''
+				else
+					case when officeCD_reg is null then '소계'
+					else getLangDesc(#companyID#,#languageCD#,'F_CODE','OFFICECD',officeCD_reg,null)
+					end
+				end
+			) as "officeCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','INCNTTPCD',incntTpCD,null) as "incntTpCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','KINDTPCD5',kindTpCD5,null) as "kindTpCD5Name"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','KINDTPCD2',kindTpCD2,null) as "kindTpCD2Name"
+			, venueCD as "venueCount"
+			, payAmt as "payAmt"
+			, resultQty_eu as "resultQty_eu"
+			, euRate as "euRate"
+			, guidAmtExp as "guidAmtExp"
+			, sdxTpCD as "sdxTpCD"
+			, targetRate as "targetRate"
+			, excPayTpCD as "excPayTpCD"
+			, gp as "gp"
+		from (
+			select
+				rageSphereCD_reg
+				, officeCD_reg
+				, incntTpCD
+				, kindTpCD5
+				, kindTpCD2
+				, sum(venueCD) as venueCD
+				, sum(payAmt) as payAmt
+				, sum(resultQty_eu) as resultQty_eu
+<!-- 				, sum(euRate) as euRate -->
+				, (
+						case when round(sum(resultQty_eu)) = 0 then 0
+						else round(round(sum(payAmt)) / round(sum(resultQty_eu)))
+						end
+					) as euRate
+				, sum(guidAmtExp) as guidAmtExp
+				, sum(sdxTpCD) as sdxTpCD
+				, sum(targetRate) as targetRate
+				, sum(excPayTpCD) as excPayTpCD
+				, grouping(rageSphereCD_reg)+grouping(officeCD_reg)+grouping(incntTpCD)+grouping(kindTpCD5)+grouping(kindTpCD2) as gp
+			from (
+				select
+					rageSphereCD_reg
+					, officeCD_reg
+					, incntTpCD
+					, kindTpCD5
+					, kindTpCD2
+					, count(venueCD) as venueCD
+					, round(sum(payAmt)) as payAmt
+					, round(sum(resultQty_eu)) as resultQty_eu
+					, (
+						case when round(sum(resultQty_eu)) = 0 then 0
+						else round(round(sum(payAmt)) / round(sum(resultQty_eu)))
+						end
+					) as euRate
+					, sum(guidAmtExp) as guidAmtExp
+					, sum(sdxTpCD) as sdxTpCD
+					, sum(targetRate) as targetRate
+					, sum(excPayTpCD) as excPayTpCD
+				from (
+					select
+						rageSphereCD_reg
+						, officeCD_reg
+						, incntTpCD
+						, kindTpCD5
+						, kindTpCD2
+						, venueCD
+						, sum(payAmt) as payAmt
+						, sum(resultQty_eu) as resultQty_eu
+						, sum(guidAmtExp) as guidAmtExp
+						, sum(sdxTpCD) as sdxTpCD
+						, sum(targetRate) as targetRate
+						, sum(excPayTpCD) as excPayTpCD
+					from (
+						select
+							 t3.*
+							 , (
+								select attrib02
+								from F_CODE
+								where
+									activeFlg='U'
+									and codediv='OFFICECD'
+									and comCode=t3.officeCD
+							 ) as rageSphereCD
+						from (
+							select
+								 t2.*
+								 , (
+									select attrib02
+									from F_CODE
+									where
+										activeFlg='U'
+										and codediv='TEAMCD'
+										and comCode=t2.teamCD
+								 ) as officeCD
+							from (
+								select
+									 t1.*
+									 , (
+										select attrib02
+										from F_CODE
+										where
+											activeFlg='U'
+											and codediv='TERRITORYCD'
+											and comCode=t1.territoryCD
+									 ) as teamCD
+								from (
+									select
+										rageSphereCD as rageSphereCD_reg
+										, officeCD as officeCD_reg
+										, incntTpCD
+										, kindTpCD5
+										, kindTpCD2
+										, venueCD
+										, payAmt
+										, resultQty_eu
+										, (
+											case when guidAmt > resultUnitAmt then 1
+											else 0
+											end
+										) as guidAmtExp
+										, (
+											case when sdxTpCD = '3LT' then 1
+											else 0
+											end
+										) as sdxTpCD
+										<![CDATA[
+										, (
+											case when targetRate < 70 then 1
+											else 0
+											end
+										) as targetRate
+										]]>
+										, (
+											case when excPayTpCD = 'YPAY' then 1
+											else 0
+											end
+										) as excPayTpCD
+										, territoryCD
+									from (
+										select
+											a.rageSphereCD
+											, a.officeCD
+											, 'VEN' as incntTpCD
+											, c.kindTpCD5
+											, c.kindTpCD2
+											, a.venueCD
+											<![CDATA[
+											, (case when b.eventym < '201910' then b.resultQty * b.resultUnitAmt  
+												else b.TotalAmt
+												end
+											) as payAmt
+											]]>
+											, (c.eu * b.resultQty) as resultQty_eu
+											, b.resultUnitAmt
+											, 0 as guidAmt
+											, '' as sdxTpCD
+											, targetRate
+											, excPayTpCD
+											, d.territoryCD
+										from GRLT01MT a
+										inner join GRLT01DT b
+											on a.eventYM = b.eventYM
+											and a.venueCD = b.venueCD
+											and a.diffNo = b.diffNo
+										inner join GPRD01MT c
+											on b.prdCD = c.prdCD
+										inner join GVEN01MT d
+											on a.venueCD = d.venueCD
+										where
+											a.apprStateCD = '50'
+											and a.eventYM between #startEventYM# and #endEventYM#
+											<isPropertyAvailable property="programCD">
+												<isNotEmpty prepend="and" property="programCD">
+													a.programCD = #programCD#
+												</isNotEmpty>
+											</isPropertyAvailable>
+											<!--
+											2015.01.23. taejoon.jang, 현재의 dkmd구분으로 조회된다. 
+											 -->
+											<isPropertyAvailable property="dkmdTpCD">
+												<isNotEmpty prepend="and" property="dkmdTpCD">
+													d.dkmdTpCD = #dkmdTpCD#
+												</isNotEmpty>
+											</isPropertyAvailable>
+											<isPropertyAvailable property="activityCD">
+												<isNotEmpty prepend="and" property="activityCD">
+													a.activityCD = #activityCD#
+												</isNotEmpty>
+											</isPropertyAvailable>
+											<isPropertyAvailable property="mileageYN">
+												<isNotEmpty prepend="and" property="mileageYN">
+													a.mileageYN = #mileageYN#
+												</isNotEmpty>
+											</isPropertyAvailable>
+										union all
+										select
+											a.rageSphereCD
+											, a.officeCD
+											, 'PRD' as incntTpCD
+											, c.kindTpCD5
+											, c.kindTpCD2
+											, a.venueCD
+											, b.payAmt * GETTAXBASE() as payAmt
+											, (c.eu * b.resultQty) as resultQty_eu
+											, b.resultUnitAmt
+											, guidAmt
+											, sdxTpCD
+											, 0 as targetRate
+											, '' as excPayTpCD
+											, d.territoryCD
+										from GRLT02MT a
+										inner join GRLT02DT b
+											on a.eventYM = b.eventYM
+											and a.venueCD = b.venueCD
+										inner join GPRD01MT c
+											on b.prdCD = c.prdCD
+										inner join GVEN01MT d
+											on a.venueCD = d.venueCD
+										where
+											b.apprStateCD = '50'
+											and a.eventYM between #startEventYM# and #endEventYM#
+											<isPropertyAvailable property="programCD">
+												<isNotEmpty prepend="and" property="programCD">
+													a.programCD = #programCD#
+												</isNotEmpty>
+											</isPropertyAvailable>
+											<!--
+											2015.01.23. taejoon.jang, 현재의 dkmd구분으로 조회된다. 
+											 -->
+											<isPropertyAvailable property="dkmdTpCD">
+												<isNotEmpty prepend="and" property="dkmdTpCD">
+													d.dkmdTpCD = #dkmdTpCD#
+												</isNotEmpty>
+											</isPropertyAvailable>
+											<isPropertyAvailable property="activityCD">
+												<isNotEmpty prepend="and" property="activityCD">
+													a.activityCD = #activityCD#
+												</isNotEmpty>
+											</isPropertyAvailable>
+											<isPropertyAvailable property="mileageYN">
+												<isNotEmpty prepend="and" property="mileageYN">
+													b.mileageYN = #mileageYN#
+												</isNotEmpty>
+											</isPropertyAvailable>
+										<!-- 마일리지추가 일단 주석처리해놓음 요청시 열면 반영됨-->
+										union all
+										select
+											a.rageSphereCD
+											, a.officeCD
+											, d.incntTpCD as incntTpCD
+											, c.kindTpCD5
+											, c.kindTpCD2
+											, a.venueCD
+											, b.addpayAmt * GETTAXBASE() as payAmt
+											, (c.eu * b.rltenterQty) as resultQty_eu
+											, b.addenterUnitAmt
+											, 0
+											, null
+											, 0 as targetRate
+											, '' as excPayTpCD
+											, d.territoryCD
+										from GMIL02MT a
+										inner join GMIL02DT b
+											on a.mileageID = b.mileageID
+										inner join GPRD01MT c
+											on b.prdCD = c.prdCD
+										inner join GVEN01MT d
+											on a.venueCD = d.venueCD
+										where
+											a.mileageStateCD = '50'
+											and a.contractdateto between #startEventYM# and #endEventYM#
+											<isPropertyAvailable property="programCD">
+												<isNotEmpty prepend="and" property="programCD">
+													'G1' = #programCD#
+												</isNotEmpty>
+											</isPropertyAvailable>
+											<isPropertyAvailable property="dkmdTpCD">
+												<isNotEmpty prepend="and" property="dkmdTpCD">
+													d.dkmdTpCD = #dkmdTpCD#
+												</isNotEmpty>
+											</isPropertyAvailable>
+											<isPropertyAvailable property="activityCD">
+												<isNotEmpty prepend="and" property="activityCD">
+													'99' = #activityCD#
+												</isNotEmpty>
+											</isPropertyAvailable>
+											<isPropertyAvailable property="mileageYN">
+												<isNotEmpty prepend="and" property="mileageYN">
+													'Y' = #mileageYN#
+												</isNotEmpty>
+											</isPropertyAvailable>
+									)
+								) t1
+							) t2
+						) t3
+					) t
+					where 1=1
+					<isPropertyAvailable property="rageSphereCD">
+						<isNotEmpty prepend="and" property="rageSphereCD">
+							rageSphereCD = #rageSphereCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+					<isPropertyAvailable property="officeCD">
+						<isNotEmpty prepend="and" property="officeCD">
+							officeCD = #officeCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+					<isPropertyAvailable property="rageSphereCD_S">
+						<isNotEmpty prepend="and" property="rageSphereCD_S">
+							rageSphereCD = #rageSphereCD_S#
+						</isNotEmpty>
+					</isPropertyAvailable>
+					<isPropertyAvailable property="officeCD_S">
+						<isNotEmpty prepend="and" property="officeCD_S">
+							officeCD = #officeCD_S#
+						</isNotEmpty>
+					</isPropertyAvailable>
+					<isPropertyAvailable property="teamCD_S">
+						<isNotEmpty prepend="and" property="teamCD_S">
+							teamCD = #teamCD_S#
+						</isNotEmpty>
+					</isPropertyAvailable>
+					<isPropertyAvailable property="territoryCD">
+						<isNotEmpty prepend="and" property="territoryCD">
+							territoryCD = #territoryCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+					<isPropertyAvailable property="kindTpCD5">
+						<isNotEmpty prepend="and" property="kindTpCD5">
+							kindTpCD5 = #kindTpCD5#
+						</isNotEmpty>
+					</isPropertyAvailable>
+					group by rageSphereCD_reg, officeCD_reg, incntTpCD, kindTpCD5, kindTpCD2, venueCD
+				)
+				group by rageSphereCD_reg, officeCD_reg, incntTpCD, kindTpCD5, kindTpCD2
+			)
+			group by rollup (rageSphereCD_reg, officeCD_reg, incntTpCD, kindTpCD5, kindTpCD2)
+		)
+		where
+			gp in (0, 4, 5)
+	</select>
+	
+</sqlMap>

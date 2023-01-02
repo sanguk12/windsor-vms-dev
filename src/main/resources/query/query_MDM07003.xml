@@ -1,0 +1,520 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="MDM07003">
+	
+	<!--임시업소[승인] 조회 -->
+	<select id="MDM0700301S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			rowNumber as "rowNum"
+			, TO_CHAR(TO_DATE(t.requestDate , 'YYYYMMDD'), 'YYYY.MM.DD')as "requestDate"
+			, t.venueCD as "venueCD"
+			, t.venueNm as "venueNm"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','REASON1CD', t.reason1CD,null) as "reason1CDNm"
+			, t.reason2 as "reason2"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','TERRITORYCD', t.territoryCD,null) as "territoryCDName"
+			, t.phoneNo as "phoneNo"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','FASCIACD', t.fascia,null) as "fasciaCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','VENUEGRADCD', t.venueGradCD,null) as "venueGradCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD1', t.addrTpCD1,null) as "addrTpCD1Name"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD2', t.addrTpCD2,null) as "addrTpCD2Name"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD3', t.addrTpCD3,null) as "addrTpCD3Name"
+			, t.oldAddr2 as "oldAddr2"
+			, t.postCD as "postCD"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SITECD', t.siteCD,null) as "siteCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','CHANNELCD', t.channelCD,null) as "channelCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SUBCHANNELCD', t.subChannelCD,null) as "subChannelCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SEGMENTCD', t.segmentCD,null) as "segmentCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SUBSEGMENTCD', t.subSegmentCD,null) as "subSegmentCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','RESERVESEGMENTCD', t.reserveSegmentCD,null) as "reserveSegmentCDName"
+ 			, getLangDesc(#companyID#,#languageCD#,'F_CODE','AGEINGCD', t.ageingCD, null) as "ageingCDName" 
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ACTIVEYN', t.kegYN, null) as "kegYN"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ACTIVEYN', t.activeYN, null) as "activeYN"
+			, t.ws1SapCD as "ws1SapCD"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','WSSAPCD', t.ws1SapCD,null) as "ws1SapCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','WSCD',t.ws1CD,null) as "branch1"
+			, t.ws2SapCD as "ws2SapCD"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','WSSAPCD', t.ws2SapCD,null) as "ws2SapCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','WSCD',t.ws2CD,null) as "branch2"
+			, t.ws3SapCD as "ws3SapCD"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','WSSAPCD', t.ws3SapCD,null) as "ws3SapCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','WSCD',t.ws3CD,null) as "branch3"
+			, t.ws4SapCD as "ws4SapCD"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','WSSAPCD', t.ws4SapCD,null) as "ws4SapCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','WSCD',t.ws4CD,null) as "branch4"
+			, t.apprCommt as "apprCommt"
+			, t.commt as "commt"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','APPRSTATECD',t.apprStateCD,null) as "apprStateCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','APPRSTATECD',t.requestStateCD,null) as "requestStateCDName"
+			, t.apprStateCD as "apprStateCD"
+			, t.requestStateCD as "requestStateCD"
+			, t.levelno as "levelNo"
+			,  (case when t.lapprLevelNo = t.levelNo then 'Y'
+				  else 'N' end) as "lastApprYN"
+			, t.lapprlevelno as "lapprlevelno"
+			, t.apprTpID as "apprTpID"
+			, t.empID as "empID"
+			, t.printYN as "printYN"
+		from (
+			select
+				rank() over(order by b.requestDate desc, a.venueCD) as rowNumber
+				, floor((rank() over(order by b.requestDate desc, a.venueCD)-1)/#displayNum#+1) as pageNum
+				, b.requestDate
+    			, b.mdDupYN
+    			, b.venueGradCD
+    			, b.venueCD
+    			, b.venueNm
+    			, b.reason1CD
+    			, b.reason2
+    			, b.territoryCD
+    			, b.phoneNo
+    			, b.fascia
+    			, b.addrTpCD1
+    			, b.addrTpCD2
+    			, b.addrTpCD3
+    			, b.addrTpCD4
+    			, b.siteCD
+    			, b.segmentCD
+    			, b.subSegmentCD
+    			, b.channelCD
+    			, b.subChannelCD
+    			, b.reserveSegmentCD
+    			, b.ageingCD
+    			, b.kegYN
+    			, b.locationCD
+    			, b.ws1CD
+    			, b.ws1SapCD
+    			, b.ws2CD
+    			, b.ws2SapCD
+    			, b.ws3CD
+    			, b.ws3SapCD
+    			, b.ws4CD
+    			, b.ws4SapCD
+    			, b.venueDivCD
+    			, b.incntTpCD
+    			, b.activeYN
+    			, b.mdVenueCD
+    			, a.commt	as apprCommt
+    			, a.apprStateCD
+    			, b.commt 	as commt
+    			, b.requestStateCD
+    			, a.levelno
+    			, b.lapprlevelno
+    			, a.empID
+    			, a.apprTpID
+    			, b.printYN
+    			, b.oldAddr2
+    			, b.postCD
+			from GVEN04MT a
+			inner join GVEN05MT b
+				on a.venueCD = b.venueCD
+				and a.gbn = 'D'
+			where 1=1
+			and a.empID = #empID#
+			and b.requestDate between #requestDateFrom# and #requestDateTo#
+			<isPropertyAvailable property="apprStateCD">
+				<isNotEmpty prepend="and" property="apprStateCD">
+					a.apprStateCD = #apprStateCD#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="venueGradCD" >
+				<isNotEmpty prepend="and" property="venueGradCD">
+					b.venueGradCD = #venueGradCD#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="venueCD" >
+				<isNotEmpty prepend="and" property="venueCD">
+					upper(b.venueCD) = upper(#venueCD#)
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="venueNm" >
+				<isNotEmpty prepend="and" property="venueNm">
+					upper(b.venueNm) like '%'||upper(#venueNm#)||'%'
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="territoryCD" >
+				<isNotEmpty prepend="and" property="territoryCD">
+					b.territoryCD = #territoryCD#
+				</isNotEmpty>
+			</isPropertyAvailable>
+		) t
+		where 1=1
+			<isPropertyAvailable property="pageNum">
+				and pageNum = #pageNum#
+			</isPropertyAvailable>
+	</select>
+	
+	<select id="MDM0700302S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			count(*) as "totalCount"
+		from GVEN04MT a
+			inner join GVEN05MT b
+				on a.venueCD = b.venueCD
+				and a.gbn = 'D'
+		where 1=1
+			and a.empID = #empID#
+			and b.requestDate between #requestDateFrom# and #requestDateTo#
+			<isPropertyAvailable property="apprStateCD">
+				<isNotEmpty prepend="and" property="apprStateCD">
+					a.apprStateCD = #apprStateCD#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="venueGradCD" >
+				<isNotEmpty prepend="and" property="venueGradCD">
+					b.venueGradCD = #venueGradCD#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="venueCD" >
+				<isNotEmpty prepend="and" property="venueCD">
+					upper(b.venueCD) = upper(#venueCD#)
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="venueNm" >
+				<isNotEmpty prepend="and" property="venueNm">
+					upper(b.venueNm) like '%'||upper(#venueNm#)||'%'
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="territoryCD" >
+				<isNotEmpty prepend="and" property="territoryCD">
+					b.territoryCD = #territoryCD#
+				</isNotEmpty>
+			</isPropertyAvailable>
+	</select>
+	
+	<!-- 임시업소[승인] 반려시 메일보낼 하위승인자들 정보(상태가 비어있거나, 승인요청인 사람 제외) -->
+	<select id="MDM0700303S" parameterClass="com.kia.mdm.model.GVEN02MT" resultClass="java.util.LinkedHashMap">
+		select
+			empID as "empID"
+			, max(empNm) as "empNm"
+			, max(emailAddr) as "emailAddr"
+		from (
+			select
+				b.empID
+				, c.empNm
+				, c.emailAddr
+				, b.apprStateCD
+			from GVEN05MT a
+			inner join GVEN04MT b
+				on a.venueCD  = b.venueCD 
+			inner join GEMP01MT c
+				on b.empID = c.empID
+			where
+				a.venueCD = #venueCD#
+		     	and b.apprTpID in
+				<iterate property="apprTpIDs" open="(" close=")" conjunction=",">
+					#apprTpIDs[]#
+		     	</iterate>
+				and (b.apprStateCD is not null and b.apprStateCD != '20')
+				and b.empID != #empID#
+				and b.gbn = 'D'
+		)
+		group by empID
+	</select>
+	
+	<select id="MDM0700304S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select 
+			t.sellingAreaID as "sellingAreaID"
+			, t.venueCD as "sellingAreaRef"
+			, 'Inactive' as "sellingAreaStatus"
+			, t.customerID as "outletID"
+			, t.refNo  as "outletRef"
+			, 'Inactive' as "outletStatus"
+		from
+		(
+		select 
+			sellingareaid as sellingAreaID
+		  , venueCD 	  as venueCD 
+		  , activeyn 	  as activeYN
+	      , customerid	  as customerID
+  	      , refno		  as refNo  	
+		from gven05mt
+		where
+			1=1
+			<isPropertyAvailable property="venueCD">
+				<isNotEmpty prepend="and" property="venueCD">
+					venueCD = #venueCD#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="venueCDs">
+				<isNotEmpty prepend="and" property="venueCDs">
+					venueCD in
+    				<iterate property="venueCDs" open="(" close=")" conjunction=",">
+      					#venueCDs[]#
+    				</iterate>
+    			</isNotEmpty>
+			</isPropertyAvailable>	
+			) t
+	</select>
+	
+	<select id="MDM0700305S" parameterClass="com.kia.mdm.model.GVEN02MT" resultClass="java.util.LinkedHashMap">
+		select 
+			venueCD as "venueCD"
+		from gven05mt
+		where
+			1=1
+			and requestStateCD = '50'
+			and requestDate between replace(#requestDateFrom#, '.', '') and replace(#requestDateTo#, '.', '')
+			<isPropertyAvailable property="apprStateCD">
+				<isNotEmpty prepend="and" property="apprStateCD">
+					requestStateCD = #apprStateCD#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="venueGradCD" >
+				<isNotEmpty prepend="and" property="venueGradCD">
+					venueGradCD = #venueGradCD#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="venueCD" >
+				<isNotEmpty prepend="and" property="venueCD">
+					upper(b.venueCD) = upper(#venueCD#)
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="venueNm" >
+				<isNotEmpty prepend="and" property="venueNm">
+					upper(venueNm) like '%'||upper(#venueNm#)||'%'
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="territoryCD" >
+				<isNotEmpty prepend="and" property="territoryCD">
+					territoryCD = #territoryCD#
+				</isNotEmpty>
+			</isPropertyAvailable>
+	</select>
+	
+	<select id="MDM0700306S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			 TO_CHAR(TO_DATE(t.requestDate , 'YYYYMMDD'), 'YYYY.MM.DD')as "requestDate"
+			, t.venueCD as "venueCD"
+			, t.venueNm as "venueNm"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','REASON1CD', t.reason1CD,null) as "reason1CDNm"
+			, t.reason2 as "reason2"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','TERRITORYCD', t.territoryCD,null) as "territoryCDName"
+			, t.phoneNo as "phoneNo"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','FASCIACD', t.fascia,null) as "fasciaCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','VENUEGRADCD', t.venueGradCD,null) as "venueGradCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD1', t.addrTpCD1,null) as "addrTpCD1Name"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD2', t.addrTpCD2,null) as "addrTpCD2Name"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD3', t.addrTpCD3,null) as "addrTpCD3Name"
+			, t.oldAddr2 as "oldAddr2"
+			, t.postCD as "postCD"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SITECD', t.siteCD,null) as "siteCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','CHANNELCD', t.channelCD,null) as "channelCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SUBCHANNELCD', t.subChannelCD,null) as "subChannelCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SEGMENTCD', t.segmentCD,null) as "segmentCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SUBSEGMENTCD', t.subSegmentCD,null) as "subSegmentCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','RESERVESEGMENTCD', t.reserveSegmentCD,null) as "reserveSegmentCDName"
+ 			, getLangDesc(#companyID#,#languageCD#,'F_CODE','AGEINGCD', t.ageingCD, null) as "ageingCDName" 
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ACTIVEYN', t.kegYN, null) as "kegYN"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ACTIVEYN', t.activeYN, null) as "activeYN"
+			, t.ws1SapCD as "ws1SapCD"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','WSSAPCD', t.ws1SapCD,null) as "ws1SapCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','WSCD',t.ws1CD,null) as "branch1"
+			, t.ws2SapCD as "ws2SapCD"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','WSSAPCD', t.ws2SapCD,null) as "ws2SapCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','WSCD',t.ws2CD,null) as "branch2"
+			, t.ws3SapCD as "ws3SapCD"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','WSSAPCD', t.ws3SapCD,null) as "ws3SapCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','WSCD',t.ws3CD,null) as "branch3"
+			, t.ws4SapCD as "ws4SapCD"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','WSSAPCD', t.ws4SapCD,null) as "ws4SapCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','WSCD',t.ws4CD,null) as "branch4"
+			, t.apprCommt as "apprCommt"
+			, t.commt as "commt"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','APPRSTATECD',t.apprStateCD,null) as "apprStateCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','APPRSTATECD',t.requestStateCD,null) as "requestStateCDName"
+			, t.apprStateCD as "apprStateCD"
+			, t.requestStateCD as "requestStateCD"
+			, t.levelno as "levelNo"
+			,  (case when t.lapprLevelNo = t.levelNo then 'Y'
+				  else 'N' end) as "lastApprYN"
+			, t.lapprlevelno as "lapprlevelno"
+			, t.apprTpID as "apprTpID"
+			, t.empID as "empID"
+			, t.printYN as "printYN"
+		from (
+			select
+				 b.requestDate
+    			, b.mdDupYN
+    			, b.venueGradCD
+    			, b.venueCD
+    			, b.venueNm
+    			, b.reason1CD
+    			, b.reason2
+    			, b.territoryCD
+    			, b.phoneNo
+    			, b.fascia
+    			, b.addrTpCD1
+    			, b.addrTpCD2
+    			, b.addrTpCD3
+    			, b.addrTpCD4
+    			, b.siteCD
+    			, b.segmentCD
+    			, b.subSegmentCD
+    			, b.channelCD
+    			, b.subChannelCD
+    			, b.reserveSegmentCD
+    			, b.ageingCD
+    			, b.kegYN
+    			, b.locationCD
+    			, b.ws1CD
+    			, b.ws1SapCD
+    			, b.ws2CD
+    			, b.ws2SapCD
+    			, b.ws3CD
+    			, b.ws3SapCD
+    			, b.ws4CD
+    			, b.ws4SapCD
+    			, b.venueDivCD
+    			, b.incntTpCD
+    			, b.activeYN
+    			, b.mdVenueCD
+    			, a.commt	as apprCommt
+    			, a.apprStateCD
+    			, b.commt 	as commt
+    			, b.requestStateCD
+    			, a.levelno
+    			, b.lapprlevelno
+    			, a.empID
+    			, a.apprTpID
+    			, b.printYN
+    			, b.oldAddr2
+    			, b.postCD
+			from GVEN04MT a
+			inner join GVEN05MT b
+				on a.venueCD = b.venueCD
+				and a.gbn = 'D'
+			where 1=1
+			and a.empID = #empID#
+			and b.requestDate between #requestDateFrom# and #requestDateTo#
+			<isPropertyAvailable property="apprStateCD">
+				<isNotEmpty prepend="and" property="apprStateCD">
+					a.apprStateCD = #apprStateCD#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="venueGradCD" >
+				<isNotEmpty prepend="and" property="venueGradCD">
+					b.venueGradCD = #venueGradCD#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="venueCD" >
+				<isNotEmpty prepend="and" property="venueCD">
+					upper(b.venueCD) = upper(#venueCD#)
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="venueNm" >
+				<isNotEmpty prepend="and" property="venueNm">
+					upper(b.venueNm) like '%'||upper(#venueNm#)||'%'
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="territoryCD" >
+				<isNotEmpty prepend="and" property="territoryCD">
+					b.territoryCD = #territoryCD#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			order by b.requestDate desc, a.venueCD
+		) t
+		where 1=1
+	</select>
+	
+	
+	<!-- 임시업소[승인] 전체 승인상태 갱신 -->
+	<update id="MDM0700301U" parameterClass="com.kia.mdm.model.GVEN02MT">
+		update GVEN05MT
+		set
+			requestStateCD = #apprStateCD#
+			, chgID = #userID#
+			, chgDate = sysdate
+		where
+			venueCD = #venueCD#
+	</update>
+	
+	<!-- 임시업소[승인] 승인상태 갱신 -->
+	<update id="MDM0700302U" parameterClass="com.kia.mdm.model.GVEN02MT">
+		update GVEN04MT
+		set
+			apprStateCD = '50'
+			, commt = #apprCommt#
+			, apprDate = sysdate
+			, chgID = #userID#
+			, chgDate = sysdate
+		where
+			venueCD = #venueCD#
+		and levelNo = #levelNo#
+		and gbn = 'D'
+	</update>
+	
+	<!-- 임시업소[승인] 상위자 승인요청처리 -->
+	<update id="MDM0700303U" parameterClass="com.kia.mdm.model.GVEN02MT">
+		update GVEN04MT
+		set
+			apprStateCD = '20'
+			, chgID = #userID#
+			, chgDate = sysdate
+		where
+			venueCD = #venueCD#
+		and levelNo = #levelNo#+1
+		and gbn = 'D'
+	</update>
+	
+	<!-- 임시업소[반려] 상태 갱신 -->
+	<update id="MDM0700304U" parameterClass="com.kia.mdm.model.GVEN02MT">
+		update GVEN05MT
+		set
+			requestStateCD = #apprStateCD#
+			, chgID = #userID#
+			, commt = #commt#
+			, chgDate = sysdate
+		where
+			venueCD = #venueCD#
+	</update>
+	
+	<!-- 임시업소[반려] 승인상태 갱신 -->
+	<update id="MDM0700305U" parameterClass="com.kia.mdm.model.GVEN02MT">
+		update GVEN04MT
+		set
+			apprStateCD = #apprStateCD#
+			, apprDate = sysdate
+			, commt = #commt#
+			, chgID = #userID#
+			, chgDate = sysdate
+		where
+			venueCD = #venueCD#
+		and levelNo = #levelNo#
+		and gbn = 'D'
+	</update>
+	
+	<update id="MDM0700306U" parameterClass="java.lang.String">
+		update GVEN05MT
+		set
+			printYN = 'Y'
+			, chgID = #userID#
+			, chgDate = sysdate
+		where
+			venueCD = #venueCD#
+	</update>
+	
+	<update id="MDM0700307U" parameterClass="com.kia.mdm.model.GVEN03MT">
+		update GVEN05MT
+		set
+			printYN = 'Y'
+			, printDate = sysdate
+			, chgID = #userID#
+			, chgDate = sysdate
+		where
+			venueCD = #venueCD#
+	</update>
+	
+	<update id="MDM0700308U" parameterClass="com.kia.mdm.model.GVEN02MT">
+		update GVEN05MT
+		set
+			requestStateCD = #apprStateCD#
+ 			, excelSeq = excelSeq.NEXTVAL 
+			, excelKeyCD = to_char(sysdate, 'YYYYMMDD') || '_' || excelSeq.NEXTVAL 
+			, chgID = #userID#
+			, chgDate = sysdate
+		where
+			venueCD = #venueCD#
+	</update>
+	
+	
+</sqlMap>

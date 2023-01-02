@@ -1,0 +1,712 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="PLN03001">
+	
+	<!-- Plan내역 리스트 조회 -->
+	<select id="PLN0300101S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+			select
+			rowNumber as "rowNum"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','PROGRAMCD',programCD,null) as "programCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ACTIVITYCD',activityCD,null) as "activityCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','RAGESPHERECD',rageSphereCD,null) as "rageSphereCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','OFFICECD',officeCD,null) as "officeCDName"
+			<isPropertyAvailable property="grpID">
+				<isNotEmpty property="grpID">
+			, (case when (select dkmdtpcd from GEMP01MT where empID=t2.empID) != 'DK' then '' else (select empNm from GEMP01MT where empID=t2.empID) end) as "empNm"
+				</isNotEmpty>
+				<isEmpty property="grpID">
+			, (select empNm from GEMP01MT where empID=t2.empID) as "empNm"
+				</isEmpty>
+			</isPropertyAvailable>
+			, venueCD as "venueCD"
+			, venueNm as "venueNm"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','VENUEGRADCD',venueGradCD,null) as "venueGradCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SEGMENTCD',segmentCD,null) as "segmentCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SUBSEGMENTCD',subSegmentCD,null) as "subSegmentCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD1',addrTpCD1,null) as "addrTpCD1Name"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD2',addrTpCD2,null) as "addrTpCD2Name"
+			, tpayAmt as "tpayAmt"
+			, planTQty as "planTQty"
+			, avgUnitAmt as "avgUnitAmt"
+			, gsvRate as "gsvRate"
+			, threeMonthAvgRate as "threeMonthAvgRate"			
+			, apprStateCD_emp as "apprStateCDName_emp"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','APPRSTATECD',apprStateCD,null) as "apprStateCDName"
+			, apprStateCD as "apprStateCD"
+			, apprStateCD_emp as "apprStateCD_emp"
+			, lapprLevelNo as "lapprLevelNo"
+			, levelNo as "levelNo"
+			, lastApprYN as "lastApprYN"
+		from (
+			select
+				t.*
+				, rank() over(
+					order by
+						rageSphereCD
+						, officeCD
+						, empID
+						, venueCD
+				) as rowNumber
+				, floor((rank() over(
+					order by
+						rageSphereCD
+						, officeCD
+						, empID
+						, venueCD
+				)-1)/#displayNum#+1) as pageNum
+			from (
+				select
+					programCD
+					, activityCD
+					, c.rageSphereCD
+					, c.officeCD
+					, b.empID
+					, a.venueCD
+					, venueNm
+					, venueGradCD
+					, segmentCD
+					, subSegmentCD
+					, addrTpCD1
+					, addrTpCD2
+					, tpayAmt
+					, planTQty
+					, (
+						case when planTQty=0 then 0
+						else round(tpayAmt / planTQty)
+						end
+					) as avgUnitAmt
+					, gsvRate
+					, threeMonthAvgRate
+					, b.commt
+					, a.commt as apprCommt
+					, b.apprStateCD
+					, nvl(e.CHGCNT,0) as apprStateCD_emp
+					, b.lapprLevelNo
+					, a.levelNo
+					, (
+						case when b.lapprLevelNo = a.levelNo then 'Y'
+						else 'N'
+						end
+					) as lastApprYN
+				from GPLN03MT a
+				inner join GPLN01MT b
+					on a.eventYM = b.eventYM
+					and a.venueCD = b.venueCD
+				inner join GEMP01MT c
+					on b.empID = c.empID
+					<isNotEqual property="empID" compareValue="KIMJUNHAK"> 
+					and c.empID in (
+						    SELECT #empID# AS EMPID FROM DUAL 
+							 UNION 
+							SELECT EMPID FROM GAPP01DT        
+							 WHERE APPRTPID =  '000000'
+							   and PAPPRGRPID IN (
+									SELECT APPRGRPID 
+									  FROM GAPP01DT B    
+									 WHERE B.APPRTPID = '000000' 
+									   AND B.EMPID    = #empID#
+							       )
+							 UNION 
+							SELECT EMPID FROM GAPP01DT    
+							 WHERE APPRTPID =  '000000'
+							   and PAPPRGRPID IN (
+							SELECT APPRGRPID 
+							  FROM GAPP01DT B    
+							 WHERE B.APPRTPID =  '000000' 
+							   AND B.EMPID IN  (
+									        SELECT EMPID FROM GAPP01DT
+									         WHERE PAPPRGRPID IN (
+												        SELECT APPRGRPID 
+												          FROM GAPP01DT B    
+												         WHERE B.APPRTPID = '000000' 
+												           AND B.EMPID    = #empID#
+									               )
+							              )    
+							     )
+							 UNION 
+							SELECT EMPID FROM GAPP01DT  
+							 WHERE APPRTPID =  '000000'
+							   and PAPPRGRPID IN (
+							    SELECT APPRGRPID FROM GAPP01DT
+								 WHERE APPRTPID =  '000000' 
+							     and PAPPRGRPID IN (
+								SELECT APPRGRPID 
+								  FROM GAPP01DT B    
+								 WHERE B.APPRTPID =  '000000' 
+								   AND B.EMPID IN  (
+										        SELECT EMPID FROM GAPP01DT
+										         WHERE PAPPRGRPID IN (
+													        SELECT APPRGRPID 
+													          FROM GAPP01DT B    
+													         WHERE B.APPRTPID = '000000' 
+													           AND B.EMPID    = #empID#
+										               )
+								              )    
+								     )
+							     )
+						    
+						) 
+					</isNotEqual>	
+				inner join GVEN01MT d
+					on a.venueCD = d.venueCD
+				left outer join GCHG01MT e      
+                    on a.eventYM = e.eventYM      
+                   and a.venueCD = e.venueCD     
+				where
+					a.eventYM = #eventYM#
+					and a.levelNo = '1'					
+					and a.apprStateCD in (
+						select comCode
+						from F_CODE
+						where
+							codediv='APPRSTATECD'
+							and activeFlg = 'U'
+							and useYN = 'Y'
+							and attrib02 = 'MNG'
+					)
+					<isPropertyAvailable property="programCD">
+						<isNotEmpty prepend="and" property="programCD">
+							programCD = #programCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+					<isPropertyAvailable property="activityCD">
+						<isNotEmpty prepend="and" property="activityCD">
+							activityCD = #activityCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+					<isPropertyAvailable property="venueGradCD">
+						<isNotEmpty prepend="and" property="venueGradCD">
+							venueGradCD = #venueGradCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+					<isPropertyAvailable property="segmentCD">
+						<isNotEmpty prepend="and" property="segmentCD">
+							segmentCD = #segmentCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+					<isPropertyAvailable property="subSegmentCD">
+						<isNotEmpty prepend="and" property="subSegmentCD">
+							subSegmentCD = #subSegmentCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+					<isPropertyAvailable property="rageSphereCD">
+						<isNotEmpty prepend="and" property="rageSphereCD">
+							c.rageSphereCD = #rageSphereCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+					<isPropertyAvailable property="officeCD">
+						<isNotEmpty prepend="and" property="officeCD">
+							c.officeCD = #officeCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+					<isPropertyAvailable property="apprStateCD">
+						<isNotEmpty prepend="and" property="apprStateCD">
+							a.apprStateCD = #apprStateCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+					<isPropertyAvailable property="dkmdTpCD">
+						<isNotEmpty prepend="and" property="dkmdTpCD">
+							b.dkmdTpCD = #dkmdTpCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+					<isPropertyAvailable property="overGSVYN">
+						<isEqual prepend="and" property="overGSVYN" compareValue="Y">
+							gsvRate > 10
+						</isEqual>
+					</isPropertyAvailable>
+					<isPropertyAvailable property="threeMonthAvg">
+						<isEqual prepend="and" property="threeMonthAvg" compareValue="Y">
+							<![CDATA[
+							(threeMonthAvgRate < 90 or threeMonthAvgRate > 120)
+							]]>
+						</isEqual>
+					</isPropertyAvailable>
+			) t
+		) t2
+		where 1=1
+			<isPropertyAvailable property="pageNum">
+				<isNotEmpty prepend="and" property="pageNum">
+					pageNum = #pageNum#
+				</isNotEmpty>
+			</isPropertyAvailable>
+	</select>
+	
+	
+	
+
+	
+	<select id="PLN0300102S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			count(*) as "totalCount"
+		from (
+			select
+				programCD
+				, activityCD
+				, c.rageSphereCD
+				, c.officeCD
+				, b.empID
+				, a.venueCD
+				, venueNm
+				, venueGradCD
+				, segmentCD
+				, subSegmentCD
+				, addrTpCD1
+				, addrTpCD2
+				, tpayAmt
+				, planTQty
+				, (
+					case when planTQty=0 then 0
+					else round(tpayAmt / planTQty)
+					end
+				) as avgUnitAmt
+				, gsvRate
+				, threeMonthAvgRate
+				, b.commt
+				, a.commt as apprCommt
+				, b.apprStateCD
+				, a.apprStateCD as apprStateCD_emp
+				, b.lapprLevelNo
+				, a.levelNo
+				, (
+					case when b.lapprLevelNo = a.levelNo then 'Y'
+					else 'N'
+					end
+				) as lastApprYN
+			from GPLN03MT a
+			inner join GPLN01MT b
+				on a.eventYM = b.eventYM
+				and a.venueCD = b.venueCD
+			inner join GEMP01MT c
+				on b.empID = c.empID
+				<isNotEqual property="empID" compareValue="KIMJUNHAK"> 
+					and c.empID in (
+						    SELECT #empID# AS EMPID FROM DUAL 
+							 UNION 
+							SELECT EMPID FROM GAPP01DT        
+							 WHERE APPRTPID =  '000000'
+							   and PAPPRGRPID IN (
+									SELECT APPRGRPID 
+									  FROM GAPP01DT B    
+									 WHERE B.APPRTPID = '000000' 
+									   AND B.EMPID    = #empID#
+							       )
+							 UNION 
+							SELECT EMPID FROM GAPP01DT    
+							 WHERE APPRTPID =  '000000'
+							   and PAPPRGRPID IN (
+							SELECT APPRGRPID 
+							  FROM GAPP01DT B    
+							 WHERE B.APPRTPID =  '000000' 
+							   AND B.EMPID IN  (
+									        SELECT EMPID FROM GAPP01DT
+									         WHERE PAPPRGRPID IN (
+												        SELECT APPRGRPID 
+												          FROM GAPP01DT B    
+												         WHERE B.APPRTPID = '000000' 
+												           AND B.EMPID    = #empID#
+									               )
+							              )    
+							     )
+							 UNION 
+							SELECT EMPID FROM GAPP01DT  
+							 WHERE APPRTPID =  '000000'
+							   and PAPPRGRPID IN (
+							    SELECT APPRGRPID FROM GAPP01DT
+								 WHERE APPRTPID =  '000000' 
+							     and PAPPRGRPID IN (
+								SELECT APPRGRPID 
+								  FROM GAPP01DT B    
+								 WHERE B.APPRTPID =  '000000' 
+								   AND B.EMPID IN  (
+										        SELECT EMPID FROM GAPP01DT
+										         WHERE PAPPRGRPID IN (
+													        SELECT APPRGRPID 
+													          FROM GAPP01DT B    
+													         WHERE B.APPRTPID = '000000' 
+													           AND B.EMPID    = #empID#
+										               )
+								              )    
+								     )
+							     )
+						    
+						) 
+				</isNotEqual>
+			inner join GVEN01MT d
+				on a.venueCD = d.venueCD
+			where
+				a.eventYM = #eventYM#
+				and a.levelNo = '1'				
+				and a.apprStateCD in (
+					select comCode
+					from F_CODE
+					where
+						codediv='APPRSTATECD'
+						and activeFlg = 'U'
+						and useYN = 'Y'
+						and attrib02 = 'MNG'
+				)
+				<isPropertyAvailable property="programCD">
+					<isNotEmpty prepend="and" property="programCD">
+						programCD = #programCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="activityCD">
+					<isNotEmpty prepend="and" property="activityCD">
+						activityCD = #activityCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="venueGradCD">
+					<isNotEmpty prepend="and" property="venueGradCD">
+						venueGradCD = #venueGradCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="segmentCD">
+					<isNotEmpty prepend="and" property="segmentCD">
+						segmentCD = #segmentCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="subSegmentCD">
+					<isNotEmpty prepend="and" property="subSegmentCD">
+						subSegmentCD = #subSegmentCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="rageSphereCD">
+					<isNotEmpty prepend="and" property="rageSphereCD">
+						c.rageSphereCD = #rageSphereCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="officeCD">
+					<isNotEmpty prepend="and" property="officeCD">
+						c.officeCD = #officeCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="apprStateCD">
+					<isNotEmpty prepend="and" property="apprStateCD">
+						a.apprStateCD = #apprStateCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="dkmdTpCD">
+					<isNotEmpty prepend="and" property="dkmdTpCD">
+						b.dkmdTpCD = #dkmdTpCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="overGSVYN">
+					<isEqual prepend="and" property="overGSVYN" compareValue="Y">
+						gsvRate > 10
+					</isEqual>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="threeMonthAvg">
+					<isEqual prepend="and" property="threeMonthAvg" compareValue="Y">
+						<![CDATA[
+						(threeMonthAvgRate < 90 or threeMonthAvgRate > 120)
+						]]>
+					</isEqual>
+				</isPropertyAvailable>
+		) t			
+	</select>
+	<!-- Plan승인 엑셀 조회 -->
+	<select id="PLN0300105S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			getLangDesc(#companyID#,#languageCD#,'F_CODE','PROGRAMCD',programCD,null) as "programCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ACTIVITYCD',activityCD,null) as "activityCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','RAGESPHERECD',rageSphereCD,null) as "rageSphereCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','OFFICECD',officeCD,null) as "officeCDName"
+			<isPropertyAvailable property="grpID">
+				<isNotEmpty property="grpID">
+			, (case when (select dkmdtpcd from GEMP01MT where empID=t.empID) != 'DK' then '' else (select empNm from GEMP01MT where empID=t.empID) end) as "empNm"
+				</isNotEmpty>
+				<isEmpty property="grpID">
+			, (select empNm from GEMP01MT where empID=t.empID) as "empNm"
+				</isEmpty>
+			</isPropertyAvailable>
+			, venueCD as "venueCD"
+			, venueNm as "venueNm"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','VENUEGRADCD',venueGradCD,null) as "venueGradCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SEGMENTCD',segmentCD,null) as "segmentCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SUBSEGMENTCD',subSegmentCD,null) as "subSegmentCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD1',addrTpCD1,null) as "addrTpCD1Name"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD2',addrTpCD2,null) as "addrTpCD2Name"
+			, tpayAmt as "tpayAmt"
+			, planTQty as "planTQty"
+			, avgUnitAmt as "avgUnitAmt"
+			, gsvRate as "gsvRate"
+			, threeMonthAvgRate as "threeMonthAvgRate"
+			, commt as "commt"
+			, apprCommt as "apprCommt"
+			, apprStateCD_emp as "apprStateCDName_emp"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','APPRSTATECD',apprStateCD,null) as "apprStateCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','KINDTPCD5',kindTpCD5,null) as "kindTpCD5Name"
+			, prdNm as "prdNm"
+			, factoryPrice as "factoryPrice"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','QTYUNITCD',qtyUnitCD,null) as "qtyUnitCDName"
+			, threeMonthAvgQty as "threeMonthAvgQty"
+			, planQty as "planQty"
+			, planUnitAmt as "planUnitAmt"
+			, payAmt as "payAmt"
+		from (
+			select
+				programCD
+				, activityCD
+				, c.rageSphereCD
+				, c.officeCD
+				, b.empID
+				, a.venueCD
+				, venueNm
+				, venueGradCD
+				, segmentCD
+				, subSegmentCD
+				, addrTpCD1
+				, addrTpCD2
+				, tpayAmt
+				, planTQty
+				, (
+					case when planTQty=0 then 0
+					else round(tpayAmt / planTQty)
+					end
+				) as avgUnitAmt
+				, gsvRate
+				, threeMonthAvgRate
+				, b.commt
+				, a.commt as apprCommt
+				, b.apprStateCD
+				, nvl(g.CHGCNT,0) as apprStateCD_emp
+				, b.lapprLevelNo
+				, a.levelNo
+				, (
+					case when b.lapprLevelNo = a.levelNo then 'Y'
+					else 'N'
+					end
+				) as lastApprYN
+				, f.kindTpCD5
+				, f.prdNm
+				, e.factoryPrice
+				, f.qtyUnitCD
+				, e.threeMonthAvgQty
+				, e.planQty
+				, e.planUnitAmt
+				, e.payAmt
+				, e.prdCD
+			from GPLN03MT a
+			inner join GPLN01MT b
+				on a.eventYM = b.eventYM
+				and a.venueCD = b.venueCD
+			inner join GEMP01MT c
+				on b.empID = c.empID
+				<isNotEqual property="empID" compareValue="KIMJUNHAK"> 
+					and c.empID in (
+						    SELECT #empID# AS EMPID FROM DUAL 
+							 UNION 
+							SELECT EMPID FROM GAPP01DT        
+							 WHERE APPRTPID =  '000000'
+							   and PAPPRGRPID IN (
+									SELECT APPRGRPID 
+									  FROM GAPP01DT B    
+									 WHERE B.APPRTPID = '000000' 
+									   AND B.EMPID    = #empID#
+							       )
+							 UNION 
+							SELECT EMPID FROM GAPP01DT    
+							 WHERE APPRTPID =  '000000'
+							   and PAPPRGRPID IN (
+							SELECT APPRGRPID 
+							  FROM GAPP01DT B    
+							 WHERE B.APPRTPID =  '000000' 
+							   AND B.EMPID IN  (
+									        SELECT EMPID FROM GAPP01DT
+									         WHERE PAPPRGRPID IN (
+												        SELECT APPRGRPID 
+												          FROM GAPP01DT B    
+												         WHERE B.APPRTPID = '000000' 
+												           AND B.EMPID    = #empID#
+									               )
+							              )    
+							     )
+							 UNION 
+							SELECT EMPID FROM GAPP01DT  
+							 WHERE APPRTPID =  '000000'
+							   and PAPPRGRPID IN (
+							    SELECT APPRGRPID FROM GAPP01DT
+								 WHERE APPRTPID =  '000000' 
+							     and PAPPRGRPID IN (
+								SELECT APPRGRPID 
+								  FROM GAPP01DT B    
+								 WHERE B.APPRTPID =  '000000' 
+								   AND B.EMPID IN  (
+										        SELECT EMPID FROM GAPP01DT
+										         WHERE PAPPRGRPID IN (
+													        SELECT APPRGRPID 
+													          FROM GAPP01DT B    
+													         WHERE B.APPRTPID = '000000' 
+													           AND B.EMPID    = #empID#
+										               )
+								              )    
+								     )
+							     )
+						    
+						) 
+					</isNotEqual>	
+			inner join GVEN01MT d
+				on a.venueCD = d.venueCD
+			inner join GPLN01DT e
+				on a.eventYM = e.eventYM
+				and a.venueCD = e.venueCD
+			inner join GPRD01MT f
+				on e.prdCD = f.prdCD
+			left outer join GCHG01MT g      
+                on a.eventYM = g.eventYM      
+               and a.venueCD = g.venueCD   
+			where
+				a.eventYM = #eventYM#
+				and a.levelNo = '1'	
+				and a.apprStateCD in (
+					select comCode
+					from F_CODE
+					where
+						codediv='APPRSTATECD'
+						and activeFlg = 'U'
+						and useYN = 'Y'
+						and attrib02 = 'MNG'
+				)
+				<isPropertyAvailable property="programCD">
+					<isNotEmpty prepend="and" property="programCD">
+						programCD = #programCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="activityCD">
+					<isNotEmpty prepend="and" property="activityCD">
+						activityCD = #activityCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="venueGradCD">
+					<isNotEmpty prepend="and" property="venueGradCD">
+						venueGradCD = #venueGradCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="segmentCD">
+					<isNotEmpty prepend="and" property="segmentCD">
+						segmentCD = #segmentCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="subSegmentCD">
+					<isNotEmpty prepend="and" property="subSegmentCD">
+						subSegmentCD = #subSegmentCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="rageSphereCD">
+					<isNotEmpty prepend="and" property="rageSphereCD">
+						c.rageSphereCD = #rageSphereCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="officeCD">
+					<isNotEmpty prepend="and" property="officeCD">
+						c.officeCD = #officeCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="apprStateCD">
+					<isNotEmpty prepend="and" property="apprStateCD">
+						a.apprStateCD = #apprStateCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="dkmdTpCD">
+					<isNotEmpty prepend="and" property="dkmdTpCD">
+						b.dkmdTpCD = #dkmdTpCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="overGSVYN">
+					<isEqual prepend="and" property="overGSVYN" compareValue="Y">
+						gsvRate > 10
+					</isEqual>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="threeMonthAvg">
+					<isEqual prepend="and" property="threeMonthAvg" compareValue="Y">
+						<![CDATA[
+						(threeMonthAvgRate < 90 or threeMonthAvgRate > 120)
+						]]>
+					</isEqual>
+				</isPropertyAvailable>
+		) t
+		order by
+			rageSphereCD
+			, officeCD
+			, empID
+			, venueCD
+	</select>
+	
+	<!-- Plan정보 승인상태 갱신 -->
+	<update id="PLN0300101U" parameterClass="com.kia.pln.model.GPLN01MT">
+		update GPLN01MT
+		set	  apprStateCD = '20'			
+			, chgID       = #userID#
+			, chgDate     = sysdate
+		where
+			eventYM       = #eventYM#
+			and venueCD   = #venueCD#
+	</update>
+	
+	<!-- Plan정보 승인상태 갱신 -->
+	<update id="PLN0300102U_1" parameterClass="com.kia.pln.model.GPLN01MT">
+		update GPLN03MT
+		   set COMMT       = null
+             , APPRSTATECD = null
+             , APPRDATE    = null
+			 , CHGID       = null
+			 , chgDate     = null
+		 where eventYM = #eventYM#
+		   and venueCD = #venueCD#
+	</update>
+	
+	<update id="PLN0300102U_2" parameterClass="com.kia.pln.model.GPLN01MT">
+		update GPLN03MT
+		   set APPRSTATECD = '50'
+             , APPRDATE    = sysdate
+		 where eventYM = #eventYM#
+		   and venueCD = #venueCD#
+		   and LEVELNO = '1'
+	</update>
+	
+	<update id="PLN0300102U_3" parameterClass="com.kia.pln.model.GPLN01MT">
+		update GPLN03MT
+		   set APPRSTATECD = '20'
+		 where eventYM = #eventYM#
+		   and venueCD = #venueCD#
+		   and LEVELNO = '2'
+	</update>
+	
+	<insert id="PLN0300107I" parameterClass="com.kia.pln.model.GPLN01MT">
+		merge into GCHG01MT t1
+		using dual
+		on (
+			   t1.eventYM = #eventYM#
+		   and t1.venueCD = #venueCD#
+		)
+		when not matched then
+			insert (
+				     EVENTYM
+					,VENUECD
+					,PBCHK
+					,EMPID
+					,COMMT
+					,CHGCNT
+					,REGID
+					,REGDATE
+			)values (
+				  #eventYM#
+				, #venueCD#
+				, 'P'
+				, #userID#
+				, #commt#
+				, 1
+				, #userID#
+				, sysdate
+			)
+		when matched then
+			update
+			set
+				  CHGCNT  = CHGCNT + 1
+				, COMMT   = #commt#
+				, chgID   = #userID#
+				, chgDate = sysdate
+	</insert>
+	
+</sqlMap>

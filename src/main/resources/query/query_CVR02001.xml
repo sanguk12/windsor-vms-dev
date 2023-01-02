@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="CVR02001">
+   
+	<!--보상률 조회-->
+	<select id="CVR0200101S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select getLangDesc(#companyID#,#languageCD#,'F_CODE','RAGESPHERECD',RAGESPHERECD,null) as "rageSphereNM",
+			   getLangDesc(#companyID#,#languageCD#,'F_CODE','OFFICECD',OFFICECD,null) as "officeNM",
+			   getLangDesc(#companyID#,#languageCD#,'F_CODE','KINDTPCD',KINDTPCD,null) as "kindTpNM",		       
+			   ROUND(NGGSVRN,2) as "NGGSVN",
+			   ROUND(NGGSVRC,2) as "NGGSVC",
+			   COMMT   as "BJ",
+			   getLangDesc(#companyID#,#languageCD#,'F_CODE','APPRSTATECD',APPRSTATECD,null) as "apprStateNM",
+			   RAGESPHERECD  as "rageSphereCD" ,
+			   OFFICECD      as "officeCD",
+			   APPRSTATECD   as "apprStateCD",
+			   KINDTPCD AS "kindTpCD"
+		  from GCVR02MT 
+		 where eventYM = #eventYM#
+		  AND APPRSTATECD IN ('10', '20', '40','50')
+		 <isPropertyAvailable property="rageSphereCD">
+			<isNotEmpty prepend="and" property="rageSphereCD">
+				rageSphereCD = #rageSphereCD#
+			</isNotEmpty>
+		 </isPropertyAvailable>
+		 <isPropertyAvailable property="officeCD">
+			<isNotEmpty prepend="and" property="officeCD">
+				officeCD = #officeCD#
+			</isNotEmpty>
+		 </isPropertyAvailable>
+		 <isPropertyAvailable property="rageSphereCD_S">
+			<isNotEmpty prepend="and" property="rageSphereCD_S">
+				rageSphereCD = #rageSphereCD_S#
+			</isNotEmpty>
+		 </isPropertyAvailable>
+		 <isPropertyAvailable property="officeCD_S">
+			<isNotEmpty prepend="and" property="officeCD_S">
+				officeCD = #officeCD_S#
+			</isNotEmpty>
+		 </isPropertyAvailable>
+		 <isPropertyAvailable property="apprStateCD_S">
+			<isNotEmpty prepend="and" property="apprStateCD_S">
+				apprStateCD = #apprStateCD_S#
+			</isNotEmpty>
+		</isPropertyAvailable>
+	</select>
+	
+	<select id="CVR0200102S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select getLangDesc(#companyID#,#languageCD#,'F_CODE','RAGESPHERECD',RAGESPHERECD,null) as "rageSphereNM",
+			   getLangDesc(#companyID#,#languageCD#,'F_CODE','OFFICECD',OFFICECD,null) as "officeNM",
+			   getLangDesc(#companyID#,#languageCD#,'F_CODE','KINDTPCD',KINDTPCD,null) as "kindTpNM",		       
+			   ROUND(NGGSVRN,2) as "NGGSVN",
+			   ROUND(NGGSVRC,2) as "NGGSVC",
+			   COMMT   as "BJ",
+			   getLangDesc(#companyID#,#languageCD#,'F_CODE','APPRSTATECD',APPRSTATECD,null) as "apprStateNM",
+			   RAGESPHERECD  as "rageSphereCD" ,
+			   OFFICECD      as "officeCD",
+			   APPRSTATECD   as "apprStateCD",
+			   KINDTPCD AS "kindTpCD"
+		  from GCVR02MT 
+		 where eventYM = #eventYM#
+		  AND APPRSTATECD IN ('10', '20', '40','50')
+		 <isPropertyAvailable property="rageSphereCD">
+			<isNotEmpty prepend="and" property="rageSphereCD">
+				rageSphereCD = #rageSphereCD#
+			</isNotEmpty>
+		 </isPropertyAvailable>
+		 <isPropertyAvailable property="officeCD">
+			<isNotEmpty prepend="and" property="officeCD">
+				officeCD = #officeCD#
+			</isNotEmpty>
+		 </isPropertyAvailable>
+		 <isPropertyAvailable property="rageSphereCD_S">
+			<isNotEmpty prepend="and" property="rageSphereCD_S">
+				rageSphereCD = #rageSphereCD_S#
+			</isNotEmpty>
+		 </isPropertyAvailable>
+		 <isPropertyAvailable property="officeCD_S">
+			<isNotEmpty prepend="and" property="officeCD_S">
+				officeCD = #officeCD_S#
+			</isNotEmpty>
+		 </isPropertyAvailable>
+		 <isPropertyAvailable property="apprStateCD_S">
+			<isNotEmpty prepend="and" property="apprStateCD_S">
+				apprStateCD = #apprStateCD_S#
+			</isNotEmpty>
+		</isPropertyAvailable>
+	</select>
+	
+	<!-- 승인요청 -->
+	<update id="CVR0200101U" parameterClass="com.kia.cvr.model.GCVR02MT">
+		UPDATE GCVR02MT
+			SET NGGSVRC = #nggsvRc#
+				,COMMT = #commt#
+				,APPRSTATECD = '20'
+				,CHGID = #chgID#
+				,CHGDATE = SYSDATE
+		WHERE EVENTYM = #eventYm#
+		 AND RAGESPHERECD = #rageSphereCD#
+		 AND OFFICECD = #officeCD#
+		 AND KINDTPCD = #kindTpCD#
+	</update>
+	
+	<!-- 승인요청 취소 -->
+	<update id="CVR0200102U" parameterClass="com.kia.cvr.model.GCVR02MT">
+		UPDATE GCVR02MT
+			SET APPRSTATECD = '10'
+				,CHGID = #chgID#
+				,CHGDATE = SYSDATE
+				,NGGSVRC = ''
+		WHERE EVENTYM = #eventYm#
+		 AND RAGESPHERECD = #rageSphereCD#
+		 AND OFFICECD = #officeCD#
+		 AND KINDTPCD = #kindTpCD#
+	</update>
+	
+	<!-- 승인 -->
+	<update id="CVR0200103U" parameterClass="com.kia.cvr.model.GCVR02MT">
+		UPDATE GCVR02MT
+			SET APPRSTATECD = '50'
+				,CHGID = #chgID#
+				,CHGDATE = SYSDATE
+				,NGGSVRN = NGGSVRC
+				,NGGSVRC = ''
+		WHERE EVENTYM = #eventYm#
+		 AND RAGESPHERECD = #rageSphereCD#
+		 AND OFFICECD = #officeCD#
+		 AND KINDTPCD = #kindTpCD#
+	</update>
+	
+	<!-- 반려 -->
+	<update id="CVR0200104U" parameterClass="com.kia.cvr.model.GCVR02MT">
+		UPDATE GCVR02MT
+			SET APPRSTATECD = '40'
+				,CHGID = #chgID#
+				,CHGDATE = SYSDATE
+		WHERE EVENTYM = #eventYm#
+		 AND RAGESPHERECD = #rageSphereCD#
+		 AND OFFICECD = #officeCD#
+		 AND KINDTPCD = #kindTpCD#
+	</update>
+	
+</sqlMap>   
+

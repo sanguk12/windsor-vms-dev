@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="PLN03003">
+	
+	<!-- Plan승인내역 리스트 조회 -->
+	<select id="PLN0300301S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+	select
+			  (
+				case when incntTpCD is null then '합계'
+				else getLangDesc(#companyID#,#languageCD#,'F_CODE','INCNTTPCD',incntTpCD,null) 
+			    end
+			   ) as "incntTpCDName"
+			, (
+					case when incntTpCD is null then ''
+					else getLangDesc(#companyID#,#languageCD#,'F_CODE','RAGESPHERECD',rageSphereCD,null) end
+		   	  )  as  "rageSphereCDName"
+			, (
+					case when incntTpCD is null then ''
+					else getLangDesc(#companyID#,#languageCD#,'F_CODE','OFFICECD',officeCD,null) end
+		   	   )  as  "officeCDName"
+			<isPropertyAvailable property="grpID">
+				<isNotEmpty property="grpID">
+			, (case when (select dkmdtpcd from GEMP01MT where empID=t.empID) != 'DK' then '' else (select empNm from GEMP01MT where empID=t.empID) end) as "empNm"
+				</isNotEmpty>
+				<isEmpty property="grpID">
+			, (select empNm from GEMP01MT where empID=t.empID) as "empNm"
+				</isEmpty>
+			</isPropertyAvailable>
+			, venueCount as "venueCount"
+			, tpayAmt as "tpayAmt"
+			, planTQty as "planTQty"
+		    , gp as "gp"
+		from (
+			select
+				incntTpCD
+				, max(rageSphereCD) as rageSphereCD
+				, max(officeCD) as officeCD
+				, empID
+				, count(venueCD) as venueCount
+				, sum(tpayAmt) as tpayAmt
+				, sum(planTQty) as planTQty
+				, grouping(incntTpCD)+grouping(rageSphereCD)+grouping(officeCD)+grouping(empID) as gp
+			from (
+				select
+					incntTpCD
+					, rageSphereCD
+					, officeCD
+					, empID
+					, venueCD
+					, tpayAmt
+					, planTQty					
+				from (
+					select
+						'VEN' as incntTpCD
+						, (select rageSphereCD from GEMP01MT where empID=a.empID) as rageSphereCD
+						, (select officeCD from GEMP01MT where empID=a.empID) as officeCD
+						, a.empID
+						, a.venueCD
+						, a.tpayAmt
+						, a.planTQty
+					from (
+					       select a1.eventYM,a2.empID , a1.venueCD  , a2.apprStateCD,sum(a1.payAmt) tpayAmt  ,  sum(a1.planQty) planTQty
+	                         from GPLN01dT a1 
+	                        inner join GPLN01mT a2         
+	                               on a1.eventYM = a2.eventYM
+	                              and a1.venueCD = a2.venueCD 
+	                        inner join GPRD01MT a3
+                                    on a1.PRDCD = a3.PRDCD
+	                        where a1.eventYM =  #eventYM# 
+	                        <isNotEqual property="empID" compareValue="KIMJUNHAK"> 
+							  and a2.empID in (
+								    SELECT #empID# AS EMPID FROM DUAL 
+									 UNION 
+									SELECT EMPID FROM GAPP01DT        
+									 WHERE APPRTPID =  '000000'
+									   and PAPPRGRPID IN (
+											SELECT APPRGRPID 
+											  FROM GAPP01DT B    
+											 WHERE B.APPRTPID = '000000' 
+											   AND B.EMPID    = #empID#
+									       )
+									 UNION 
+									SELECT EMPID FROM GAPP01DT    
+									 WHERE APPRTPID =  '000000'
+									   and PAPPRGRPID IN (
+									SELECT APPRGRPID 
+									  FROM GAPP01DT B    
+									 WHERE B.APPRTPID =  '000000' 
+									   AND B.EMPID IN  (
+											        SELECT EMPID FROM GAPP01DT
+											         WHERE PAPPRGRPID IN (
+														        SELECT APPRGRPID 
+														          FROM GAPP01DT B    
+														         WHERE B.APPRTPID = '000000' 
+														           AND B.EMPID    = #empID#
+											               )
+									              )    
+									     )
+									 UNION 
+									SELECT EMPID FROM GAPP01DT  
+									 WHERE APPRTPID =  '000000'
+									   and PAPPRGRPID IN (
+									    SELECT APPRGRPID FROM GAPP01DT
+										 WHERE APPRTPID =  '000000' 
+									     and PAPPRGRPID IN (
+										SELECT APPRGRPID 
+										  FROM GAPP01DT B    
+										 WHERE B.APPRTPID =  '000000' 
+										   AND B.EMPID IN  (
+												        SELECT EMPID FROM GAPP01DT
+												         WHERE PAPPRGRPID IN (
+															        SELECT APPRGRPID 
+															          FROM GAPP01DT B    
+															         WHERE B.APPRTPID = '000000' 
+															           AND B.EMPID    = #empID#
+												               )
+										              )    
+										     )
+									     )
+								    ) 
+							  </isNotEqual>	
+	                        and   a2.apprStateCD not in ( '10')
+	                        <isPropertyAvailable property="activityCD">
+							    <isNotEmpty prepend="and" property="activityCD">
+								    a2.activityCD = #activityCD#
+							    </isNotEmpty>
+						    </isPropertyAvailable>
+						    <isPropertyAvailable property="kindTpCD5">
+								<isNotEmpty prepend="and" property="kindTpCD5">
+									a3.kindTpCD5 = #kindTpCD5#
+								</isNotEmpty>
+							</isPropertyAvailable>
+	                        group by a2.empID,a1.venueCD, a1.eventYM ,a2.apprStateCD
+					     ) a
+					inner join GVEN01MT d
+					   on a.venueCD = d.venueCD	
+				)
+				where 1=1
+					<isPropertyAvailable property="rageSphereCD">
+						<isNotEmpty prepend="and" property="rageSphereCD">
+							rageSphereCD = #rageSphereCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+					<isPropertyAvailable property="officeCD">
+						<isNotEmpty prepend="and" property="officeCD">
+							officeCD = #officeCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+					
+				union all
+				
+				select
+					max(incntTpCD) as incntTpCD
+					, max(rageSphereCD) as rageSphereCD
+					, max(officeCD) as officeCD
+					, empID
+					, venueCD
+					, sum(payAmt) as payAmt
+					, sum(planQty) as planQty				
+				from (
+					select
+						incntTpCD
+						, rageSphereCD
+						, officeCD
+						, empID
+						, venueCD
+						, payAmt
+						, planQty						
+					from (
+						select
+							  a.eventYM
+							, 'PRD' as incntTpCD
+							, (select rageSphereCD from GEMP01MT where empID=a.empID) as rageSphereCD
+							, (select officeCD from GEMP01MT where empID=a.empID) as officeCD
+							, a.empID
+							, a.venueCD
+							, e.payAmt
+							, e.planQty
+						from GPLN02MT a
+						inner join GVEN01MT d
+						   on a.venueCD = d.venueCD
+						inner join GPLN02DT e
+						   on a.eventYM = e.eventYM
+						  and a.venueCD = e.venueCD
+						inner join GPRD01MT g
+                           on e.PRDCD = g.PRDCD
+						where a.eventYM = #eventYM#
+							  <isNotEqual property="empID" compareValue="KIMJUNHAK"> 
+							      and a.empID in (
+								    SELECT #empID# AS EMPID FROM DUAL 
+									 UNION 
+									SELECT EMPID FROM GAPP01DT        
+									 WHERE APPRTPID =  '000000'
+									   and PAPPRGRPID IN (
+											SELECT APPRGRPID 
+											  FROM GAPP01DT B    
+											 WHERE B.APPRTPID = '000000' 
+											   AND B.EMPID    = #empID#
+									       )
+									 UNION 
+									SELECT EMPID FROM GAPP01DT    
+									 WHERE APPRTPID =  '000000'
+									   and PAPPRGRPID IN (
+									SELECT APPRGRPID 
+									  FROM GAPP01DT B    
+									 WHERE B.APPRTPID =  '000000' 
+									   AND B.EMPID IN  (
+											        SELECT EMPID FROM GAPP01DT
+											         WHERE PAPPRGRPID IN (
+														        SELECT APPRGRPID 
+														          FROM GAPP01DT B    
+														         WHERE B.APPRTPID = '000000' 
+														           AND B.EMPID    = #empID#
+											               )
+									              )    
+									     )
+									 UNION 
+									SELECT EMPID FROM GAPP01DT  
+									 WHERE APPRTPID =  '000000'
+									   and PAPPRGRPID IN (
+									    SELECT APPRGRPID FROM GAPP01DT
+										 WHERE APPRTPID =  '000000' 
+									     and PAPPRGRPID IN (
+										SELECT APPRGRPID 
+										  FROM GAPP01DT B    
+										 WHERE B.APPRTPID =  '000000' 
+										   AND B.EMPID IN  (
+												        SELECT EMPID FROM GAPP01DT
+												         WHERE PAPPRGRPID IN (
+															        SELECT APPRGRPID 
+															          FROM GAPP01DT B    
+															         WHERE B.APPRTPID = '000000' 
+															           AND B.EMPID    = #empID#
+												               )
+										              )    
+										     )
+									     )
+								    
+								) 
+						    </isNotEqual>
+						  and e.apprStateCD not in ('10') 
+						    <isPropertyAvailable property="kindTpCD5">
+								<isNotEmpty prepend="and" property="kindTpCD5">
+									g.kindTpCD5 = #kindTpCD5#
+								</isNotEmpty>
+							</isPropertyAvailable>
+							<isPropertyAvailable property="activityCD">
+								<isNotEmpty prepend="and" property="activityCD">
+									activityCD = #activityCD#
+								</isNotEmpty>
+							</isPropertyAvailable>
+					)
+					where 1=1
+						<isPropertyAvailable property="rageSphereCD">
+							<isNotEmpty prepend="and" property="rageSphereCD">
+								rageSphereCD = #rageSphereCD#
+							</isNotEmpty>
+						</isPropertyAvailable>
+						<isPropertyAvailable property="officeCD">
+							<isNotEmpty prepend="and" property="officeCD">
+								officeCD = #officeCD#
+							</isNotEmpty>
+						</isPropertyAvailable>
+				)
+				group by venueCD, empID
+			)
+			group by rollup (  incntTpCD , rageSphereCD , officeCD ,empID )
+		) t
+		 where gp in (0,4,5) 
+		
+	</select>
+	
+</sqlMap>

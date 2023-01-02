@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="MDM04001">
+    
+	<!-- 행사등록기간조회 -->
+	<select id="MDM0400101S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+        select
+		    SUBSTR(t1.eventYM,0,4) as "yearCD",
+		    getLangDesc(#companyID#, #languageCD#, 'F_CODE', 'YEARCD', SUBSTR(t1.eventYM,0,4), NULL) as "eventYear",
+		    SUBSTR(t1.eventYM,5,2) as "monthCD",
+		    getLangDesc(#companyID#, #languageCD#, 'F_CODE', 'MONTHCD', SUBSTR(t1.eventYM,5,2), NULL) as "eventMonth",
+		    t1.planResultTpCD as "planResultTpCD",
+		    getLangDesc(#companyID#, #languageCD#, 'F_CODE', 'PLANRESULTTPCD', t1.planResultTpCD, NULL) as "planResultTpCDName",
+		    t1.regDateFrom as "regDateFrom",
+		    t1.regDateTo as "regDateTo",
+		    t1.eventSeq as "eventSeq"
+		from GEVN01MT t1
+		where
+		    t1.eventYM LIKE #yearCD#||'%'
+		<isPropertyAvailable property="planResultTpCD" >
+        	<isNotEmpty prepend="and" property="planResultTpCD">
+        		t1.planResultTpCD = #planResultTpCD#
+        	</isNotEmpty>
+        </isPropertyAvailable>
+        order by
+        	SUBSTR(t1.eventYM,0,4),
+        	SUBSTR(t1.eventYM,5,2),
+        	t1.planResultTpCD,
+        	t1.regDateFrom,
+        	t1.regDateTo
+    </select>
+    
+    <!-- 행사등록기간 countSeq 체크 GEVN01MT -->
+    <select id="MDM0400102S" parameterClass="com.kia.mdm.model.GEVN01MT" resultClass="java.lang.Integer">
+		select
+		    count(eventSeq) as "cntSeq"
+		from
+			GEVN01MT
+		where
+			eventYM = #eventYM#
+		and planResultTpCD = #planResultTpCD#
+	</select>
+	
+    <!-- 행사등록기간 maxSeq 체크 GEVN01MT -->
+    <select id="MDM0400103S" parameterClass="com.kia.mdm.model.GEVN01MT" resultClass="java.lang.Integer">
+		select
+		    NVL(MAX(eventSeq),0) as "maxSeq"
+		from
+			GEVN01MT
+		where
+			eventYM = #eventYM#
+		and planResultTpCD = #planResultTpCD#
+	</select>
+	
+    <!-- 행사등록기간 seq 체크 GEVN01MT -->
+    <select id="MDM0400104S" parameterClass="com.kia.mdm.model.GEVN01MT" resultClass="java.lang.Integer">
+		select
+		    count(eventSeq) as "eventSeq"
+		from
+			GEVN01MT
+		where
+			eventYM = #eventYM#
+		and planResultTpCD = #planResultTpCD#
+		and eventSeq = #eventSeq#
+	</select>
+	
+	<!-- 행사등록기간 등록-->
+	<insert id="MDM0400105I" parameterClass="com.kia.mdm.model.GEVN01MT">    
+        insert into GEVN01MT (
+        	eventYM, 
+        	planResultTpCD, 
+        	eventSeq, 
+        	regDateFrom, 
+        	regDateTo, 
+            regID, 
+            regDate
+        ) values (
+        	#eventYM#, 
+        	#planResultTpCD#, 
+        	#eventSeq#, 
+        	#regDateFrom#, 
+        	#regDateTo#, 
+            #userID#,
+            SYSDATE
+        )
+    </insert>
+    
+    <!-- 행사등록기간 수정 -->
+    <update id="MDM0400106U" parameterClass="com.kia.mdm.model.GEVN01MT">
+        update GEVN01MT
+        set
+        	eventYM = #eventYM#,
+        	planResultTpCD = #planResultTpCD#,
+        	eventSeq = #eventSeq#,
+			regDateFrom = #regDateFrom#,
+			regDateTo = #regDateTo#,
+        	chgID = #userID#, 
+        	chgDate = SYSDATE
+        where
+        	eventYM = #eventYM#
+		and planResultTpCD = #planResultTpCD#
+		and eventSeq = #eventSeq#
+    </update>
+    
+    <!-- 행사등록기간 삭제 -->
+	<insert id="MDM0400107D" parameterClass="com.kia.mdm.model.GEVN01MT">
+		delete from GEVN01MT
+		where
+			eventYM = #eventYM#
+		and planResultTpCD = #planResultTpCD#
+		and eventSeq = #eventSeq#
+	</insert>
+</sqlMap>

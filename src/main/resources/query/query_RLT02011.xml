@@ -1,0 +1,3784 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="RLT02011">	
+	<select id="RLT0201100S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		<![CDATA[
+		 SELECT b2.Summary as "summary" , b2.typename as "summaryN", nvl(a2.qty,0)  as "volume", nvl(a2.amt,0) as "incentive", nvl(a2.gsv,0) as "GSV",
+		        CASE WHEN a2.ng IS NULL AND a2.gsv IS NULL  THEN 0
+		             WHEN a2.ng = 0  AND a2.gsv = 0  THEN 0
+		             WHEN a2.ng = 0  AND a2.gsv <> 0 THEN 0
+		             WHEN a2.ng <> 0 AND a2.gsv = 0  THEN round((a2.ng)*100,2) 
+		             ELSE round((a2.ng/a2.gsv)*100,2) END as "NGGSV"
+		]]>
+		   FROM (
+		    SELECT  'Total' as Summary,  'Target' as typeName,  '1' AS SEQ1, '1' AS SEQ2,
+	                0 as Qty, 0 as Amt, 0 AS GSV, 0 AS NG             
+	          FROM  dual  
+	         UNION  ALL       
+	        SELECT  'Total' as Summary, 'PLAN' as typeName,  '1' AS SEQ1, '2' AS SEQ2, 
+	                0 as Qty, 0 as Amt, 0 AS GSV, 0 AS NG      
+	          FROM  dual  
+	         UNION  ALL  
+	         SELECT  'Total' as Summary, 'RESULT' as typeName,  '1' AS SEQ1, '3' AS SEQ2, 
+	                0 as Qty, 0 as Amt, 0 AS GSV, 0 AS NG      
+	          FROM  dual  
+	         UNION  ALL 
+	        SELECT  'Local Whishky' as Summary,  'Target' as typeName, '2' AS SEQ1, '1' AS SEQ2,
+	                0 as Qty, 0 as Amt, 0 AS GSV, 0 AS NG       
+	          FROM  dual  
+	         UNION  ALL 
+	        SELECT  'Local Whishky' as Summary, 'PLAN' as typeName,  '2' AS SEQ1,  '2' AS SEQ2,
+	                0 as Qty, 0 as Amt, 0 AS GSV, 0 AS NG       
+	          FROM  dual  
+	          UNION  ALL 
+	        SELECT  'Local Whishky' as Summary, 'RESULT' as typeName,  '2' AS SEQ1,  '3' AS SEQ2,
+	                0 as Qty, 0 as Amt, 0 AS GSV, 0 AS NG       
+	          FROM  dual  
+	         UNION  ALL 
+	        SELECT  'International Whishky' as Summary,  'Target' as typeName,  '3' AS SEQ1,  '1' AS SEQ2,      
+	                0 as Qty, 0 as Amt, 0 AS GSV, 0 AS NG       
+	          FROM  dual  
+	         UNION  ALL 
+	        SELECT  'International Whishky' as Summary, 'PLAN' as typeName,  '3' AS SEQ1,   '2' AS SEQ2,
+			        0 as Qty, 0 as Amt, 0 AS GSV, 0 AS NG       
+		      FROM  dual  
+		      UNION  ALL 
+	        SELECT  'International Whishky' as Summary, 'RESULT' as typeName,  '3' AS SEQ1,   '3' AS SEQ2,
+			        0 as Qty, 0 as Amt, 0 AS GSV, 0 AS NG       
+		      FROM  dual  
+          ) B2,
+		   (  
+		       SELECT Summary,typeName,SEQ1,SEQ2, 
+		              round(Qty/3) as Qty , round(Amt/3) as Amt, 
+		              round(GSV/3) AS GSV ,  round(NG/3) AS NG
+		         FROM (
+		            SELECT ' Total' as Summary, 'Target' as typeName,   
+		                   '1' AS SEQ1,'1' AS SEQ2, 
+		                   sum(B1.RESULTQTY) as Qty,
+		                   sum(B1.PAYAMT) as Amt,
+		                   SUM(P1.GSV * B1.RESULTQTY ) AS GSV,
+		                   SUM(B1.PAYAMT ) AS NG
+		              from GRLT01MT a1      
+		             inner join GRLT01DT B1                  
+		                     on a1.eventYM = B1.eventYM                  
+		                    and a1.venueCD = B1.venueCD 
+		             inner join GPRD01MT P1                  
+		                     on B1.prdCD = P1.prdCD                     
+		             where a1.eventYM between  to_char(add_months(to_date(#eventYM#||'01' ,'YYYYMMDD'), -4),'YYYYMM') and  to_char(add_months(to_date(#eventYM#||'01' ,'YYYYMMDD'), -1),'YYYYMM')
+		             	<isPropertyAvailable property="officeCD_S">
+							<isNotEmpty property="officeCD_S">
+		             			AND A1.OFFICECD = #officeCD_S#
+		             		</isNotEmpty>
+		             	</isPropertyAvailable> 
+		             	<isPropertyAvailable property="rageSphereCD_S">
+							<isNotEmpty property="rageSphereCD_S">
+								AND A1.RAGESPHERECD = #rageSphereCD_S#
+							</isNotEmpty>
+						</isPropertyAvailable> 
+		               		and a1.empID in ( 
+		             <isPropertyAvailable property="apprLv">
+						<isNotEmpty property="apprLv">
+							<isEqual property="apprLv" compareValue="20">   
+		               		select empID   
+									   from GAPP01DT
+									  where apprTpID      =  '000000' 
+									    and papprGrpID    in (  select apprgrpid
+									                              from gapp01dt 
+									                             where apprTpID = '000000' 
+									                               and empid    = #empID#) 
+							</isEqual>
+							<isEqual property="apprLv" compareValue="30">
+								SELECT EMPID
+								FROM GAPP01DT
+								WHERE APPRTPID      =  '000000'  
+								AND PAPPRGRPID IN (
+								    SELECT APPRGRPID
+								    FROM GAPP01DT
+								    WHERE APPRTPID      =  '000000'  
+								    AND PAPPRGRPID IN (
+								        SELECT APPRGRPID
+								        FROM GAPP01DT
+								        WHERE EMPID = #empID#
+								        AND APPRTPID      =  '000000' 
+								    )
+								)
+							</isEqual>
+							<isEqual property="apprLv" compareValue="40">
+								SELECT EMPID
+								FROM GAPP01DT
+								WHERE apprTpID      =  '000000'  
+								AND PAPPRGRPID IN (
+								    SELECT APPRGRPID
+								    FROM GAPP01DT
+								    WHERE APPRTPID      =  '000000'  
+								    AND PAPPRGRPID IN (
+								        SELECT APPRGRPID
+								        FROM GAPP01DT
+								        WHERE APPRTPID      =  '000000'  
+								        AND PAPPRGRPID IN (
+								            SELECT APPRGRPID
+								            FROM GAPP01DT
+								            WHERE EMPID = #empID#
+								            AND APPRTPID      =  '000000' 
+								        )
+								    )
+								)
+							</isEqual>
+						</isNotEmpty>
+					</isPropertyAvailable>
+				 	) )
+		         UNION ALL
+		        SELECT 'Total' as Summary, 'PLAN' as typeName,    
+		               '1' AS SEQ1,'2' AS SEQ2, 
+		               sum(B1.PLANQTY) as Qty,
+		               sum(B1.PAYAMT) as Amt,
+		               SUM(P1.GSV * B1.PLANQTY )AS GSV,
+		               SUM(B1.PAYAMT  )AS NG
+		          from GPLN01MT a1      
+		         inner join GPLN01DT B1                  
+		                 on a1.eventYM = B1.eventYM                  
+		                and a1.venueCD = B1.venueCD 
+		         inner join GPRD01MT P1                  
+		                 on B1.prdCD = P1.prdCD          
+		         where a1.eventYM =  #eventYM#
+		         <isPropertyAvailable property="officeCD_S">
+					<isNotEmpty property="officeCD_S">
+						AND A1.OFFICECD = #officeCD_S#
+					</isNotEmpty>
+				</isPropertyAvailable> 
+             	<isPropertyAvailable property="rageSphereCD_S">
+					<isNotEmpty property="rageSphereCD_S">
+						AND A1.RAGESPHERECD = #rageSphereCD_S#
+					</isNotEmpty>
+				</isPropertyAvailable> 				
+		           and a1.empID in ( 
+		          <isPropertyAvailable property="apprLv">
+					<isNotEmpty property="apprLv">
+						<isEqual property="apprLv" compareValue="20">   
+						select empID   
+								   from GAPP01DT
+								  where apprTpID      =  '000000' 
+									and papprGrpID    in (  select apprgrpid
+															  from gapp01dt 
+															 where apprTpID = '000000' 
+															   and empid    = #empID#) 
+						</isEqual>
+						<isEqual property="apprLv" compareValue="30">
+							SELECT EMPID
+							FROM GAPP01DT
+							WHERE APPRTPID      =  '000000'  
+							AND PAPPRGRPID IN (
+								SELECT APPRGRPID
+								FROM GAPP01DT
+								WHERE APPRTPID      =  '000000'  
+								AND PAPPRGRPID IN (
+									SELECT APPRGRPID
+									FROM GAPP01DT
+									WHERE EMPID = #empID#
+									AND APPRTPID      =  '000000' 
+								)
+							)
+						</isEqual>
+						<isEqual property="apprLv" compareValue="40">
+							SELECT EMPID
+							FROM GAPP01DT
+							WHERE PAPPRGRPID IN (
+								SELECT APPRGRPID
+								FROM GAPP01DT
+								WHERE APPRTPID      =  '000000'  
+								AND PAPPRGRPID IN (
+									SELECT APPRGRPID
+									FROM GAPP01DT
+									WHERE APPRTPID      =  '000000'  
+									AND PAPPRGRPID IN (
+										SELECT APPRGRPID
+										FROM GAPP01DT
+										WHERE EMPID = #empID#
+										AND APPRTPID      =  '000000' 
+									)
+								)
+							)
+						</isEqual>
+					</isNotEmpty>
+				</isPropertyAvailable>
+				 )
+		           <isPropertyAvailable property="apprStateCD">
+						<isNotEmpty prepend="and" property="apprStateCD">
+							a1.apprStateCD = #apprStateCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+					<isPropertyAvailable property="rageSphereCD_S">
+						<isNotEmpty property="rageSphereCD_S">
+							AND A1.RAGESPHERECD = #rageSphereCD_S#
+						</isNotEmpty>
+					</isPropertyAvailable> 
+		         GROUP BY a1.eventYM
+		         
+				UNION ALL
+		        SELECT 'Total' as Summary, 'RESULT' as typeName,    
+		               '1' AS SEQ1,'3' AS SEQ2, 
+		               sum(B1.RESULTQTY) as Qty,
+		               sum(B1.PAYAMT) as Amt,
+		               SUM(P1.GSV * B1.RESULTQTY )AS GSV,
+		               SUM(B1.PAYAMT  )AS NG
+		          from GRLT01MT a1      
+		         inner join GRLT01DT B1                  
+		                 on a1.eventYM = B1.eventYM                  
+		                and a1.venueCD = B1.venueCD 
+		         inner join GPRD01MT P1                  
+		                 on B1.prdCD = P1.prdCD          
+		         where a1.eventYM =  #eventYM#
+		         <isPropertyAvailable property="officeCD_S">
+					<isNotEmpty property="officeCD_S">
+						AND A1.OFFICECD = #officeCD_S#
+					</isNotEmpty>
+				</isPropertyAvailable> 
+             	<isPropertyAvailable property="rageSphereCD_S">
+					<isNotEmpty property="rageSphereCD_S">
+						AND A1.RAGESPHERECD = #rageSphereCD_S#
+					</isNotEmpty>
+				</isPropertyAvailable> 				
+		           and a1.empID in ( 
+		          <isPropertyAvailable property="apprLv">
+					<isNotEmpty property="apprLv">
+						<isEqual property="apprLv" compareValue="20">   
+						select empID   
+								   from GAPP01DT
+								  where apprTpID      =  '000000' 
+									and papprGrpID    in (  select apprgrpid
+															  from gapp01dt 
+															 where apprTpID = '000000' 
+															   and empid    = #empID#) 
+						</isEqual>
+						<isEqual property="apprLv" compareValue="30">
+							SELECT EMPID
+							FROM GAPP01DT
+							WHERE APPRTPID      =  '000000'  
+							AND PAPPRGRPID IN (
+								SELECT APPRGRPID
+								FROM GAPP01DT
+								WHERE APPRTPID      =  '000000'  
+								AND PAPPRGRPID IN (
+									SELECT APPRGRPID
+									FROM GAPP01DT
+									WHERE EMPID = #empID#
+									AND APPRTPID      =  '000000' 
+								)
+							)
+						</isEqual>
+						<isEqual property="apprLv" compareValue="40">
+							SELECT EMPID
+							FROM GAPP01DT
+							WHERE APPRTPID      =  '000000'   
+							AND PAPPRGRPID IN (
+								SELECT APPRGRPID
+								FROM GAPP01DT
+								WHERE APPRTPID      =  '000000'  
+								AND PAPPRGRPID IN (
+									SELECT APPRGRPID
+									FROM GAPP01DT
+									WHERE APPRTPID      =  '000000'  
+									AND PAPPRGRPID IN (
+										SELECT APPRGRPID
+										FROM GAPP01DT
+										WHERE EMPID = #empID#
+										AND APPRTPID      =  '000000' 
+									)
+								)
+							)
+						</isEqual>
+					</isNotEmpty>
+				</isPropertyAvailable>
+				 )
+		           <isPropertyAvailable property="apprStateCD">
+						<isNotEmpty prepend="and" property="apprStateCD">
+							a1.apprStateCD = #apprStateCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+					<isPropertyAvailable property="rageSphereCD_S">
+						<isNotEmpty property="rageSphereCD_S">
+							AND A1.RAGESPHERECD = #rageSphereCD_S#
+						</isNotEmpty>
+					</isPropertyAvailable> 
+		         GROUP BY a1.eventYM    
+		          
+		       Union all
+		       SELECT Summary,typeName,SEQ1,SEQ2, 
+		              round(Qty/3) as Qty , round(Amt/3) as Amt, 
+		              round(GSV/3) AS GSV ,  round(NG/3) AS NG
+		         FROM (
+		            SELECT 'Local Whishky' as Summary, 'Target' as typeName,   
+		                   '2' AS SEQ1,'1' AS SEQ2, 
+		                   sum(B1.RESULTQTY) as Qty,
+		                   sum(B1.PAYAMT) as Amt,
+		                   SUM(P1.GSV * B1.RESULTQTY ) AS GSV,
+		                   SUM(B1.PAYAMT ) AS NG
+		              from GRLT01MT a1      
+		             inner join GRLT01DT B1                  
+		                     on a1.eventYM = B1.eventYM                  
+		                    and a1.venueCD = B1.venueCD 
+		             inner join GPRD01MT P1                  
+		                     on B1.prdCD = P1.prdCD
+		                    and P1.KINDTPCD3 = '10' 
+		             where a1.eventYM between  to_char(add_months(to_date(#eventYM#||'01' ,'YYYYMMDD'), -4),'YYYYMM') and  to_char(add_months(to_date(#eventYM#||'01' ,'YYYYMMDD'), -1),'YYYYMM')
+		             <isPropertyAvailable property="officeCD_S">
+						<isNotEmpty property="officeCD_S">
+							AND A1.OFFICECD = #officeCD_S#
+						</isNotEmpty>
+					</isPropertyAvailable>             
+	             	<isPropertyAvailable property="rageSphereCD_S">
+						<isNotEmpty property="rageSphereCD_S">
+							AND A1.RAGESPHERECD = #rageSphereCD_S#
+						</isNotEmpty>
+					</isPropertyAvailable> 					
+		               and a1.empID in ( 
+					<isPropertyAvailable property="apprLv">
+						<isNotEmpty property="apprLv">
+							<isEqual property="apprLv" compareValue="20">   
+							select empID   
+									   from GAPP01DT
+									  where apprTpID      =  '000000' 
+										and papprGrpID    in (  select apprgrpid
+																  from gapp01dt 
+																 where apprTpID = '000000' 
+																   and empid    = #empID#) 
+							</isEqual>
+							<isEqual property="apprLv" compareValue="30">
+								SELECT EMPID
+								FROM GAPP01DT
+								WHERE APPRTPID      =  '000000'  
+								AND PAPPRGRPID IN (
+									SELECT APPRGRPID
+									FROM GAPP01DT
+									WHERE APPRTPID      =  '000000'  
+									AND PAPPRGRPID IN (
+										SELECT APPRGRPID
+										FROM GAPP01DT
+										WHERE EMPID = #empID#
+										AND APPRTPID      =  '000000' 
+									)
+								)
+							</isEqual>
+							<isEqual property="apprLv" compareValue="40">
+								SELECT EMPID
+								FROM GAPP01DT
+								WHERE PAPPRGRPID IN (
+									SELECT APPRGRPID
+									FROM GAPP01DT
+									WHERE APPRTPID      =  '000000'  
+									AND PAPPRGRPID IN (
+										SELECT APPRGRPID
+										FROM GAPP01DT
+										WHERE APPRTPID      =  '000000'  
+										AND PAPPRGRPID IN (
+											SELECT APPRGRPID
+											FROM GAPP01DT
+											WHERE EMPID = #empID#
+											AND APPRTPID      =  '000000' 
+										)
+									)
+								)
+							</isEqual>
+						</isNotEmpty>
+					</isPropertyAvailable>
+					) )
+		        UNION ALL
+		        SELECT 'Local Whishky' as Summary, 'PLAN' as typeName,    
+		               '2' AS SEQ1,'2' AS SEQ2, 
+		               sum(B1.PLANQTY) as Qty,
+		               sum(B1.PAYAMT) as Amt,
+		               SUM(P1.GSV * B1.PLANQTY )AS GSV,
+		               SUM(B1.PAYAMT  )AS NG
+		          from GPLN01MT a1      
+		         inner join GPLN01DT B1                  
+		                 on a1.eventYM = B1.eventYM                  
+		                and a1.venueCD = B1.venueCD 
+		         inner join GPRD01MT P1                  
+		                 on B1.prdCD = P1.prdCD          
+		                and P1.KINDTPCD3 = '10' 
+		         where a1.eventYM = #eventYM#
+		         <isPropertyAvailable property="officeCD_S">
+						<isNotEmpty property="officeCD_S">
+							AND A1.OFFICECD = #officeCD_S#
+						</isNotEmpty>
+					</isPropertyAvailable> 
+	             	<isPropertyAvailable property="rageSphereCD_S">
+						<isNotEmpty property="rageSphereCD_S">
+							AND A1.RAGESPHERECD = #rageSphereCD_S#
+						</isNotEmpty>
+					</isPropertyAvailable> 					
+		           and A1.empID in ( 
+				<isPropertyAvailable property="apprLv">
+					<isNotEmpty property="apprLv">
+						<isEqual property="apprLv" compareValue="20">   
+						select empID   
+								   from GAPP01DT
+								  where apprTpID      =  '000000' 
+									and papprGrpID    in (  select apprgrpid
+															  from gapp01dt 
+															 where apprTpID = '000000' 
+															   and empid    = #empID#) 
+						</isEqual>
+						<isEqual property="apprLv" compareValue="30">
+							SELECT EMPID
+							FROM GAPP01DT
+							WHERE APPRTPID      =  '000000'  
+							AND PAPPRGRPID IN (
+								SELECT APPRGRPID
+								FROM GAPP01DT
+								WHERE APPRTPID      =  '000000'  
+								AND PAPPRGRPID IN (
+									SELECT APPRGRPID
+									FROM GAPP01DT
+									WHERE EMPID = #empID#
+									AND APPRTPID      =  '000000' 
+								)
+							)
+						</isEqual>
+						<isEqual property="apprLv" compareValue="40">
+							SELECT EMPID
+							FROM GAPP01DT
+							WHERE PAPPRGRPID IN (
+								SELECT APPRGRPID
+								FROM GAPP01DT
+								WHERE APPRTPID      =  '000000'  
+								AND PAPPRGRPID IN (
+									SELECT APPRGRPID
+									FROM GAPP01DT
+									WHERE APPRTPID      =  '000000'  
+									AND PAPPRGRPID IN (
+										SELECT APPRGRPID
+										FROM GAPP01DT
+										WHERE EMPID = #empID#
+										AND APPRTPID      =  '000000' 
+									)
+								)
+							)
+						</isEqual>
+					</isNotEmpty>
+				</isPropertyAvailable>		
+				 ) 
+		           <isPropertyAvailable property="apprStateCD">
+						<isNotEmpty prepend="and" property="apprStateCD">
+							a1.apprStateCD = #apprStateCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+		         GROUP BY  a1.eventYM
+		         
+				UNION ALL
+		        SELECT 'Local Whishky' as Summary, 'RESULT' as typeName,    
+		               '2' AS SEQ1,'3' AS SEQ2, 
+		               sum(B1.RESULTQTY) as Qty,
+		               sum(B1.PAYAMT) as Amt,
+		               SUM(P1.GSV * B1.RESULTQTY )AS GSV,
+		               SUM(B1.PAYAMT  )AS NG
+		          from GRLT01MT a1      
+		         inner join GRLT01DT B1                  
+		                 on a1.eventYM = B1.eventYM                  
+		                and a1.venueCD = B1.venueCD 
+		         inner join GPRD01MT P1                  
+		                 on B1.prdCD = P1.prdCD          
+		                and P1.KINDTPCD3 = '10' 
+		         where a1.eventYM = #eventYM#
+		         <isPropertyAvailable property="officeCD_S">
+						<isNotEmpty property="officeCD_S">
+							AND A1.OFFICECD = #officeCD_S#
+						</isNotEmpty>
+					</isPropertyAvailable> 
+	             	<isPropertyAvailable property="rageSphereCD_S">
+						<isNotEmpty property="rageSphereCD_S">
+							AND A1.RAGESPHERECD = #rageSphereCD_S#
+						</isNotEmpty>
+					</isPropertyAvailable> 					
+		           and A1.empID in ( 
+				<isPropertyAvailable property="apprLv">
+					<isNotEmpty property="apprLv">
+						<isEqual property="apprLv" compareValue="20">   
+						select empID   
+								   from GAPP01DT
+								  where apprTpID      =  '000000' 
+									and papprGrpID    in (  select apprgrpid
+															  from gapp01dt 
+															 where apprTpID = '000000' 
+															   and empid    = #empID#) 
+						</isEqual>
+						<isEqual property="apprLv" compareValue="30">
+							SELECT EMPID
+							FROM GAPP01DT
+							WHERE APPRTPID      =  '000000'  
+							AND PAPPRGRPID IN (
+								SELECT APPRGRPID
+								FROM GAPP01DT
+								WHERE APPRTPID      =  '000000'  
+								AND PAPPRGRPID IN (
+									SELECT APPRGRPID
+									FROM GAPP01DT
+									WHERE EMPID = #empID#
+									AND APPRTPID      =  '000000' 
+								)
+							)
+						</isEqual>
+						<isEqual property="apprLv" compareValue="40">
+							SELECT EMPID
+							FROM GAPP01DT
+							WHERE PAPPRGRPID IN (
+								SELECT APPRGRPID
+								FROM GAPP01DT
+								WHERE APPRTPID      =  '000000'  
+								AND PAPPRGRPID IN (
+									SELECT APPRGRPID
+									FROM GAPP01DT
+									WHERE APPRTPID      =  '000000'  
+									AND PAPPRGRPID IN (
+										SELECT APPRGRPID
+										FROM GAPP01DT
+										WHERE EMPID = #empID#
+										AND APPRTPID      =  '000000' 
+									)
+								)
+							)
+						</isEqual>
+					</isNotEmpty>
+				</isPropertyAvailable>		
+				 ) 
+		           <isPropertyAvailable property="apprStateCD">
+						<isNotEmpty prepend="and" property="apprStateCD">
+							a1.apprStateCD = #apprStateCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+		         GROUP BY  a1.eventYM
+		         
+		         UNION ALL  
+		       SELECT Summary,typeName,SEQ1,SEQ2, 
+		              round(Qty/3) as Qty , round(Amt/3) as Amt, 
+		              round(GSV/3) AS GSV ,  round(NG/3) AS NG
+		         FROM (		           
+		            SELECT 'International Whishky' as Summary, 'Target' as typeName,   
+		                   '3' AS SEQ1,'1' AS SEQ2, 
+		                   sum(B1.RESULTQTY) as Qty,
+		                   sum(B1.PAYAMT) as Amt,
+		                   NVL(SUM(P1.GSV * B1.RESULTQTY ),0) AS GSV,
+		                   SUM(B1.PAYAMT  ) AS NG
+		              from GRLT01MT a1      
+		             inner join GRLT01DT B1                  
+		                     on a1.eventYM = B1.eventYM                  
+		                    and a1.venueCD = B1.venueCD 
+		             inner join GPRD01MT P1                  
+		                     on B1.prdCD = P1.prdCD  
+		                    and P1.KINDTPCD3 = '20' 
+		             where a1.eventYM between  to_char(add_months(to_date(#eventYM#||'01' ,'YYYYMMDD'), -4),'YYYYMM') and  to_char(add_months(to_date(#eventYM#||'01' ,'YYYYMMDD'), -1),'YYYYMM')
+		             <isPropertyAvailable property="officeCD_S">
+						<isNotEmpty property="officeCD_S">
+							AND A1.OFFICECD = #officeCD_S#
+						</isNotEmpty>
+					</isPropertyAvailable>
+	             	<isPropertyAvailable property="rageSphereCD_S">
+						<isNotEmpty property="rageSphereCD_S">
+							AND A1.RAGESPHERECD = #rageSphereCD_S#
+						</isNotEmpty>
+					</isPropertyAvailable> 
+		               and a1.empID in ( 
+		             <isPropertyAvailable property="apprLv">
+						<isNotEmpty property="apprLv">
+							<isEqual property="apprLv" compareValue="20">   
+							select empID   
+									   from GAPP01DT
+									  where apprTpID      =  '000000' 
+										and papprGrpID    in (  select apprgrpid
+																  from gapp01dt 
+																 where apprTpID = '000000' 
+																   and empid    = #empID#) 
+							</isEqual>
+							<isEqual property="apprLv" compareValue="30">
+								SELECT EMPID
+								FROM GAPP01DT
+								WHERE APPRTPID      =  '000000'  
+								AND PAPPRGRPID IN (
+									SELECT APPRGRPID
+									FROM GAPP01DT
+									WHERE APPRTPID      =  '000000'  
+									AND PAPPRGRPID IN (
+										SELECT APPRGRPID
+										FROM GAPP01DT
+										WHERE EMPID = #empID#
+										AND APPRTPID      =  '000000' 
+									)
+								)
+							</isEqual>
+							<isEqual property="apprLv" compareValue="40">
+								SELECT EMPID
+								FROM GAPP01DT
+								WHERE PAPPRGRPID IN (
+									SELECT APPRGRPID
+									FROM GAPP01DT
+									WHERE APPRTPID      =  '000000'  
+									AND PAPPRGRPID IN (
+										SELECT APPRGRPID
+										FROM GAPP01DT
+										WHERE APPRTPID      =  '000000'  
+										AND PAPPRGRPID IN (
+											SELECT APPRGRPID
+											FROM GAPP01DT
+											WHERE EMPID = #empID#
+											AND APPRTPID      =  '000000' 
+										)
+									)
+								)
+							</isEqual>
+						</isNotEmpty>
+					</isPropertyAvailable>
+					 ) )
+		         UNION ALL		        
+		        SELECT 'International Whishky' as Summary, 'PLAN' as typeName,    
+		               '3' AS SEQ1,'2' AS SEQ2, 
+		               sum(B1.PLANQTY) as Qty,
+		               sum(B1.PAYAMT) as Amt,
+		               NVL(SUM(P1.GSV * B1.PLANQTY ),0) AS GSV,
+		               SUM(B1.PAYAMT  )AS NG
+		          from GPLN01MT a1      
+		         inner join GPLN01DT B1                  
+		                 on a1.eventYM = B1.eventYM                  
+		                and a1.venueCD = B1.venueCD 
+		         inner join GPRD01MT P1                  
+		                 on B1.prdCD = P1.prdCD          
+		                 and P1.KINDTPCD3 = '20'
+		         where a1.eventYM = #eventYM#
+	             <isPropertyAvailable property="officeCD_S">
+					<isNotEmpty property="officeCD_S">
+						AND A1.OFFICECD = #officeCD_S#
+					</isNotEmpty>
+				</isPropertyAvailable>  
+             	<isPropertyAvailable property="rageSphereCD_S">
+					<isNotEmpty property="rageSphereCD_S">
+						AND A1.RAGESPHERECD = #rageSphereCD_S#
+					</isNotEmpty>
+				</isPropertyAvailable> 				
+		           and a1.empID in ( 
+				<isPropertyAvailable property="apprLv">
+					<isNotEmpty property="apprLv">
+						<isEqual property="apprLv" compareValue="20">   
+						select empID   
+								   from GAPP01DT
+								  where apprTpID      =  '000000' 
+									and papprGrpID    in (  select apprgrpid
+															  from gapp01dt 
+															 where apprTpID = '000000' 
+															   and empid    = #empID#) 
+						</isEqual>
+						<isEqual property="apprLv" compareValue="30">
+							SELECT EMPID
+							FROM GAPP01DT
+							WHERE APPRTPID      =  '000000'  
+							AND PAPPRGRPID IN (
+								SELECT APPRGRPID
+								FROM GAPP01DT
+								WHERE APPRTPID      =  '000000'  
+								AND PAPPRGRPID IN (
+									SELECT APPRGRPID
+									FROM GAPP01DT
+									WHERE EMPID = #empID#
+									AND APPRTPID      =  '000000' 
+								)
+							)
+						</isEqual>
+						<isEqual property="apprLv" compareValue="40">
+							SELECT EMPID
+							FROM GAPP01DT
+							WHERE PAPPRGRPID IN (
+								SELECT APPRGRPID
+								FROM GAPP01DT
+								WHERE APPRTPID      =  '000000'  
+								AND PAPPRGRPID IN (
+									SELECT APPRGRPID
+									FROM GAPP01DT
+									WHERE APPRTPID      =  '000000'  
+									AND PAPPRGRPID IN (
+										SELECT APPRGRPID
+										FROM GAPP01DT
+										WHERE EMPID = #empID#
+										AND APPRTPID      =  '000000' 
+									)
+								)
+							)
+						</isEqual>
+					</isNotEmpty>
+				</isPropertyAvailable>  	
+				 )	           
+		           <isPropertyAvailable property="apprStateCD">
+						<isNotEmpty prepend="and" property="apprStateCD">
+							a1.apprStateCD = #apprStateCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+		         GROUP BY  a1.eventYM    
+		         
+		         UNION ALL		        
+		        SELECT 'International Whishky' as Summary, 'RESULT' as typeName,    
+		               '3' AS SEQ1,'3' AS SEQ2, 
+		               sum(B1.RESULTQTY) as Qty,
+		               sum(B1.PAYAMT) as Amt,
+		               NVL(SUM(P1.GSV * B1.RESULTQTY ),0) AS GSV,
+		               SUM(B1.PAYAMT  )AS NG
+		          from GRLT01MT a1      
+		         inner join GRLT01DT B1                  
+		                 on a1.eventYM = B1.eventYM                  
+		                and a1.venueCD = B1.venueCD 
+		         inner join GPRD01MT P1                  
+		                 on B1.prdCD = P1.prdCD          
+		                 and P1.KINDTPCD3 = '20'
+		         where a1.eventYM = #eventYM#
+	             <isPropertyAvailable property="officeCD_S">
+					<isNotEmpty property="officeCD_S">
+						AND A1.OFFICECD = #officeCD_S#
+					</isNotEmpty>
+				</isPropertyAvailable>  
+             	<isPropertyAvailable property="rageSphereCD_S">
+					<isNotEmpty property="rageSphereCD_S">
+						AND A1.RAGESPHERECD = #rageSphereCD_S#
+					</isNotEmpty>
+				</isPropertyAvailable> 				
+		           and a1.empID in ( 
+				<isPropertyAvailable property="apprLv">
+					<isNotEmpty property="apprLv">
+						<isEqual property="apprLv" compareValue="20">   
+						select empID   
+								   from GAPP01DT
+								  where apprTpID      =  '000000' 
+									and papprGrpID    in (  select apprgrpid
+															  from gapp01dt 
+															 where apprTpID = '000000' 
+															   and empid    = #empID#) 
+						</isEqual>
+						<isEqual property="apprLv" compareValue="30">
+							SELECT EMPID
+							FROM GAPP01DT
+							WHERE APPRTPID      =  '000000'  
+							AND PAPPRGRPID IN (
+								SELECT APPRGRPID
+								FROM GAPP01DT
+								WHERE APPRTPID      =  '000000'  
+								AND PAPPRGRPID IN (
+									SELECT APPRGRPID
+									FROM GAPP01DT
+									WHERE EMPID = #empID#
+									AND APPRTPID      =  '000000' 
+								)
+							)
+						</isEqual>
+						<isEqual property="apprLv" compareValue="40">
+							SELECT EMPID
+							FROM GAPP01DT
+							WHERE PAPPRGRPID IN (
+								SELECT APPRGRPID
+								FROM GAPP01DT
+								WHERE APPRTPID      =  '000000'  
+								AND PAPPRGRPID IN (
+									SELECT APPRGRPID
+									FROM GAPP01DT
+									WHERE APPRTPID      =  '000000'  
+									AND PAPPRGRPID IN (
+										SELECT APPRGRPID
+										FROM GAPP01DT
+										WHERE EMPID = #empID#
+										AND APPRTPID      =  '000000' 
+									)
+								)
+							)
+						</isEqual>
+					</isNotEmpty>
+				</isPropertyAvailable>  	
+				 )	           
+		           <isPropertyAvailable property="apprStateCD">
+						<isNotEmpty prepend="and" property="apprStateCD">
+							a1.apprStateCD = #apprStateCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+		         GROUP BY  a1.eventYM    		         
+		            
+		    ) A2
+		where b2.SEQ1  = a2.seq1(+)
+          and b2.SEQ2  = a2.seq2(+)
+		ORDER BY b2.SEQ1,b2.SEQ2   	  	
+	</select>	
+	
+	<select id="RLT0201101S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		<![CDATA[
+		 SELECT b2.Summary as "summary" , b2.typename as "summaryN", nvl(a2.qty,0)  as "volume", nvl(a2.amt,0) as "incentive", nvl(a2.gsv,0) as "GSV",
+		        CASE WHEN a2.ng IS NULL AND a2.gsv IS NULL  THEN 0
+		             WHEN a2.ng = 0  AND a2.gsv = 0  THEN 0
+		             WHEN a2.ng = 0  AND a2.gsv <> 0 THEN 0
+		             WHEN a2.ng <> 0 AND a2.gsv = 0  THEN round((a2.ng)*100,2) 
+		             ELSE round((a2.ng/a2.gsv)*100,2) END as "NGGSV" ,
+			    nvl(a2.apprStateCDName,'0') as "apprStateCDName",
+                nvl(a2.apprStateCD,'0') as "apprStateCD"        
+		]]>
+		   FROM (
+		    SELECT E2.empNm as Summary,'Target' as typeName,
+		           '1' AS SEQ1,'1' AS SEQ2, E2.empID,
+		           0 as Qty,  0 as Amt, 0 AS GSV, 0 AS NG ,
+		           '0' AS apprStateCDName, '0' AS apprStateCD    
+		      FROM GEMP01MT E2
+		     WHERE E2.empID in ( select empID   
+									   from GAPP01DT
+									  where apprTpID      =  '000000' 
+									    and papprGrpID    in (  select apprgrpid
+									                              from gapp01dt 
+									                             where apprTpID = '000000' 
+									                               and empid    = #empID#) 
+									)    		
+		     UNION ALL
+		    SELECT 'Total' as Summary,'PLAN' as typeName,
+		           '1' AS SEQ1,'2' AS SEQ2, E2.empID,
+		           0 as Qty,  0 as Amt, 0 AS GSV, 0 AS NG  ,
+		           '0' AS apprStateCDName, '0' AS apprStateCD 
+		      FROM GEMP01MT E2
+		     WHERE E2.empID in ( select empID   
+									   from GAPP01DT
+									  where apprTpID      =  '000000' 
+									    and papprGrpID    in (  select apprgrpid
+									                              from gapp01dt 
+									                             where apprTpID = '000000' 
+									                               and empid    = #empID#) 
+									)    		
+		     UNION ALL
+		    SELECT 'Total' as Summary,'Result' as typeName,
+		           '1' AS SEQ1,'3' AS SEQ2, E2.empID,
+		           0 as Qty,  0 as Amt, 0 AS GSV, 0 AS NG  ,
+		           '0' AS apprStateCDName, '0' AS apprStateCD 
+		      FROM GEMP01MT E2
+		     WHERE E2.empID in ( select empID   
+									   from GAPP01DT
+									  where apprTpID      =  '000000' 
+									    and papprGrpID    in (  select apprgrpid
+									                              from gapp01dt 
+									                             where apprTpID = '000000' 
+									                               and empid    = #empID#) 
+									)    		
+		     UNION ALL
+		    SELECT 'Local Whishky' as Summary,'Target' as typeName,
+		           '2' AS SEQ1,'1' AS SEQ2, E2.empID,
+		           0 as Qty,  0 as Amt, 0 AS GSV, 0 AS NG  ,
+		           '0' AS apprStateCDName, '0' AS apprStateCD 
+		      FROM GEMP01MT E2
+		     WHERE E2.empID in ( select empID   
+									   from GAPP01DT
+									  where apprTpID      =  '000000' 
+									    and papprGrpID    in (  select apprgrpid
+									                              from gapp01dt 
+									                             where apprTpID = '000000' 
+									                               and empid    = #empID#) 
+									)    		
+		     UNION ALL
+		    SELECT 'Local Whishky' as Summary,'PLAN' as typeName,
+		           '2' AS SEQ1,'2' AS SEQ2, E2.empID,
+		           0 as Qty,  0 as Amt, 0 AS GSV, 0 AS NG  ,
+		           '0' AS apprStateCDName, '0' AS apprStateCD 
+		      FROM GEMP01MT E2
+		     WHERE E2.empID in ( select empID   
+									   from GAPP01DT
+									  where apprTpID      =  '000000' 
+									    and papprGrpID    in (  select apprgrpid
+									                              from gapp01dt 
+									                             where apprTpID = '000000' 
+									                               and empid    = #empID#) 
+									)    
+			  UNION ALL
+		    SELECT 'Local Whishky' as Summary,'Result' as typeName,
+		           '2' AS SEQ1,'3' AS SEQ2, E2.empID,
+		           0 as Qty,  0 as Amt, 0 AS GSV, 0 AS NG  ,
+		           '0' AS apprStateCDName, '0' AS apprStateCD 
+		      FROM GEMP01MT E2
+		     WHERE E2.empID in ( select empID   
+									   from GAPP01DT
+									  where apprTpID      =  '000000' 
+									    and papprGrpID    in (  select apprgrpid
+									                              from gapp01dt 
+									                             where apprTpID = '000000' 
+									                               and empid    = #empID#) 
+									)    		  
+		     UNION ALL
+		    SELECT 'International Whishky' as Summary,'Target' as typeName,
+		           '3' AS SEQ1,'1' AS SEQ2, E2.empID,
+		           0 as Qty,  0 as Amt, 0 AS GSV, 0 AS NG  ,
+		           '0' AS apprStateCDName, '0' AS apprStateCD 
+		      FROM GEMP01MT E2
+		     WHERE E2.empID in ( select empID   
+									   from GAPP01DT
+									  where apprTpID      =  '000000' 
+									    and papprGrpID    in (  select apprgrpid
+									                              from gapp01dt 
+									                             where apprTpID = '000000' 
+									                               and empid    = #empID#) 
+									)    		
+		     UNION ALL
+		    SELECT 'International Whishky' as Summary,'PLAN' as typeName,
+		           '3' AS SEQ1,'2' AS SEQ2, E2.empID,
+		           0 as Qty,  0 as Amt, 0 AS GSV, 0 AS NG  ,
+		           '0' AS apprStateCDName, '0' AS apprStateCD 
+		      FROM GEMP01MT E2
+		     WHERE E2.empID in ( select empID   
+									   from GAPP01DT
+									  where apprTpID      =  '000000' 
+									    and papprGrpID    in (  select apprgrpid
+									                              from gapp01dt 
+									                             where apprTpID = '000000' 
+									                               and empid    = #empID#) 
+									)
+		     UNION ALL
+		    SELECT 'International Whishky' as Summary,'Result' as typeName,
+		           '3' AS SEQ1,'3' AS SEQ2, E2.empID,
+		           0 as Qty,  0 as Amt, 0 AS GSV, 0 AS NG  ,
+		           '0' AS apprStateCDName, '0' AS apprStateCD 
+		      FROM GEMP01MT E2
+		     WHERE E2.empID in ( select empID   
+									   from GAPP01DT
+									  where apprTpID      =  '000000' 
+									    and papprGrpID    in (  select apprgrpid
+									                              from gapp01dt 
+									                             where apprTpID = '000000' 
+									                               and empid    = #empID#) 
+									)    		  ) B2,
+		   (  
+		       SELECT empID||Summary,typeName,SEQ1,SEQ2, empID,
+		              round(Qty/3) as Qty , round(Amt/3) as Amt, 
+		              round(GSV/3) AS GSV ,  round(NG/3) AS NG ,
+			          apprStateCDName, apprStateCD 
+		         FROM (
+		            SELECT ' Total' as Summary, 'Target' as typeName,   
+		                   '1' AS SEQ1,'1' AS SEQ2, a1.empID,
+		                   sum(B1.RESULTQTY) as Qty,
+		                   sum(B1.PAYAMT) as Amt,
+		                   SUM(P1.GSV * B1.RESULTQTY ) AS GSV,
+		                   SUM(B1.PAYAMT  ) AS NG ,
+                           '0' as apprStateCDName,
+                           '0' as apprStateCD       
+		              from GRLT01MT a1      
+		             inner join GRLT01DT B1                  
+		                     on a1.eventYM = B1.eventYM                  
+		                    and a1.venueCD = B1.venueCD 
+		             inner join GPRD01MT P1                  
+		                     on B1.prdCD = P1.prdCD                     
+		             where a1.eventYM between  to_char(add_months(to_date(#eventYM#||'01' ,'YYYYMMDD'), -4),'YYYYMM') and  to_char(add_months(to_date(#eventYM#||'01' ,'YYYYMMDD'), -1),'YYYYMM')     
+		               and a1.empID in ( select empID   
+									   from GAPP01DT
+									  where apprTpID      =  '000000' 
+									    and papprGrpID    in (  select apprgrpid
+									                              from gapp01dt 
+									                             where apprTpID = '000000' 
+									                               and empid    = #empID#) 
+									)    		               
+		             GROUP BY A1.empID )  
+		         UNION ALL
+		        SELECT 'Total' as Summary, 'PLAN' as typeName,    
+		               '1' AS SEQ1,'2' AS SEQ2, A1.empID,
+		               sum(B1.PLANQTY) as Qty,
+		               sum(B1.PAYAMT) as Amt,
+		               SUM(P1.GSV * B1.PLANQTY )AS GSV,
+		               SUM(B1.PAYAMT  )AS NG,
+                       getLangDesc('000001','KR','F_CODE','APPRSTATECD',a1.apprStateCD,null) as apprStateCDName,
+			           a1.apprStateCD as apprStateCD
+		          from GPLN01MT a1      
+		         inner join GPLN01DT B1                  
+		                 on a1.eventYM = B1.eventYM                  
+		                and a1.venueCD = B1.venueCD 
+		         inner join GPRD01MT P1                  
+		                 on B1.prdCD = P1.prdCD          
+		         where a1.eventYM =  #eventYM#
+		           and a1.apprStateCD = '50'
+		           and a1.empID   in ( select empID   
+									   from GAPP01DT
+									  where apprTpID      =  '000000' 
+									    and papprGrpID    in (  select apprgrpid
+									                              from gapp01dt 
+									                             where apprTpID = '000000' 
+									                               and empid    = #empID#) 
+									)   						
+		         GROUP BY A1.empID   , a1.apprStateCD     
+		        UNION ALL
+		        SELECT 'Total' as Summary, 'Result' as typeName,    
+		               '1' AS SEQ1,'3' AS SEQ2, A1.empID,
+		               sum(B1.RESULTQTY) as Qty,
+		               sum(B1.PAYAMT) as Amt,
+		               SUM(P1.GSV * B1.RESULTQTY )AS GSV,
+		               SUM(B1.PAYAMT  )AS NG,
+                       getLangDesc('000001','KR','F_CODE','APPRSTATECD',a1.apprStateCD,null) as apprStateCDName,
+			           a1.apprStateCD as apprStateCD
+		          from GRLT01MT a1      
+		         inner join GRLT01DT B1                  
+		                 on a1.eventYM = B1.eventYM                  
+		                and a1.venueCD = B1.venueCD 
+		         inner join GPRD01MT P1                  
+		                 on B1.prdCD = P1.prdCD          
+		         where a1.eventYM =  #eventYM#
+		           and a1.empID   in ( select empID   
+									   from GAPP01DT
+									  where apprTpID      =  '000000' 
+									    and papprGrpID    in (  select apprgrpid
+									                              from gapp01dt 
+									                             where apprTpID = '000000' 
+									                               and empid    = #empID#) 
+									)    		
+		           <isPropertyAvailable property="apprStateCD">
+						<isNotEmpty prepend="and" property="apprStateCD">
+							a1.apprStateCD = #apprStateCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+		         GROUP BY A1.empID   , a1.apprStateCD     
+		       Union all
+		       SELECT Summary,typeName,SEQ1,SEQ2, empID,
+		              round(Qty/3) as Qty , round(Amt/3) as Amt, 
+		              round(GSV/3) AS GSV ,  round(NG/3) AS NG ,
+			          apprStateCDName, apprStateCD 
+		         FROM (
+		            SELECT 'Local Whishky' as Summary, 'Target' as typeName,   
+		                   '2' AS SEQ1,'1' AS SEQ2, a1.empID,
+		                   sum(B1.RESULTQTY) as Qty,
+		                   sum(B1.PAYAMT) as Amt,
+		                   SUM(P1.GSV * B1.RESULTQTY ) AS GSV,
+		                   SUM(B1.PAYAMT ) AS NG,
+                           '0' as apprStateCDName,
+                           '0' as apprStateCD       
+		              from GRLT01MT a1      
+		             inner join GRLT01DT B1                  
+		                     on a1.eventYM = B1.eventYM                  
+		                    and a1.venueCD = B1.venueCD 
+		             inner join GPRD01MT P1                  
+		                     on B1.prdCD = P1.prdCD
+		                    and P1.KINDTPCD3 = '10' 
+		             where a1.eventYM between  to_char(add_months(to_date(#eventYM#||'01' ,'YYYYMMDD'), -4),'YYYYMM') and  to_char(add_months(to_date(#eventYM#||'01' ,'YYYYMMDD'), -1),'YYYYMM')            
+		               and a1.empID in ( select empID   
+									   from GAPP01DT
+									  where apprTpID      =  '000000' 
+									    and papprGrpID    in (  select apprgrpid
+									                              from gapp01dt 
+									                             where apprTpID = '000000' 
+									                               and empid    = #empID#) 
+									)    			               
+		             GROUP BY a1.empID )     
+		        UNION ALL
+		        SELECT 'Local Whishky' as Summary, 'PLAN' as typeName,    
+		               '2' AS SEQ1,'2' AS SEQ2, A1.empID,
+		               sum(B1.PLANQTY) as Qty,
+		               sum(B1.PAYAMT) as Amt,
+		               SUM(P1.GSV * B1.PLANQTY )AS GSV,
+		               SUM(B1.PAYAMT  )AS NG,
+                       getLangDesc('000001','KR','F_CODE','APPRSTATECD',a1.apprStateCD,null) as apprStateCDName,
+			           a1.apprStateCD as apprStateCD
+		          from GPLN01MT a1      
+		         inner join GPLN01DT B1                  
+		                 on a1.eventYM = B1.eventYM                  
+		                and a1.venueCD = B1.venueCD 
+		         inner join GPRD01MT P1                  
+		                 on B1.prdCD = P1.prdCD          
+		                and P1.KINDTPCD3 = '10' 
+		         where a1.eventYM = #eventYM#
+		           and a1.apprStateCD = '50'
+		           and A1.empID in ( select empID   
+									   from GAPP01DT
+									  where apprTpID      =  '000000' 
+									    and papprGrpID    in (  select apprgrpid
+									                              from gapp01dt 
+									                             where apprTpID = '000000' 
+									                               and empid    = #empID#) 
+									)  
+		         GROUP BY A1.empID, a1.apprStateCD
+		        UNION ALL
+		        SELECT 'Local Whishky' as Summary, 'Result' as typeName,    
+		               '2' AS SEQ1,'3' AS SEQ2, A1.empID,
+		               sum(B1.RESULTQTY) as Qty,
+		               sum(B1.PAYAMT) as Amt,
+		               SUM(P1.GSV * B1.RESULTQTY )AS GSV,
+		               SUM(B1.PAYAMT  )AS NG,
+                       getLangDesc('000001','KR','F_CODE','APPRSTATECD',a1.apprStateCD,null) as apprStateCDName,
+			           a1.apprStateCD as apprStateCD
+		          from GRLT01MT a1      
+		         inner join GRLT01DT B1                  
+		                 on a1.eventYM = B1.eventYM                  
+		                and a1.venueCD = B1.venueCD 
+		         inner join GPRD01MT P1                  
+		                 on B1.prdCD = P1.prdCD          
+		                and P1.KINDTPCD3 = '10' 
+		         where a1.eventYM = #eventYM#
+		           and A1.empID in ( select empID   
+									   from GAPP01DT
+									  where apprTpID      =  '000000' 
+									    and papprGrpID    in (  select apprgrpid
+									                              from gapp01dt 
+									                             where apprTpID = '000000' 
+									                               and empid    = #empID#) 
+									)    		
+		           <isPropertyAvailable property="apprStateCD">
+						<isNotEmpty prepend="and" property="apprStateCD">
+							a1.apprStateCD = #apprStateCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+		         GROUP BY A1.empID, a1.apprStateCD
+		         UNION ALL  
+		       SELECT Summary,typeName,SEQ1,SEQ2, empID,
+		              round(Qty/3) as Qty , round(Amt/3) as Amt, 
+		              round(GSV/3) AS GSV ,  round(NG/3) AS NG ,
+			          apprStateCDName, apprStateCD 
+		         FROM (		           
+		            SELECT 'International Whishky' as Summary, 'Target' as typeName,   
+		                   '3' AS SEQ1,'1' AS SEQ2, a1.empID,
+		                   sum(B1.RESULTQTY) as Qty,
+		                   sum(B1.PAYAMT) as Amt,
+		                   NVL(SUM(P1.GSV * B1.RESULTQTY ),0) AS GSV,
+		                   SUM(B1.PAYAMT ) AS NG,
+                           '0' as apprStateCDName,
+                           '0' as apprStateCD       
+		              from GRLT01MT a1      
+		             inner join GRLT01DT B1                  
+		                     on a1.eventYM = B1.eventYM                  
+		                    and a1.venueCD = B1.venueCD 
+		             inner join GPRD01MT P1                  
+		                     on B1.prdCD = P1.prdCD  
+		                    and P1.KINDTPCD3 = '20' 
+		             where a1.eventYM between  to_char(add_months(to_date(#eventYM#||'01' ,'YYYYMMDD'), -4),'YYYYMM') and  to_char(add_months(to_date(#eventYM#||'01' ,'YYYYMMDD'), -1),'YYYYMM')          
+		               and a1.empID in ( select empID   
+									   from GAPP01DT
+									  where apprTpID      =  '000000' 
+									    and papprGrpID    in (  select apprgrpid
+									                              from gapp01dt 
+									                             where apprTpID = '000000' 
+									                               and empid    = #empID#) 
+									)    		
+		             GROUP BY A1.empID   )        
+		         UNION ALL		        
+		        SELECT 'International Whishky' as Summary, 'PLAN' as typeName,    
+		               '3' AS SEQ1,'2' AS SEQ2, A1.empID,
+		               sum(B1.PLANQTY) as Qty,
+		               sum(B1.PAYAMT) as Amt,
+		               NVL(SUM(P1.GSV * B1.PLANQTY ),0) AS GSV,
+		               SUM(B1.PAYAMT  )AS NG,
+                       getLangDesc('000001','KR','F_CODE','APPRSTATECD',a1.apprStateCD,null) as apprStateCDName,
+			           a1.apprStateCD as apprStateCD
+		          from GPLN01MT a1      
+		         inner join GPLN01DT B1                  
+		                 on a1.eventYM = B1.eventYM                  
+		                and a1.venueCD = B1.venueCD 
+		         inner join GPRD01MT P1                  
+		                 on B1.prdCD = P1.prdCD          
+		                 and P1.KINDTPCD3 = '20'
+		         where a1.eventYM = #eventYM#
+		           and a1.apprStateCD = '50'
+		           and a1.empID in ( select empID   
+									   from GAPP01DT
+									  where apprTpID      =  '000000' 
+									    and papprGrpID    in (  select apprgrpid
+									                              from gapp01dt 
+									                             where apprTpID = '000000' 
+									                               and empid    = #empID#) 
+									)    
+		         GROUP BY A1.empID , a1.apprStateCD   
+		        UNION ALL		        
+		        SELECT 'International Whishky' as Summary, 'Result' as typeName,    
+		               '3' AS SEQ1,'3' AS SEQ2, A1.empID,
+		               sum(B1.RESULTQTY) as Qty,
+		               sum(B1.PAYAMT) as Amt,
+		               NVL(SUM(P1.GSV * B1.RESULTQTY ),0) AS GSV,
+		               SUM(B1.PAYAMT  )AS NG,
+                       getLangDesc('000001','KR','F_CODE','APPRSTATECD',a1.apprStateCD,null) as apprStateCDName,
+			           a1.apprStateCD as apprStateCD
+		          from GRLT01MT a1      
+		         inner join GRLT01DT B1                  
+		                 on a1.eventYM = B1.eventYM                  
+		                and a1.venueCD = B1.venueCD 
+		         inner join GPRD01MT P1                  
+		                 on B1.prdCD = P1.prdCD          
+		                 and P1.KINDTPCD3 = '20'
+		         where a1.eventYM = #eventYM#
+		           and a1.empID in ( select empID   
+									   from GAPP01DT
+									  where apprTpID      =  '000000' 
+									    and papprGrpID    in (  select apprgrpid
+									                              from gapp01dt 
+									                             where apprTpID = '000000' 
+									                               and empid    = #empID#) 
+									)    		           
+		           <isPropertyAvailable property="apprStateCD">
+						<isNotEmpty prepend="and" property="apprStateCD">
+							a1.apprStateCD = #apprStateCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+		         GROUP BY A1.empID , a1.apprStateCD       
+		    ) A2
+		where b2.empID = a2.empID(+)		 
+          and b2.SEQ1  = a2.seq1(+)
+          and b2.SEQ2  = a2.seq2(+)
+		ORDER BY b2.empID,b2.SEQ1,b2.SEQ2   	  	
+	</select>	
+	
+	<!-- Result 승인_업소단위 : 지점장 -->
+	<select id="RLT0201102S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		<![CDATA[
+		 SELECT b2.Summary as "summary" , b2.typename as "summaryN", nvl(a2.qty,0)  as "volume", nvl(a2.amt,0) as "incentive", nvl(a2.gsv,0) as "GSV",
+		        CASE WHEN a2.ng IS NULL AND a2.gsv IS NULL  THEN 0
+		             WHEN a2.ng = 0  AND a2.gsv = 0  THEN 0
+		             WHEN a2.ng = 0  AND a2.gsv <> 0 THEN 0
+		             WHEN a2.ng <> 0 AND a2.gsv = 0  THEN round((a2.ng)*100,2) 
+		             ELSE round((a2.ng/a2.gsv)*100,2) END as "NGGSV" ,
+			    nvl(a2.apprStateCDName,'0') as "apprStateCDName",
+                nvl(a2.apprStateCD,'0') as "apprStateCD"        
+                ,b2.empid as "empID"
+		]]>
+		   FROM (
+		    SELECT E2.empNm as Summary,'Target' as typeName,
+		           '1' AS SEQ1,'1' AS SEQ2, E2.empID,
+		           0 as Qty,  0 as Amt, 0 AS GSV, 0 AS NG ,
+		           '0' AS apprStateCDName, '0' AS apprStateCD    
+		      FROM GEMP01MT E2
+		     WHERE E2.empID in ( select empID   
+									   from GAPP01DT
+									  where apprTpID      =  '000000' 
+									    and papprGrpID    in (  select apprgrpid
+									                              from gapp01dt 
+									                             where apprTpID = '000000' 
+									                               and empid    = #empID#) 
+									)    		
+				<isPropertyAvailable property="officeCD_S">
+					<isNotEmpty property="officeCD_S">
+						AND E2.officecd = #officeCD_S#
+					</isNotEmpty>
+				</isPropertyAvailable> 
+				<isPropertyAvailable property="rageSphereCD_S">
+					<isNotEmpty property="rageSphereCD_S">
+						AND E2.RAGESPHERECD = #rageSphereCD_S#
+					</isNotEmpty>
+				</isPropertyAvailable>   		
+		     UNION ALL
+		    SELECT 'Total' as Summary,'PLAN' as typeName,
+		           '1' AS SEQ1,'2' AS SEQ2, E2.empID,
+		           0 as Qty,  0 as Amt, 0 AS GSV, 0 AS NG  ,
+		           '0' AS apprStateCDName, '0' AS apprStateCD 
+		      FROM GEMP01MT E2
+		     WHERE E2.empID in ( select empID   
+									   from GAPP01DT
+									  where apprTpID      =  '000000' 
+									    and papprGrpID    in (  select apprgrpid
+									                              from gapp01dt 
+									                             where apprTpID = '000000' 
+									                               and empid    = #empID#) 
+									) 
+				<isPropertyAvailable property="officeCD_S">
+					<isNotEmpty property="officeCD_S">
+						AND E2.officecd = #officeCD_S#
+					</isNotEmpty>
+				</isPropertyAvailable> 
+				<isPropertyAvailable property="rageSphereCD_S">
+					<isNotEmpty property="rageSphereCD_S">
+						AND E2.RAGESPHERECD = #rageSphereCD_S#
+					</isNotEmpty>
+				</isPropertyAvailable> 
+		     UNION ALL
+		    SELECT 'Total' as Summary,'RESULT' as typeName,
+		           '1' AS SEQ1,'3' AS SEQ2, E2.empID,
+		           0 as Qty,  0 as Amt, 0 AS GSV, 0 AS NG  ,
+		           '0' AS apprStateCDName, '0' AS apprStateCD 
+		      FROM GEMP01MT E2
+		     WHERE E2.empID in ( select empID   
+									   from GAPP01DT
+									  where apprTpID      =  '000000' 
+									    and papprGrpID    in (  select apprgrpid
+									                              from gapp01dt 
+									                             where apprTpID = '000000' 
+									                               and empid    = #empID#) 
+									) 
+				<isPropertyAvailable property="officeCD_S">
+					<isNotEmpty property="officeCD_S">
+						AND E2.officecd = #officeCD_S#
+					</isNotEmpty>
+				</isPropertyAvailable> 
+				<isPropertyAvailable property="rageSphereCD_S">
+					<isNotEmpty property="rageSphereCD_S">
+						AND E2.RAGESPHERECD = #rageSphereCD_S#
+					</isNotEmpty>
+				</isPropertyAvailable>    				
+		     UNION ALL
+		    SELECT 'Local Whishky' as Summary,'Target' as typeName,
+		           '2' AS SEQ1,'1' AS SEQ2, E2.empID,
+		           0 as Qty,  0 as Amt, 0 AS GSV, 0 AS NG  ,
+		           '0' AS apprStateCDName, '0' AS apprStateCD 
+		      FROM GEMP01MT E2
+		     WHERE E2.empID in ( select empID   
+									   from GAPP01DT
+									  where apprTpID      =  '000000' 
+									    and papprGrpID    in (  select apprgrpid
+									                              from gapp01dt 
+									                             where apprTpID = '000000' 
+									                               and empid    = #empID#) 
+									)    		
+				<isPropertyAvailable property="officeCD_S">
+					<isNotEmpty property="officeCD_S">
+						AND E2.officecd = #officeCD_S#
+					</isNotEmpty>
+				</isPropertyAvailable> 
+				<isPropertyAvailable property="rageSphereCD_S">
+					<isNotEmpty property="rageSphereCD_S">
+						AND E2.RAGESPHERECD = #rageSphereCD_S#
+					</isNotEmpty>
+				</isPropertyAvailable> 
+		     UNION ALL
+		    SELECT 'Local Whishky' as Summary,'PLAN' as typeName,
+		           '2' AS SEQ1,'2' AS SEQ2, E2.empID,
+		           0 as Qty,  0 as Amt, 0 AS GSV, 0 AS NG  ,
+		           '0' AS apprStateCDName, '0' AS apprStateCD 
+		      FROM GEMP01MT E2
+		     WHERE E2.empID in ( select empID   
+									   from GAPP01DT
+									  where apprTpID      =  '000000' 
+									    and papprGrpID    in (  select apprgrpid
+									                              from gapp01dt 
+									                             where apprTpID = '000000' 
+									                               and empid    = #empID#) 
+									)    	
+				<isPropertyAvailable property="officeCD_S">
+					<isNotEmpty property="officeCD_S">
+						AND E2.officecd = #officeCD_S#
+					</isNotEmpty>
+				</isPropertyAvailable> 
+				<isPropertyAvailable property="rageSphereCD_S">
+					<isNotEmpty property="rageSphereCD_S">
+						AND E2.RAGESPHERECD = #rageSphereCD_S#
+					</isNotEmpty>
+				</isPropertyAvailable> 
+		     UNION ALL
+		    SELECT 'Local Whishky' as Summary,'RESULT' as typeName,
+		           '2' AS SEQ1,'3' AS SEQ2, E2.empID,
+		           0 as Qty,  0 as Amt, 0 AS GSV, 0 AS NG  ,
+		           '0' AS apprStateCDName, '0' AS apprStateCD 
+		      FROM GEMP01MT E2
+		     WHERE E2.empID in ( select empID   
+									   from GAPP01DT
+									  where apprTpID      =  '000000' 
+									    and papprGrpID    in (  select apprgrpid
+									                              from gapp01dt 
+									                             where apprTpID = '000000' 
+									                               and empid    = #empID#) 
+									)    	
+				<isPropertyAvailable property="officeCD_S">
+					<isNotEmpty property="officeCD_S">
+						AND E2.officecd = #officeCD_S#
+					</isNotEmpty>
+				</isPropertyAvailable> 
+				<isPropertyAvailable property="rageSphereCD_S">
+					<isNotEmpty property="rageSphereCD_S">
+						AND E2.RAGESPHERECD = #rageSphereCD_S#
+					</isNotEmpty>
+				</isPropertyAvailable> 				
+		     UNION ALL
+		    SELECT 'International Whishky' as Summary,'Target' as typeName,
+		           '3' AS SEQ1,'1' AS SEQ2, E2.empID,
+		           0 as Qty,  0 as Amt, 0 AS GSV, 0 AS NG  ,
+		           '0' AS apprStateCDName, '0' AS apprStateCD 
+		      FROM GEMP01MT E2
+		     WHERE E2.empID in ( select empID   
+									   from GAPP01DT
+									  where apprTpID      =  '000000' 
+									    and papprGrpID    in (  select apprgrpid
+									                              from gapp01dt 
+									                             where apprTpID = '000000' 
+									                               and empid    = #empID#) 
+									)    	
+				<isPropertyAvailable property="officeCD_S">
+					<isNotEmpty property="officeCD_S">
+						AND E2.officecd = #officeCD_S#
+					</isNotEmpty>
+				</isPropertyAvailable> 
+				<isPropertyAvailable property="rageSphereCD_S">
+					<isNotEmpty property="rageSphereCD_S">
+						AND E2.RAGESPHERECD = #rageSphereCD_S#
+					</isNotEmpty>
+				</isPropertyAvailable> 	
+		     UNION ALL
+		    SELECT 'International Whishky' as Summary,'PLAN' as typeName,
+		           '3' AS SEQ1,'2' AS SEQ2, E2.empID,
+		           0 as Qty,  0 as Amt, 0 AS GSV, 0 AS NG  ,
+		           '0' AS apprStateCDName, '0' AS apprStateCD 
+		      FROM GEMP01MT E2
+		     WHERE E2.empID in ( select empID   
+									   from GAPP01DT
+									  where apprTpID      =  '000000' 
+									    and papprGrpID    in (  select apprgrpid
+									                              from gapp01dt 
+									                             where apprTpID = '000000' 
+									                               and empid    = #empID#) 
+									)    	
+				<isPropertyAvailable property="officeCD_S">
+					<isNotEmpty property="officeCD_S">
+						AND E2.officecd = #officeCD_S#
+					</isNotEmpty>
+				</isPropertyAvailable> 
+				<isPropertyAvailable property="rageSphereCD_S">
+					<isNotEmpty property="rageSphereCD_S">
+						AND E2.RAGESPHERECD = #rageSphereCD_S#
+					</isNotEmpty>
+				</isPropertyAvailable> 
+		     UNION ALL
+		    SELECT 'International Whishky' as Summary,'RESULT' as typeName,
+		           '3' AS SEQ1,'3' AS SEQ2, E2.empID,
+		           0 as Qty,  0 as Amt, 0 AS GSV, 0 AS NG  ,
+		           '0' AS apprStateCDName, '0' AS apprStateCD 
+		      FROM GEMP01MT E2
+		     WHERE E2.empID in ( select empID   
+									   from GAPP01DT
+									  where apprTpID      =  '000000' 
+									    and papprGrpID    in (  select apprgrpid
+									                              from gapp01dt 
+									                             where apprTpID = '000000' 
+									                               and empid    = #empID#) 
+									)    	
+				<isPropertyAvailable property="officeCD_S">
+					<isNotEmpty property="officeCD_S">
+						AND E2.officecd = #officeCD_S#
+					</isNotEmpty>
+				</isPropertyAvailable> 
+				<isPropertyAvailable property="rageSphereCD_S">
+					<isNotEmpty property="rageSphereCD_S">
+						AND E2.RAGESPHERECD = #rageSphereCD_S#
+					</isNotEmpty>
+				</isPropertyAvailable> 					  
+			) B2,
+		   (  
+		       SELECT empID||Summary,typeName,SEQ1,SEQ2, empID,
+		              round(Qty/3) as Qty , round(Amt/3) as Amt, 
+		              round(GSV/3) AS GSV ,  round(NG/3) AS NG ,
+			          apprStateCDName, apprStateCD 
+		         FROM (
+		            SELECT ' Total' as Summary, 'Target' as typeName,   
+		                   '1' AS SEQ1,'1' AS SEQ2, a1.empID,
+		                   sum(B1.RESULTQTY) as Qty,
+		                   sum(B1.PAYAMT) as Amt,
+		                   SUM(P1.GSV * B1.RESULTQTY ) AS GSV,
+		                   SUM(B1.PAYAMT  ) AS NG ,
+                           '0' as apprStateCDName,
+                           '0' as apprStateCD       
+		              from GRLT01MT a1      
+		             inner join GRLT01DT B1                  
+		                     on a1.eventYM = B1.eventYM                  
+		                    and a1.venueCD = B1.venueCD 
+		             inner join GPRD01MT P1                  
+		                     on B1.prdCD = P1.prdCD                     
+		             where a1.eventYM between  to_char(add_months(to_date(#eventYM#||'01' ,'YYYYMMDD'), -4),'YYYYMM') and  to_char(add_months(to_date(#eventYM#||'01' ,'YYYYMMDD'), -1),'YYYYMM')
+					<isPropertyAvailable property="officeCD_S">
+						<isNotEmpty property="officeCD_S">
+							AND A1.officecd = #officeCD_S#
+						</isNotEmpty>
+					</isPropertyAvailable> 
+					<isPropertyAvailable property="rageSphereCD_S">
+						<isNotEmpty property="rageSphereCD_S">
+							AND A1.RAGESPHERECD = #rageSphereCD_S#
+						</isNotEmpty>
+					</isPropertyAvailable> 		                  
+		               and a1.empID in ( select empID   
+									   from GAPP01DT
+									  where apprTpID      =  '000000' 
+									    and papprGrpID    in (  select apprgrpid
+									                              from gapp01dt 
+									                             where apprTpID = '000000' 
+									                               and empid    = #empID#) 
+									)    		               
+		             GROUP BY A1.empID )  
+		         UNION ALL
+		        SELECT 'Total' as Summary, 'PLAN' as typeName,    
+		               '1' AS SEQ1,'2' AS SEQ2, A1.empID,
+		               sum(B1.PLANQTY) as Qty,
+		               sum(B1.PAYAMT) as Amt,
+		               SUM(P1.GSV * B1.PLANQTY )AS GSV,
+		               SUM(B1.PAYAMT  )AS NG,
+                       <![CDATA[
+						GETLANGDESC('000001','KR','F_CODE','APPRSTATECD',max(T1.APPRSTATECD),NULL) AS APPRSTATECDNAME,
+						MAX(T1.APPRSTATECD) AS APPRSTATECD
+						]]>
+		          from GPLN01MT a1      
+		         inner join GPLN01DT B1                  
+		                 on a1.eventYM = B1.eventYM                  
+		                and a1.venueCD = B1.venueCD 
+		         inner join GPRD01MT P1                  
+		                 on B1.prdCD = P1.prdCD          
+			     LEFT OUTER JOIN ( SELECT EVENTYM, VENUECD, APPRSTATECD
+						       FROM GPLN03MT
+						      WHERE EVENTYM =  #eventYM#
+						        AND LEVELNO = '1'  ) T1
+					     ON A1.EVENTYM = T1.EVENTYM
+					    AND A1.VENUECD = T1.VENUECD		                 
+		         where a1.eventYM =  #eventYM#
+					<isPropertyAvailable property="officeCD_S">
+						<isNotEmpty property="officeCD_S">
+							AND A1.officecd = #officeCD_S#
+						</isNotEmpty>
+					</isPropertyAvailable> 
+					<isPropertyAvailable property="rageSphereCD_S">
+						<isNotEmpty property="rageSphereCD_S">
+							AND A1.RAGESPHERECD = #rageSphereCD_S#
+						</isNotEmpty>
+					</isPropertyAvailable> 		   		         
+		           and a1.empID   in ( select empID   
+									   from GAPP01DT
+									  where apprTpID      =  '000000' 
+									    and papprGrpID    in (  select apprgrpid
+									                              from gapp01dt 
+									                             where apprTpID = '000000' 
+									                               and empid    = #empID#) 
+									) 
+		         GROUP BY A1.empID
+				 
+				UNION ALL
+		        SELECT 'Total' as Summary, 'RESULT' as typeName,    
+		               '1' AS SEQ1,'3' AS SEQ2, A1.empID,
+		               sum(B1.RESULTQTY) as Qty,
+		               sum(B1.PAYAMT) as Amt,
+		               SUM(P1.GSV * B1.RESULTQTY )AS GSV,
+		               SUM(B1.PAYAMT  )AS NG,
+                       <![CDATA[
+						GETLANGDESC('000001','KR','F_CODE','APPRSTATECD',max(T1.APPRSTATECD),NULL) AS APPRSTATECDNAME,
+						MAX(T1.APPRSTATECD) AS APPRSTATECD
+						]]>
+		          from GRLT01MT a1      
+		         inner join GRLT01DT B1                  
+		                 on a1.eventYM = B1.eventYM                  
+		                and a1.venueCD = B1.venueCD 
+		         inner join GPRD01MT P1                  
+		                 on B1.prdCD = P1.prdCD          
+				 LEFT OUTER JOIN ( SELECT EVENTYM, VENUECD, APPRSTATECD
+						             FROM GRLT07MT
+						            WHERE EVENTYM =  #eventYM#
+						              AND LEVELNO = '1' ) T1
+					     ON A1.EVENTYM = T1.EVENTYM
+					    AND A1.VENUECD = T1.VENUECD		                 
+		         where a1.eventYM =  #eventYM#
+					<isPropertyAvailable property="officeCD_S">
+						<isNotEmpty property="officeCD_S">
+							AND A1.officecd = #officeCD_S#
+						</isNotEmpty>
+					</isPropertyAvailable> 
+					<isPropertyAvailable property="rageSphereCD_S">
+						<isNotEmpty property="rageSphereCD_S">
+							AND A1.RAGESPHERECD = #rageSphereCD_S#
+						</isNotEmpty>
+					</isPropertyAvailable> 		   		         
+		           and a1.empID   in ( select empID   
+									   from GAPP01DT
+									  where apprTpID      =  '000000' 
+									    and papprGrpID    in (  select apprgrpid
+									                              from gapp01dt 
+									                             where apprTpID = '000000' 
+									                               and empid    = #empID#) 
+									)  
+		         GROUP BY A1.empID
+				 
+		       Union all
+		       SELECT Summary,typeName,SEQ1,SEQ2, empID,
+		              round(Qty/3) as Qty , round(Amt/3) as Amt, 
+		              round(GSV/3) AS GSV ,  round(NG/3) AS NG ,
+			          apprStateCDName, apprStateCD 
+		         FROM (
+		            SELECT 'Local Whishky' as Summary, 'Target' as typeName,   
+		                   '2' AS SEQ1,'1' AS SEQ2, a1.empID,
+		                   sum(B1.RESULTQTY) as Qty,
+		                   sum(B1.PAYAMT) as Amt,
+		                   SUM(P1.GSV * B1.RESULTQTY ) AS GSV,
+		                   SUM(B1.PAYAMT  ) AS NG,
+                           '0' as apprStateCDName,
+                           '0' as apprStateCD       
+		              from GRLT01MT a1      
+		             inner join GRLT01DT B1                  
+		                     on a1.eventYM = B1.eventYM                  
+		                    and a1.venueCD = B1.venueCD 
+		             inner join GPRD01MT P1                  
+		                     on B1.prdCD = P1.prdCD
+		                    and P1.KINDTPCD3 = '10' 
+		             where a1.eventYM between  to_char(add_months(to_date(#eventYM#||'01' ,'YYYYMMDD'), -4),'YYYYMM') and  to_char(add_months(to_date(#eventYM#||'01' ,'YYYYMMDD'), -1),'YYYYMM')
+					<isPropertyAvailable property="officeCD_S">
+						<isNotEmpty property="officeCD_S">
+							AND A1.officecd = #officeCD_S#
+						</isNotEmpty>
+					</isPropertyAvailable> 
+					<isPropertyAvailable property="rageSphereCD_S">
+						<isNotEmpty property="rageSphereCD_S">
+							AND A1.RAGESPHERECD = #rageSphereCD_S#
+						</isNotEmpty>
+					</isPropertyAvailable> 		   		                         
+		               and a1.empID in ( select empID   
+									   from GAPP01DT
+									  where apprTpID      =  '000000' 
+									    and papprGrpID    in (  select apprgrpid
+									                              from gapp01dt 
+									                             where apprTpID = '000000' 
+									                               and empid    = #empID#) 
+									)    			               
+		             GROUP BY a1.empID )     
+		        UNION ALL
+		        SELECT 'Local Whishky' as Summary, 'PLAN' as typeName,    
+		               '2' AS SEQ1,'2' AS SEQ2, A1.empID,
+		               sum(B1.PLANQTY) as Qty,
+		               sum(B1.PAYAMT) as Amt,
+		               SUM(P1.GSV * B1.PLANQTY )AS GSV,
+		               SUM(B1.PAYAMT )AS NG,
+						<![CDATA[
+						GETLANGDESC('000001','KR','F_CODE','APPRSTATECD',max(T1.APPRSTATECD),NULL) AS APPRSTATECDNAME,
+						MAX(T1.APPRSTATECD) AS APPRSTATECD
+						]]>
+		          from GPLN01MT a1      
+		         inner join GPLN01DT B1                  
+		                 on a1.eventYM = B1.eventYM                  
+		                and a1.venueCD = B1.venueCD 
+		         inner join GPRD01MT P1                  
+		                 on B1.prdCD = P1.prdCD          
+		                and P1.KINDTPCD3 = '10' 
+				 LEFT OUTER JOIN ( SELECT EVENTYM, VENUECD,	APPRSTATECD
+				                     FROM GPLN03MT
+						            WHERE EVENTYM =  #eventYM#
+						              AND LEVELNO = '1' ) T1
+					     ON A1.EVENTYM = T1.EVENTYM
+					    AND A1.VENUECD = T1.VENUECD		                
+		         where a1.eventYM = #eventYM#
+					<isPropertyAvailable property="officeCD_S">
+						<isNotEmpty property="officeCD_S">
+							AND A1.officecd = #officeCD_S#
+						</isNotEmpty>
+					</isPropertyAvailable> 
+					<isPropertyAvailable property="rageSphereCD_S">
+						<isNotEmpty property="rageSphereCD_S">
+							AND A1.RAGESPHERECD = #rageSphereCD_S#
+						</isNotEmpty>
+					</isPropertyAvailable> 		   		         
+		           and A1.empID in ( select empID   
+									   from GAPP01DT
+									  where apprTpID      =  '000000' 
+									    and papprGrpID    in (  select apprgrpid
+									                              from gapp01dt 
+									                             where apprTpID = '000000' 
+									                               and empid    = #empID#) 
+									)    
+		         GROUP BY A1.empID
+				 
+				UNION ALL
+		        SELECT 'Local Whishky' as Summary, 'RESULT' as typeName,    
+		               '2' AS SEQ1,'3' AS SEQ2, A1.empID,
+		               sum(B1.RESULTQTY) as Qty,
+		               sum(B1.PAYAMT) as Amt,
+		               SUM(P1.GSV * B1.RESULTQTY )AS GSV,
+		               SUM(B1.PAYAMT )AS NG,
+						<![CDATA[
+						GETLANGDESC('000001','KR','F_CODE','APPRSTATECD',max(T1.APPRSTATECD),NULL) AS APPRSTATECDNAME,
+						MAX(T1.APPRSTATECD) AS APPRSTATECD
+						]]>
+		          from GRLT01MT a1      
+		         inner join GRLT01DT B1                  
+		                 on a1.eventYM = B1.eventYM                  
+		                and a1.venueCD = B1.venueCD 
+		         inner join GPRD01MT P1                  
+		                 on B1.prdCD = P1.prdCD          
+		                and P1.KINDTPCD3 = '10' 
+				LEFT OUTER JOIN (
+						SELECT EVENTYM, VENUECD, 
+							APPRSTATECD
+						FROM GRLT07MT
+						WHERE EVENTYM =  #eventYM#
+						AND LEVELNO = '1'
+					) T1
+					ON A1.EVENTYM = T1.EVENTYM
+					AND A1.VENUECD = T1.VENUECD		                
+		         where a1.eventYM = #eventYM#
+					<isPropertyAvailable property="officeCD_S">
+						<isNotEmpty property="officeCD_S">
+							AND A1.officecd = #officeCD_S#
+						</isNotEmpty>
+					</isPropertyAvailable> 
+					<isPropertyAvailable property="rageSphereCD_S">
+						<isNotEmpty property="rageSphereCD_S">
+							AND A1.RAGESPHERECD = #rageSphereCD_S#
+						</isNotEmpty>
+					</isPropertyAvailable> 		   		         
+		           and A1.empID in ( select empID   
+									   from GAPP01DT
+									  where apprTpID      =  '000000' 
+									    and papprGrpID    in (  select apprgrpid
+									                              from gapp01dt 
+									                             where apprTpID = '000000' 
+									                               and empid    = #empID#) 
+									)    
+		         GROUP BY A1.empID
+				 
+		         UNION ALL  
+		       SELECT Summary,typeName,SEQ1,SEQ2, empID,
+		              round(Qty/3) as Qty , round(Amt/3) as Amt, 
+		              round(GSV/3) AS GSV ,  round(NG/3) AS NG ,
+			          apprStateCDName, apprStateCD 
+		         FROM (		           
+		            SELECT 'International Whishky' as Summary, 'Target' as typeName,   
+		                   '3' AS SEQ1,'1' AS SEQ2, a1.empID,
+		                   sum(B1.RESULTQTY) as Qty,
+		                   sum(B1.PAYAMT) as Amt,
+		                   NVL(SUM(P1.GSV * B1.RESULTQTY ),0) AS GSV,
+		                   SUM(B1.PAYAMT ) AS NG,
+                           '0' as apprStateCDName,
+                           '0' as apprStateCD       
+		              from GRLT01MT a1      
+		             inner join GRLT01DT B1                  
+		                     on a1.eventYM = B1.eventYM                  
+		                    and a1.venueCD = B1.venueCD 
+		             inner join GPRD01MT P1                  
+		                     on B1.prdCD = P1.prdCD  
+		                    and P1.KINDTPCD3 = '20' 
+		             where a1.eventYM between  to_char(add_months(to_date(#eventYM#||'01' ,'YYYYMMDD'), -4),'YYYYMM') and  to_char(add_months(to_date(#eventYM#||'01' ,'YYYYMMDD'), -1),'YYYYMM')
+					<isPropertyAvailable property="officeCD_S">
+						<isNotEmpty property="officeCD_S">
+							AND A1.officecd = #officeCD_S#
+						</isNotEmpty>
+					</isPropertyAvailable> 
+					<isPropertyAvailable property="rageSphereCD_S">
+						<isNotEmpty property="rageSphereCD_S">
+							AND A1.RAGESPHERECD = #rageSphereCD_S#
+						</isNotEmpty>
+					</isPropertyAvailable> 		   		                       
+		               and a1.empID in ( select empID   
+									   from GAPP01DT
+									  where apprTpID      =  '000000' 
+									    and papprGrpID    in (  select apprgrpid
+									                              from gapp01dt 
+									                             where apprTpID = '000000' 
+									                               and empid    = #empID#) 
+									)    		
+		             GROUP BY A1.empID   )        
+		         UNION ALL		        
+		        SELECT 'International Whishky' as Summary, 'PLAN' as typeName,    
+		               '3' AS SEQ1,'2' AS SEQ2, A1.empID,
+		               sum(B1.PLANQTY) as Qty,
+		               sum(B1.PAYAMT) as Amt,
+		               NVL(SUM(P1.GSV * B1.PLANQTY ),0) AS GSV,
+		               SUM(B1.PAYAMT  )AS NG,
+						<![CDATA[
+						GETLANGDESC('000001','KR','F_CODE','APPRSTATECD',max(T1.APPRSTATECD),NULL) AS APPRSTATECDNAME,
+						MAX(T1.APPRSTATECD) AS APPRSTATECD
+						]]>
+		          from GPLN01MT a1      
+		         inner join GPLN01DT B1                  
+		                 on a1.eventYM = B1.eventYM                  
+		                and a1.venueCD = B1.venueCD 
+		         inner join GPRD01MT P1                  
+		                 on B1.prdCD = P1.prdCD          
+		                 and P1.KINDTPCD3 = '20'
+				LEFT OUTER JOIN (
+						SELECT EVENTYM, VENUECD, 
+							APPRSTATECD
+						FROM GPLN03MT
+						WHERE EVENTYM =  #eventYM#
+						AND LEVELNO = '1'
+					) T1
+					ON A1.EVENTYM = T1.EVENTYM
+					AND A1.VENUECD = T1.VENUECD		                 
+		         where a1.eventYM = #eventYM#
+					<isPropertyAvailable property="officeCD_S">
+						<isNotEmpty property="officeCD_S">
+							AND A1.officecd = #officeCD_S#
+						</isNotEmpty>
+					</isPropertyAvailable> 
+					<isPropertyAvailable property="rageSphereCD_S">
+						<isNotEmpty property="rageSphereCD_S">
+							AND A1.RAGESPHERECD = #rageSphereCD_S#
+						</isNotEmpty>
+					</isPropertyAvailable> 		   		         
+		           and a1.empID in ( select empID   
+									   from GAPP01DT
+									  where apprTpID      =  '000000' 
+									    and papprGrpID    in (  select apprgrpid
+									                              from gapp01dt 
+									                             where apprTpID = '000000' 
+									                               and empid    = #empID#) 
+									)    
+		         GROUP BY A1.empID       
+				 
+		         UNION ALL		        
+		        SELECT 'International Whishky' as Summary, 'RESULT' as typeName,    
+		               '3' AS SEQ1,'3' AS SEQ2, A1.empID,
+		               sum(B1.RESULTQTY) as Qty,
+		               sum(B1.PAYAMT) as Amt,
+		               NVL(SUM(P1.GSV * B1.RESULTQTY ),0) AS GSV,
+		               SUM(B1.PAYAMT  )AS NG,
+						<![CDATA[
+						GETLANGDESC('000001','KR','F_CODE','APPRSTATECD',max(T1.APPRSTATECD),NULL) AS APPRSTATECDNAME,
+						MAX(T1.APPRSTATECD) AS APPRSTATECD
+						]]>
+		          from GRLT01MT a1      
+		         inner join GRLT01DT B1                  
+		                 on a1.eventYM = B1.eventYM                  
+		                and a1.venueCD = B1.venueCD 
+		         inner join GPRD01MT P1                  
+		                 on B1.prdCD = P1.prdCD          
+		                 and P1.KINDTPCD3 = '20'
+				LEFT OUTER JOIN (
+						SELECT EVENTYM, VENUECD, 
+							APPRSTATECD
+						FROM GRLT07MT
+						WHERE EVENTYM =  #eventYM#
+						AND LEVELNO = '1'
+					) T1
+					ON A1.EVENTYM = T1.EVENTYM
+					AND A1.VENUECD = T1.VENUECD		                 
+		         where a1.eventYM = #eventYM#
+					<isPropertyAvailable property="officeCD_S">
+						<isNotEmpty property="officeCD_S">
+							AND A1.officecd = #officeCD_S#
+						</isNotEmpty>
+					</isPropertyAvailable> 
+					<isPropertyAvailable property="rageSphereCD_S">
+						<isNotEmpty property="rageSphereCD_S">
+							AND A1.RAGESPHERECD = #rageSphereCD_S#
+						</isNotEmpty>
+					</isPropertyAvailable> 		   		         
+		           and a1.empID in ( select empID   
+									   from GAPP01DT
+									  where apprTpID      =  '000000' 
+									    and papprGrpID    in (  select apprgrpid
+									                              from gapp01dt 
+									                             where apprTpID = '000000' 
+									                               and empid    = #empID#) 
+									)   
+		         GROUP BY A1.empID    				 
+				 
+		    ) A2
+		where b2.empID = a2.empID(+)		 
+          and b2.SEQ1  = a2.seq1(+)
+          and b2.SEQ2  = a2.seq2(+)
+		ORDER BY b2.empID,b2.SEQ1,b2.SEQ2   	  	
+	</select>	
+	
+	<!-- Result 승인_업소단위 : 권역장 -->
+	<select id="RLT0201103S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		<![CDATA[
+		 SELECT b2.Summary as "summary" , b2.typename as "summaryN", nvl(a2.qty,0)  as "volume", nvl(a2.amt,0) as "incentive", nvl(a2.gsv,0) as "GSV",
+		        CASE WHEN a2.ng IS NULL AND a2.gsv IS NULL  THEN 0
+		             WHEN a2.ng = 0  AND a2.gsv = 0  THEN 0
+		             WHEN a2.ng = 0  AND a2.gsv <> 0 THEN 0
+		             WHEN a2.ng <> 0 AND a2.gsv = 0  THEN round((a2.ng)*100,2) 
+		             ELSE round((a2.ng/a2.gsv)*100,2) END as "NGGSV" ,
+			    nvl(a2.apprStateCDName,'0') as "apprStateCDName",
+                nvl(a2.apprStateCD,'0') as "apprStateCD"        
+		]]>
+		   FROM (
+		    SELECT E2.empNm as Summary,'Target' as typeName,
+		           '1' AS SEQ1,'1' AS SEQ2, E2.empID,
+		           0 as Qty,  0 as Amt, 0 AS GSV, 0 AS NG ,
+		           '0' AS apprStateCDName, '0' AS apprStateCD    
+		      FROM GEMP01MT E2
+		     WHERE E2.empID in ( select empID   
+									   from GAPP01DT
+									  where apprTpID      =  '000000' 
+									    and papprGrpID    in (  select apprgrpid
+									                              from gapp01dt 
+									                             where apprTpID = '000000' 
+									                               and empid    = #empID#) 
+									)  
+			<isPropertyAvailable property="officeCD_S">
+				<isNotEmpty property="officeCD_S">
+					AND E2.officecd = #officeCD_S#
+				</isNotEmpty>
+			</isPropertyAvailable> 
+			<isPropertyAvailable property="rageSphereCD_S">
+				<isNotEmpty property="rageSphereCD_S">
+					AND E2.RAGESPHERECD = #rageSphereCD_S#
+				</isNotEmpty>
+			</isPropertyAvailable> 									  		
+		     UNION ALL
+		    SELECT 'Total' as Summary,'PLAN' as typeName,
+		           '1' AS SEQ1,'2' AS SEQ2, E2.empID,
+		           0 as Qty,  0 as Amt, 0 AS GSV, 0 AS NG  ,
+		           '0' AS apprStateCDName, '0' AS apprStateCD 
+		      FROM GEMP01MT E2
+		     WHERE E2.empID in ( select empID   
+									   from GAPP01DT
+									  where apprTpID      =  '000000' 
+									    and papprGrpID    in (  select apprgrpid
+									                              from gapp01dt 
+									                             where apprTpID = '000000' 
+									                               and empid    = #empID#) 
+									)
+			<isPropertyAvailable property="officeCD_S">
+				<isNotEmpty property="officeCD_S">
+					AND E2.officecd = #officeCD_S#
+				</isNotEmpty>
+			</isPropertyAvailable> 
+			<isPropertyAvailable property="rageSphereCD_S">
+				<isNotEmpty property="rageSphereCD_S">
+					AND E2.RAGESPHERECD = #rageSphereCD_S#
+				</isNotEmpty>
+			</isPropertyAvailable> 			
+
+		     UNION ALL
+		    SELECT 'Total' as Summary,'RESULT' as typeName,
+		           '1' AS SEQ1,'3' AS SEQ2, E2.empID,
+		           0 as Qty,  0 as Amt, 0 AS GSV, 0 AS NG  ,
+		           '0' AS apprStateCDName, '0' AS apprStateCD 
+		      FROM GEMP01MT E2
+		     WHERE E2.empID in ( select empID   
+									   from GAPP01DT
+									  where apprTpID      =  '000000' 
+									    and papprGrpID    in (  select apprgrpid
+									                              from gapp01dt 
+									                             where apprTpID = '000000' 
+									                               and empid    = #empID#) 
+									)
+			<isPropertyAvailable property="officeCD_S">
+				<isNotEmpty property="officeCD_S">
+					AND E2.officecd = #officeCD_S#
+				</isNotEmpty>
+			</isPropertyAvailable> 
+			<isPropertyAvailable property="rageSphereCD_S">
+				<isNotEmpty property="rageSphereCD_S">
+					AND E2.RAGESPHERECD = #rageSphereCD_S#
+				</isNotEmpty>
+			</isPropertyAvailable> 
+			
+		     UNION ALL
+		    SELECT 'Local Whishky' as Summary,'Target' as typeName,
+		           '2' AS SEQ1,'1' AS SEQ2, E2.empID,
+		           0 as Qty,  0 as Amt, 0 AS GSV, 0 AS NG  ,
+		           '0' AS apprStateCDName, '0' AS apprStateCD 
+		      FROM GEMP01MT E2
+		     WHERE E2.empID in ( select empID   
+									   from GAPP01DT
+									  where apprTpID      =  '000000' 
+									    and papprGrpID    in (  select apprgrpid
+									                              from gapp01dt 
+									                             where apprTpID = '000000' 
+									                               and empid    = #empID#) 
+									)    		
+			<isPropertyAvailable property="officeCD_S">
+				<isNotEmpty property="officeCD_S">
+					AND E2.officecd = #officeCD_S#
+				</isNotEmpty>
+			</isPropertyAvailable> 
+			<isPropertyAvailable property="rageSphereCD_S">
+				<isNotEmpty property="rageSphereCD_S">
+					AND E2.RAGESPHERECD = #rageSphereCD_S#
+				</isNotEmpty>
+			</isPropertyAvailable> 													
+		     UNION ALL
+		    SELECT 'Local Whishky' as Summary,'PLAN' as typeName,
+		           '2' AS SEQ1,'2' AS SEQ2, E2.empID,
+		           0 as Qty,  0 as Amt, 0 AS GSV, 0 AS NG  ,
+		           '0' AS apprStateCDName, '0' AS apprStateCD 
+		      FROM GEMP01MT E2
+		     WHERE E2.empID in ( select empID   
+									   from GAPP01DT
+									  where apprTpID      =  '000000' 
+									    and papprGrpID    in (  select apprgrpid
+									                              from gapp01dt 
+									                             where apprTpID = '000000' 
+									                               and empid    = #empID#) 
+									)    	
+			<isPropertyAvailable property="officeCD_S">
+				<isNotEmpty property="officeCD_S">
+					AND E2.officecd = #officeCD_S#
+				</isNotEmpty>
+			</isPropertyAvailable> 
+			<isPropertyAvailable property="rageSphereCD_S">
+				<isNotEmpty property="rageSphereCD_S">
+					AND E2.RAGESPHERECD = #rageSphereCD_S#
+				</isNotEmpty>
+			</isPropertyAvailable> 	
+
+		     UNION ALL
+		    SELECT 'Local Whishky' as Summary,'RESULT' as typeName,
+		           '2' AS SEQ1,'3' AS SEQ2, E2.empID,
+		           0 as Qty,  0 as Amt, 0 AS GSV, 0 AS NG  ,
+		           '0' AS apprStateCDName, '0' AS apprStateCD 
+		      FROM GEMP01MT E2
+		     WHERE E2.empID in ( select empID   
+									   from GAPP01DT
+									  where apprTpID      =  '000000' 
+									    and papprGrpID    in (  select apprgrpid
+									                              from gapp01dt 
+									                             where apprTpID = '000000' 
+									                               and empid    = #empID#) 
+									)    	
+			<isPropertyAvailable property="officeCD_S">
+				<isNotEmpty property="officeCD_S">
+					AND E2.officecd = #officeCD_S#
+				</isNotEmpty>
+			</isPropertyAvailable> 
+			<isPropertyAvailable property="rageSphereCD_S">
+				<isNotEmpty property="rageSphereCD_S">
+					AND E2.RAGESPHERECD = #rageSphereCD_S#
+				</isNotEmpty>
+			</isPropertyAvailable> 
+			
+		     UNION ALL
+		    SELECT 'International Whishky' as Summary,'Target' as typeName,
+		           '3' AS SEQ1,'1' AS SEQ2, E2.empID,
+		           0 as Qty,  0 as Amt, 0 AS GSV, 0 AS NG  ,
+		           '0' AS apprStateCDName, '0' AS apprStateCD 
+		      FROM GEMP01MT E2
+		     WHERE E2.empID in ( select empID   
+									   from GAPP01DT
+									  where apprTpID      =  '000000' 
+									    and papprGrpID    in (  select apprgrpid
+									                              from gapp01dt 
+									                             where apprTpID = '000000' 
+									                               and empid    = #empID#) 
+									)    		
+			<isPropertyAvailable property="officeCD_S">
+				<isNotEmpty property="officeCD_S">
+					AND E2.officecd = #officeCD_S#
+				</isNotEmpty>
+			</isPropertyAvailable> 
+			<isPropertyAvailable property="rageSphereCD_S">
+				<isNotEmpty property="rageSphereCD_S">
+					AND E2.RAGESPHERECD = #rageSphereCD_S#
+				</isNotEmpty>
+			</isPropertyAvailable> 													
+		     UNION ALL
+		    SELECT 'International Whishky' as Summary,'PLAN' as typeName,
+		           '3' AS SEQ1,'2' AS SEQ2, E2.empID,
+		           0 as Qty,  0 as Amt, 0 AS GSV, 0 AS NG  ,
+		           '0' AS apprStateCDName, '0' AS apprStateCD 
+		      FROM GEMP01MT E2
+		     WHERE E2.empID in ( select empID   
+									   from GAPP01DT
+									  where apprTpID      =  '000000' 
+									    and papprGrpID    in (  select apprgrpid
+									                              from gapp01dt 
+									                             where apprTpID = '000000' 
+									                               and empid    = #empID#) 
+									)    		
+			<isPropertyAvailable property="officeCD_S">
+				<isNotEmpty property="officeCD_S">
+					AND E2.officecd = #officeCD_S#
+				</isNotEmpty>
+			</isPropertyAvailable> 
+			<isPropertyAvailable property="rageSphereCD_S">
+				<isNotEmpty property="rageSphereCD_S">
+					AND E2.RAGESPHERECD = #rageSphereCD_S#
+				</isNotEmpty>
+			</isPropertyAvailable> 	
+
+		     UNION ALL
+		    SELECT 'International Whishky' as Summary,'RESULT' as typeName,
+		           '3' AS SEQ1,'3' AS SEQ2, E2.empID,
+		           0 as Qty,  0 as Amt, 0 AS GSV, 0 AS NG  ,
+		           '0' AS apprStateCDName, '0' AS apprStateCD 
+		      FROM GEMP01MT E2
+		     WHERE E2.empID in ( select empID   
+									   from GAPP01DT
+									  where apprTpID      =  '000000' 
+									    and papprGrpID    in (  select apprgrpid
+									                              from gapp01dt 
+									                             where apprTpID = '000000' 
+									                               and empid    = #empID#) 
+									)    		
+			<isPropertyAvailable property="officeCD_S">
+				<isNotEmpty property="officeCD_S">
+					AND E2.officecd = #officeCD_S#
+				</isNotEmpty>
+			</isPropertyAvailable> 
+			<isPropertyAvailable property="rageSphereCD_S">
+				<isNotEmpty property="rageSphereCD_S">
+					AND E2.RAGESPHERECD = #rageSphereCD_S#
+				</isNotEmpty>
+			</isPropertyAvailable> 
+			
+			) B2,
+		   (  
+		       SELECT empID||Summary,typeName,SEQ1,SEQ2, empID,
+		              round(Qty/3) as Qty , round(Amt/3) as Amt, 
+		              round(GSV/3) AS GSV ,  round(NG/3) AS NG ,
+			          apprStateCDName, apprStateCD 
+		         FROM (
+		            SELECT ' Total' as Summary, 'Target' as typeName,   
+		                   '1' AS SEQ1,'1' AS SEQ2,
+		                   NVL((SELECT MAX(EMPID) FROM GEMP01MT WHERE OFFICECD = A1.OFFICECD AND WORKSTATCD = '01' AND TERRITORYCD IS NULL AND DKMDTPCD = 'DK' GROUP BY OFFICECD), 'ETC') AS empID,
+		                   sum(B1.RESULTQTY) as Qty,
+		                   sum(B1.PAYAMT) as Amt,
+		                   SUM(P1.GSV * B1.RESULTQTY ) AS GSV,
+		                   SUM(B1.PAYAMT  ) AS NG ,
+                           '0' as apprStateCDName,
+                           '0' as apprStateCD       
+		              from GRLT01MT a1      
+		             inner join GRLT01DT B1                  
+		                     on a1.eventYM = B1.eventYM                  
+		                    and a1.venueCD = B1.venueCD 
+		             inner join GPRD01MT P1                  
+		                     on B1.prdCD = P1.prdCD                     
+		             where a1.eventYM between  to_char(add_months(to_date(#eventYM#||'01' ,'YYYYMMDD'), -4),'YYYYMM') and  to_char(add_months(to_date(#eventYM#||'01' ,'YYYYMMDD'), -1),'YYYYMM')
+					<isPropertyAvailable property="officeCD_S">
+						<isNotEmpty property="officeCD_S">
+							AND A1.officecd = #officeCD_S#
+						</isNotEmpty>
+					</isPropertyAvailable> 
+					<isPropertyAvailable property="rageSphereCD_S">
+						<isNotEmpty property="rageSphereCD_S">
+							AND A1.RAGESPHERECD = #rageSphereCD_S#
+						</isNotEmpty>
+					</isPropertyAvailable> 				     
+		               and a1.empID in ( 
+										SELECT EMPID
+										FROM GAPP01DT
+										WHERE APPRTPID      =  '000000'  
+										AND PAPPRGRPID IN (
+											SELECT APPRGRPID
+											FROM GAPP01DT
+											WHERE APPRTPID      =  '000000'  
+											AND PAPPRGRPID IN (
+												SELECT APPRGRPID
+												FROM GAPP01DT
+												WHERE EMPID = #empID#
+												AND APPRTPID      =  '000000' 
+											)
+										)
+									)    		               
+		             GROUP BY A1.OFFICECD )  
+		         UNION ALL
+		        SELECT 'Total' as Summary, 'PLAN' as typeName,    
+		               '1' AS SEQ1,'2' AS SEQ2, 
+		               NVL((SELECT MAX(EMPID) FROM GEMP01MT WHERE OFFICECD = A1.OFFICECD AND WORKSTATCD = '01' AND TERRITORYCD IS NULL AND DKMDTPCD = 'DK' GROUP BY OFFICECD), 'ETC') AS empID,
+		               sum(B1.PLANQTY) as Qty,
+		               sum(B1.PAYAMT) as Amt,
+		               SUM(P1.GSV * B1.PLANQTY )AS GSV,
+		               SUM(B1.PAYAMT  )AS NG,
+		               <![CDATA[
+                       GETLANGDESC('000001','KR','F_CODE','APPRSTATECD',max(T1.APPRSTATECD),NULL) AS APPRSTATECDNAME,
+					   MAX(T1.APPRSTATECD) AS APPRSTATECD
+					   ]]>
+		          from GPLN01MT a1      
+		         inner join GPLN01DT B1                  
+		                 on a1.eventYM = B1.eventYM                  
+		                and a1.venueCD = B1.venueCD 
+		         inner join GPRD01MT P1                  
+		                 on B1.prdCD = P1.prdCD       
+				LEFT OUTER JOIN (
+					SELECT EVENTYM, VENUECD, 
+						APPRSTATECD
+					FROM GPLN03MT
+					WHERE EVENTYM =  #eventYM#
+					AND LEVELNO = '2'
+				) T1
+				ON A1.EVENTYM = T1.EVENTYM
+				AND A1.VENUECD = T1.VENUECD                    
+		         where a1.eventYM =  #eventYM#
+					<isPropertyAvailable property="officeCD_S">
+						<isNotEmpty property="officeCD_S">
+							AND A1.officecd = #officeCD_S#
+						</isNotEmpty>
+					</isPropertyAvailable> 
+					<isPropertyAvailable property="rageSphereCD_S">
+						<isNotEmpty property="rageSphereCD_S">
+							AND A1.RAGESPHERECD = #rageSphereCD_S#
+						</isNotEmpty>
+					</isPropertyAvailable> 		         
+		           and a1.empID   in ( 
+										SELECT EMPID
+										FROM GAPP01DT
+										WHERE APPRTPID      =  '000000'  
+										AND PAPPRGRPID IN (
+											SELECT APPRGRPID
+											FROM GAPP01DT
+											WHERE APPRTPID      =  '000000'  
+											AND PAPPRGRPID IN (
+												SELECT APPRGRPID
+												FROM GAPP01DT
+												WHERE EMPID = #empID#
+												AND APPRTPID      =  '000000' 
+											)
+										)
+									)    		
+		           <isPropertyAvailable property="apprStateCD">
+						<isNotEmpty prepend="and" property="apprStateCD">
+							a1.apprStateCD = #apprStateCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+		         GROUP BY A1.OFFICECD 
+				 
+		         UNION ALL
+		        SELECT 'Total' as Summary, 'RESULT' as typeName,    
+		               '1' AS SEQ1,'3' AS SEQ2, 
+		               NVL((SELECT MAX(EMPID) FROM GEMP01MT WHERE OFFICECD = A1.OFFICECD AND WORKSTATCD = '01' AND TERRITORYCD IS NULL AND DKMDTPCD = 'DK' GROUP BY OFFICECD), 'ETC') AS empID,
+		               sum(B1.RESULTQTY) as Qty,
+		               sum(B1.PAYAMT) as Amt,
+		               SUM(P1.GSV * B1.RESULTQTY )AS GSV,
+		               SUM(B1.PAYAMT  )AS NG,
+		               <![CDATA[
+                       GETLANGDESC('000001','KR','F_CODE','APPRSTATECD',max(T1.APPRSTATECD),NULL) AS APPRSTATECDNAME,
+					   MAX(T1.APPRSTATECD) AS APPRSTATECD
+					   ]]>
+		          from GRLT01MT a1      
+		         inner join GRLT01DT B1                  
+		                 on a1.eventYM = B1.eventYM                  
+		                and a1.venueCD = B1.venueCD 
+		         inner join GPRD01MT P1                  
+		                 on B1.prdCD = P1.prdCD       
+				LEFT OUTER JOIN (
+					SELECT EVENTYM, VENUECD, 
+						APPRSTATECD
+					FROM GRLT07MT
+					WHERE EVENTYM =  #eventYM#
+					AND LEVELNO = '2'
+				) T1
+				ON A1.EVENTYM = T1.EVENTYM
+				AND A1.VENUECD = T1.VENUECD                    
+		         where a1.eventYM =  #eventYM#
+					<isPropertyAvailable property="officeCD_S">
+						<isNotEmpty property="officeCD_S">
+							AND A1.officecd = #officeCD_S#
+						</isNotEmpty>
+					</isPropertyAvailable> 
+					<isPropertyAvailable property="rageSphereCD_S">
+						<isNotEmpty property="rageSphereCD_S">
+							AND A1.RAGESPHERECD = #rageSphereCD_S#
+						</isNotEmpty>
+					</isPropertyAvailable> 		         
+		           and a1.empID   in ( 
+										SELECT EMPID
+										FROM GAPP01DT
+										WHERE APPRTPID      =  '000000'  
+										AND PAPPRGRPID IN (
+											SELECT APPRGRPID
+											FROM GAPP01DT
+											WHERE APPRTPID      =  '000000'  
+											AND PAPPRGRPID IN (
+												SELECT APPRGRPID
+												FROM GAPP01DT
+												WHERE EMPID = #empID#
+												AND APPRTPID      =  '000000' 
+											)
+										)
+									)    		
+		           <isPropertyAvailable property="apprStateCD">
+						<isNotEmpty prepend="and" property="apprStateCD">
+							a1.apprStateCD = #apprStateCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+		         GROUP BY A1.OFFICECD 				 
+				 
+		       Union all
+		       SELECT Summary,typeName,SEQ1,SEQ2, empID,
+		              round(Qty/3) as Qty , round(Amt/3) as Amt, 
+		              round(GSV/3) AS GSV ,  round(NG/3) AS NG ,
+			          apprStateCDName, apprStateCD 
+		         FROM (
+		            SELECT 'Local Whishky' as Summary, 'Target' as typeName,   
+		                   '2' AS SEQ1,'1' AS SEQ2, 
+		                   NVL((SELECT MAX(EMPID) FROM GEMP01MT WHERE OFFICECD = A1.OFFICECD AND WORKSTATCD = '01' AND TERRITORYCD IS NULL AND DKMDTPCD = 'DK' GROUP BY OFFICECD), 'ETC') AS empID,
+		                   sum(B1.RESULTQTY) as Qty,
+		                   sum(B1.PAYAMT) as Amt,
+		                   SUM(P1.GSV * B1.RESULTQTY ) AS GSV,
+		                   SUM(B1.PAYAMT  ) AS NG,
+                           '0' as apprStateCDName,
+                           '0' as apprStateCD       
+		              from GRLT01MT a1      
+		             inner join GRLT01DT B1                  
+		                     on a1.eventYM = B1.eventYM                  
+		                    and a1.venueCD = B1.venueCD 
+		             inner join GPRD01MT P1                  
+		                     on B1.prdCD = P1.prdCD
+		                    and P1.KINDTPCD3 = '10' 
+		             where a1.eventYM between  to_char(add_months(to_date(#eventYM#||'01' ,'YYYYMMDD'), -4),'YYYYMM') and  to_char(add_months(to_date(#eventYM#||'01' ,'YYYYMMDD'), -1),'YYYYMM')
+					<isPropertyAvailable property="officeCD_S">
+						<isNotEmpty property="officeCD_S">
+							AND A1.officecd = #officeCD_S#
+						</isNotEmpty>
+					</isPropertyAvailable> 
+					<isPropertyAvailable property="rageSphereCD_S">
+						<isNotEmpty property="rageSphereCD_S">
+							AND A1.RAGESPHERECD = #rageSphereCD_S#
+						</isNotEmpty>
+					</isPropertyAvailable> 		                         
+		               and a1.empID in ( 
+										SELECT EMPID
+										FROM GAPP01DT
+										WHERE APPRTPID      =  '000000'  
+										AND PAPPRGRPID IN (
+											SELECT APPRGRPID
+											FROM GAPP01DT
+											WHERE APPRTPID      =  '000000'  
+											AND PAPPRGRPID IN (
+												SELECT APPRGRPID
+												FROM GAPP01DT
+												WHERE EMPID = #empID#
+												AND APPRTPID      =  '000000' 
+											)
+										)
+									)    			               
+		             GROUP BY a1.OFFICECD )     
+		        UNION ALL
+		        SELECT 'Local Whishky' as Summary, 'PLAN' as typeName,    
+		               '2' AS SEQ1,'2' AS SEQ2, 
+		               NVL((SELECT MAX(EMPID) FROM GEMP01MT WHERE OFFICECD = A1.OFFICECD AND WORKSTATCD = '01' AND TERRITORYCD IS NULL AND DKMDTPCD = 'DK' GROUP BY OFFICECD), 'ETC') AS empID,
+		               sum(B1.PLANQTY) as Qty,
+		               sum(B1.PAYAMT) as Amt,
+		               SUM(P1.GSV * B1.PLANQTY )AS GSV,
+		               SUM(B1.PAYAMT )AS NG,
+						<![CDATA[
+						GETLANGDESC('000001','KR','F_CODE','APPRSTATECD',max(T1.APPRSTATECD),NULL) AS APPRSTATECDNAME,
+						MAX(T1.APPRSTATECD) AS APPRSTATECD
+						]]>
+		          from GPLN01MT a1      
+		         inner join GPLN01DT B1                  
+		                 on a1.eventYM = B1.eventYM                  
+		                and a1.venueCD = B1.venueCD 
+		         inner join GPRD01MT P1                  
+		                 on B1.prdCD = P1.prdCD          
+		                and P1.KINDTPCD3 = '10' 
+			LEFT OUTER JOIN (
+					SELECT EVENTYM, VENUECD, 
+						APPRSTATECD
+					FROM GPLN03MT
+					WHERE EVENTYM =  #eventYM#
+					AND LEVELNO = '2'
+				) T1
+				ON A1.EVENTYM = T1.EVENTYM
+				AND A1.VENUECD = T1.VENUECD               
+		         where a1.eventYM = #eventYM#
+					<isPropertyAvailable property="officeCD_S">
+						<isNotEmpty property="officeCD_S">
+							AND A1.officecd = #officeCD_S#
+						</isNotEmpty>
+					</isPropertyAvailable> 
+					<isPropertyAvailable property="rageSphereCD_S">
+						<isNotEmpty property="rageSphereCD_S">
+							AND A1.RAGESPHERECD = #rageSphereCD_S#
+						</isNotEmpty>
+					</isPropertyAvailable> 		         
+		           and A1.empID in ( 
+										SELECT EMPID
+										FROM GAPP01DT
+										WHERE APPRTPID      =  '000000'  
+										AND PAPPRGRPID IN (
+											SELECT APPRGRPID
+											FROM GAPP01DT
+											WHERE APPRTPID      =  '000000'  
+											AND PAPPRGRPID IN (
+												SELECT APPRGRPID
+												FROM GAPP01DT
+												WHERE EMPID = #empID#
+												AND APPRTPID      =  '000000' 
+											)
+										)
+									)    		
+		           <isPropertyAvailable property="apprStateCD">
+						<isNotEmpty prepend="and" property="apprStateCD">
+							a1.apprStateCD = #apprStateCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+		         GROUP BY A1.OFFICECD
+				 
+		        UNION ALL
+		        SELECT 'Local Whishky' as Summary, 'RESULT' as typeName,    
+		               '2' AS SEQ1,'3' AS SEQ2, 
+		               NVL((SELECT MAX(EMPID) FROM GEMP01MT WHERE OFFICECD = A1.OFFICECD AND WORKSTATCD = '01' AND TERRITORYCD IS NULL AND DKMDTPCD = 'DK' GROUP BY OFFICECD), 'ETC') AS empID,
+		               sum(B1.RESULTQTY) as Qty,
+		               sum(B1.PAYAMT) as Amt,
+		               SUM(P1.GSV * B1.RESULTQTY )AS GSV,
+		               SUM(B1.PAYAMT )AS NG,
+						<![CDATA[
+						GETLANGDESC('000001','KR','F_CODE','APPRSTATECD',max(T1.APPRSTATECD),NULL) AS APPRSTATECDNAME,
+						MAX(T1.APPRSTATECD) AS APPRSTATECD
+						]]>
+		          from GRLT01MT a1      
+		         inner join GRLT01DT B1                  
+		                 on a1.eventYM = B1.eventYM                  
+		                and a1.venueCD = B1.venueCD 
+		         inner join GPRD01MT P1                  
+		                 on B1.prdCD = P1.prdCD          
+		                and P1.KINDTPCD3 = '10' 
+				LEFT OUTER JOIN (
+					SELECT EVENTYM, VENUECD, 
+						APPRSTATECD
+					FROM GRLT07MT
+					WHERE EVENTYM =  #eventYM#
+					AND LEVELNO = '2'
+				) T1
+				ON A1.EVENTYM = T1.EVENTYM
+				AND A1.VENUECD = T1.VENUECD               
+		         where a1.eventYM = #eventYM#
+					<isPropertyAvailable property="officeCD_S">
+						<isNotEmpty property="officeCD_S">
+							AND A1.officecd = #officeCD_S#
+						</isNotEmpty>
+					</isPropertyAvailable> 
+					<isPropertyAvailable property="rageSphereCD_S">
+						<isNotEmpty property="rageSphereCD_S">
+							AND A1.RAGESPHERECD = #rageSphereCD_S#
+						</isNotEmpty>
+					</isPropertyAvailable> 		         
+		           and A1.empID in ( 
+										SELECT EMPID
+										FROM GAPP01DT
+										WHERE APPRTPID      =  '000000'  
+										AND PAPPRGRPID IN (
+											SELECT APPRGRPID
+											FROM GAPP01DT
+											WHERE APPRTPID      =  '000000'  
+											AND PAPPRGRPID IN (
+												SELECT APPRGRPID
+												FROM GAPP01DT
+												WHERE EMPID = #empID#
+												AND APPRTPID      =  '000000' 
+											)
+										)
+									)    		
+		           <isPropertyAvailable property="apprStateCD">
+						<isNotEmpty prepend="and" property="apprStateCD">
+							a1.apprStateCD = #apprStateCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+		         GROUP BY A1.OFFICECD				 
+				 
+		         UNION ALL  
+		       SELECT Summary,typeName,SEQ1,SEQ2, empID,
+		              round(Qty/3) as Qty , round(Amt/3) as Amt, 
+		              round(GSV/3) AS GSV ,  round(NG/3) AS NG ,
+			          apprStateCDName, apprStateCD 
+		         FROM (		           
+		            SELECT 'International Whishky' as Summary, 'Target' as typeName,   
+		                   '3' AS SEQ1,'1' AS SEQ2, 
+		                   NVL((SELECT MAX(EMPID) FROM GEMP01MT WHERE OFFICECD = A1.OFFICECD AND WORKSTATCD = '01' AND TERRITORYCD IS NULL AND DKMDTPCD = 'DK' GROUP BY OFFICECD), 'ETC') AS empID,
+		                   sum(B1.RESULTQTY) as Qty,
+		                   sum(B1.PAYAMT) as Amt,
+		                   NVL(SUM(P1.GSV * B1.RESULTQTY ),0) AS GSV,
+		                   SUM(B1.PAYAMT ) AS NG,
+                           '0' as apprStateCDName,
+                           '0' as apprStateCD       
+		              from GRLT01MT a1      
+		             inner join GRLT01DT B1                  
+		                     on a1.eventYM = B1.eventYM                  
+		                    and a1.venueCD = B1.venueCD 
+		             inner join GPRD01MT P1                  
+		                     on B1.prdCD = P1.prdCD  
+		                    and P1.KINDTPCD3 = '20' 
+		             where a1.eventYM between  to_char(add_months(to_date(#eventYM#||'01' ,'YYYYMMDD'), -4),'YYYYMM') and  to_char(add_months(to_date(#eventYM#||'01' ,'YYYYMMDD'), -1),'YYYYMM')
+					<isPropertyAvailable property="officeCD_S">
+						<isNotEmpty property="officeCD_S">
+							AND A1.officecd = #officeCD_S#
+						</isNotEmpty>
+					</isPropertyAvailable> 
+					<isPropertyAvailable property="rageSphereCD_S">
+						<isNotEmpty property="rageSphereCD_S">
+							AND A1.RAGESPHERECD = #rageSphereCD_S#
+						</isNotEmpty>
+					</isPropertyAvailable> 		                       
+		               and a1.empID in (
+				              			SELECT EMPID
+										FROM GAPP01DT
+										WHERE APPRTPID      =  '000000'  
+										AND PAPPRGRPID IN (
+											SELECT APPRGRPID
+											FROM GAPP01DT
+											WHERE APPRTPID      =  '000000'  
+											AND PAPPRGRPID IN (
+												SELECT APPRGRPID
+												FROM GAPP01DT
+												WHERE EMPID = #empID#
+												AND APPRTPID      =  '000000' 
+											)
+										)
+									)    		
+		             GROUP BY A1.OFFICECD   )        
+		         UNION ALL		        
+		        SELECT 'International Whishky' as Summary, 'PLAN' as typeName,    
+		               '3' AS SEQ1,'2' AS SEQ2, 
+		               NVL((SELECT MAX(EMPID) FROM GEMP01MT WHERE OFFICECD = A1.OFFICECD AND WORKSTATCD = '01' AND TERRITORYCD IS NULL AND DKMDTPCD = 'DK' GROUP BY OFFICECD), 'ETC') AS empID,
+		               sum(B1.PLANQTY) as Qty,
+		               sum(B1.PAYAMT) as Amt,
+		               NVL(SUM(P1.GSV * B1.PLANQTY ),0) AS GSV,
+		               SUM(B1.PAYAMT  )AS NG,
+						<![CDATA[
+						GETLANGDESC('000001','KR','F_CODE','APPRSTATECD',max(T1.APPRSTATECD),NULL) AS APPRSTATECDNAME,
+						MAX(T1.APPRSTATECD) AS APPRSTATECD
+						]]>
+		          from GPLN01MT a1      
+		         inner join GPLN01DT B1                  
+		                 on a1.eventYM = B1.eventYM                  
+		                and a1.venueCD = B1.venueCD 
+		         inner join GPRD01MT P1                  
+		                 on B1.prdCD = P1.prdCD          
+		                 and P1.KINDTPCD3 = '20'
+				LEFT OUTER JOIN (
+						SELECT EVENTYM, VENUECD, 
+							APPRSTATECD
+						FROM GPLN03MT
+						WHERE EVENTYM =  #eventYM#
+						AND LEVELNO = '2'
+					) T1
+					ON A1.EVENTYM = T1.EVENTYM
+					AND A1.VENUECD = T1.VENUECD
+		         where a1.eventYM = #eventYM#
+					<isPropertyAvailable property="officeCD_S">
+						<isNotEmpty property="officeCD_S">
+							AND A1.officecd = #officeCD_S#
+						</isNotEmpty>
+					</isPropertyAvailable> 
+					<isPropertyAvailable property="rageSphereCD_S">
+						<isNotEmpty property="rageSphereCD_S">
+							AND A1.RAGESPHERECD = #rageSphereCD_S#
+						</isNotEmpty>
+					</isPropertyAvailable> 		         
+		           and a1.empID in ( 
+										SELECT EMPID
+										FROM GAPP01DT
+										WHERE APPRTPID      =  '000000'  
+										AND PAPPRGRPID IN (
+											SELECT APPRGRPID
+											FROM GAPP01DT
+											WHERE APPRTPID      =  '000000'  
+											AND PAPPRGRPID IN (
+												SELECT APPRGRPID
+												FROM GAPP01DT
+												WHERE EMPID = #empID#
+												AND APPRTPID      =  '000000' 
+											)
+										)
+									)    		           
+		           <isPropertyAvailable property="apprStateCD">
+						<isNotEmpty prepend="and" property="apprStateCD">
+							a1.apprStateCD = #apprStateCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+		         GROUP BY A1.OFFICECD
+
+				UNION ALL
+		        SELECT 'International Whishky' as Summary, 'RESULT' as typeName,    
+		               '3' AS SEQ1,'2' AS SEQ2, 
+		               NVL((SELECT MAX(EMPID) FROM GEMP01MT WHERE OFFICECD = A1.OFFICECD AND WORKSTATCD = '01' AND TERRITORYCD IS NULL AND DKMDTPCD = 'DK' GROUP BY OFFICECD), 'ETC') AS empID,
+		               sum(B1.RESULTQTY) as Qty,
+		               sum(B1.PAYAMT) as Amt,
+		               NVL(SUM(P1.GSV * B1.RESULTQTY ),0) AS GSV,
+		               SUM(B1.PAYAMT  )AS NG,
+						<![CDATA[
+						GETLANGDESC('000001','KR','F_CODE','APPRSTATECD',max(T1.APPRSTATECD),NULL) AS APPRSTATECDNAME,
+						MAX(T1.APPRSTATECD) AS APPRSTATECD
+						]]>
+		          from GRLT01MT a1      
+		         inner join GRLT01DT B1                  
+		                 on a1.eventYM = B1.eventYM                  
+		                and a1.venueCD = B1.venueCD 
+		         inner join GPRD01MT P1                  
+		                 on B1.prdCD = P1.prdCD          
+		                 and P1.KINDTPCD3 = '20'
+				LEFT OUTER JOIN (
+						SELECT EVENTYM, VENUECD, 
+							APPRSTATECD
+						FROM GRLT07MT
+						WHERE EVENTYM =  #eventYM#
+						AND LEVELNO = '2'
+					) T1
+					ON A1.EVENTYM = T1.EVENTYM
+					AND A1.VENUECD = T1.VENUECD
+		         where a1.eventYM = #eventYM#
+					<isPropertyAvailable property="officeCD_S">
+						<isNotEmpty property="officeCD_S">
+							AND A1.officecd = #officeCD_S#
+						</isNotEmpty>
+					</isPropertyAvailable> 
+					<isPropertyAvailable property="rageSphereCD_S">
+						<isNotEmpty property="rageSphereCD_S">
+							AND A1.RAGESPHERECD = #rageSphereCD_S#
+						</isNotEmpty>
+					</isPropertyAvailable> 		         
+		           and a1.empID in ( 
+										SELECT EMPID
+										FROM GAPP01DT
+										WHERE APPRTPID      =  '000000'  
+										AND PAPPRGRPID IN (
+											SELECT APPRGRPID
+											FROM GAPP01DT
+											WHERE APPRTPID      =  '000000'  
+											AND PAPPRGRPID IN (
+												SELECT APPRGRPID
+												FROM GAPP01DT
+												WHERE EMPID = #empID#
+												AND APPRTPID      =  '000000' 
+											)
+										)
+									)    		           
+		           <isPropertyAvailable property="apprStateCD">
+						<isNotEmpty prepend="and" property="apprStateCD">
+							a1.apprStateCD = #apprStateCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+		         GROUP BY A1.OFFICECD    
+				 
+		    ) A2
+		where b2.empID = a2.empID(+)		 
+          and b2.SEQ1  = a2.seq1(+)
+          and b2.SEQ2  = a2.seq2(+)
+		ORDER BY b2.empID,b2.SEQ1,b2.SEQ2   	  	
+	</select>
+	
+	<!-- Reslut 승인_업소단위 : CM -->
+	<select id="RLT0201104S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		<![CDATA[
+		 SELECT b2.Summary as "summary" , b2.typename as "summaryN", nvl(a2.qty,0)  as "volume", nvl(a2.amt,0) as "incentive", nvl(a2.gsv,0) as "GSV",
+		        CASE WHEN a2.ng IS NULL AND a2.gsv IS NULL  THEN 0
+		             WHEN a2.ng = 0  AND a2.gsv = 0  THEN 0
+		             WHEN a2.ng = 0  AND a2.gsv <> 0 THEN 0
+		             WHEN a2.ng <> 0 AND a2.gsv = 0  THEN round((a2.ng)*100,2) 
+		             ELSE round((a2.ng/a2.gsv)*100,2) END as "NGGSV" ,
+			    nvl(a2.apprStateCDName,'0') as "apprStateCDName",
+                nvl(a2.apprStateCD,'0') as "apprStateCD"        
+		]]>
+		   FROM (
+		    SELECT E2.empNm as Summary,'Target' as typeName,
+		           '1' AS SEQ1,'1' AS SEQ2, E2.empID,
+		           0 as Qty,  0 as Amt, 0 AS GSV, 0 AS NG ,
+		           '0' AS apprStateCDName, '0' AS apprStateCD    
+		      FROM GEMP01MT E2
+		     WHERE E2.empID in ( select empID   
+									   from GAPP01DT
+									  where apprTpID      =  '000000' 
+									    and papprGrpID    in (  select apprgrpid
+									                              from gapp01dt 
+									                             where apprTpID = '000000' 
+									                               and empid    = #empID#) 
+									)  
+			<isPropertyAvailable property="officeCD_S">
+				<isNotEmpty property="officeCD_S">
+					AND E2.officecd = #officeCD_S#
+				</isNotEmpty>
+			</isPropertyAvailable> 
+			<isPropertyAvailable property="rageSphereCD_S">
+				<isNotEmpty property="rageSphereCD_S">
+					AND E2.RAGESPHERECD = #rageSphereCD_S#
+				</isNotEmpty>
+			</isPropertyAvailable> 									  		
+		     UNION ALL
+		    SELECT 'Total' as Summary,'PLAN' as typeName,
+		           '1' AS SEQ1,'2' AS SEQ2, E2.empID,
+		           0 as Qty,  0 as Amt, 0 AS GSV, 0 AS NG  ,
+		           '0' AS apprStateCDName, '0' AS apprStateCD 
+		      FROM GEMP01MT E2
+		     WHERE E2.empID in ( select empID   
+									   from GAPP01DT
+									  where apprTpID      =  '000000' 
+									    and papprGrpID    in (  select apprgrpid
+									                              from gapp01dt 
+									                             where apprTpID = '000000' 
+									                               and empid    = #empID#) 
+									)    		
+			<isPropertyAvailable property="officeCD_S">
+				<isNotEmpty property="officeCD_S">
+					AND E2.officecd = #officeCD_S#
+				</isNotEmpty>
+			</isPropertyAvailable> 
+			<isPropertyAvailable property="rageSphereCD_S">
+				<isNotEmpty property="rageSphereCD_S">
+					AND E2.RAGESPHERECD = #rageSphereCD_S#
+				</isNotEmpty>
+			</isPropertyAvailable> 
+
+		     UNION ALL
+		    SELECT 'Total' as Summary,'RESULT' as typeName,
+		           '1' AS SEQ1,'3' AS SEQ2, E2.empID,
+		           0 as Qty,  0 as Amt, 0 AS GSV, 0 AS NG  ,
+		           '0' AS apprStateCDName, '0' AS apprStateCD 
+		      FROM GEMP01MT E2
+		     WHERE E2.empID in ( select empID   
+									   from GAPP01DT
+									  where apprTpID      =  '000000' 
+									    and papprGrpID    in (  select apprgrpid
+									                              from gapp01dt 
+									                             where apprTpID = '000000' 
+									                               and empid    = #empID#) 
+									)    		
+			<isPropertyAvailable property="officeCD_S">
+				<isNotEmpty property="officeCD_S">
+					AND E2.officecd = #officeCD_S#
+				</isNotEmpty>
+			</isPropertyAvailable> 
+			<isPropertyAvailable property="rageSphereCD_S">
+				<isNotEmpty property="rageSphereCD_S">
+					AND E2.RAGESPHERECD = #rageSphereCD_S#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			
+		     UNION ALL
+		    SELECT 'Local Whishky' as Summary,'Target' as typeName,
+		           '2' AS SEQ1,'1' AS SEQ2, E2.empID,
+		           0 as Qty,  0 as Amt, 0 AS GSV, 0 AS NG  ,
+		           '0' AS apprStateCDName, '0' AS apprStateCD 
+		      FROM GEMP01MT E2
+		     WHERE E2.empID in ( select empID   
+									   from GAPP01DT
+									  where apprTpID      =  '000000' 
+									    and papprGrpID    in (  select apprgrpid
+									                              from gapp01dt 
+									                             where apprTpID = '000000' 
+									                               and empid    = #empID#) 
+									)    		
+			<isPropertyAvailable property="officeCD_S">
+				<isNotEmpty property="officeCD_S">
+					AND E2.officecd = #officeCD_S#
+				</isNotEmpty>
+			</isPropertyAvailable> 
+			<isPropertyAvailable property="rageSphereCD_S">
+				<isNotEmpty property="rageSphereCD_S">
+					AND E2.RAGESPHERECD = #rageSphereCD_S#
+				</isNotEmpty>
+			</isPropertyAvailable> 										
+		     UNION ALL
+		    SELECT 'Local Whishky' as Summary,'PLAN' as typeName,
+		           '2' AS SEQ1,'2' AS SEQ2, E2.empID,
+		           0 as Qty,  0 as Amt, 0 AS GSV, 0 AS NG  ,
+		           '0' AS apprStateCDName, '0' AS apprStateCD 
+		      FROM GEMP01MT E2
+		     WHERE E2.empID in ( select empID   
+									   from GAPP01DT
+									  where apprTpID      =  '000000' 
+									    and papprGrpID    in (  select apprgrpid
+									                              from gapp01dt 
+									                             where apprTpID = '000000' 
+									                               and empid    = #empID#) 
+									)    		  
+			<isPropertyAvailable property="officeCD_S">
+				<isNotEmpty property="officeCD_S">
+					AND E2.officecd = #officeCD_S#
+				</isNotEmpty>
+			</isPropertyAvailable> 
+			<isPropertyAvailable property="rageSphereCD_S">
+				<isNotEmpty property="rageSphereCD_S">
+					AND E2.RAGESPHERECD = #rageSphereCD_S#
+				</isNotEmpty>
+			</isPropertyAvailable> 		
+
+		     UNION ALL
+		    SELECT 'Local Whishky' as Summary,'RESULT' as typeName,
+		           '2' AS SEQ1,'3' AS SEQ2, E2.empID,
+		           0 as Qty,  0 as Amt, 0 AS GSV, 0 AS NG  ,
+		           '0' AS apprStateCDName, '0' AS apprStateCD 
+		      FROM GEMP01MT E2
+		     WHERE E2.empID in ( select empID   
+									   from GAPP01DT
+									  where apprTpID      =  '000000' 
+									    and papprGrpID    in (  select apprgrpid
+									                              from gapp01dt 
+									                             where apprTpID = '000000' 
+									                               and empid    = #empID#) 
+									)    		  
+			<isPropertyAvailable property="officeCD_S">
+				<isNotEmpty property="officeCD_S">
+					AND E2.officecd = #officeCD_S#
+				</isNotEmpty>
+			</isPropertyAvailable> 
+			<isPropertyAvailable property="rageSphereCD_S">
+				<isNotEmpty property="rageSphereCD_S">
+					AND E2.RAGESPHERECD = #rageSphereCD_S#
+				</isNotEmpty>
+			</isPropertyAvailable> 
+			
+		     UNION ALL
+		    SELECT 'International Whishky' as Summary,'Target' as typeName,
+		           '3' AS SEQ1,'1' AS SEQ2, E2.empID,
+		           0 as Qty,  0 as Amt, 0 AS GSV, 0 AS NG  ,
+		           '0' AS apprStateCDName, '0' AS apprStateCD 
+		      FROM GEMP01MT E2
+		     WHERE E2.empID in ( select empID   
+									   from GAPP01DT
+									  where apprTpID      =  '000000' 
+									    and papprGrpID    in (  select apprgrpid
+									                              from gapp01dt 
+									                             where apprTpID = '000000' 
+									                               and empid    = #empID#) 
+									)    		
+			<isPropertyAvailable property="officeCD_S">
+				<isNotEmpty property="officeCD_S">
+					AND E2.officecd = #officeCD_S#
+				</isNotEmpty>
+			</isPropertyAvailable> 
+			<isPropertyAvailable property="rageSphereCD_S">
+				<isNotEmpty property="rageSphereCD_S">
+					AND E2.RAGESPHERECD = #rageSphereCD_S#
+				</isNotEmpty>
+			</isPropertyAvailable> 										
+		     UNION ALL
+		    SELECT 'International Whishky' as Summary,'PLAN' as typeName,
+		           '3' AS SEQ1,'2' AS SEQ2, E2.empID,
+		           0 as Qty,  0 as Amt, 0 AS GSV, 0 AS NG  ,
+		           '0' AS apprStateCDName, '0' AS apprStateCD 
+		      FROM GEMP01MT E2
+		     WHERE E2.empID in ( select empID   
+									   from GAPP01DT
+									  where apprTpID      =  '000000' 
+									    and papprGrpID    in (  select apprgrpid
+									                              from gapp01dt 
+									                             where apprTpID = '000000' 
+									                               and empid    = #empID#) 
+									)    	
+			<isPropertyAvailable property="officeCD_S">
+				<isNotEmpty property="officeCD_S">
+					AND E2.officecd = #officeCD_S#
+				</isNotEmpty>
+			</isPropertyAvailable> 
+			<isPropertyAvailable property="rageSphereCD_S">
+				<isNotEmpty property="rageSphereCD_S">
+					AND E2.RAGESPHERECD = #rageSphereCD_S#
+				</isNotEmpty>
+			</isPropertyAvailable> 	
+
+		     UNION ALL
+		    SELECT 'International Whishky' as Summary,'RESULT' as typeName,
+		           '3' AS SEQ1,'3' AS SEQ2, E2.empID,
+		           0 as Qty,  0 as Amt, 0 AS GSV, 0 AS NG  ,
+		           '0' AS apprStateCDName, '0' AS apprStateCD 
+		      FROM GEMP01MT E2
+		     WHERE E2.empID in ( select empID   
+									   from GAPP01DT
+									  where apprTpID      =  '000000' 
+									    and papprGrpID    in (  select apprgrpid
+									                              from gapp01dt 
+									                             where apprTpID = '000000' 
+									                               and empid    = #empID#) 
+									)    	
+			<isPropertyAvailable property="officeCD_S">
+				<isNotEmpty property="officeCD_S">
+					AND E2.officecd = #officeCD_S#
+				</isNotEmpty>
+			</isPropertyAvailable> 
+			<isPropertyAvailable property="rageSphereCD_S">
+				<isNotEmpty property="rageSphereCD_S">
+					AND E2.RAGESPHERECD = #rageSphereCD_S#
+				</isNotEmpty>
+			</isPropertyAvailable> 
+			
+			) B2,
+		   (  
+		       SELECT empID||Summary,typeName,SEQ1,SEQ2, empID,
+		              round(Qty/3) as Qty , round(Amt/3) as Amt, 
+		              round(GSV/3) AS GSV ,  round(NG/3) AS NG ,
+			          apprStateCDName, apprStateCD 
+		         FROM (
+		            SELECT ' Total' as Summary, 'Target' as typeName,   
+		                   '1' AS SEQ1,'1' AS SEQ2,
+		                   NVL((SELECT MAX(EMPID) FROM GEMP01MT WHERE RAGESPHERECD = A1.RAGESPHERECD AND WORKSTATCD = '01' AND OFFICECD IS NULL AND DKMDTPCD = 'DK' GROUP BY RAGESPHERECD), 'ETC') AS empID,
+		                   sum(B1.RESULTQTY) as Qty,
+		                   sum(B1.PAYAMT) as Amt,
+		                   SUM(P1.GSV * B1.RESULTQTY ) AS GSV,
+		                   SUM(B1.PAYAMT  ) AS NG ,
+                           '0' as apprStateCDName,
+                           '0' as apprStateCD       
+		              from GRLT01MT a1      
+		             inner join GRLT01DT B1                  
+		                     on a1.eventYM = B1.eventYM                  
+		                    and a1.venueCD = B1.venueCD 
+		             inner join GPRD01MT P1                  
+		                     on B1.prdCD = P1.prdCD                     
+		             where a1.eventYM between  to_char(add_months(to_date(#eventYM#||'01' ,'YYYYMMDD'), -4),'YYYYMM') and  to_char(add_months(to_date(#eventYM#||'01' ,'YYYYMMDD'), -1),'YYYYMM')
+					<isPropertyAvailable property="officeCD_S">
+						<isNotEmpty property="officeCD_S">
+							AND A1.officecd = #officeCD_S#
+						</isNotEmpty>
+					</isPropertyAvailable> 
+					<isPropertyAvailable property="rageSphereCD_S">
+						<isNotEmpty property="rageSphereCD_S">
+							AND A1.RAGESPHERECD = #rageSphereCD_S#
+						</isNotEmpty>
+					</isPropertyAvailable> 			                  
+		               and a1.empID in ( 
+										SELECT EMPID
+										FROM GAPP01DT
+										WHERE PAPPRGRPID IN (
+											SELECT APPRGRPID
+											FROM GAPP01DT
+											WHERE APPRTPID      =  '000000'  
+											AND PAPPRGRPID IN (
+												SELECT APPRGRPID
+												FROM GAPP01DT
+												WHERE APPRTPID      =  '000000'  
+												AND PAPPRGRPID IN (
+													SELECT APPRGRPID
+													FROM GAPP01DT
+													WHERE EMPID = #empID#
+													AND APPRTPID      =  '000000' 
+												)
+											)
+										)
+									)    		               
+		             GROUP BY A1.RAGESPHERECD )  
+		         UNION ALL
+		        SELECT 'Total' as Summary, 'PLAN' as typeName,    
+		               '1' AS SEQ1,'2' AS SEQ2, 
+		               NVL((SELECT MAX(EMPID) FROM GEMP01MT WHERE RAGESPHERECD = A1.RAGESPHERECD AND WORKSTATCD = '01' AND OFFICECD IS NULL AND DKMDTPCD = 'DK' GROUP BY RAGESPHERECD), 'ETC') AS empID,
+		               sum(B1.PLANQTY) as Qty,
+		               sum(B1.PAYAMT) as Amt,
+		               SUM(P1.GSV * B1.PLANQTY )AS GSV,
+		               SUM(B1.PAYAMT  )AS NG,
+						<![CDATA[
+						GETLANGDESC('000001','KR','F_CODE','APPRSTATECD',max(T1.APPRSTATECD),NULL) AS APPRSTATECDNAME,
+						MAX(T1.APPRSTATECD) AS APPRSTATECD
+						]]>
+		          from GPLN01MT a1      
+		         inner join GPLN01DT B1                  
+		                 on a1.eventYM = B1.eventYM                  
+		                and a1.venueCD = B1.venueCD 
+		         inner join GPRD01MT P1                  
+		                 on B1.prdCD = P1.prdCD          
+				LEFT OUTER JOIN (
+						SELECT EVENTYM, VENUECD, 
+							APPRSTATECD
+						FROM GPLN03MT
+						WHERE EVENTYM =  #eventYM#
+						AND LEVELNO = '3'
+					) T1
+					ON A1.EVENTYM = T1.EVENTYM
+					AND A1.VENUECD = T1.VENUECD		                 
+		         where a1.eventYM =  #eventYM#
+					<isPropertyAvailable property="officeCD_S">
+						<isNotEmpty property="officeCD_S">
+							AND A1.officecd = #officeCD_S#
+						</isNotEmpty>
+					</isPropertyAvailable> 
+					<isPropertyAvailable property="rageSphereCD_S">
+						<isNotEmpty property="rageSphereCD_S">
+							AND A1.RAGESPHERECD = #rageSphereCD_S#
+						</isNotEmpty>
+					</isPropertyAvailable> 			         
+		           and a1.empID   in ( 
+										SELECT EMPID
+										FROM GAPP01DT
+										WHERE PAPPRGRPID IN (
+											SELECT APPRGRPID
+											FROM GAPP01DT
+											WHERE APPRTPID      =  '000000'  
+											AND PAPPRGRPID IN (
+												SELECT APPRGRPID
+												FROM GAPP01DT
+												WHERE APPRTPID      =  '000000'  
+												AND PAPPRGRPID IN (
+													SELECT APPRGRPID
+													FROM GAPP01DT
+													WHERE EMPID = #empID#
+													AND APPRTPID      =  '000000' 
+												)
+											)
+										)
+									)    		
+		           <isPropertyAvailable property="apprStateCD">
+						<isNotEmpty prepend="and" property="apprStateCD">
+							a1.apprStateCD = #apprStateCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+		         GROUP BY A1.RAGESPHERECD
+				 
+				UNION ALL
+		        SELECT 'Total' as Summary, 'RESULT' as typeName,    
+		               '1' AS SEQ1,'3' AS SEQ2, 
+		               NVL((SELECT MAX(EMPID) FROM GEMP01MT WHERE RAGESPHERECD = A1.RAGESPHERECD AND WORKSTATCD = '01' AND OFFICECD IS NULL AND DKMDTPCD = 'DK' GROUP BY RAGESPHERECD), 'ETC') AS empID,
+		               sum(B1.RESULTQTY) as Qty,
+		               sum(B1.PAYAMT) as Amt,
+		               SUM(P1.GSV * B1.RESULTQTY )AS GSV,
+		               SUM(B1.PAYAMT  )AS NG,
+						<![CDATA[
+						GETLANGDESC('000001','KR','F_CODE','APPRSTATECD',max(T1.APPRSTATECD),NULL) AS APPRSTATECDNAME,
+						MAX(T1.APPRSTATECD) AS APPRSTATECD
+						]]>
+		          from GRLT01MT a1      
+		         inner join GRLT01DT B1                  
+		                 on a1.eventYM = B1.eventYM                  
+		                and a1.venueCD = B1.venueCD 
+		         inner join GPRD01MT P1                  
+		                 on B1.prdCD = P1.prdCD          
+				LEFT OUTER JOIN (
+						SELECT EVENTYM, VENUECD, 
+							APPRSTATECD
+						FROM GRLT07MT
+						WHERE EVENTYM =  #eventYM#
+						AND LEVELNO = '3'
+					) T1
+					ON A1.EVENTYM = T1.EVENTYM
+					AND A1.VENUECD = T1.VENUECD		                 
+		         where a1.eventYM =  #eventYM#
+					<isPropertyAvailable property="officeCD_S">
+						<isNotEmpty property="officeCD_S">
+							AND A1.officecd = #officeCD_S#
+						</isNotEmpty>
+					</isPropertyAvailable> 
+					<isPropertyAvailable property="rageSphereCD_S">
+						<isNotEmpty property="rageSphereCD_S">
+							AND A1.RAGESPHERECD = #rageSphereCD_S#
+						</isNotEmpty>
+					</isPropertyAvailable> 			         
+		           and a1.empID   in ( 
+										SELECT EMPID
+										FROM GAPP01DT
+										WHERE PAPPRGRPID IN (
+											SELECT APPRGRPID
+											FROM GAPP01DT
+											WHERE APPRTPID      =  '000000'  
+											AND PAPPRGRPID IN (
+												SELECT APPRGRPID
+												FROM GAPP01DT
+												WHERE APPRTPID      =  '000000'  
+												AND PAPPRGRPID IN (
+													SELECT APPRGRPID
+													FROM GAPP01DT
+													WHERE EMPID = #empID#
+													AND APPRTPID      =  '000000' 
+												)
+											)
+										)
+									)    		
+		           <isPropertyAvailable property="apprStateCD">
+						<isNotEmpty prepend="and" property="apprStateCD">
+							a1.apprStateCD = #apprStateCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+		         GROUP BY A1.RAGESPHERECD
+				 
+		       Union all
+		       SELECT Summary,typeName,SEQ1,SEQ2, empID,
+		              round(Qty/3) as Qty , round(Amt/3) as Amt, 
+		              round(GSV/3) AS GSV ,  round(NG/3) AS NG ,
+			          apprStateCDName, apprStateCD 
+		         FROM (
+		            SELECT 'Local Whishky' as Summary, 'Target' as typeName,   
+		                   '2' AS SEQ1,'1' AS SEQ2, 
+		                   NVL((SELECT MAX(EMPID) FROM GEMP01MT WHERE RAGESPHERECD = A1.RAGESPHERECD AND WORKSTATCD = '01' AND OFFICECD IS NULL AND DKMDTPCD = 'DK' GROUP BY RAGESPHERECD), 'ETC') AS empID,
+		                   sum(B1.RESULTQTY) as Qty,
+		                   sum(B1.PAYAMT) as Amt,
+		                   SUM(P1.GSV * B1.RESULTQTY ) AS GSV,
+		                   SUM(B1.PAYAMT  ) AS NG,
+                           '0' as apprStateCDName,
+                           '0' as apprStateCD       
+		              from GRLT01MT a1      
+		             inner join GRLT01DT B1                  
+		                     on a1.eventYM = B1.eventYM                  
+		                    and a1.venueCD = B1.venueCD 
+		             inner join GPRD01MT P1                  
+		                     on B1.prdCD = P1.prdCD
+		                    and P1.KINDTPCD3 = '10' 
+		             where a1.eventYM between  to_char(add_months(to_date(#eventYM#||'01' ,'YYYYMMDD'), -4),'YYYYMM') and  to_char(add_months(to_date(#eventYM#||'01' ,'YYYYMMDD'), -1),'YYYYMM')
+					<isPropertyAvailable property="officeCD_S">
+						<isNotEmpty property="officeCD_S">
+							AND A1.officecd = #officeCD_S#
+						</isNotEmpty>
+					</isPropertyAvailable> 
+					<isPropertyAvailable property="rageSphereCD_S">
+						<isNotEmpty property="rageSphereCD_S">
+							AND A1.RAGESPHERECD = #rageSphereCD_S#
+						</isNotEmpty>
+					</isPropertyAvailable> 			                         
+		               and a1.empID in ( 
+										SELECT EMPID
+										FROM GAPP01DT
+										WHERE PAPPRGRPID IN (
+											SELECT APPRGRPID
+											FROM GAPP01DT
+											WHERE APPRTPID      =  '000000'  
+											AND PAPPRGRPID IN (
+												SELECT APPRGRPID
+												FROM GAPP01DT
+												WHERE APPRTPID      =  '000000'  
+												AND PAPPRGRPID IN (
+													SELECT APPRGRPID
+													FROM GAPP01DT
+													WHERE EMPID = #empID#
+													AND APPRTPID      =  '000000' 
+												)
+											)
+										)
+									)    			               
+		             GROUP BY a1.RAGESPHERECD )     
+		        UNION ALL
+		        SELECT 'Local Whishky' as Summary, 'PLAN' as typeName,    
+		               '2' AS SEQ1,'2' AS SEQ2, 
+		               NVL((SELECT MAX(EMPID) FROM GEMP01MT WHERE RAGESPHERECD = A1.RAGESPHERECD AND WORKSTATCD = '01' AND OFFICECD IS NULL AND DKMDTPCD = 'DK' GROUP BY RAGESPHERECD), 'ETC') AS empID,
+		               sum(B1.PLANQTY) as Qty,
+		               sum(B1.PAYAMT) as Amt,
+		               SUM(P1.GSV * B1.PLANQTY )AS GSV,
+		               SUM(B1.PAYAMT )AS NG,
+                       <![CDATA[
+						GETLANGDESC('000001','KR','F_CODE','APPRSTATECD',max(T1.APPRSTATECD),NULL) AS APPRSTATECDNAME,
+						MAX(T1.APPRSTATECD) AS APPRSTATECD
+						]]>
+		          from GPLN01MT a1      
+		         inner join GPLN01DT B1                  
+		                 on a1.eventYM = B1.eventYM                  
+		                and a1.venueCD = B1.venueCD 
+		         inner join GPRD01MT P1                  
+		                 on B1.prdCD = P1.prdCD          
+		                and P1.KINDTPCD3 = '10' 
+				LEFT OUTER JOIN (
+						SELECT EVENTYM, VENUECD, 
+							APPRSTATECD
+						FROM GPLN03MT
+						WHERE EVENTYM =  #eventYM#
+						AND LEVELNO = '3'
+					) T1
+					ON A1.EVENTYM = T1.EVENTYM
+					AND A1.VENUECD = T1.VENUECD		                
+		         where a1.eventYM = #eventYM#
+					<isPropertyAvailable property="officeCD_S">
+						<isNotEmpty property="officeCD_S">
+							AND A1.officecd = #officeCD_S#
+						</isNotEmpty>
+					</isPropertyAvailable> 
+					<isPropertyAvailable property="rageSphereCD_S">
+						<isNotEmpty property="rageSphereCD_S">
+							AND A1.RAGESPHERECD = #rageSphereCD_S#
+						</isNotEmpty>
+					</isPropertyAvailable> 			         
+		           and A1.empID in ( 
+										SELECT EMPID
+										FROM GAPP01DT
+										WHERE PAPPRGRPID IN (
+											SELECT APPRGRPID
+											FROM GAPP01DT
+											WHERE APPRTPID      =  '000000'  
+											AND PAPPRGRPID IN (
+												SELECT APPRGRPID
+												FROM GAPP01DT
+												WHERE APPRTPID      =  '000000'  
+												AND PAPPRGRPID IN (
+													SELECT APPRGRPID
+													FROM GAPP01DT
+													WHERE EMPID = #empID#
+													AND APPRTPID      =  '000000' 
+												)
+											)
+										)
+									)    		
+		           <isPropertyAvailable property="apprStateCD">
+						<isNotEmpty prepend="and" property="apprStateCD">
+							a1.apprStateCD = #apprStateCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+		         GROUP BY A1.RAGESPHERECD
+				 
+		        UNION ALL
+		        SELECT 'Local Whishky' as Summary, 'RESULT' as typeName,    
+		               '2' AS SEQ1,'3' AS SEQ2, 
+		               NVL((SELECT MAX(EMPID) FROM GEMP01MT WHERE RAGESPHERECD = A1.RAGESPHERECD AND WORKSTATCD = '01' AND OFFICECD IS NULL AND DKMDTPCD = 'DK' GROUP BY RAGESPHERECD), 'ETC') AS empID,
+		               sum(B1.RESULTQTY) as Qty,
+		               sum(B1.PAYAMT) as Amt,
+		               SUM(P1.GSV * B1.RESULTQTY )AS GSV,
+		               SUM(B1.PAYAMT )AS NG,
+                       <![CDATA[
+						GETLANGDESC('000001','KR','F_CODE','APPRSTATECD',max(T1.APPRSTATECD),NULL) AS APPRSTATECDNAME,
+						MAX(T1.APPRSTATECD) AS APPRSTATECD
+						]]>
+		          from GRLT01MT a1      
+		         inner join GRLT01DT B1                  
+		                 on a1.eventYM = B1.eventYM                  
+		                and a1.venueCD = B1.venueCD 
+		         inner join GPRD01MT P1                  
+		                 on B1.prdCD = P1.prdCD          
+		                and P1.KINDTPCD3 = '10' 
+				LEFT OUTER JOIN (
+						SELECT EVENTYM, VENUECD, 
+							APPRSTATECD
+						FROM GRLT07MT
+						WHERE EVENTYM =  #eventYM#
+						AND LEVELNO = '3'
+					) T1
+					ON A1.EVENTYM = T1.EVENTYM
+					AND A1.VENUECD = T1.VENUECD		                
+		         where a1.eventYM = #eventYM#
+					<isPropertyAvailable property="officeCD_S">
+						<isNotEmpty property="officeCD_S">
+							AND A1.officecd = #officeCD_S#
+						</isNotEmpty>
+					</isPropertyAvailable> 
+					<isPropertyAvailable property="rageSphereCD_S">
+						<isNotEmpty property="rageSphereCD_S">
+							AND A1.RAGESPHERECD = #rageSphereCD_S#
+						</isNotEmpty>
+					</isPropertyAvailable> 			         
+		           and A1.empID in ( 
+										SELECT EMPID
+										FROM GAPP01DT
+										WHERE PAPPRGRPID IN (
+											SELECT APPRGRPID
+											FROM GAPP01DT
+											WHERE APPRTPID      =  '000000'  
+											AND PAPPRGRPID IN (
+												SELECT APPRGRPID
+												FROM GAPP01DT
+												WHERE APPRTPID      =  '000000'  
+												AND PAPPRGRPID IN (
+													SELECT APPRGRPID
+													FROM GAPP01DT
+													WHERE EMPID = #empID#
+													AND APPRTPID      =  '000000' 
+												)
+											)
+										)
+									)    		
+		           <isPropertyAvailable property="apprStateCD">
+						<isNotEmpty prepend="and" property="apprStateCD">
+							a1.apprStateCD = #apprStateCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+		         GROUP BY A1.RAGESPHERECD				 
+				 
+		         UNION ALL  
+		       SELECT Summary,typeName,SEQ1,SEQ2, empID,
+		              round(Qty/3) as Qty , round(Amt/3) as Amt, 
+		              round(GSV/3) AS GSV ,  round(NG/3) AS NG ,
+			          apprStateCDName, apprStateCD 
+		         FROM (		           
+		            SELECT 'International Whishky' as Summary, 'Target' as typeName,   
+		                   '3' AS SEQ1,'1' AS SEQ2, 
+		                   NVL((SELECT MAX(EMPID) FROM GEMP01MT WHERE RAGESPHERECD = A1.RAGESPHERECD AND WORKSTATCD = '01' AND OFFICECD IS NULL AND DKMDTPCD = 'DK' GROUP BY RAGESPHERECD), 'ETC') AS empID,
+		                   sum(B1.RESULTQTY) as Qty,
+		                   sum(B1.PAYAMT) as Amt,
+		                   NVL(SUM(P1.GSV * B1.RESULTQTY ),0) AS GSV,
+		                   SUM(B1.PAYAMT ) AS NG,
+                           '0' as apprStateCDName,
+                           '0' as apprStateCD       
+		              from GRLT01MT a1      
+		             inner join GRLT01DT B1                  
+		                     on a1.eventYM = B1.eventYM                  
+		                    and a1.venueCD = B1.venueCD 
+		             inner join GPRD01MT P1                  
+		                     on B1.prdCD = P1.prdCD  
+		                    and P1.KINDTPCD3 = '20' 
+		             where a1.eventYM between  to_char(add_months(to_date(#eventYM#||'01' ,'YYYYMMDD'), -4),'YYYYMM') and  to_char(add_months(to_date(#eventYM#||'01' ,'YYYYMMDD'), -1),'YYYYMM')
+					<isPropertyAvailable property="officeCD_S">
+						<isNotEmpty property="officeCD_S">
+							AND A1.officecd = #officeCD_S#
+						</isNotEmpty>
+					</isPropertyAvailable> 
+					<isPropertyAvailable property="rageSphereCD_S">
+						<isNotEmpty property="rageSphereCD_S">
+							AND A1.RAGESPHERECD = #rageSphereCD_S#
+						</isNotEmpty>
+					</isPropertyAvailable> 			                       
+		               and a1.empID in (
+										SELECT EMPID
+										FROM GAPP01DT
+										WHERE PAPPRGRPID IN (
+											SELECT APPRGRPID
+											FROM GAPP01DT
+											WHERE APPRTPID      =  '000000'  
+											AND PAPPRGRPID IN (
+												SELECT APPRGRPID
+												FROM GAPP01DT
+												WHERE APPRTPID      =  '000000'  
+												AND PAPPRGRPID IN (
+													SELECT APPRGRPID
+													FROM GAPP01DT
+													WHERE EMPID = #empID#
+													AND APPRTPID      =  '000000' 
+												)
+											)
+										)
+									)    		
+		             GROUP BY A1.RAGESPHERECD   )        
+		         UNION ALL		        
+		        SELECT 'International Whishky' as Summary, 'PLAN' as typeName,    
+		               '3' AS SEQ1,'2' AS SEQ2, 
+		               NVL((SELECT MAX(EMPID) FROM GEMP01MT WHERE RAGESPHERECD = A1.RAGESPHERECD AND WORKSTATCD = '01' AND OFFICECD IS NULL AND DKMDTPCD = 'DK' GROUP BY RAGESPHERECD), 'ETC') AS empID,
+		               sum(B1.PLANQTY) as Qty,
+		               sum(B1.PAYAMT) as Amt,
+		               NVL(SUM(P1.GSV * B1.PLANQTY ),0) AS GSV,
+		               SUM(B1.PAYAMT  )AS NG,
+						<![CDATA[
+						GETLANGDESC('000001','KR','F_CODE','APPRSTATECD',max(T1.APPRSTATECD),NULL) AS APPRSTATECDNAME,
+						MAX(T1.APPRSTATECD) AS APPRSTATECD
+						]]>
+		          from GPLN01MT a1      
+		         inner join GPLN01DT B1                  
+		                 on a1.eventYM = B1.eventYM                  
+		                and a1.venueCD = B1.venueCD 
+		         inner join GPRD01MT P1                  
+		                 on B1.prdCD = P1.prdCD          
+		                 and P1.KINDTPCD3 = '20'
+				LEFT OUTER JOIN (
+						SELECT EVENTYM, VENUECD, 
+							APPRSTATECD
+						FROM GPLN03MT
+						WHERE EVENTYM =  #eventYM#
+						AND LEVELNO = '3'
+					) T1
+					ON A1.EVENTYM = T1.EVENTYM
+					AND A1.VENUECD = T1.VENUECD
+		         where a1.eventYM = #eventYM#
+					<isPropertyAvailable property="officeCD_S">
+						<isNotEmpty property="officeCD_S">
+							AND A1.officecd = #officeCD_S#
+						</isNotEmpty>
+					</isPropertyAvailable> 
+					<isPropertyAvailable property="rageSphereCD_S">
+						<isNotEmpty property="rageSphereCD_S">
+							AND A1.RAGESPHERECD = #rageSphereCD_S#
+						</isNotEmpty>
+					</isPropertyAvailable> 			         
+		           and a1.empID in ( 
+										SELECT EMPID
+										FROM GAPP01DT
+										WHERE PAPPRGRPID IN (
+											SELECT APPRGRPID
+											FROM GAPP01DT
+											WHERE APPRTPID      =  '000000'  
+											AND PAPPRGRPID IN (
+												SELECT APPRGRPID
+												FROM GAPP01DT
+												WHERE APPRTPID      =  '000000'  
+												AND PAPPRGRPID IN (
+													SELECT APPRGRPID
+													FROM GAPP01DT
+													WHERE EMPID = #empID#
+													AND APPRTPID      =  '000000' 
+												)
+											)
+										)
+									)    		           
+		           <isPropertyAvailable property="apprStateCD">
+						<isNotEmpty prepend="and" property="apprStateCD">
+							a1.apprStateCD = #apprStateCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+		         GROUP BY A1.RAGESPHERECD
+				 
+		         UNION ALL		        
+		        SELECT 'International Whishky' as Summary, 'RESULT' as typeName,    
+		               '3' AS SEQ1,'3' AS SEQ2, 
+		               NVL((SELECT MAX(EMPID) FROM GEMP01MT WHERE RAGESPHERECD = A1.RAGESPHERECD AND WORKSTATCD = '01' AND OFFICECD IS NULL AND DKMDTPCD = 'DK' GROUP BY RAGESPHERECD), 'ETC') AS empID,
+		               sum(B1.RESULTQTY) as Qty,
+		               sum(B1.PAYAMT) as Amt,
+		               NVL(SUM(P1.GSV * B1.RESULTQTY ),0) AS GSV,
+		               SUM(B1.PAYAMT  )AS NG,
+						<![CDATA[
+						GETLANGDESC('000001','KR','F_CODE','APPRSTATECD',max(T1.APPRSTATECD),NULL) AS APPRSTATECDNAME,
+						MAX(T1.APPRSTATECD) AS APPRSTATECD
+						]]>
+		          from GRLT01MT a1      
+		         inner join GRLT01DT B1                  
+		                 on a1.eventYM = B1.eventYM                  
+		                and a1.venueCD = B1.venueCD 
+		         inner join GPRD01MT P1                  
+		                 on B1.prdCD = P1.prdCD          
+		                 and P1.KINDTPCD3 = '20'
+				LEFT OUTER JOIN (
+						SELECT EVENTYM, VENUECD, 
+							APPRSTATECD
+						FROM GRLT07MT
+						WHERE EVENTYM =  #eventYM#
+						AND LEVELNO = '3'
+					) T1
+					ON A1.EVENTYM = T1.EVENTYM
+					AND A1.VENUECD = T1.VENUECD
+		         where a1.eventYM = #eventYM#
+					<isPropertyAvailable property="officeCD_S">
+						<isNotEmpty property="officeCD_S">
+							AND A1.officecd = #officeCD_S#
+						</isNotEmpty>
+					</isPropertyAvailable> 
+					<isPropertyAvailable property="rageSphereCD_S">
+						<isNotEmpty property="rageSphereCD_S">
+							AND A1.RAGESPHERECD = #rageSphereCD_S#
+						</isNotEmpty>
+					</isPropertyAvailable> 			         
+		           and a1.empID in ( 
+										SELECT EMPID
+										FROM GAPP01DT
+										WHERE PAPPRGRPID IN (
+											SELECT APPRGRPID
+											FROM GAPP01DT
+											WHERE APPRTPID      =  '000000'  
+											AND PAPPRGRPID IN (
+												SELECT APPRGRPID
+												FROM GAPP01DT
+												WHERE APPRTPID      =  '000000'  
+												AND PAPPRGRPID IN (
+													SELECT APPRGRPID
+													FROM GAPP01DT
+													WHERE EMPID = #empID#
+													AND APPRTPID      =  '000000' 
+												)
+											)
+										)
+									)    		           
+		           <isPropertyAvailable property="apprStateCD">
+						<isNotEmpty prepend="and" property="apprStateCD">
+							a1.apprStateCD = #apprStateCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+		         GROUP BY A1.RAGESPHERECD				 
+				 
+		    ) A2
+		where b2.empID = a2.empID(+)		 
+          and b2.SEQ1  = a2.seq1(+)
+          and b2.SEQ2  = a2.seq2(+)
+		ORDER BY b2.empID,b2.SEQ1,b2.SEQ2   	  	
+	</select>
+	
+	<!-- 자기 자신의 승인상태  확인 -->
+	<select id="RLT0201108S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		<![CDATA[ 
+		SELECT CASE WHEN CNT < 2 THEN NVL(apprstatecd,'30') ELSE 'X' END AS CHK
+		]]>
+		FROM
+		(
+		SELECT COUNT(*) CNT, MAX(apprstatecd) AS apprstatecd
+		FROM
+		    (
+		    SELECT apprstatecd, COUNT(*) CNT
+		      FROM GRLT07MT      
+		     WHERE EVENTYM = #eventYM#
+		       AND LEVELNO = #levelNo#
+		       AND EMPID   = #empID#
+		    GROUP BY apprstatecd
+		    )
+		)
+	</select>
+	
+	<!-- Result정보 승인상태 갱신 -->
+	<update id="RLT0201101U" parameterClass="com.kia.rlt.model.GRLT01MT">
+		update GRLT01MT
+		   set apprStateCD   = #apprStateCD#
+			 , verifyStateCD = #verifyStateCD#
+			 , chgID         = #userID#
+			 , chgDate       = sysdate
+		 where eventYM       = #eventYM#
+		   <isPropertyAvailable property="apprLv">
+	      	<isNotEmpty property="apprLv">
+	      		<isEqual property="apprLv" compareValue="20">
+					and venueCD     in ( select venueCD from GRLT01MT
+										  where eventym = #eventYM#
+										    and empid in ( select empID  from GAPP01DT
+														    where apprTpID =  '000000' 
+															  and papprGrpID in (  select apprgrpid
+																			         from gapp01dt 
+																			        where apprTpID = '000000' 
+																			          and empid    = #userID#
+																				)  
+											              )
+			                           ) 
+	             </isEqual>
+	             <isEqual property="apprLv" compareValue="30">
+					and venueCD     in ( select venueCD from GRLT01MT
+										  where eventym = #eventYM#
+										    and empid in ( 
+										    			SELECT EMPID
+														FROM GAPP01DT
+														WHERE APPRTPID      =  '000000'  
+														AND PAPPRGRPID IN (
+															SELECT APPRGRPID
+															FROM GAPP01DT
+															WHERE APPRTPID      =  '000000'  
+															AND PAPPRGRPID IN (
+																SELECT APPRGRPID
+																FROM GAPP01DT
+																WHERE EMPID = #userID#
+																AND APPRTPID      =  '000000' 
+															)
+														)
+												)
+			                           ) 
+	             </isEqual>
+				<isEqual property="apprLv" compareValue="40">
+					and venueCD     in ( select venueCD from GRLT01MT
+										  where eventym = #eventYM#
+										    and empid in ( 
+										    			SELECT EMPID
+														FROM GAPP01DT
+														WHERE PAPPRGRPID IN (
+															SELECT APPRGRPID
+															FROM GAPP01DT
+															WHERE APPRTPID      =  '000000'  
+															AND PAPPRGRPID IN (
+																SELECT APPRGRPID
+																FROM GAPP01DT
+																WHERE APPRTPID      =  '000000'  
+																AND PAPPRGRPID IN (
+																	SELECT APPRGRPID
+																	FROM GAPP01DT
+																	WHERE EMPID = #userID#
+																	AND APPRTPID      =  '000000' 
+																)
+															)
+														)
+												)
+			                           ) 
+	             </isEqual>
+			</isNotEmpty>
+			<isEmpty property="apprLv">
+				and venueCD = ''
+			</isEmpty>
+		</isPropertyAvailable>
+		<isNotPropertyAvailable property="apprLv">
+			and venueCD = ''
+		</isNotPropertyAvailable>		   
+	</update>
+	
+	<!-- Result승인정보 승인처리 -->
+	<update id="RLT0201102U" parameterClass="com.kia.rlt.model.GRLT01MT">
+		update GRLT07MT
+		   set apprStateCD = '50'
+			 , commt    = #apprCommt#
+			 , apprDate = sysdate
+			 , chgID    = #userID#
+			 , chgDate  = sysdate
+		 where eventYM  = #eventYM#		   
+		   and diffNo   = #diffNo#
+		   and apprTpID = #apprTpID#
+		   and levelNo  = #levelNo#
+		  <isPropertyAvailable property="apprLv">
+			<isNotEmpty property="apprLv">
+				<isEqual property="apprLv" compareValue="20">
+					and venueCD     in ( select venueCD from GRLT01MT
+										  where eventym = #eventYM#
+											and empid in ( select empID  from GAPP01DT
+															where apprTpID =  '000000' 
+															  and papprGrpID in (  select apprgrpid
+																					 from gapp01dt 
+																					where apprTpID = '000000' 
+																					  and empid    = #userID#
+																				)  
+														  )
+									   ) 
+				 </isEqual>
+				 <isEqual property="apprLv" compareValue="30">
+					and venueCD     in ( select venueCD from GRLT01MT
+										  where eventym = #eventYM#
+											and empid in ( 
+														SELECT EMPID
+														FROM GAPP01DT
+														WHERE APPRTPID      =  '000000'  
+														AND PAPPRGRPID IN (
+															SELECT APPRGRPID
+															FROM GAPP01DT
+															WHERE APPRTPID      =  '000000'  
+															AND PAPPRGRPID IN (
+																SELECT APPRGRPID
+																FROM GAPP01DT
+																WHERE EMPID = #userID#
+																AND APPRTPID      =  '000000' 
+															)
+														)
+												)
+									   ) 
+				 </isEqual>
+				<isEqual property="apprLv" compareValue="40">
+					and venueCD     in ( select venueCD from GRLT01MT
+										  where eventym = #eventYM#
+											and empid in ( 
+														SELECT EMPID
+														FROM GAPP01DT
+														WHERE PAPPRGRPID IN (
+															SELECT APPRGRPID
+															FROM GAPP01DT
+															WHERE APPRTPID      =  '000000'  
+															AND PAPPRGRPID IN (
+																SELECT APPRGRPID
+																FROM GAPP01DT
+																WHERE APPRTPID      =  '000000'  
+																AND PAPPRGRPID IN (
+																	SELECT APPRGRPID
+																	FROM GAPP01DT
+																	WHERE EMPID = #userID#
+																	AND APPRTPID      =  '000000' 
+																)
+															)
+														)
+												)
+									   ) 
+				 </isEqual>
+			</isNotEmpty>
+			<isEmpty property="apprLv">
+				and venueCD = ''
+			</isEmpty>
+		</isPropertyAvailable>
+		<isNotPropertyAvailable property="apprLv">
+			and venueCD = ''
+		</isNotPropertyAvailable>
+	</update>
+	
+	<!-- Result승인정보 상위자 승인요청처리 -->
+	<update id="RLT0201103U" parameterClass="com.kia.rlt.model.GRLT01MT">
+		update GRLT07MT
+		   set apprStateCD = '20'
+			 , chgID       = #userID#
+			 , chgDate     = sysdate
+	     where eventYM     = #eventYM#	       
+		   and diffNo      = #diffNo#
+		   and apprTpID    = #apprTpID#
+		   and levelNo     = #levelNo#+1
+		   <isPropertyAvailable property="apprLv">
+			<isNotEmpty property="apprLv">
+				<isEqual property="apprLv" compareValue="20">
+					and venueCD     in ( select venueCD from GRLT01MT
+										  where eventym = #eventYM#
+											and empid in ( select empID  from GAPP01DT
+															where apprTpID =  '000000' 
+															  and papprGrpID in (  select apprgrpid
+																					 from gapp01dt 
+																					where apprTpID = '000000' 
+																					  and empid    = #userID#
+																				)  
+														  )
+									   ) 
+				 </isEqual>
+				 <isEqual property="apprLv" compareValue="30">
+					and venueCD     in ( select venueCD from GRLT01MT
+										  where eventym = #eventYM#
+											and empid in ( 
+														SELECT EMPID
+														FROM GAPP01DT
+														WHERE APPRTPID      =  '000000'  
+														AND PAPPRGRPID IN (
+															SELECT APPRGRPID
+															FROM GAPP01DT
+															WHERE APPRTPID      =  '000000'  
+															AND PAPPRGRPID IN (
+																SELECT APPRGRPID
+																FROM GAPP01DT
+																WHERE EMPID = #userID#
+																AND APPRTPID      =  '000000' 
+															)
+														)
+												)
+									   ) 
+				 </isEqual>
+				<isEqual property="apprLv" compareValue="40">
+					and venueCD     in ( select venueCD from GRLT01MT
+										  where eventym = #eventYM#
+											and empid in ( 
+														SELECT EMPID
+														FROM GAPP01DT
+														WHERE PAPPRGRPID IN (
+															SELECT APPRGRPID
+															FROM GAPP01DT
+															WHERE APPRTPID      =  '000000'  
+															AND PAPPRGRPID IN (
+																SELECT APPRGRPID
+																FROM GAPP01DT
+																WHERE APPRTPID      =  '000000'  
+																AND PAPPRGRPID IN (
+																	SELECT APPRGRPID
+																	FROM GAPP01DT
+																	WHERE EMPID = #userID#
+																	AND APPRTPID      =  '000000' 
+																)
+															)
+														)
+												)
+									   ) 
+				 </isEqual>
+			</isNotEmpty>
+			<isEmpty property="apprLv">
+				and venueCD = ''
+			</isEmpty>
+		</isPropertyAvailable>
+		<isNotPropertyAvailable property="apprLv">
+			and venueCD = ''
+		</isNotPropertyAvailable>
+	</update>
+	<!-- Result승인정보 승인처리 -->
+	<update id="RLT0201114U" parameterClass="com.kia.rlt.model.GRLT01MT">
+		update GLTC01MT a
+		   set tpayAmt = ( select nvl(sum(incentive),0) from GRLT06MT
+			                where eventYM = #eventYM#
+			                  and venueCD = a.venueCD		)
+			, chgID = a.empID
+			, chgDate = sysdate
+		where contractDateTo = #eventYM#
+			and venueCD     in ( select venueCD from GRLT01MT
+										  where eventym = #eventYM#
+											and empid in ( 
+														SELECT EMPID
+														FROM GAPP01DT
+														WHERE PAPPRGRPID IN (
+															SELECT APPRGRPID
+															FROM GAPP01DT
+															WHERE APPRTPID      =  '000000'  
+															AND PAPPRGRPID IN (
+																SELECT APPRGRPID
+																FROM GAPP01DT
+																WHERE APPRTPID      =  '000000'  
+																AND PAPPRGRPID IN (
+																	SELECT APPRGRPID
+																	FROM GAPP01DT
+																	WHERE EMPID = #userID#
+																	AND APPRTPID      =  '000000' 
+																)
+															)
+														)
+												)
+									   ) 
+	</update>
+	
+	<!-- 반려시 메일보낼 하위승인자들 정보(상태가 비어있거나, 승인요청인 사람 제외) -->
+	<select id="RLT0201105S" parameterClass="com.kia.rlt.model.GRLT01MT" resultClass="java.util.LinkedHashMap">
+		select empID as "empID"
+			 , max(empNm) as "empNm"
+			 , max(emailAddr) as "emailAddr"
+		  from ( select b.empID
+				      , empNm
+				      , emailAddr
+				      , b.apprStateCD
+			       from GRLT01MT a
+			      inner join GRLT07MT b
+				          on a.eventYM = b.eventYM
+				         and a.venueCD = b.venueCD
+				         and a.diffNo = b.diffNo
+			      inner join GEMP01MT c
+				          on b.empID = c.empID
+		 where a.eventYM = #eventYM#		   
+	       and a.diffNo  = #diffNo#
+		   and b.apprTpID in(#apprTpID#, #apprTpID_Normal#)
+		   and (b.apprStateCD is not null and b.apprStateCD != '20')
+		   and A.venueCD in ( select venueCD from GRLT01MT
+						       where eventym = #eventYM#
+						           <isPropertyAvailable property="empIDs">
+					                   <iterate property="empIDs" open="and empID in (" close=")" conjunction=",">
+					        		       #empIDs[]#
+					                   </iterate>
+					               </isPropertyAvailable>
+						  )
+		        )
+		group by empID
+	</select>
+	
+	<!-- Result정보 승인상태 갱신 -->
+	<update id="RLT0201105U" parameterClass="com.kia.rlt.model.GRLT01MT">
+		update GRLT01MT
+		   set apprStateCD   = #apprStateCD#
+			 , verifyStateCD = #verifyStateCD#
+			 , chgID         = #userID#
+			 , chgDate       = sysdate
+		where  eventYM       = #eventYM#	
+		
+		and venueCD in ( select venueCD from GRLT07MT
+						       where eventym = #eventYM#
+						       and APPRTPID = '000000' 
+						       and LEVELNO = '1'
+						       and APPRSTATECD = '50'
+						           <isPropertyAvailable property="empIDs">
+					                   <iterate property="empIDs" open="and empID in (" close=")" conjunction=",">
+					        		       #empIDs[]#
+					                   </iterate>
+					               </isPropertyAvailable>
+						  )
+						  	  
+		<isPropertyAvailable property="empIDs">
+		<iterate property="empIDs" open="and empID in (" close=")" conjunction=",">
+		    #empIDs[]#
+		</iterate>
+		</isPropertyAvailable>
+		
+		
+	</update>
+	
+	<!-- Result승인정보 하위자 반려처리 -->
+	<update id="RLT0201106U" parameterClass="com.kia.rlt.model.GRLT01MT">
+		update GRLT07MT
+		   set apprStateCD = #apprStateCD#
+			 , apprDate    = sysdate
+			 , commt       = #apprCommt#
+			 , chgID       = #userID#
+			 , chgDate     = sysdate
+		 where eventYM     = #eventYM#		  
+   		AND EMPID IN (
+		    SELECT EMPID   
+		    FROM GAPP01DT
+		    WHERE APPRTPID      =  '000000' 
+		    AND PAPPRGRPID    IN (  SELECT APPRGRPID
+		              FROM GAPP01DT 
+		             WHERE APPRTPID = '000000' 
+		               AND EMPID    = #empID#) 
+		)
+		   
+	</update>
+</sqlMap>

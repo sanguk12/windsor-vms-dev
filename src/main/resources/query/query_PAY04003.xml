@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="PAY04003">
+	
+	<!-- 지급 완료 -->
+	<update id="PAY0400301U" parameterClass="com.kia.rlt.model.GRLT01MT">
+		update GRLT01MT
+		set
+			payStateCD = #payStateCD#
+			, payCommt = #payCommt#
+			, transferDueDate = #transferDueDate#
+			, transferDate = #transferDate#
+			, chgID = #userID#
+			, chgDate = sysdate
+		where
+			eventYM = #eventYM#
+			and venueCD = #venueCD#
+			and diffNo = #diffNo#
+	</update>
+	
+	<!-- 지급 보류 -->
+	<update id="PAY0400302U" parameterClass="com.kia.rlt.model.GRLT01MT">
+		update GRLT01MT
+		set
+			payStateCD = #payStateCD#
+			, transferDueDate = #transferDueDate#
+			, payCommt = #payCommt#
+			, chgID = #userID#
+			, chgDate = sysdate
+		where
+			eventYM = #eventYM#
+			and venueCD = #venueCD#
+			and diffNo = #diffNo#
+	</update>
+	
+	<!-- 키맨 확인 여부 수정(미확인)-->
+	<update id="PAY0400302U1" parameterClass="com.kia.rlt.model.GRLT01MT">
+		UPDATE 
+			(SELECT A.KEYCHKYN ,
+					<!-- DECODE(B.CONTRACTYN,NULL,2,0) AS "KEYCHK", --> 
+					'0' AS "KEYCHK", 
+					A.EVENTYM, 
+					A.VENUECD, 
+					A.DIFFNO, 
+					A.KEYMANID 
+			FROM GRLT06MT A, PMOB001DT B 
+			WHERE A.EVENTYM=#eventYM# 
+			AND A.VENUECD = #venueCD# 
+			AND A.DIFFNO = #diffNo#
+			AND A.KEYMANID = B.KEYMANID(+)) 
+		SET KEYCHKYN = KEYCHK
+	</update>
+	
+	<!-- 지급의견 수정 -->
+	<update id="PAY0400303U" parameterClass="com.kia.rlt.model.GRLT01MT">
+		update GRLT01MT
+		set
+			payCommt = #payCommt#
+			, chgID = #userID#
+			, chgDate = sysdate
+		where
+			eventYM = #eventYM#
+			and venueCD = #venueCD#
+			and diffNo = #diffNo#
+	</update>
+	
+	<!-- 지급 엑셀 조회 업소단위(지급예정내역) -->
+	<select id="PAY0400301S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			eventYM as "eventYM"
+			, diffNo as "diffNo"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','INCNTTPCD',incntTpCD,null) as "incntTpCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ACTIVITYCD',activityCD,null) as "activityCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','PROGRAMCD',programCD,null) as "programCDName"
+			, payApprDate as "payApprDate"
+			, transferDueDate as "transferDueDate"
+			, transferDate as "transferDate"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','DKMDTPCD',dkmdTpCD,null) as "dkmdTpCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','RAGESPHERECD',rageSphereCD,null) as "rageSphereCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','OFFICECD',officeCD,null) as "officeCDName"
+			, (select empNm from GEMP01MT where empID=t.empID) as "empNm"
+			, venueCD as "venueCD"
+			, venueNm as "venueNm"
+			, prdNm as "prdNm"
+			, keymanID as "keymanID"
+			, keymanNm as "keymanNm"
+			, regIDNo as "regIDNo"
+			, addr as "addr"
+			, phoneNo as "phoneNo"
+			, bankCD as "bankCD"
+			, accountNo as "accountNo"
+			, holderNm as "holderNm"
+			, payAmt as "payAmt"
+			, payCommt as "payCommt"
+		from (
+			select
+				a.eventYM
+				, '' as diffNo
+				, 'VEN' as incntTpCD
+				, activityCD
+				, programCD
+				, payApprDate
+				, transferDueDate
+				, transferDate
+				, a.dkmdTpCD
+				, a.rageSphereCD
+				, a.officeCD
+				, a.teamCD
+				, a.empID
+				, a.venueCD
+				, venueNm
+				, '' as prdNm
+				, e.keymanID
+				, f.keymanNm
+				, SCP.DEC_B64('DAMO','SCP','AES_256.SCPS',f.regIDNo) AS regIDNo
+				, f.addr
+				, f.phoneNo
+				, e.bankCD
+				, e.accountNo
+				, e.holderNm
+				, e.payAmt
+				, a.payCommt
+			from GRLT01MT a
+			inner join GVEN01MT b
+				on a.venueCD = b.venueCD
+			inner join GRLT06MT e
+				on a.eventYM = e.eventYM
+				and a.venueCD = e.venueCD
+				and a.diffNo = e.diffNo
+			left outer join GKEY01MT f
+				on e.keymanID = f.keymanID
+			where
+				a.eventYM = #eventYM#
+				and a.diffNo = #diffNo#
+				and programCD = 'G1'
+				and activityCD != '20'
+				<isPropertyAvailable property="dkmdTpCD">
+					<isNotEmpty prepend="and" property="dkmdTpCD">
+						a.dkmdTpCD = #dkmdTpCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="rageSphereCD">
+					<isNotEmpty prepend="and" property="rageSphereCD">
+						rageSphereCD = #rageSphereCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="officeCD">
+					<isNotEmpty prepend="and" property="officeCD">
+						officeCD = #officeCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="stdAmt">
+					<isNotEmpty prepend="and" property="stdAmt">
+						tpayAmt >= #stdAmt#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="payStateCD">
+					<isNotEmpty prepend="and" property="payStateCD">
+						payStateCD = #payStateCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="transferDate">
+					<isNotEmpty prepend="and" property="transferDate">
+						a.transferDate = #transferDate#
+					</isNotEmpty>
+				</isPropertyAvailable>
+		) t
+		order by
+			rageSphereCD
+			, officeCD
+			, teamCD
+			, empID
+			, venueCD
+	</select>
+	
+</sqlMap>

@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="ANL02004">
+	
+	<!-- ************** -->
+	<!-- *** SELECT *** -->
+	<!-- ************** -->
+	
+	<!-- 조건: Data구분 조회 -->
+    <select id="ANL0200401S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+        select
+        	t1.comCode as "comCode", 
+            NVL(t2.pkDesc,t1.codeName) as "codeName"
+        from
+        	F_Code t1
+        	left outer join (
+        		select *
+        		from
+        			F_LangDescription
+        		where
+        		languageCD = #languageCD#
+        		and tableID = 'F_CODE'
+        		and pkID1 = #codeDiv#
+        		)  t2
+        	  on t1.codeDiv = t2.pkID1
+        	  and t1.comCode = t2.pkID2
+        where
+        	t1.codeDiv = #codeDiv#
+        and t1.comCode in ('13', '14', '15', '16', '17')
+        and t1.useYN = 'Y'
+        and t1.activeFlg = 'U'
+        order by
+            t1.seq, t1.comCode
+    </select>
+	
+	<!-- 조건: 회계기준년도 조회 -->
+    <select id="ANL0200402S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+        SELECT T1. Fy  as "comCode"
+        		, T1.Fy as "codeName"
+          FROM ESLT_CALENDAR_MT T1
+         GROUP BY T1.Fy
+         ORDER BY T1.Fy
+    </select>
+	
+	<!-- 조건: 현재시스템월 전월의 회계기준년월을 가지고온다. -->
+    <select id="ANL0200403S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+        SELECT substr(t.fyPeriod,1,4) as "fy"
+			   , substr(t.fyPeriod,5,7) as "period"
+		  FROM (
+		  			SELECT GETFISCALYM(TO_CHAR(ADD_MONTHS(TO_DATE(TO_CHAR(SYSDATE,'YYYYMM'),'YYYYMM'),-1), 'YYYYMM')) as fyPeriod
+			  		  FROM dual
+			    )t
+    </select>
+    
+	<!-- ************** -->
+	<!-- *** DELETE *** -->
+	<!-- ************** -->
+	
+	<!-- 목표자료 업로드 : 월Shiment목표|지점 삭제 -->
+	<delete id="ANL0200401D" parameterClass="com.kia.anl.model.ESLT_SH_TG">
+	   delete 
+	     from ESLT_SH_TG
+	    where fy = #fy_S#
+	</delete>
+	
+	<!-- 목표자료 업로드 : 월DC목표|지점 삭제 -->
+	<delete id="ANL0200402D" parameterClass="com.kia.anl.model.ESLT_DC_TG">
+	   delete
+	     from ESLT_DC_TG
+	    where fy = #fy_S#
+	</delete>
+	
+	<!-- 목표자료 업로드 : 월채권목표|지점 삭제 -->
+	<delete id="ANL0200403D" parameterClass="com.kia.anl.model.ESLT_CD_TG">
+	   delete
+	     from ESLT_CD_TG
+	    where fy = #fy_S#
+	</delete>
+	
+	<!-- 목표자료 업로드 : 월NTS목표|팀 삭제 -->
+	<delete id="ANL0200404D" parameterClass="com.kia.anl.model.ESLT_NTS_TG">
+	   delete
+	     from ESLT_NTS_TG
+	    where fy = #fy_S#
+	</delete>
+	
+	<!-- 목표자료 업로드 : 월NOTEG목표|팀 삭제 -->
+	<delete id="ANL0200405D" parameterClass="com.kia.anl.model.ESLT_NOTEG_TG">
+	   delete
+	     from ESLT_NOTEG_TG
+	    where fy = #fy_S#
+	</delete>
+	
+	<!-- ************** -->
+	<!-- *** INSERT *** -->
+	<!-- ************** -->
+	
+	<!-- 목표자료 업로드 : 월Shiment목표|지점 추가 -->
+	<insert id="ANL0200401I" parameterClass="com.kia.anl.model.ESLT_SH_TG">
+	    insert into ESLT_SH_TG (
+	    	fy, period, branch, productL7, volume,
+	    	regID, regDate, chgID, chgDate
+	    ) values (
+	    	UPPER(#fy#), UPPER(#period#), UPPER(#branch#), UPPER(#productL7#), UPPER(#volume#),
+	    	#userID#, sysdate, #userID#, sysdate
+	    )
+	</insert>
+	
+	<!-- 목표자료 업로드 : 월DC목표|지점 추가 -->
+	<insert id="ANL0200402I" parameterClass="com.kia.anl.model.ESLT_DC_TG">
+	    insert into ESLT_DC_TG (
+	    	fy, period, branch, dataType, productL2, volume, 
+	    	regID, regDate, chgID, chgDate
+	    ) values (
+	    	UPPER(#fy#), UPPER(#period#), UPPER(#branch#), UPPER(#dataType#), UPPER(#productL2#), UPPER(#volume#),
+	    	#userID#, sysdate, #userID#, sysdate
+	    )
+	</insert>
+	
+	<!-- 목표자료 업로드 : 월채권목표|지점 추가 -->
+	<insert id="ANL0200403I" parameterClass="com.kia.anl.model.ESLT_CD_TG">
+	    insert into ESLT_CD_TG (
+	    	fy, period, branch, periodType, branchType, ratio, 
+	    	regID, regDate, chgID, chgDate
+	    ) values (
+	    	UPPER(#fy#), UPPER(#period#), UPPER(#branch#), UPPER(#periodType#), UPPER(#branchType#), UPPER(#ratio#),
+	    	#userID#, sysdate, #userID#, sysdate
+	    )
+	</insert>
+	
+	<!-- 목표자료 업로드 : 월NTS목표|팀 추가 -->
+	<insert id="ANL0200404I" parameterClass="com.kia.anl.model.ESLT_NTS_TG">
+	    insert into ESLT_NTS_TG (
+	    	fy, period, team, market, segment, channel, company, volume, 
+	    	regID, regDate, chgID, chgDate
+	    ) values (
+	    	UPPER(#fy#), UPPER(#period#), UPPER(#team#), UPPER(#market#), UPPER(#segment#), UPPER(#channel#), UPPER(#company#), UPPER(#volume#),
+	    	#userID#, sysdate, #userID#, sysdate
+	    )
+	</insert>
+	
+	<!-- 목표자료 업로드 : 월NOTEG목표|팀 추가 -->
+	<insert id="ANL0200405I" parameterClass="com.kia.anl.model.ESLT_NOTEG_TG">
+	    insert into ESLT_NOTEG_TG (
+	    	fy, period, team, market, volume, amount, 
+	    	regID, regDate, chgID, chgDate 
+	    ) values (
+	    	UPPER(#fy#), UPPER(#period#), UPPER(#team#), UPPER(#market#), UPPER(#volume#), UPPER(#amount#),
+	    	#userID#, sysdate, #userID#, sysdate
+	    )
+	</insert>
+	
+</sqlMap>

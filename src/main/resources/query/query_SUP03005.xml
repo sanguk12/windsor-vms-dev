@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="SUP03005">
+	
+	<select id="SUP0300105S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		SELECT
+		    SUPPORTID AS "supportID"
+		    ,KIND_TYPE AS "kindType"
+		    ,FY AS "fy"
+		    ,OFFICENM AS "officeNm"
+		    ,VENUECD as "venueCD"
+		    ,VENUENM as "venueNm"
+		    ,(CASE WHEN (ROUND(MONTH_TGT * (CASE WHEN EXP_MONTH <![CDATA[>]]> CONTRACTMONTHCT THEN CONTRACTMONTHCT ELSE EXP_MONTH - 1 END) / SUBTRACTAMT * 100) <![CDATA[>]]> 100) THEN 'Ahead'
+		        WHEN (ROUND(MONTH_TGT * (CASE WHEN EXP_MONTH <![CDATA[>]]> CONTRACTMONTHCT THEN CONTRACTMONTHCT ELSE EXP_MONTH - 1 END) / SUBTRACTAMT * 100) = 100) THEN 'Ontrack'
+		        ELSE 'Behind' END
+		     ) AS "progress"
+		    ,(CASE WHEN contractStatus = 'Y' THEN '계약중' WHEN contractStatus = 'N' THEN '계약종료' ELSE '' END) AS "contractStatus"
+		    ,CONTRACTDATEFROM as "contractDateFrom"
+		    ,CONTRACTDATETO as "contractDateTo"
+		    ,CONTRACTMONTHCT as "contractMontCt"
+		    ,CURRENT_STD AS "currentStd"
+		    ,EXP_MONTH as "expMonth"
+		    ,(CASE WHEN EXP_MONTH <![CDATA[>]]> CONTRACTMONTHCT THEN CONTRACTMONTHCT ELSE EXP_MONTH - 1 END) as "expMonth2"
+		    ,ADD_MONTH as "addMonth"
+		    ,NVL(REMAIN_AMT, 0) as "remainAmt"
+		    ,NVL(contractAmt, 0) as "constractAmt"
+		    ,NVL(MONTH_TGT, 0) AS "monthTgt"
+		    ,NVL(MONTH_TGT * (CASE WHEN EXP_MONTH <![CDATA[>]]> CONTRACTMONTHCT THEN CONTRACTMONTHCT ELSE EXP_MONTH - 1 END), 0)  as "accumAmt"
+		    ,NVL(SUBTRACTAMT, 0) AS "kiaAccumAmt"
+		    ,'' as "completeRtnAmt"
+		    ,NVL(MONTH_TGT * (CASE WHEN EXP_MONTH <![CDATA[>]]> CONTRACTMONTHCT THEN CONTRACTMONTHCT ELSE EXP_MONTH - 1 END) - SUBTRACTAMT, 0) AS "diffAmt"
+		    ,NVL(ROUND(MONTH_TGT * (CASE WHEN EXP_MONTH <![CDATA[>]]> CONTRACTMONTHCT THEN CONTRACTMONTHCT ELSE EXP_MONTH - 1 END) / SUBTRACTAMT * 100), 0) AS "targetRate"
+		    ,TERRITORYCD
+		    ,TEAMCD
+		    ,OFFICECD
+		    ,RAGESPHERECD
+		FROM (
+		    SELECT
+		        T1.supportID AS supportID
+		        <![CDATA[
+		        ,(CASE WHEN KIND_CNT1 >= 1 AND KIND_CNT2 = 0 THEN 'Local'
+		            WHEN KIND_CNT1 = 0 AND KIND_CNT2 >= 1 THEN 'International'
+		            WHEN KIND_CNT1 >= 1 AND KIND_CNT2 >= 1  THEN 'Local+Inter'
+		            ELSE '' END
+		        ) AS KIND_TYPE 
+		        ]]>
+		        ,(CASE WHEN T1.CONTRACTDATEFROM IS NOT NULL THEN 'F'||SUBSTR(T1.CONTRACTDATEFROM, 3,2) ELSE '' END) AS FY
+		        ,T3.territoryCD AS territoryCD
+		        ,(select CODENAME from f_code where codediv = 'OFFICECD' AND COMCODE = (
+		            select attrib02 from f_code where codediv = 'TEAMCD' AND COMCODE = (
+		                select attrib02 from f_code where codediv = 'TERRITORYCD' and comcode = T3.territoryCD
+		            )
+		         )) AS OFFICENM 
+		        ,T1.venueCD
+		        ,T3.venueNm
+		        ,(CASE WHEN TO_CHAR(SYSDATE,'YYYYMMDD') <![CDATA[>=]]> T1.CONTRACTDATEFROM AND TO_CHAR(SYSDATE,'YYYYMMDD') <![CDATA[<=]]> T1.CONTRACTDATETO THEN 'Y' ELSE 'N' END) AS contractStatus
+		        ,TO_CHAR(TO_DATE(T1.CONTRACTDATEFROM, 'YYYYMMDD'), 'YYYY-MM-DD') AS CONTRACTDATEFROM
+		        ,TO_CHAR(TO_DATE(T1.CONTRACTDATETO, 'YYYYMMDD'), 'YYYY-MM-DD') AS CONTRACTDATETO
+		        ,T1.CONTRACTMONTHCT
+		        ,(CASE WHEN TO_DATE(T1.CONTRACTDATETO, 'YYYYMMDD') <![CDATA[>]]> SYSDATE THEN TO_CHAR(SYSDATE, 'YYYY-MM-DD') 
+		            ELSE TO_CHAR(TO_DATE(T1.CONTRACTDATETO, 'YYYYMMDD'), 'YYYY-MM-DD') END) AS CURRENT_STD      
+		        ,CEIL(MONTHS_BETWEEN(TO_CHAR(SYSDATE, 'YYYYMMDD'), T1.CONTRACTDATEFROM)) AS EXP_MONTH
+		        ,'' AS ADD_MONTH
+		        ,T1.contractamt - subtractamt AS REMAIN_AMT 
+		        ,T1.contractAmt
+		        ,TRUNC(T1.contractAmt / T1.contractMonthCt) AS MONTH_TGT 
+		        ,T1.SUBTRACTAMT
+			    ,(SELECT ATTRIB02 FROM F_CODE WHERE CODEDIV = 'TERRITORYCD' AND COMCODE = T3.TERRITORYCD) AS TEAMCD
+		        ,(SELECT ATTRIB02 FROM F_CODE WHERE CODEDIV = 'TEAMCD' AND COMCODE = (
+		            SELECT ATTRIB02 FROM F_CODE WHERE CODEDIV = 'TERRITORYCD' AND COMCODE = T3.TERRITORYCD
+		         )) AS OFFICECD
+		         ,(SELECT ATTRIB02 FROM F_CODE WHERE CODEDIV = 'OFFICECD' AND COMCODE = (
+		            SELECT ATTRIB02 FROM F_CODE WHERE CODEDIV = 'TEAMCD' AND COMCODE = (
+		                SELECT ATTRIB02 FROM F_CODE WHERE CODEDIV = 'TERRITORYCD' AND COMCODE = T3.TERRITORYCD
+		            )
+		         )) AS RAGESPHERECD
+		    FROM GSUP01MT T1
+		    INNER JOIN GSUP02MT T2
+		    ON T1.supportID = T2.supportID
+		    INNER JOIN GVEN01MT T3
+		    ON T1.venueCD = T3.venueCD
+		    INNER JOIN GEMP01MT T4
+		    ON T3.territoryCD = T4.territoryCD
+		    INNER JOIN (
+		        SELECT
+		            SUPPORTID
+		            ,SUM(CASE WHEN KINDTPCD3 = '10' THEN 1 ELSE 0 END) KIND_CNT1
+		            ,SUM(CASE WHEN KINDTPCD3 = '20' THEN 1 ELSE 0 END) KIND_CNT2
+		        FROM GSUP01DT A INNER JOIN GPRD01MT B
+		        ON A.PRDCD = B.PRDCD
+		        GROUP BY A.SUPPORTID
+		    ) T4
+		    ON T1.SUPPORTID = T4.SUPPORTID
+		    WHERE 1=1
+		    AND T1.supportStateCD = '60'
+			<![CDATA[
+			and t1.contractDateTo >= #contractDateFrom#
+			and t1.contractDateFrom <= #contractDateTo#
+			]]>
+			<isPropertyAvailable property="dkmdTpCD">
+				<isNotEqual prepend="and" property="dkmdTpCD" compareValue="DK">
+					t3.dkmdTpCD = #dkmdTpCD#
+				</isNotEqual>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="venue_S">
+				<isNotEmpty prepend="and" property="venue_S">
+					T1.venueCD = #venue_S#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="periodLongTerm">
+				<isNotEmpty prepend="and" property="periodLongTerm">
+					contractMonthCt <![CDATA[>=]]> #periodLongTerm#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="periodShortTerm">
+				<isNotEmpty prepend="and" property="periodShortTerm">
+					contractMonthCt <![CDATA[<]]> #periodShortTerm#
+				</isNotEmpty>
+			</isPropertyAvailable>
+		)
+		WHERE 1=1
+		<isPropertyAvailable property="rageSphereCD">
+			<isNotEmpty prepend="and" property="rageSphereCD">
+				rageSphereCD = #rageSphereCD#
+			</isNotEmpty>
+		</isPropertyAvailable>
+		<isPropertyAvailable property="officeCD">
+			<isNotEmpty prepend="and" property="officeCD">
+				officeCD = #officeCD#
+			</isNotEmpty>
+		</isPropertyAvailable>
+		<isPropertyAvailable property="teamCD">
+			<isNotEmpty prepend="and" property="teamCD">
+				teamCD = #teamCD#
+			</isNotEmpty>
+		</isPropertyAvailable>
+		<isPropertyAvailable property="territoryCD">
+			<isNotEmpty prepend="and" property="territoryCD">
+				territoryCD = #territoryCD#
+			</isNotEmpty>
+		</isPropertyAvailable>
+		<isPropertyAvailable property="rageSphereCD_S">
+			<isNotEmpty prepend="and" property="rageSphereCD_S">
+				rageSphereCD = #rageSphereCD_S#
+			</isNotEmpty>
+		</isPropertyAvailable>
+		<isPropertyAvailable property="officeCD_S">
+			<isNotEmpty prepend="and" property="officeCD_S">
+				officeCD = #officeCD_S#
+			</isNotEmpty>
+		</isPropertyAvailable>
+		<isPropertyAvailable property="contractStatus">
+			<isNotEmpty prepend="and" property="contractStatus">
+				contractStatus = #contractStatus#
+			</isNotEmpty>
+		</isPropertyAvailable>
+		order by supportID
+	</select>
+	
+	
+</sqlMap>

@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="PAY04007">
+	
+	<!-- Paging 구현쿼리 Header 조각 -->
+    <sql id="PAY04007.paging.header">
+        <isPropertyAvailable property="pageNum">
+        select p.* from (
+            select
+    	        count(*) over() as "totalCount",
+    	</isPropertyAvailable>
+    	<isNotPropertyAvailable property="pageNum">
+    		select
+    	</isNotPropertyAvailable>
+    </sql>
+    
+    <!-- Paging 구현쿼리 Header 조각 -->
+    <sql id="PAY04007.paging.footer">
+        <isPropertyAvailable property="pageNum">
+        ) p
+		where
+			p.pageNum = #pageNum#
+		</isPropertyAvailable>
+    </sql>
+	
+	<!-- 지급신청(G2) 리스트 조회 -->
+	<select id="PAY0400701S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		<include refid="PAY04007.paging.header"/>
+			rank() over(
+				order by
+					dkmdTpCD
+					, rageSphereCD
+					, officeCD
+					, teamCD
+					, empID
+					, venueCD
+			) as "rowNum"
+			, floor((rank() over(
+				order by
+					dkmdTpCD
+					, rageSphereCD
+					, officeCD
+					, teamCD
+					, empID
+					, venueCD
+			)-1)/#displayNum#+1) as pageNum
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','PROGRAMCD',programCD,null) as "programCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ACTIVITYCD',activityCD,null) as "activityCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','RAGESPHERECD',rageSphereCD,null) as "rageSphereCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','OFFICECD',officeCD,null) as "officeCDName"
+			<isPropertyAvailable property="grpID">
+				<isNotEmpty property="grpID">
+			, (case when (select dkmdtpcd from GEMP01MT where empID=t.empID) != 'DK' then '' else (select empNm from GEMP01MT where empID=t.empID) end) as "empNm"
+				</isNotEmpty>
+				<isEmpty property="grpID">
+			, (select empNm from GEMP01MT where empID=t.empID) as "empNm"
+				</isEmpty>
+			</isPropertyAvailable>
+			, venueCD as "venueCD"
+			, venueNm as "venueNm"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','VENUEGRADCD',venueGradCD,null) as "venueGradCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SEGMENTCD',segmentCD,null) as "segmentCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SUBSEGMENTCD',subSegmentCD,null) as "subSegmentCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD1',addrTpCD1,null) as "addrTpCD1Name"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD2',addrTpCD2,null) as "addrTpCD2Name"
+			, payAmt as "payAmt"
+			, keymanNm as "keymanNm"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','BANKCD',bankCD,null) as "bankCDName"
+			, accountNo as "accountNo"
+			, payApprDate as "payApprDate"
+			, payCommt as "payCommt"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','PAYSTATECD',payStateCD,null) as "payStateCDName"
+			, holderNm as "holderNm"
+			, payStateCD as "payStateCD"
+			, keymanID as "keymanID"
+			, bankCD as "bankCD"
+			, transferDate as "transferDate"
+		from (
+			select
+				programCD
+				, activityCD
+				, rageSphereCD
+				, officeCD
+				, teamCD
+				, empID
+				, a.venueCD
+				, venueNm
+				, venueGradCD
+				, segmentCD
+				, subSegmentCD
+				, addrTpCD1
+				, addrTpCD2
+				, e.payAmt
+				, f.keymanNm
+				, e.bankCD
+				, e.accountNo
+				, payApprDate
+				, payCommt
+				, payStateCD
+				, e.keymanID
+				, e.holderNm
+				, a.transferDate
+				, a.dkmdTpCD
+			from GRLT01MT a
+			inner join GVEN01MT b
+				on a.venueCD = b.venueCD
+			inner join GRLT06MT e
+				on a.eventYM = e.eventYM
+				and a.venueCD = e.venueCD
+				and a.diffNo = e.diffNo
+			left outer join GKEY01MT f
+				on e.keymanID = f.keymanID
+			where
+				a.eventYM = #eventYM#
+				and a.diffNo = #diffNo#
+				and programCD = 'G2'
+				<isPropertyAvailable property="dkmdTpCD">
+					<isNotEmpty prepend="and" property="dkmdTpCD">
+						a.dkmdTpCD = #dkmdTpCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="rageSphereCD">
+					<isNotEmpty prepend="and" property="rageSphereCD">
+						rageSphereCD = #rageSphereCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="officeCD">
+					<isNotEmpty prepend="and" property="officeCD">
+						officeCD = #officeCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="stdAmt">
+					<isNotEmpty prepend="and" property="stdAmt">
+						e.payAmt >= #stdAmt#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="payStateCD">
+					<isNotEmpty prepend="and" property="payStateCD">
+						payStateCD = #payStateCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="transferDate">
+					<isNotEmpty prepend="and" property="transferDate">
+						a.transferDate = #transferDate#
+					</isNotEmpty>
+				</isPropertyAvailable>
+		) t
+		<include refid="PAY04007.paging.footer"/>
+	</select>
+	
+	<!-- 지급신청(G2) 키맨 수정 -->
+	<update id="PAY0400701U" parameterClass="com.kia.rlt.model.GRLT01MT">
+		update GRLT06MT
+		set
+			keymanID = #keymanID#
+			, bankCD = #bankCD#
+			, accountNo = #accountNo#
+			, holderNm = #holderNm#
+			, chgID = #userID#
+			, chgDate = sysdate
+		where
+			eventYM = #eventYM#
+			and venueCD = #venueCD#
+			and diffNo = #diffNo#
+	</update>
+	
+	<!-- 지급신청 상태 -->
+	<update id="PAY0400702U" parameterClass="com.kia.rlt.model.GRLT01MT">
+		update GRLT01MT
+		set
+			payStateCD = #payStateCD#
+			, payApprDate = ''
+			, chgID = #userID#
+			, chgDate = sysdate
+		where
+			eventYM = #eventYM#
+			and venueCD = #venueCD#
+			and diffNo = #diffNo#
+	</update>
+	
+</sqlMap>

@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="AD04001">
+	
+	<!-- AD 조회 -->
+	<select id="AD0400101S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+	  	SELECT
+        	T1.chainCD as "chainCD"       ,
+        	T1.chainNm as "chainNm"         
+    	FROM
+        	(SELECT
+            	A.chainCD as chainCD        ,
+            	A.chainNm as chainNm        ,
+            	B.venueCD as venueCD       
+        	FROM
+	            GCHA01MT A         
+        	LEFT OUTER JOIN GCHA01DT B       
+                ON A.chainCD = B.chainCD       
+        	GROUP BY
+	            A.chainCD,
+    	        A.chainNm,
+        	    B.venueCD
+        	<isPropertyAvailable property="venueCD">
+				<isNotEmpty property="venueCD">
+					HAVING B.venueCD= #venueCD#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			) T1    
+	  	GROUP BY
+	  		T1.chainCD,
+	  		T1.chainNm 
+		<isPropertyAvailable property="chain">
+			<isNotEmpty property="chain">
+				HAVING (chainCD like '%' || UPPER(#chain#) || '%'
+					OR chainNm like '%' || UPPER(#chain#) || '%')
+			</isNotEmpty>
+		</isPropertyAvailable>	
+	  	ORDER BY T1.chainCD
+	</select>
+	
+	<!-- AD 상세조회 -->
+	<select id="AD0400102S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+	    SELECT
+	  		A.venueCD as "venueCD"
+	  	,   B.venueNm as "venueNm"
+	  	,   A.chainCD as "chainCD"
+	  	FROM GCHA01DT A
+	  	LEFT OUTER JOIN GVEN01MT B
+	  		ON A.venueCD = B.venueCD 
+	  	WHERE
+	  		1=1
+		AND	A.chainCD = #selectChainCD#
+	  	ORDER BY A.venueCD
+	</select>
+	
+	<!-- AD 상세조회 count -->
+	<select id="AD0400103S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+	      SELECT
+	  		A.venueCD as "venueCD"
+	  	,   B.venueNm as "venueNm"
+	  	,   A.chainCD as "chainCD"
+	  	FROM GCHA01DT A
+	  	LEFT OUTER JOIN GVEN01MT B
+	  		ON A.venueCD = B.venueCD 
+	  	WHERE
+	  		1=1
+	  	ORDER BY A.chainCD
+	</select>
+	
+	<!-- AD 체인 업소 업로드 시 중복체크 -->
+	<select id="AD0400104S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		SELECT
+	  	   B.venueCD as "venueCD"
+	  	FROM GCHA01MT A
+        INNER JOIN GCHA01DT B
+        	ON A.chainCD = B.chainCD
+       	WHERE
+	  		1=1
+		AND NOT A.chainCD = #chainCD#
+		AND B.venueCD = #venueCD#
+	</select>
+	
+	<insert id="AD0400101I" parameterClass="com.kia.ad.model.GCHA01MT">
+		INSERT INTO GCHA01MT (
+			chainCD
+			, chainNm
+			, regID
+			, regDate
+		)
+		VALUES (
+			#chainCD#
+			, #chainNm#
+			, #regID#
+			, SYSDATE
+		)
+	</insert>
+	
+	<insert id="AD0400102I" parameterClass="com.kia.ad.model.GCHA01MT">
+		INSERT INTO GCHA01DT (
+			chainCD
+			, venueCD
+			, regID
+			, regDate
+		)
+		VALUES (
+			#chainCD#
+			, #venueCD#
+			, #regID#
+			, SYSDATE
+		)
+	</insert>
+	
+	<delete id="AD0400101D" parameterClass="com.kia.ad.model.GCHA01MT">
+		DELETE FROM GCHA01MT
+	</delete>
+
+	<delete id="AD0400102D" parameterClass="com.kia.ad.model.GCHA01MT">
+		DELETE FROM GCHA01DT
+	</delete>
+
+</sqlMap>

@@ -1,0 +1,345 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="PLN01002">
+	
+	<!-- Plan작성 당월Plan업소 리스트 조회 -->
+	<select id="PLN0100201S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			getLangDesc(#companyID#,#languageCD#,'F_CODE','PROGRAMCD',programCD,null) as "programCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ACTIVITYCD',activityCD,null) as "activityCDName"
+			, venueCD as "venueCD"
+			, venueNm as "venueNm"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','VENUEGRADCD',venueGradCD,null) as "venueGradCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD2',addrTpCD2,null) as "addrTpCD2Name"
+			, tpayAmt as "tpayAmt"
+			, chgID as "chgID"
+			, (select officecd from gemp01mt where empid= #empID#) AS "officeCD"
+		from (
+			select
+				a.venueCD
+				, venueNm
+				, venueGradCD
+				, addrTpCD2
+				, programCD
+				, activityCD
+				, tpayAmt
+				, a.chgID
+			from GPLN01MT a
+			inner join GVEN01MT b
+				on a.venueCD = b.venueCD
+			inner join GEMP01MT c
+				on b.territoryCD = c.territoryCD
+			where
+				a.eventYM = #eventYM#
+				and a.empID = #empID#
+				<isPropertyAvailable property="programCD">
+					<isNotEmpty prepend="and" property="programCD">
+						programCD = #programCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="activityCD">
+					<isNotEmpty prepend="and" property="activityCD">
+						activityCD = #activityCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="venueGradCD">
+					<isNotEmpty prepend="and" property="venueGradCD">
+						venueGradCD = #venueGradCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="addrTpCD1">
+					<isNotEmpty prepend="and" property="addrTpCD1">
+						addrTpCD1 = #addrTpCD1#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="addrTpCD2">
+					<isNotEmpty prepend="and" property="addrTpCD2">
+						addrTpCD2 = #addrTpCD2#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="apprStateCD">
+					<isNotEmpty prepend="and" property="apprStateCD">
+						apprStateCD = #apprStateCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="venueCD">
+					<isNotEmpty prepend="and" property="venueCD">
+						upper(a.venueCD) = upper(#venueCD#)
+					</isNotEmpty>
+				</isPropertyAvailable>
+		) t
+		order by venueCD
+	</select>
+	
+	<!-- Plan작성 당월Plan업소 상세 조회 -->
+	<select id="PLN0100202S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			getLangDesc(#companyID#,#languageCD#,'F_CODE','PROGRAMCD',programCD,null) as "programCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ACTIVITYCD',activityCD,null) as "activityCDName"
+			, activityCD as "activityCD"
+			, venueCD as "venueCD"
+			, (select venueNm from GVEN01MT where venueCD=t.venueCD) as "venueNm"
+			, threeMonthAvgTQty as "threeMonthAvgTQty"
+			, nvl(planTQty, 0) as "planTQty"
+			, nvl(tpayAmt, 0) as "tpayAmt"
+			, nvl(gsvRate, 0) as "gsvRate"
+			, nvl(threeMonthAvgRate, 0) as "threeMonthAvgRate"
+			, keymanID as "keymanID"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','APPRSTATECD',apprStateCD,null) as "apprStateCDName"
+			, apprStateCD as "apprStateCD"
+			, commt as "commt"
+			, programCD as "programCD"
+			, (select NGGSVRN from GCVR02MT where eventym = #eventYM# and officecd = #officeCD# and kindtpcd ='10') as "LofficeNGSV"
+			, (select NGGSVRN from GCVR02MT where eventym = #eventYM# and officecd = #officeCD# and kindtpcd ='20') as "IofficeNGSV"
+			, endYM as "endYM"
+			, nvl(LOCAL_RMNAMT,0) as "LocalRmnamt"
+			, nvl(INTER_RMNAMT,0) as "InterRmnamt"
+		from (
+			select
+				a.programCD
+				, a.activityCD
+				, a.venueCD
+				, a.threeMonthAvgTQty
+				, a.planTQty
+				, a.tpayAmt
+				, a.gsvRate
+				, a.threeMonthAvgRate
+				, a.keymanID
+				, a.apprStateCD
+				, a.commt
+				, b.endYM
+				, b.LOCAL_RMNAMT
+				, b.INTER_RMNAMT
+			from GPLN01MT a
+			left outer join gsup01mt b
+            	on a.SUPPORTID = b.SUPPORTID
+            	and a.eventym = b.endym
+			where
+				a.eventYM = #eventYM#
+				and a.venueCD = #venueCD#
+		) t
+	</select>
+	
+	<!-- Plan작성 당월Plan업소제품 리스트 조회 -->
+	<select id="PLN0100203S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			getLangDesc(#companyID#,#languageCD#,'F_CODE','KINDTPCD5',kindTpCD5,null) as "kindTpCD5Name"
+			, prdNm as "prdNm"
+			, factoryPrice as "factoryPrice"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','QTYUNITCD',qtyUnitCD,null) as "qtyUnitCDName"
+			, threeMonthAvgQty as "threeMonthAvgQty"
+			, planQty as "planQty"
+			, planUnitAmt as "planUnitAmt"
+			, payAmt as "payAmt"
+			, prdCD as "prdCD"
+			, nvl(gsv,0) as "gsv"
+			, kindtpcd3 as "kindtpcd"
+		from (
+			select
+				b.kindTpCD5
+				, b.prdNm
+				, a.factoryPrice
+				, b.qtyUnitCD
+				, a.threeMonthAvgQty
+				, a.planQty
+				, a.planUnitAmt
+				, a.payAmt
+				, a.prdCD
+				, b.gsv
+				, b.kindtpcd3
+			from GPLN01DT a
+			inner join GPRD01MT b
+				on a.prdCD = b.prdCD
+			where
+				eventYM = #eventYM#
+				and venueCD = #venueCD#
+		) t
+		order by prdCD
+	</select>
+	
+	<!-- plan작성 저장 -->
+	<update id="PLN0100201U" parameterClass="com.kia.pln.model.GPLN01MT">
+		update GPLN01MT
+		set
+			threeMonthAvgTQty = #threeMonthAvgTQty#
+			, planTQty = #planTQty#
+			, tpayAmt = #tpayAmt#
+			, gsvRate = #gsvRate#
+			, threeMonthAvgRate = #threeMonthAvgRate#
+			, keymanID = #keymanID#
+			, commt = #commt#
+			, chgID = #userID#
+			, chgDate = sysdate
+		where
+			eventYM = #eventYM#
+			and venueCD = #venueCD#
+	</update>
+	<update id="PLN0100202U" parameterClass="com.kia.pln.model.GPLN01MT">
+		update GPLN01DT
+		set
+			planQty = #planQty#
+			, planUnitAmt = #planUnitAmt#
+			, payAmt = #payAmt#
+			, chgID = #userID#
+			, chgDate = sysdate
+		where
+			eventYM = #eventYM#
+			and venueCD = #venueCD#
+			and prdCD = #prdCD#
+	</update>
+	
+	<!-- plan작성 상태가 반려시 저장(상태를 등록으로) -->
+	<update id="PLN0100205U" parameterClass="com.kia.pln.model.GPLN01MT">
+		update GPLN01MT
+		set
+			threeMonthAvgTQty = #threeMonthAvgTQty#
+			, planTQty = #planTQty#
+			, tpayAmt = #tpayAmt#
+			, gsvRate = #gsvRate#
+			, threeMonthAvgRate = #threeMonthAvgRate#
+			, keymanID = #keymanID#
+			, commt = #commt#
+			, chgID = #userID#
+			, chgDate = sysdate
+			, apprStateCD = '10'
+		where
+			eventYM = #eventYM#
+			and venueCD = #venueCD#
+	</update>
+	
+	<!-- 반려된 것 데이터 삭제 -->
+	<delete id="PLN0100201D" parameterClass="com.kia.pln.model.GPLN01MT">
+		delete from GPLN03MT
+		where
+			eventYM = #eventYM#
+			and venueCD = #venueCD#
+	</delete>
+	
+	<!-- plan복사 전월Plan정보와 당월 3개월평균 리스트 조회
+	2015.01.09. taejoon.jang. 당월 3개월평균 추가
+	 -->
+	<select id="PLN0100204S" parameterClass="com.kia.pln.model.GPLN01MT" resultClass="java.util.LinkedHashMap">
+		select
+			max(planTQty) as "planTQty"
+			, max(tpayAmt) as "tpayAmt"
+			, max(keymanID) as "keymanID"
+			, max(threeMonthAvgTQty) as "threeMonthAvgTQty"
+		from (
+			select
+				planTQty
+				, tpayAmt
+				, (
+					case when (select programCD from GPLN01MT where eventYM = #eventYM# and venueCD = #venueCD#)='G2' then (
+						case when t1.keymanID = t2.keymanID then t1.keymanID
+						else ' '
+						end
+					)
+					else ' '
+					end
+				) as keymanID
+				, 0 as threeMonthAvgTQty
+			from GPLN01MT t1
+			left outer join (
+				select keymanID
+				from (
+					select
+						keymanID
+						, pkeymanYN
+						, row_number() over (order by pkeymanYN desc) as rn
+					from GKEY01MT
+					where
+						venueCD = #venueCD#
+						and activeYN = 'Y'
+				)
+				where
+					rn=1
+			) t2
+			on t1.keymanID = t2.keymanID
+			where
+				eventYM = #befEventYM#
+				and venueCD = #venueCD#
+			union all
+			select
+				0 as planTQty
+				, 0 as tpayAmt
+				, '' as keymanID
+				, threeMonthAvgTQty
+			from GPLN01MT
+			where
+				eventYM = #eventYM#
+				and venueCD = #venueCD#
+		)
+	</select>
+	
+	<!-- plan복사 전월Plan제품 리스트 조회 -->
+	<select id="PLN0100205S" parameterClass="com.kia.pln.model.GPLN01MT" resultClass="java.util.LinkedHashMap">
+		select
+			factoryPrice as "factoryPrice"
+			, planQty as "planQty"
+			, planUnitAmt as "planUnitAmt"
+			, payAmt as "payAmt"
+			, prdCD as "prdCD"
+		from (
+			select
+				b.factoryPrice
+				, a.threeMonthAvgQty
+				, a.planQty
+				, a.planUnitAmt
+				, a.payAmt
+				, a.prdCD
+			from GPLN01DT a
+			inner join GPRD01MT b
+				on a.prdCD = b.prdCD
+			where
+				eventYM = #befEventYM#
+				and venueCD = #venueCD#
+		) t
+	</select>
+	
+	<!-- Plan작성정보 업소단위 복사 -->
+	<update id="PLN0100203U" parameterClass="com.kia.pln.model.GPLN01MT">
+		update GPLN01MT
+		set
+			planTQty = #planTQty#
+			, tpayAmt = #tpayAmt#
+			, gsvRate = #gsvRate#
+			, threeMonthAvgRate = #threeMonthAvgRate#
+			, keymanID = #keymanID#
+			, chgID = #userID#
+			, chgDate = sysdate
+		where
+			eventYM = #eventYM#
+			and venueCD = #venueCD#
+	</update>
+	<update id="PLN0100204U" parameterClass="com.kia.pln.model.GPLN01MT">
+		update GPLN01DT
+		set
+			planQty = #planQty#
+			, planUnitAmt = #planUnitAmt#
+			, payAmt = #payAmt#
+			, chgID = #userID#
+			, chgDate = sysdate
+		where
+			eventYM = #eventYM#
+			and venueCD = #venueCD#
+			and prdCD = #prdCD#
+	</update>
+	
+	<!-- 승인상태조회 -->
+	<select id="PLN0100206S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			apprGrpNm as "apprGrpNm"
+			, empID as "empID"
+			, (select empNm from GEMP01MT where empID = t.empID) as "empNm"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','APPRSTATECD',apprStateCD,null) as "apprStateCDName"
+			, to_char(apprDate, 'yyyy.mm.dd hh24:mi') as "apprDate"
+			, commt as "commt"
+		from GPLN03MT t
+		where
+			eventYM = #eventYM#
+			and venueCD = #venueCD#
+		order by levelNo
+	</select>
+	
+</sqlMap>

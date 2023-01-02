@@ -1,0 +1,456 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:p="http://www.springframework.org/schema/p"
+		xmlns:context="http://www.springframework.org/schema/context"
+		xmlns:aop="http://www.springframework.org/schema/aop"
+		xmlns:tx="http://www.springframework.org/schema/tx"
+		xmlns:util="http://www.springframework.org/schema/util"
+		xsi:schemaLocation="
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.1.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.1.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.1.xsd">
+
+
+	<!-- **********************************************************  -->
+	<!-- Applicaton Env Config Property                            	 -->
+	<!-- **********************************************************  -->
+	<util:properties id="appenv" location="classpath:/config/appenv.properties" />
+    
+	<!-- **********************************************************  -->
+	<!-- Default Configure                                       	 -->
+	<!-- **********************************************************  -->
+	<bean id="configure" class="kr.co.nis.waf.mvc.Configure">
+        <!-- Globalization-->
+        <property name="systemTimezone" value="GP0900" />
+        <property name="systemTimezoneDesc" value="Asia/Seoul" />
+        <property name="locale" value="ko_KR" /> <!-- Korean (South Korea): ko_KR, English (United States): en_US -->
+        <property name="timezone" value="GP0900" />
+        <property name="timezoneDesc" value="Asia/Seoul" />
+        <property name="language" value="KR" />
+        <property name="currency" value="KRW" />
+        <property name="dateFormat" value="YMDD" />
+        <property name="amtFormat" value="" />
+        
+        <!-- View Url -->
+        <property name="expiredSessionViewUrl" value="#{appenv['app.system.version']}/cms/expiredsession" />
+        <property name="loginViewUrl" value="redirect:/index.page" />
+        <property name="mainViewUrl" value="#{appenv['app.system.version']}/cms/workspace" />
+        <property name="mainPageViewUrl" value="service/widget/viewUserWidget" />
+        <property name="noAuthorityViewUrl" value="#{appenv['app.system.version']}/cms/noauthority" />
+        <property name="loginOverlapViewUrl" value="#{appenv['app.system.version']}/cms/loginoverlap" />
+        
+        <!-- Menu Navigation Style (WATERFALL/TREE) -->
+        <property name="menuStyle" value="TREE" />
+        
+        <!-- Session Configure -->
+        <!-- Session Max Inactive Interval (sec * min * hour = 60 * 60 * 1 = 1 hour) -->
+        <!-- <property name="sessionMaxInActiveInterval" value="900" /> -->
+        <property name="sessionMaxInActiveInterval" value="900000" />
+        <property name="sessionValidationCheckKey" value="USERID" />
+        <property name="noSessionCheckUri">
+			<util:list>
+                <value>#{appenv['app.contextPath']}/service/auth/login</value>
+                <value>#{appenv['app.contextPath']}/#{appenv['app.system.version']}/cms/nosession.page</value>
+                <value>#{appenv['app.contextPath']}/#{appenv['app.system.version']}/cms/nouse.page</value>
+                <value>#{appenv['app.contextPath']}/service/doclink/insertFileForYUI</value>
+                <value>#{appenv['app.contextPath']}/#{appenv['app.system.version']}/index.page</value>
+                <value>#{appenv['app.contextPath']}/index.page</value>
+                <value>#{appenv['app.contextPath']}/service/api/checkAppVersion</value>
+				<value>#{appenv['app.contextPath']}/service/api/login</value>
+				<value>#{appenv['app.contextPath']}/service/api/completeAuth</value>
+				<value>#{appenv['app.contextPath']}/service/api/getContractList</value>
+				<value>#{appenv['app.contextPath']}/service/api/getContract</value>
+				<value>#{appenv['app.contextPath']}/service/api/signContract</value>
+				<value>#{appenv['app.contextPath']}/service/api/getSalesPromotionList</value>
+				<value>#{appenv['app.contextPath']}/service/api/getSalesPromotion</value>
+				<value>#{appenv['app.contextPath']}/service/api/getBankList</value>
+				<value>#{appenv['app.contextPath']}/service/api/saveAccountNumber</value>
+				<value>#{appenv['app.contextPath']}/service/api/saveSalesPromotion</value>		
+				<value>#{appenv['app.contextPath']}/service/api/changePassword</value>
+				<value>#{appenv['app.contextPath']}/service/app/download</value>
+				<value>#{appenv['app.contextPath']}/service/api/niceChk</value>
+				<value>#{appenv['app.contextPath']}/service/api/niceChkFail</value>
+				<value>#{appenv['app.contextPath']}/service/api/niceChkSuccess</value>
+				<value>#{appenv['app.contextPath']}/service/api/rejectSalesPromotion</value>
+				<value>#{appenv['app.contextPath']}/service/api/getKeyCodeList</value>
+				<value>#{appenv['app.contextPath']}/service/api/getTest</value>
+				<value>#{appenv['app.contextPath']}/service/app/guideDownload</value>
+				<value>#{appenv['app.contextPath']}/service/api/saveMstAccNumber</value>
+				<value>#{appenv['app.contextPath']}/service/app/testApkDownload</value>
+				<value>#{appenv['app.contextPath']}/service/api/userInfo</value>
+				<value>#{appenv['app.contextPath']}/service/api/resetUserPass</value>
+				<value>#{appenv['app.contextPath']}/service/auth/okta/login</value>
+				<value>#{appenv['app.contextPath']}/service/changeEmpID</value>
+			</util:list>
+        </property>
+        <property name="noSessionCheckAction">
+            <util:list>
+                <value>page</value>
+                <value>#{appenv['app.contextPath']}/mobile</value>
+                <value>#{appenv['app.contextPath']}/eslt</value>
+            </util:list>
+        </property>
+        
+        <!-- Theme ( blue/green/yellow ) -->
+        <property name="themeDefaultPath" value="/scripts/theme/" />
+        <property name="theme" value="gold" />
+        
+        <!-- Upload Default Content Path -->
+        <property name="uploadDefaultUrl" value="/upload/" />
+        <!-- Upload Sub Directory Use (Y/N) -->
+        <property name="uploadDirUse" value="Y" />
+        <!-- Upload FileName Option (ORIGINAL/UUID) -->
+        <property name="uploadFileNameOption" value="UUID" />
+        
+        <!-- Web Editor (fck/yui) -->
+        <property name="webEditor" value="fck" />
+        
+        <!-- SaaS Service Config Parameter -->
+        <property name="saasServiceAdminMenuConstructID" value="000001"/>
+	</bean>
+
+<!-- **********************************************************  -->
+<!-- JDBC Configuration                                          -->
+<!-- **********************************************************  -->
+
+	<!-- 1st Database Configuration Start -->
+
+	<!-- Oracle -->
+	
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+		<property name="driverClassName" value="#{appenv['db.driverClassName']}"/>
+		<property name="url" value="#{appenv['db.url']}"/>
+		<property name="username" value="#{appenv['db.username']}"/>
+		<property name="password" value="#{appenv['db.password']}"/>
+	</bean>
+	 <!-- 
+	<bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
+	  	<property name="jndiName">
+	  	    <value>#{appenv['db.jndi']}</value>
+	  	</property>
+	</bean>
+	-->
+	<!-- SQL Server 2005 -->
+	<!-- 
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+		<property name="driverClassName" value="core.log.jdbc.driver.Mssql2005Driver"/>com.microsoft.sqlserver.jdbc.SQLServerDriver
+		</property>
+		<property name="url">
+			<value>jdbc:sqlserver://localhost;DatabaseName=awp4;</value>
+		</property>
+		<property name="username">
+			<value>sa</value>
+		</property>
+		<property name="password">
+			<value>prm</value>
+		</property>
+	</bean>
+	-->
+	  
+	<!-- NuriAF DAO Configuration (Properties Type) - START ****************************** -->
+	<!-- 
+    <bean id="wafJdbcDaoSupport" abstract="true" class="kr.co.nis.waf.jdbc.WafJdbcDaoSupport">
+        <property name="dataSource">
+            <ref local="dataSource" />
+        </property>
+        <property name="messageSourceAccessor">
+            <ref bean="messageSourceAccessor" />
+        </property>
+    </bean>
+    
+    <bean id="wafNamedParameterJdbcDaoSupport" abstract="true" class="kr.co.nis.waf.jdbc.WafNamedParameterJdbcDaoSupport">
+        <property name="dataSource">
+            <ref local="dataSource" />
+        </property>
+        <property name="messageSourceAccessor">
+            <ref bean="messageSourceAccessor" />
+        </property>
+    </bean>
+     -->    
+    <!-- NuriAF DAO Configuration - END *************************************************** -->
+	
+	<!-- iBATIS Config - START *************************************************** -->
+    <bean id="sqlMapClientDaoSupport" abstract="true" class="org.springframework.orm.ibatis.support.SqlMapClientDaoSupport">
+        <property name="dataSource">
+            <ref local="dataSource" />
+        </property>
+    </bean>
+    
+    <bean id="sqlMapClient" class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+        <property name="configLocation" value="/WEB-INF/conf/sqlMaps-env.xml"/>
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    <!-- iBATIS Config - END *************************************************** -->
+    
+    <bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" /> 
+	</bean>
+	
+	<tx:annotation-driven transaction-manager="txManager" /> 
+	
+	<tx:advice id="txAdvice" transaction-manager="txManager">
+		<tx:attributes>
+			<tx:method name="check*" read-only="true" />
+            <tx:method name="existed*" read-only="true" />
+            <tx:method name="find*" read-only="true" />
+			<tx:method name="get*" read-only="true" />
+			<tx:method name="query*" read-only="true" />
+            <tx:method name="search*" read-only="true" />
+		 	<tx:method name="select*" read-only="true" />
+		 	<tx:method name="*" />
+		</tx:attributes>
+	</tx:advice>
+	
+	<!-- 1st Database Configuration End -->
+	
+	
+	<!-- 2nd Database Configuration Start 
+	<bean id="dataSource_bi" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+		<property name="driverClassName" value="#{appenv['db_bi.driverClassName']}"/>
+		<property name="url" value="#{appenv['db_bi.url']}"/>
+		<property name="username" value="#{appenv['db_bi.username']}"/>
+		<property name="password" value="#{appenv['db_bi.password']}"/>
+		
+		<property name="defaultAutoCommit" value="false"/>
+		<property name="initialSize" value="5"/>
+		<property name="maxActive" value="30"/>
+		<property name="maxIdle" value="5"/>
+		<property name="maxWait" value="30000"/>
+		<property name="validationQuery" value="SELECT 1 FROM DUAL"/>
+		
+	</bean>
+    <bean id="sqlMapClientDaoSupport_bi" abstract="true" class="org.springframework.orm.ibatis.support.SqlMapClientDaoSupport">
+        <property name="dataSource">
+            <ref local="dataSource_bi" />
+        </property>
+        <property name="messageSourceAccessor">
+            <ref bean="messageSourceAccessor" />
+        </property>
+    </bean>
+    
+    <bean id="sqlMapClient_bi" class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+        <property name="configLocation" value="/WEB-INF/conf/sqlMaps-env.xml"/>
+        <property name="dataSource" ref="dataSource_bi"/>
+    </bean> 
+    
+	<bean id="txManager_bi" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource_bi" /> 
+	</bean>
+	
+	<tx:advice id="txAdvice_bi" transaction-manager="txManager_bi">
+		<tx:attributes>
+			<tx:method name="check*" read-only="true" />
+            <tx:method name="existed*" read-only="true" />
+            <tx:method name="find*" read-only="true" />
+			<tx:method name="get*" read-only="true" />
+			<tx:method name="query*" read-only="true" />
+            <tx:method name="search*" read-only="true" />
+		 	<tx:method name="select*" read-only="true" />
+		 	<tx:method name="*" />
+		</tx:attributes>
+	</tx:advice>
+	-->
+	<!-- 2nd Database Configuration End -->
+			
+<!-- ***********************************************************	-->
+<!-- AOP Configuration                                          	-->
+<!-- ***********************************************************	-->
+ 	<!-- Enable @AspectJ support -->
+	<aop:aspectj-autoproxy />
+
+	<!-- Logging -->
+	<bean id="loggingAdvice" class="kr.co.nis.waf.aop.aspectj.LoggingAdvice" />
+	<aop:config>
+		<aop:pointcut id="loggingOperation"
+				expression="execution(* kr.co.nis.waf.system..*Service.*(..)) or
+							execution(* kr.co.nis.waf.system..*Dao.*(..)) or
+							execution(* com.kia..*Service.*(..))" />
+		<aop:aspect ref="loggingAdvice">
+				<aop:around pointcut-ref="loggingOperation"	method="logOperations" />
+		</aop:aspect>
+	</aop:config>
+
+	<!-- Transaction -->
+	<aop:config>
+		<aop:pointcut id="txOperation" 
+				expression="execution(* kr.co.nis.waf.system..*Service.*(..)) or
+							execution(* com.kia..*Service.*(..))" />
+		<!-- 1st Database Transaction Configuration -->
+		<aop:advisor advice-ref="txAdvice" pointcut-ref="txOperation" />
+		<!-- 2nd Database Transaction Configuration 
+		<aop:advisor advice-ref="txAdvice_bi" pointcut-ref="txOperation" />
+		-->
+	</aop:config>
+
+	<!-- Email -->	
+	<bean id="emailNotificationThrowsAdvice" class="kr.co.nis.waf.aop.EmailNotificationThrowsAdvice">
+		<property name="mailSender" ref="mailSender" />
+	</bean>
+	
+
+<!-- **********************************************************  -->
+<!-- Email Configuration                                         -->
+<!-- **********************************************************  -->
+
+	<bean id="mailSender" class="kr.co.nis.waf.mail.ExceptionMailSender">
+		<property name="sender">
+			<ref bean="sender" />
+		</property>
+		<property name="to">
+			<value>#{appenv['app.mail.address']}</value>
+		</property>
+		<property name="from">
+			<value>#{appenv['app.mail.address']}</value>
+		</property>
+		<property name="messageSourceAccessor">
+			<ref bean="messageSourceAccessor" />
+		</property>
+	</bean>
+
+	<bean id="sender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+		<property name="host">
+			<value>#{appenv['app.mail.host']}</value>
+		</property>
+		<!-- 
+		<property name="port" value="465" />
+		<property name="protocol" value="smtps" />
+		<property name="username" value="boys22@gmail.com" />
+		<property name="password" value="snsanf02"/>
+		<property name="javaMailProperties">
+			<props>
+				<prop key="mail.smtp.auth">true</prop>
+				<prop key="mail.smtp.starttls.enable">true</prop>
+			</props>
+		</property>
+		 -->
+	</bean>
+	
+	<bean id="emailSender" class="kr.co.nis.waf.system.common.web.EmailSender">
+		<property name="sender">
+			<ref bean="sender"/>
+		</property>
+		<property name="from">
+			<value>#{appenv['app.mail.address']}</value>
+		</property>
+		<property name="messageSourceAccessor">
+			<ref bean="messageSourceAccessor" />
+		</property>
+	</bean>
+	
+<!-- **********************************************************  -->
+<!-- Messages Configuration                                      -->
+<!-- **********************************************************  -->
+	<bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
+		<property name="basenames">
+			<util:list>
+				<value>messages/messages_system</value>
+				<value>messages/messages</value>
+			</util:list>
+		</property>
+	</bean>
+
+	<bean id="messageSourceAccessor" class="org.springframework.context.support.MessageSourceAccessor">
+		<constructor-arg>
+			<ref local="messageSource" />
+		</constructor-arg>
+	</bean>
+	
+<!-- **********************************************************  -->
+<!-- Quartz Scheduling Setting                                      -->
+<!-- **********************************************************  	-->
+<!--	<bean id="simpleBatchController" class="com.kia.com.web.SimpleBatchController" />-->
+<!--	-->
+<!--	<bean id="SalesInfoInvokingJobDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">-->
+<!--		<property name="targetObject"><ref bean="simpleBatchController"/></property>-->
+<!--		<property name="targetMethod"><value>request_salesInfo_batch</value></property>-->
+<!--		<property name="concurrent"><value>false</value></property>-->
+<!--	</bean>-->
+<!--	<bean id="SalesInfoCronTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">-->
+<!--		<property name="jobDetail">-->
+<!--			<ref bean="SalesInfoInvokingJobDetail"/>-->
+<!--		</property>-->
+<!--		<property name="cronExpression">-->
+<!--			<value>#{appenv['app.cron.time.batchScheduler']}</value>-->
+<!--		</property>-->
+<!--	</bean>-->
+<!--	<bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">-->
+<!--		<property name="triggers">-->
+<!--			<list>-->
+<!--				<ref local="SalesInfoCronTrigger"/>-->
+<!--			</list>-->
+<!--		</property>-->
+<!--	</bean>-->
+<!--	-->
+<!--	-->
+
+<!--	<bean id="CreateDatJobDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">-->
+<!--		<property name="targetObject"><ref bean="simpleBatchController"/></property>-->
+<!--		<property name="targetMethod"><value>create_datfile_batch</value></property>-->
+<!--		<property name="concurrent"><value>false</value></property>-->
+<!--	</bean>-->
+<!--	<bean id="CreateDatCronTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">-->
+<!--		<property name="jobDetail">-->
+<!--			<ref bean="CreateDatJobDetail"/>-->
+<!--		</property>-->
+<!--		<property name="cronExpression">-->
+<!--			<value>#{appenv['app.cron.time.batch01']}</value>-->
+<!--		</property>-->
+<!--	</bean>-->
+<!--	<bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">-->
+<!--		<property name="triggers">-->
+<!--			<list>-->
+<!--				<ref local="CreateDatCronTrigger"/>-->
+<!--			</list>-->
+<!--		</property>-->
+<!--	</bean>-->
+<!--	-->
+<!--	-->
+<!--	<bean id="EmailJobDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">-->
+<!--		<property name="targetObject"><ref bean="simpleBatchController"/></property> &lt;!&ndash; controller &ndash;&gt;-->
+<!--		&lt;!&ndash; <property name="targetMethod"><value>request_testInfo_batch</value></property> &ndash;&gt;-->
+<!--		<property name="targetMethod"><value>approve_email_batch</value></property> &lt;!&ndash; service &ndash;&gt;-->
+<!--		<property name="concurrent"><value>false</value></property>-->
+<!--	</bean>-->
+<!--	<bean id="EmailCronTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">-->
+<!--		<property name="jobDetail">-->
+<!--			<ref bean="EmailJobDetail"/>-->
+<!--		</property>-->
+<!--		<property name="cronExpression">-->
+<!--			<value>#{appenv['app.cron.time.batch02']}</value>-->
+<!--		</property>-->
+<!--	</bean>-->
+<!--	<bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">-->
+<!--		<property name="triggers">-->
+<!--			<list>-->
+<!--				<ref local="EmailCronTrigger"/>-->
+<!--			</list>-->
+<!--		</property>-->
+<!--	</bean>-->
+	
+	
+	
+	<!-- 
+		"0 0/1 * * * ?"	every 1 minutes
+		"0 0 12 * * ?"	 	Fire at 12pm (noon) every day
+		"0 15 10 ? * *"	 	Fire at 10:15am every day
+		"0 15 10 * * ?"	 	Fire at 10:15am every day
+		"0 15 10 * * ? *"	 	Fire at 10:15am every day
+		"0 15 10 * * ? 2005"	 	Fire at 10:15am every day during the year 2005
+		"0 * 14 * * ?"	 	Fire every minute starting at 2pm and ending at 2:59pm, every day
+		"0 0/5 14 * * ?"	 	Fire every 5 minutes starting at 2pm and ending at 2:55pm, every day
+		"0 0/5 14,18 * * ?"	 	Fire every 5 minutes starting at 2pm and ending at 2:55pm, AND fire every 5 minutes starting at 6pm and ending at 6:55pm, every day
+		"0 0-5 14 * * ?"	 	Fire every minute starting at 2pm and ending at 2:05pm, every day
+		"0 10,44 14 ? 3 WED"	 	Fire at 2:10pm and at 2:44pm every Wednesday in the month of March.
+		"0 15 10 ? * MON-FRI"	 	Fire at 10:15am every Monday, Tuesday, Wednesday, Thursday and Friday
+		"0 15 10 15 * ?"	 	Fire at 10:15am on the 15th day of every month
+		"0 15 10 L * ?"	 	Fire at 10:15am on the last day of every month
+		"0 15 10 ? * 6L"	 	Fire at 10:15am on the last Friday of every month
+		"0 15 10 ? * 6L"	 	Fire at 10:15am on the last Friday of every month
+		"0 15 10 ? * 6L 2002-2005"	 	Fire at 10:15am on every last friday of every month during the years 2002, 2003, 2004 and 2005
+		"0 15 10 ? * 6#3"	 	Fire at 10:15am on the third Friday of every month
+		 -->
+	
+</beans>

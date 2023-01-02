@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="MDM03003">
+    
+	<!-- 제품가이드라인내역조회 -->
+	<select id="MDM0300301S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+        select
+		    t1.prdCD as "prdCD",
+		    t1.prdSAPCD as "prdSAPCD",
+		    t1.prdNm as "prdNm",
+		    t1.qtyUnitCD as "qtyUnitCD",
+		    getLangDesc(#companyID#, #languageCD#, 'F_CODE', 'QTYUNITCD', t1.qtyUnitCD, NULL) as "qtyUnitCDName",
+		    t2.overQty as "overQty",
+		    t2.underQty as "underQty",
+		    t2.guidAmt as "guidAmt"  
+	    from
+	        GPRD01MT t1        
+    		inner join GPRD02MT t2         
+            	on t1.prdCD = t2.prdCD   
+	    where
+	        t1.dkRivalTpCD = 'DK'   
+        <isPropertyAvailable property="prdNm" >
+        	<isNotEmpty prepend="and" property="prdNm">
+        		upper(t1.prdNm) like '%'||upper(#prdNm#)||'%'
+        	</isNotEmpty>
+        </isPropertyAvailable>
+        <isPropertyAvailable property="activeYN" >
+        	<isNotEmpty prepend="and" property="activeYN">
+        		t1.activeYN = #activeYN#
+        	</isNotEmpty>
+        </isPropertyAvailable> 
+	    order by
+	    	t1.prdCD
+	        , t2.overQty
+    </select>
+    
+</sqlMap>

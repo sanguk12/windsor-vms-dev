@@ -1,0 +1,411 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="PLN01008">
+	
+	<!-- Plan승인요청 Plan업소 리스트 조회 -->
+	<select id="PLN0100801S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			getLangDesc(#companyID#,#languageCD#,'F_CODE','APPRTYPE',apprType,null) as "apprTypeName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','PROGRAMCD',programCD,null) as "programCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ACTIVITYCD',activityCD,null) as "activityCDName"
+			, venueCD as "venueCD"
+			, venueNm as "venueNm"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','VENUEGRADCD',venueGradCD,null) as "venueGradCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SEGMENTCD',segmentCD,null) as "segmentCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SUBSEGMENTCD',subSegmentCD,null) as "subSegmentCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD1',addrTpCD1,null) as "addrTpCD1Name"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD2',addrTpCD2,null) as "addrTpCD2Name"
+			, tpayAmt as "tpayAmt"
+			, planTQty as "planTQty"
+			, avgUnitAmt as "avgUnitAmt"
+			, gsvRate as "gsvRate"
+			, threeMonthAvgRate as "threeMonthAvgRate"
+			, (select keymanNm from GKEY01MT where keymanID=t.keymanID) as "keymanNm"
+			, commt as "commt"
+			, CHGCNT as "plnChgCnt"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','APPRSTATECD',apprStateCD,null) as "apprStateCDName"
+			, apprStateCD as "apprStateCD"
+			, programCD as "programCD"
+			, eventYM as "eventYM"
+			, nvl(round((t.gsv - t.duty - t.wsdc - t.tpayAmt), 1), 0)  as "nsv"
+        	, nvl(round(((t.gsv - t.duty - t.wsdc - t.tpayAmt) - t.cogs), 1), 0) as "gp"
+        	, nvl(case when (t.gsv - t.duty - t.wsdc - t.tpayAmt) = 0 then 0
+  				else round(((t.gsv - t.duty - t.wsdc - t.tpayAmt) - t.cogs) / (t.gsv - t.duty - t.wsdc - t.tpayAmt) * 100, 1) end, 0) as "gpRate"
+		from (
+			select
+				<![CDATA[
+				max(case when activityCD <> '20' then 
+					case when (d.planQty <> 0 and d.planUnitAmt > 40000) or (planTQty <> 0 AND planTQty <= 3) then '20' else '10' end
+				else '10' end) as apprType
+				]]>
+				, programCD
+				, activityCD
+				, a.venueCD
+				, venueNm
+				, venueGradCD
+				, segmentCD
+				, subSegmentCD
+				, addrTpCD1
+				, addrTpCD2
+				, max(tpayAmt) as tpayAmt
+				, max(planTQty) as planTQty
+				, max(
+					case when planTQty=0 then 0
+					else round(tpayAmt / planTQty)
+					end
+				) as avgUnitAmt
+				, max(gsvRate) as gsvRate
+				, max(threeMonthAvgRate) as threeMonthAvgRate
+				, keymanID
+				, max(a.commt) as commt
+				, max(apprStateCD) as apprStateCD
+				, a.eventYM
+				, max(nvl(e.CHGCNT,0)) as CHGCNT
+				, sum(f.gsv * d.planQty) as gsv
+            	, sum(f.duty * d.planQty) as duty
+            	, sum(f.wsdc * d.planQty) as wsdc
+            	, sum(f.cogs * d.planQty) as cogs
+			from GPLN01MT a
+			inner join GVEN01MT b
+				on a.venueCD = b.venueCD
+			inner join GEMP01MT c
+				on a.empID = c.empID
+            inner join GPLN01DT d
+                on a.eventYM = d.eventYM      
+               and a.venueCD = d.venueCD   
+			left outer join GCHG01MT e      
+                on a.eventYM = e.eventYM      
+               and a.venueCD = e.venueCD   
+            inner join GPRD01MT f
+            	on d.prdCD = f.prdCD 
+			where
+				a.eventYM = #eventYM#
+				and a.empID = #empID#
+				<isPropertyAvailable property="programCD">
+					<isNotEmpty prepend="and" property="programCD">
+						programCD = #programCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="activityCD">
+					<isNotEmpty prepend="and" property="activityCD">
+						activityCD = #activityCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="venueGradCD">
+					<isNotEmpty prepend="and" property="venueGradCD">
+						venueGradCD = #venueGradCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="segmentCD">
+					<isNotEmpty prepend="and" property="segmentCD">
+						segmentCD = #segmentCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="subSegmentCD">
+					<isNotEmpty prepend="and" property="subSegmentCD">
+						subSegmentCD = #subSegmentCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="addrTpCD1">
+					<isNotEmpty prepend="and" property="addrTpCD1">
+						addrTpCD1 = #addrTpCD1#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="addrTpCD2">
+					<isNotEmpty prepend="and" property="addrTpCD2">
+						addrTpCD2 = #addrTpCD2#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="apprStateCD">
+					<isNotEmpty prepend="and" property="apprStateCD">
+						a.apprStateCD = #apprStateCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+			group by
+	            a.eventYM,
+	            programCD,
+	            activityCD,
+	            a.venueCD,
+	            venueNm,
+	            venueGradCD,
+	            segmentCD,
+	            subSegmentCD,
+	            addrTpCD1,
+	            addrTpCD2,
+	            keymanID,
+	            apprStateCD
+		) t
+		where 1=1
+        <isPropertyAvailable property="apprType">
+			<isNotEmpty prepend="and" property="apprType">
+				apprType = #apprType#
+			</isNotEmpty>
+		</isPropertyAvailable>
+		order by venueCD
+	</select>
+	
+	<!-- Plan승인요청 Plan업소제품 상세 조회 -->
+	<select id="PLN0100802S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			getLangDesc(#companyID#,#languageCD#,'F_CODE','KINDTPCD5',kindTpCD5,null) as "kindTpCD5Name"
+			, prdNm as "prdNm"
+			, factoryPrice as "factoryPrice"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','QTYUNITCD',qtyUnitCD,null) as "qtyUnitCDName"
+			, threeMonthAvgQty as "threeMonthAvgQty"
+			, planQty as "planQty"
+			, planUnitAmt as "planUnitAmt"
+			, payAmt as "payAmt"
+			, prdCD as "prdCD"
+			, nvl(round((t.gsv - t.duty - t.wsdc - t.payAmt), 1), 0)  as "nsv"
+			, nvl(round(((t.gsv - t.duty - t.wsdc - t.payAmt) - t.cogs), 1), 0) as "gp"
+			, nvl(case when (t.gsv - t.duty - t.wsdc - t.payAmt) = 0 then 0
+  				else round(((t.gsv - t.duty - t.wsdc - t.payAmt) - t.cogs) / (t.gsv - t.duty - t.wsdc - t.payAmt) * 100, 1) end, 0) as "gpRate"
+		from (
+			select
+				b.kindTpCD5
+				, b.prdNm
+				, a.factoryPrice
+				, b.qtyUnitCD
+				, a.threeMonthAvgQty
+				, a.planQty
+				, a.planUnitAmt
+				, a.payAmt
+				, a.prdCD
+				, b.gsv * a.planQty as gsv
+                , b.duty * a.planQty as duty
+                , b.wsdc * a.planQty as wsdc
+                , b.cogs * a.planQty as cogs
+			from GPLN01DT a
+			inner join GPRD01MT b
+				on a.prdCD = b.prdCD
+			where
+				eventYM = #eventYM#
+				and venueCD = #venueCD#
+		) t
+		order by prdCD
+	</select>
+	
+	<!-- Plan승인요청 -->
+	<insert id="PLN0100801I" parameterClass="com.kia.pln.model.GPLN01MT">
+		insert into GPLN03MT (
+			eventYM
+			, venueCD
+			, levelNo
+			, apprGrpNm
+			, empID
+			, apprStateCD
+			, apprDate
+			, regID
+			, regDate
+		)
+		select
+			#eventYM#
+			, #venueCD#
+			, lv
+			, apprGrpNm
+			, empID
+			, (
+				case when lv=1 then '50'
+				when lv=2 then '20'
+				end
+			) as apprStateCD
+			, (
+				case when lv=1 then sysdate
+				end
+			) as apprDate
+			, #userID#
+			, sysdate
+		from (
+			select
+				level as lv
+				, apprGrpNm
+				, empID
+			from GAPP01DT t
+			where
+				apprTpID = #apprTpID#
+			connect by prior papprGrpID = apprGrpID and apprTpID = #apprTpID#
+			start with apprGrpID = (
+				select
+					apprGrpID
+				from GAPP01DT
+				Where
+					empID = #empID#
+					and apprTpID = #apprTpID#
+			)  and apprTpID = #apprTpID#
+		)
+	</insert>
+	
+	<!-- Plan정보 승인상태 갱신 -->
+	<update id="PLN0100801U" parameterClass="com.kia.pln.model.GPLN01MT">
+		update GPLN01MT
+		set
+			apprStateCD = #apprStateCD#
+			, lapprLevelNo = (
+				select
+					max(lv) as lv
+				from (
+					select
+						level as lv
+						, apprGrpNm
+						, empID
+					from GAPP01DT t
+					where
+						apprTpID = #apprTpID#
+					connect by prior papprGrpID = apprGrpID
+					start with apprGrpID = (
+						select
+							apprGrpID
+						from GAPP01DT
+						Where
+							empID = #empID#
+							and apprTpID = #apprTpID#
+					)
+				)
+			)
+			, chgID = #userID#
+			, chgDate = sysdate
+		where
+			eventYM = #eventYM#
+			and venueCD = #venueCD#
+	</update>
+	
+	<!-- Plan승인요청취소 -->
+	<delete id="PLN0100801D" parameterClass="com.kia.pln.model.GPLN01MT">
+		delete from GPLN03MT
+		where
+			eventYM = #eventYM#
+			and venueCD = #venueCD#
+	</delete>
+	
+	<!-- Plan승인요청 엑셀 조회 -->
+	<select id="PLN0100804S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			getLangDesc(#companyID#,#languageCD#,'F_CODE','PROGRAMCD',programCD,null) as "programCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ACTIVITYCD',activityCD,null) as "activityCDName"
+			, venueCD as "venueCD"
+			, venueNm as "venueNm"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','VENUEGRADCD',venueGradCD,null) as "venueGradCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SEGMENTCD',segmentCD,null) as "segmentCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SUBSEGMENTCD',subSegmentCD,null) as "subSegmentCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD1',addrTpCD1,null) as "addrTpCD1Name"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD2',addrTpCD2,null) as "addrTpCD2Name"
+			, tpayAmt as "tpayAmt"
+			, planTQty as "planTQty"
+			, avgUnitAmt as "avgUnitAmt"
+			, gsvRate as "gsvRate"
+			, threeMonthAvgRate as "threeMonthAvgRate"
+			, (select keymanNm from GKEY01MT where keymanID=t.keymanID) as "keymanNm"
+			, commt as "commt"
+			, CHGCNT as "plnChgCnt"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','APPRSTATECD',apprStateCD,null) as "apprStateCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','KINDTPCD5',kindTpCD5,null) as "kindTpCD5Name"
+			, prdNm as "prdNm"
+			, factoryPrice as "factoryPrice"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','QTYUNITCD',qtyUnitCD,null) as "qtyUnitCDName"
+			, threeMonthAvgQty as "threeMonthAvgQty"
+			, planQty as "planQty"
+			, planUnitAmt as "planUnitAmt"
+			, payAmt as "payAmt"
+			, nvl(round((t.gsv - t.duty - t.wsdc - t.payAmt), 1), 0)  as "nsv"
+			, nvl(round(((t.gsv - t.duty - t.wsdc - t.payAmt) - t.cogs), 1), 0) as "gp"
+			, nvl(case when (t.gsv - t.duty - t.wsdc - t.payAmt) = 0 then 0
+  				else round(((t.gsv - t.duty - t.wsdc - t.payAmt) - t.cogs) / (t.gsv - t.duty - t.wsdc - t.payAmt) * 100, 1) end, 0) as "gpRate"
+		from (
+			select
+				programCD
+				, activityCD
+				, a.venueCD
+				, venueNm
+				, venueGradCD
+				, segmentCD
+				, subSegmentCD
+				, addrTpCD1
+				, addrTpCD2
+				, tpayAmt
+				, planTQty
+				, (
+					case when planTQty=0 then 0
+					else round(tpayAmt / planTQty)
+					end
+				) as avgUnitAmt
+				, gsvRate
+				, threeMonthAvgRate
+				, keymanID
+				, a.commt
+				, nvl(g.CHGCNT,0) as CHGCNT
+				, apprStateCD
+				, e.kindTpCD5
+				, e.prdNm
+				, d.factoryPrice
+				, e.qtyUnitCD
+				, d.threeMonthAvgQty
+				, d.planQty
+				, d.planUnitAmt
+				, d.payAmt
+				, d.prdCD
+				, e.gsv * d.planQty as gsv
+                , e.duty * d.planQty as duty
+                , e.wsdc * d.planQty as wsdc
+                , e.cogs * d.planQty as cogs
+			from GPLN01MT a
+			inner join GVEN01MT b
+				on a.venueCD = b.venueCD
+			inner join GEMP01MT c
+				on a.empID = c.empID
+			inner join GPLN01DT d
+				on a.eventYM = d.eventYM
+				and a.venueCD = d.venueCD
+			inner join GPRD01MT e
+				on d.prdCD = e.prdCD
+			left outer join GCHG01MT g      
+                on a.eventYM = g.eventYM      
+               and a.venueCD = g.venueCD 
+			where
+				a.eventYM = #eventYM#
+				and a.empID = #empID#
+				<isPropertyAvailable property="programCD">
+					<isNotEmpty prepend="and" property="programCD">
+						programCD = #programCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="activityCD">
+					<isNotEmpty prepend="and" property="activityCD">
+						activityCD = #activityCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="venueGradCD">
+					<isNotEmpty prepend="and" property="venueGradCD">
+						venueGradCD = #venueGradCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="segmentCD">
+					<isNotEmpty prepend="and" property="segmentCD">
+						segmentCD = #segmentCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="subSegmentCD">
+					<isNotEmpty prepend="and" property="subSegmentCD">
+						subSegmentCD = #subSegmentCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="addrTpCD1">
+					<isNotEmpty prepend="and" property="addrTpCD1">
+						addrTpCD1 = #addrTpCD1#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="addrTpCD2">
+					<isNotEmpty prepend="and" property="addrTpCD2">
+						addrTpCD2 = #addrTpCD2#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="apprStateCD">
+					<isNotEmpty prepend="and" property="apprStateCD">
+						apprStateCD = #apprStateCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+		) t
+		where 1=1
+		order by venueCD, prdCD
+	</select>	
+</sqlMap>

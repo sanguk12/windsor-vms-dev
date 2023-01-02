@@ -1,0 +1,365 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="KEY03003C" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
+	<property name="ireport.zoom" value="1.4641000000000013"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="keymanID" class="java.lang.String"/>
+	<parameter name="path" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[select
+   a.venueCD as "venueCD"
+   , b.venueNm as "venueNm"
+   , a.keymanID as "keymanID"
+   , a.keymanNm as "keymanNm"
+   , a.birthDate as "birthDate"
+   , A.DocFinshFl as "DocFinshFl"
+   , getLangDesc('000001', 'KR', 'F_CODE', 'DOCFINSHFL', A.DocFinshFl, null) as "DocFinshFlNm"
+   , CASE WHEN D.KEYMANID IS NULL THEN 'NONE' ELSE 'EXIST' END AS DataFg
+   , substr(d.DocWorkDate,0,4) || '.' || substr(d.DocWorkDate,5,2) || '.' || substr(d.DocWorkDate,7,2) as "docWorkDate"
+   , case when d.KeymanPrgsCd is null then '999' else d.KeymanPrgsCd end as "keyManPrgsCd"
+   , case when D.KeymanPrgsCd is null then 'NODOCU' else getLangDesc('000001', 'KR', 'F_CODE','KEYMANPRGSCD', D.KeymanPrgsCd, null) end as "KeymanPrgsNm"
+   , F.DocChkYn1 as "docChkYn1"
+   , CASE WHEN F.DocChkYn2 = 'Y' THEN 'V' ELSE ' ' END as "docChkYn2_CHK1"
+   , CASE WHEN F.DocChkYn2 = 'N' THEN 'V' ELSE ' ' END as "docChkYn2_CHK2"
+   , F.DocChkYn2 as "docChkYn2"
+   , F.DocChkYn3 as "docChkYn3"
+   , F.DocChkYn4 as "docChkYn4"
+   , F.KeyManNm as "keyManNm"
+   , E.FILEURL || E.UUID as "URL"
+from GKEY01MT a
+inner join
+    GVEN01MT b
+    on a.venueCD = b.venueCD
+left outer join gkey05mt d
+    on A.KEYMANID = d.KEYMANID
+    and  d.KEYMANDOCTPCD = '100'
+left outer join
+     f_doclink e
+     on d.filedoclink = e.doclinkid
+LEFT OUTER JOIN
+     GKEY06MT f
+     on A.KEYMANID = F.KEYMANID
+     AND F.KEYMANDOCTPCD = '100'
+WHERE A.KEYMANID = $P{keymanID}]]>
+	</queryString>
+	<field name="venueCD" class="java.lang.String"/>
+	<field name="venueNm" class="java.lang.String"/>
+	<field name="keymanID" class="java.lang.String"/>
+	<field name="keymanNm" class="java.lang.String"/>
+	<field name="birthDate" class="java.lang.String"/>
+	<field name="DocFinshFl" class="java.lang.String"/>
+	<field name="DocFinshFlNm" class="java.lang.String"/>
+	<field name="DATAFG" class="java.lang.String"/>
+	<field name="docWorkDate" class="java.lang.String"/>
+	<field name="keyManPrgsCd" class="java.lang.String"/>
+	<field name="KeymanPrgsNm" class="java.lang.String"/>
+	<field name="docChkYn1" class="java.lang.String"/>
+	<field name="docChkYn2_CHK1" class="java.lang.String"/>
+	<field name="docChkYn2_CHK2" class="java.lang.String"/>
+	<field name="docChkYn2" class="java.lang.String"/>
+	<field name="docChkYn3" class="java.lang.String"/>
+	<field name="docChkYn4" class="java.lang.String"/>
+	<field name="URL" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="67" splitType="Stretch">
+			<rectangle>
+				<reportElement x="10" y="10" width="532" height="46"/>
+			</rectangle>
+			<staticText>
+				<reportElement x="10" y="10" width="532" height="46"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="맑은 고딕" size="22" isBold="true" pdfFontName="malgun.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[개인정보 처리에 관한 동의서 ]]></text>
+			</staticText>
+		</band>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="20" splitType="Stretch">
+			<staticText>
+				<reportElement x="10" y="0" width="533" height="20"/>
+				<textElement>
+					<font pdfFontName="malgun.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[디아지오코리아 주식회사(이하 ‘회사’) 귀하]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="709" splitType="Stretch">
+			<image scaleImage="FillFrame" hAlign="Center" vAlign="Middle" onErrorType="Icon">
+				<reportElement x="361" y="622" width="166" height="73"/>
+				<graphicElement>
+					<pen lineWidth="1.0" lineStyle="Solid"/>
+				</graphicElement>
+				<imageExpression class="java.lang.String"><![CDATA[$P{path}+"/upload/"+$F{URL}]]></imageExpression>
+			</image>
+			<staticText>
+				<reportElement x="81" y="233" width="8" height="17"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true" pdfFontName="HYGoThic-Medium" pdfEncoding="UniKS-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[V]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="11" y="27" width="531" height="198"/>
+				<textElement>
+					<font pdfFontName="HYGoThic-Medium" pdfEncoding="UniKS-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[1. 수집하는 개인정보의 항목
+    성명, 주소 업소명, 업소 연락처, Key-man 연락처(성명 포함), 거래계좌정보(금융기관명, 예금주, 계좌번호 등),
+    명함에 기재된 개인정보 등
+2. 수집•이용 목적
+     - 계약 당사자의 신원 확인, 계약 체결 여부의 결정, 상품의 공급 및 대금 수령 등 계약의 이행, 관련 분쟁에 대한
+        대응(내용증명 발송•가압류 신청•소 제기 등 포함)
+     - 법인세•주세•부가가치세 등 각종 세금의 신고•납부, 영수증•세금계산서•주류판매계산서의 발급•교부 등
+        회사에 부과되는 법적•행정적 의무의 이행
+     - 계약내용•거래현황•물품공급, 대금지급내역 등에 대한 전산관리 및 고객 관계 관리 등
+3. 보유 및 이용기간:
+    관계법령에 따른 보존 의무가 인정되지 않는 한, 위 수집•이용 목적이 달성될 때까지
+4. 동의를 거부할 권리 및 거부에 따른 불이익
+     귀하는 개인정보의 수집 및 이용에 동의하지 않을 수 있으나, 이 경우 상품의 공급을 포함한 계약의 체결•유지 및
+     이행이 불가능할 수 있습니다.]]></text>
+			</staticText>
+			<rectangle>
+				<reportElement x="11" y="27" width="531" height="198"/>
+			</rectangle>
+			<staticText>
+				<reportElement mode="Opaque" x="93" y="233" width="353" height="17" backcolor="#CCCCCC"/>
+				<textElement verticalAlignment="Middle">
+					<font isBold="true" pdfFontName="malgun.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[   회사의 개인정보 수집 및 이용에 관한 설명을 이해하고, 이에 동의합니다.]]></text>
+			</staticText>
+			<rectangle>
+				<reportElement x="77" y="233" width="17" height="17" backcolor="#CCCCCC"/>
+			</rectangle>
+			<staticText>
+				<reportElement x="81" y="233" width="8" height="17"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true" pdfFontName="malgun.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[V]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="11" y="27" width="531" height="198"/>
+				<textElement>
+					<font pdfFontName="malgun.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[1. 수집하는 개인정보의 항목
+    성명, 주소 업소명, 업소 연락처, Key-man 연락처(성명 포함), 거래계좌정보(금융기관명, 예금주, 계좌번호 등),
+    명함에 기재된 개인정보 등
+2. 수집•이용 목적
+     - 계약 당사자의 신원 확인, 계약 체결 여부의 결정, 상품의 공급 및 대금 수령 등 계약의 이행, 관련 분쟁에 대한
+        대응(내용증명 발송•가압류 신청•소 제기 등 포함)
+     - 법인세•주세•부가가치세 등 각종 세금의 신고•납부, 영수증•세금계산서•주류판매계산서의 발급•교부 등
+        회사에 부과되는 법적•행정적 의무의 이행
+     - 계약내용•거래현황•물품공급, 대금지급내역 등에 대한 전산관리 및 고객 관계 관리 등
+3. 보유 및 이용기간:
+    관계법령에 따른 보존 의무가 인정되지 않는 한, 위 수집•이용 목적이 달성될 때까지
+4. 동의를 거부할 권리 및 거부에 따른 불이익
+     귀하는 개인정보의 수집 및 이용에 동의하지 않을 수 있으나, 이 경우 상품의 공급을 포함한 계약의 체결•유지 및
+     이행이 불가능할 수 있습니다.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="11" y="274" width="531" height="43"/>
+				<textElement>
+					<font pdfFontName="HYGoThic-Medium" pdfEncoding="UniKS-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[상기 개인정보는 우편(전자우편 포함) 발송, SMS 전송, 전화, 팩스 등을 통한 지속적인 제품의 홍보 및 판촉, 이벤트 할인•경품행사에 대한 안내 등에 이용될 수 있습니다. 이에 동의하지 않는 경우 신제품이나 이벤트•할인•경품행사 등에 대한 안내를 받지 못하실 수 있습니다.]]></text>
+			</staticText>
+			<rectangle>
+				<reportElement x="11" y="274" width="531" height="43"/>
+			</rectangle>
+			<staticText>
+				<reportElement x="11" y="254" width="505" height="20"/>
+				<textElement>
+					<font pdfFontName="malgun.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[◎ 제품 홍보 및 이벤트 안내 관련 동의 (선택)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="335" y="326" width="100" height="17" backcolor="#CCCCCC"/>
+				<textElement verticalAlignment="Middle">
+					<font isBold="true" pdfFontName="malgun.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[  동의하지 않습니다.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="10" y="7" width="177" height="20"/>
+				<textElement>
+					<font pdfFontName="malgun.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[◎ 개인정보 수집 및 이용 동의 (필수)]]></text>
+			</staticText>
+			<rectangle>
+				<reportElement x="319" y="326" width="17" height="17" backcolor="#CCCCCC"/>
+			</rectangle>
+			<staticText>
+				<reportElement x="11" y="274" width="531" height="43"/>
+				<textElement>
+					<font pdfFontName="malgun.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[상기 개인정보는 우편(전자우편 포함) 발송, SMS 전송, 전화, 팩스 등을 통한 지속적인 제품의 홍보 및 판촉, 이벤트 할인•경품행사에 대한 안내 등에 이용될 수 있습니다. 이에 동의하지 않는 경우 신제품이나 이벤트•할인•경품행사 등에 대한 안내를 받지 못하실 수 있습니다.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="111" y="435" width="316" height="17" backcolor="#CCCCCC"/>
+				<textElement verticalAlignment="Middle">
+					<font isBold="true" pdfFontName="malgun.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[  회사의 개인정보 처리업무의 위탁에 관한 설명을 이해하였습니다.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="11" y="350" width="505" height="20"/>
+				<textElement>
+					<font pdfFontName="malgun.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[◎ 개인정보 처리업무의 위탁에 대한 안내 ]]></text>
+			</staticText>
+			<rectangle>
+				<reportElement x="94" y="435" width="17" height="17" backcolor="#CCCCCC"/>
+			</rectangle>
+			<staticText>
+				<reportElement x="98" y="435" width="8" height="17"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true" pdfFontName="malgun.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[V]]></text>
+			</staticText>
+			<rectangle>
+				<reportElement x="11" y="370" width="531" height="58"/>
+			</rectangle>
+			<staticText>
+				<reportElement x="11" y="370" width="531" height="58"/>
+				<textElement>
+					<font isBold="false" pdfFontName="malgun.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[회사는 제품의 홍보 및 판촉 관련 업무를 아래와 같이 외부 전문업체에 위탁하고 있습니다. 수탁업체는 변경될 수 있으며,변경시에는 서면, 이메일, 팩스, 전화, SMS 또는 이와 유사한 방법 중 1개 이상의 방법으로 알려드립니다.
+1. 수탁업체 : 발렉스 코리아, 티비테크, 덱스터스, 맨파워, T&L
+2. 위탁 업무내용 :  제품의 홍보 및 판촉, 이벤트•할인•경품행사 실시]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="11" y="459" width="505" height="20"/>
+				<textElement>
+					<font pdfFontName="malgun.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[◎ 업주 키맨의 추가 동의]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="132" y="558" width="272" height="17" backcolor="#CCCCCC"/>
+				<textElement verticalAlignment="Middle">
+					<font isBold="true" pdfFontName="malgun.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[  이상의 내용에 대한 설명을 이해하고, 이에 동의합니다.]]></text>
+			</staticText>
+			<rectangle>
+				<reportElement x="115" y="558" width="17" height="17" backcolor="#CCCCCC"/>
+			</rectangle>
+			<staticText>
+				<reportElement x="120" y="558" width="8" height="17"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="8" isBold="true" pdfFontName="malgun.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[V]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="11" y="479" width="531" height="70"/>
+				<textElement>
+					<font isBold="false" pdfFontName="HYGoThic-Medium" pdfEncoding="UniKS-UCS2-H"/>
+				</textElement>
+				<text><![CDATA[귀하가 소속 Key-man을 비롯한 제3자(이하 "key-man 등")의 개인정보를 회사에 제공하는경우, 귀하는 그에 앞서 Key-man 등에게 그들의 정보를 회사에 제공한다는 점과 제공하는 개인정보의 항목, 제공 목적(회사가 이를다시 제3자에게 제공하는 경우에는 그와 관련된 내용을 포함), 회사가 해당 개인정보를 보유 및 이용하는 기간을 충본히 설명하고 이에 대한 동의를 받아야 합니다. 귀하는 이 동의서에 서명하거나 전자적으로 동의함으로써 귀하가 Key-man 등에게 그와 같은 설명을 제공하고 해당 Key-man 등으로부터 적법한 동의를 받았음을 확인합니다.]]></text>
+			</staticText>
+			<rectangle>
+				<reportElement x="11" y="479" width="531" height="70"/>
+			</rectangle>
+			<staticText>
+				<reportElement x="11" y="479" width="531" height="70"/>
+				<textElement>
+					<font isBold="false" pdfFontName="malgun.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[귀하가 소속 Key-man을 비롯한 제3자(이하 "key-man 등")의 개인정보를 회사에 제공하는경우, 귀하는 그에 앞서 Key-man 등에게 그들의 정보를 회사에 제공한다는 점과 제공하는 개인정보의 항목, 제공 목적(회사가 이를다시 제3자에게 제공하는 경우에는 그와 관련된 내용을 포함), 회사가 해당 개인정보를 보유 및 이용하는 기간을 충본히 설명하고 이에 대한 동의를 받아야 합니다. 귀하는 이 동의서에 서명하거나 전자적으로 동의함으로써 귀하가 Key-man 등에게 그와 같은 설명을 제공하고 해당 Key-man 등으로부터 적법한 동의를 받았음을 확인합니다.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="10" y="581" width="532" height="29"/>
+				<textElement>
+					<font pdfFontName="malgun.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[본인은 상기 내용을 상세히 읽어보았고, 이에 관하여 충분히 이해하였으며, 본인의 자유로운 의사에 의해 명확히 동의 하므로 아래와 같이 서명합니다.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="320" y="622" width="41" height="20"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true" pdfFontName="malgun.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[서명]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="223" y="623" width="71" height="20"/>
+				<textElement verticalAlignment="Middle">
+					<font pdfFontName="malgun.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{keymanNm}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="20" y="623" width="44" height="20"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true" pdfFontName="malgun.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[작성일자]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="64" y="623" width="81" height="20"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font pdfFontName="malgun.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{docWorkDate}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="179" y="623" width="44" height="20"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true" pdfFontName="malgun.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[성명]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="91" y="326" width="227" height="17" backcolor="#CCCCCC"/>
+				<textElement verticalAlignment="Middle">
+					<font isBold="true" pdfFontName="malgun.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[   마케팅 목적의 개인정보 이용에 동의합니다.]]></text>
+			</staticText>
+			<rectangle>
+				<reportElement x="76" y="326" width="17" height="17" backcolor="#CCCCCC"/>
+			</rectangle>
+			<textField>
+				<reportElement x="81" y="328" width="12" height="17"/>
+				<textElement>
+					<font size="8" isBold="true" pdfFontName="malgun.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{docChkYn2_CHK1}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="323" y="328" width="13" height="17"/>
+				<textElement>
+					<font size="8" isBold="true" pdfFontName="malgun.ttf" pdfEncoding="Identity-H" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{docChkYn2_CHK2}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band splitType="Stretch"/>
+	</summary>
+</jasperReport>

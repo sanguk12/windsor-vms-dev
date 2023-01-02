@@ -1,0 +1,899 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="MOBILE">
+
+	<!-- 앱 사용 유무 확인 -->
+	<select id="MCOM00001" parameterClass="java.util.HashMap" resultClass="java.util.LinkedHashMap">
+		select useYN as "useYN"
+		  from pmob002mt
+		 where packageNm = #packageNm#
+		   and appOs     = #appOs#
+	</select>
+
+	<!-- 앱, 앱버전 확인 -->
+	<select id="MCOM00002" parameterClass="java.util.HashMap" resultClass="java.util.LinkedHashMap">
+		select t1.packageNm as "packageNm",
+			   t1.appOs as "appOs", 
+			   MAX(t2.versionNo) as "versionNo"
+		  from pmob002mt t1
+		  left outer join pmob002vt t2
+			           on t1.packageNm = t2.packageNm
+		              and t1.appOs = t2.appOs
+		              and t2.useYN = 'Y'
+		 where t1.packageNm = #packageNm#
+		   and t1.appOs = #appOs#
+		 group by t1.packageNm, t1.appOs
+	</select>
+	
+	<!-- 컨텐츠 파일 버전 확인 -->
+	<select id="MCOM00003" parameterClass="java.util.HashMap" resultClass="java.util.LinkedHashMap">
+		select t1.packageNm as "packageNm", 
+			   t1.versionNo as "versionNo", 
+			   MAX(t2.contentVN) as "contentsVer"
+		  from pmob002vt t1
+		  left outer join pmob002ct t2
+			           on t1.packageNm = t2.packageNm
+		   	          and t1.appOs = t2.appOs
+		   	          and t1.versionNo = t2.versionNo
+		   	          and t2.useYN = 'Y'
+		 where t1.packageNm = #packageNm#
+		   and t1.appOs = #appOs#
+		   and t1.versionNo = #appVersion#
+		 group by t1.packageNm, t1.versionNo
+	</select>
+	
+	<!-- 컨텐츠 파일 URL 쿼리 -->
+	<select id="MCOM00004" parameterClass="java.util.HashMap" resultClass="java.util.LinkedHashMap">
+		select t1.packageNm as "packageNm",
+			   t1.appOs as "appOs",
+			   t2.versionNo as "versionNo", 
+			   MAX(t3.contentVN) as "contentVer", 
+			   'kr.co.diageo.kia' as "fileNm"
+		  from pmob002mt t1
+		 inner join pmob002vt t2
+		         on t1.packageNm = t2.packageNm
+		        and t1.appOs = t2.appOs
+		 inner join pmob002ct t3
+			     on t1.packageNm = t3.packageNm
+		        and t1.appOs = t3.appOs
+		        and t2.versionNo = t3.versionNo
+		 where t1.packageNm = #packageNm#
+		   and t1.appOs = #appOs#
+		   and t2.versionNo = #appVersion#
+		   and t1.useYN = 'Y'
+		   and t2.useYN = 'Y'
+		   and t3.useYN = 'Y'
+		 group by t1.packageNm, t1.appOs, t2.versionNo
+	</select>
+	
+	<!-- 로그인: 사용자 등록여부 조회 -->
+	<select id="LOGIN01S" parameterClass="kr.co.nis.waf.system.auth.model.User" resultClass="java.lang.Integer">
+		select
+			count(*) as "count"
+		from (
+			SELECT * FROM PMOB001MT
+			where APPID     = #userID#
+			  AND APPPASSWD = F_MD5_CRIPT(#passwd#)
+				and USEYN   = 'Y'
+		     )
+	</select>
+	
+	<!-- 로그인: 사용자 상세정보 조회 -->    
+   	<select id="LOGIN02S" parameterClass="kr.co.nis.waf.system.auth.model.User" resultClass="java.util.LinkedHashMap">
+   		<![CDATA[
+   		 SELECT 
+   		        A.APPID  as "userID", 
+                A.APPNM  as "userName", 
+                A.APPYN  as "appYN",
+                GETCONTYN(A.APPID) as "contYN",
+                (SELECT MAX(BIRTHDATE) FROM GKEY01MT WHERE SUBSTR(REPLACE(PHONENO,'-',''),4,12) =  A.APPID ) as "birthDT" ,
+                A.CALLNUM      AS "callNumber",
+                A.INITPASSWDYN as "initpasswdYN",
+                C.KEYMANTYPECD as "keymanTypeCd",
+                C.KEYMANID     as "keymanID"
+           FROM PMOB001MT A,
+           		PMOB001DT B,
+           		GKEY01MT  C
+          where A.APPID     = B.APPID
+            AND B.KEYMANID  = C.KEYMANID 
+          	AND A.APPID     = #userID#
+			AND A.APPPASSWD = F_MD5_CRIPT(#passwd#)
+			AND A.USEYN     = 'Y'
+   		 ]]>
+     </select>
+     
+     <select id="LOGIN03S" parameterClass="kr.co.nis.waf.system.auth.model.User" resultClass="java.util.LinkedHashMap">
+   		<![CDATA[
+   		 select APPID  as "userID"
+           FROM PMOB001MT
+          where APPID     = #userID#
+			AND APPPASSWD = F_MD5_CRIPT(#passwd#)
+			AND USEYN     = 'Y'
+   		 ]]>
+     </select>    
+	
+    <!-- 계약현황 List  -->
+	<select id="ContractList01S" parameterClass="java.util.HashMap" resultClass="java.util.LinkedHashMap">
+	    SELECT A.KEYMANID   as contractID,
+	           B.LAPPLYDATE as contractDate, 
+	           C.VENUENM as contractNM,
+		       DECODE(A.CONTRACTIMG,null,'N','Y') AS signYN   
+	      FROM PMOB001DT A ,
+	           GKEY01MT  B ,
+	           GVEN01MT C
+	     WHERE A.KEYMANID = B.KEYMANID
+	       AND A.APPID    = #userID#
+	       AND B.VENUECD = C.VENUECD
+		<isPropertyAvailable property="storeNm">
+		<isNotEmpty prepend="and" property="storeNm">
+			C.VENUENM LIKE '%' || #storeNm# || '%'
+		</isNotEmpty>
+		</isPropertyAvailable>
+		<isPropertyAvailable property="signCode">
+			<isEqual prepend="AND" property="signCode" compareValue="01">
+				A.CONTRACTIMG IS NOT NULL
+			</isEqual>
+			<isEqual prepend="AND" property="signCode" compareValue="02">
+				A.CONTRACTIMG IS NULL
+			</isEqual>
+		</isPropertyAvailable>
+	</select>
+     
+    <!-- 계약현황 상세  -->
+	<select id="Contract01S" parameterClass="java.util.HashMap" resultClass="java.util.LinkedHashMap">
+		SELECT  A.KEYMANID as contractID,
+		        (SELECT VENUENM FROM GVEN01MT WHERE VENUECD = B.VENUECD ) as contractNM,
+				A.CONTRACTDATE as contractDate, 
+				A.CONTRACTIMG AS contractSign,
+				DECODE(A.CONTRACTIMG,null,'N','Y') AS signYN,
+				NVL(A.CONTRACT01,'N') AS CONTRACT01,
+				NVL(A.CONTRACT02,'N') AS CONTRACT02,
+				NVL(A.CONTRACT03,'N') AS CONTRACT03,
+				NVL(A.CONTRACT04,'N') AS CONTRACT04,
+				NVL(A.CONTRACT05,'N') AS CONTRACT05,
+				NVL(A.CONTRACT06,'N') AS CONTRACT06,
+				NVL(A.CONTRACT07,'N') AS CONTRACT07,
+				NVL(A.CONTRACT08,'N') AS CONTRACT08,
+				NVL(A.CONTRACT09,'N') AS CONTRACT09,
+				NVL(A.CONTRACT10,'N') AS CONTRACT10,
+				DECODE(NVL(B.DUTYCD,'60'),'10','Y','N') AS PKEYMANYN,
+		        B.KEYMANID AS KEYMANID,    
+		        B.VENUECD AS VENUECD,
+		        B.BANKCD AS "bankCD",
+		        REPLACE(B.ACCOUNTNO,'-','') as "accountNo",  
+		        B.HOLDERNM AS "holderNm",
+		        B.BANKYN AS "bankFC"
+		FROM PMOB001DT A ,
+             GKEY01MT  B
+       WHERE A.KEYMANID = B.KEYMANID
+		 AND A.APPID    = #userID#
+		<isPropertyAvailable property="contractID">
+			<isNotEmpty prepend="and" property="contractID">
+				A.KEYMANID = #contractID#
+			</isNotEmpty>
+		</isPropertyAvailable>
+	</select>
+     
+    <!-- 판매관리리스트  -->
+	<select id="SalesPromotionList01S" parameterClass="java.util.HashMap" resultClass="java.util.LinkedHashMap">
+		select 
+			eventYM    as "eventYM"     ,  
+			venueCD    as "venueCD"     ,  
+			venueNm    as "venueNm"     ,  
+			diffNo     as "diffNo"      ,
+			tpayAmt    as "tpayAmt"     ,  
+			resultTQty as "resultTQty"  ,
+			keymanID   as "keymanID"    , 
+			bankCD     as "bankCD"      ,
+			accountNo  as "accountNo"   ,  
+			holderNm   as "holderNm"    ,
+			approveYN as "approveYN",
+			gubun as "gubun",
+			saleCD01 as "saleCD01", 
+			saleCD02 as "saleCD02", 
+			saleCD03 as "saleCD03", 
+			saleCD04 as "saleCD04", 
+			saleCD05 as "saleCD05", 
+			saleCD06 as "saleCD06", 
+			saleCD07 as "saleCD07", 
+			saleCD08 as "saleCD08", 
+			saleCD09 as "saleCD09", 
+			saleCD10 as "saleCD10" 
+		 from (
+		   select
+			      a.eventYM    as eventYM     ,  
+			      a.venueCD    as venueCD     ,  
+			      d.venueNm    as venueNm     ,  
+			      a.diffNo     as diffNo      ,
+			      b.PAYAMT    as tpayAmt     ,  
+			      a.resultTQty as resultTQty  ,
+			      b.keymanID   as keymanID    , 
+			      b.bankCD     as bankCD      ,
+			      REPLACE(b.accountNo,'-','')  as accountNo   ,  
+			      b.holderNm   as holderNm    ,
+			      b.KEYCHKYN as approveYN,
+			      'P' as gubun,
+			      NVL(C.SALECDYN01,'N') as saleCD01, 
+			      NVL(C.SALECDYN02,'N') as saleCD02, 
+			      NVL(C.SALECDYN03,'N') as saleCD03, 
+			      NVL(C.SALECDYN04,'N') as saleCD04, 
+			      NVL(C.SALECDYN05,'N') as saleCD05, 
+			      NVL(C.SALECDYN06,'N') as saleCD06, 
+			      NVL(C.SALECDYN07,'N') as saleCD07, 
+			      NVL(C.SALECDYN08,'N') as saleCD08, 
+			      NVL(C.SALECDYN09,'N') as saleCD09, 
+			      NVL(C.SALECDYN10,'N') as saleCD10 
+			from  GRLT01MT a        
+			left outer join PMOB003MT C         
+			         on a.eventYM = c.eventYM         
+			        AND a.venueCD = c.venueCD         
+			left outer join GRLT06MT b         
+			         on a.eventYM = b.eventYM         
+			        AND a.venueCD = b.venueCD         
+			        AND a.diffNo  = b.diffNo        
+			inner join GVEN01MT d         
+			        on a.venueCD = d.venueCD        
+			where 1 = 1 
+			  <!-- AND a.eventYM  =  #eventYM# -->
+			  AND b.keymanID in (select KEYMANID from PMOB001DT
+			                      WHERE APPID = #userID#
+			                    )
+			  AND A.TPAYAMT > 0
+			  AND b.PAYAMT > 0
+			  AND A.APPRSTATECD = '50'
+			  AND A.PAYSTATECD != '10'
+			  <isPropertyAvailable property="venueNm">
+				<isNotEmpty prepend="and" property="venueNm">
+					D.venueNm LIKE '%' || #venueNm# || '%'  
+				</isNotEmpty>
+			  </isPropertyAvailable>
+			  <isPropertyAvailable property="approveYN">
+			  	<isNotEmpty prepend="AND" property="approveYN">
+					b.KEYCHKYN = #approveYN#
+				</isNotEmpty>			
+			   </isPropertyAvailable>		   
+			UNION 
+	        select
+			       a.eventYM        as eventYM     ,  
+			       a.venueCD        as venueCD     ,  
+			       d.venueNm        as venueNm     ,  
+			       NULL             as diffNo      ,
+			       SUM(A.PAYAMT)    as tpayAmt     ,  
+			       SUM(A.RESULTQTY) as resultTQty  ,
+			       A.keymanID       as keymanID    , 
+			       A.bankCD         as bankCD      ,
+			       REPLACE(A.accountNo,'-','')  as accountNo   ,  
+			       A.holderNm       as holderNm    ,
+			       A.KEYCHKYN as approveYN,
+			       'B' as gubun,
+			      NVL(C.SALECDYN01,'N') as salecdYN01, 
+			      NVL(C.SALECDYN02,'N') as salecdYN02, 
+			      NVL(C.SALECDYN03,'N') as salecdYN03, 
+			      NVL(C.SALECDYN04,'N') as salecdYN04, 
+			      NVL(C.SALECDYN05,'N') as salecdYN05, 
+			      NVL(C.SALECDYN06,'N') as salecdYN06, 
+			      NVL(C.SALECDYN07,'N') as salecdYN07, 
+			      NVL(C.SALECDYN08,'N') as salecdYN08, 
+			      NVL(C.SALECDYN09,'N') as salecdYN09, 
+			      NVL(C.SALECDYN10,'N') as salecdYN10
+			  from GRLT02DT A
+			  left outer join PMOB003MT C         
+			         on a.eventYM = c.eventYM         
+			        AND a.venueCD = c.venueCD   
+			    inner join GVEN01MT d         
+					    on a.venueCD = d.venueCD    
+			    where 1 = 1 
+				  <!-- AND a.eventYM  =  #eventYM# -->
+				  AND A.keymanID in (select KEYMANID from PMOB001DT
+					                      WHERE APPID = #userID#
+					                    )
+			      AND A.PAYAMT > 0
+			      AND A.APPRSTATECD = '50'
+			      AND A.PAYSTATECD != '10'
+	          <isPropertyAvailable property="venueNm">
+				<isNotEmpty prepend="and" property="venueNm">
+					D.venueNm LIKE '%' || #venueNm# || '%'  
+				</isNotEmpty>
+			  </isPropertyAvailable>
+			  <isPropertyAvailable property="approveYN">
+				<isNotEmpty prepend="AND" property="approveYN">
+					A.KEYCHKYN = #approveYN#
+				</isNotEmpty>
+			   </isPropertyAvailable>		   
+	      GROUP BY a.eventYM,a.venueCD,d.venueNm,A.keymanID,A.bankCD,A.accountNo,A.holderNm,A.KEYCHKYN,		
+	      C.SALECDYN01,C.SALECDYN02,C.SALECDYN03,C.SALECDYN04,C.SALECDYN05,C.SALECDYN06,C.SALECDYN07,C.SALECDYN08,C.SALECDYN09,C.SALECDYN10 
+        )ORDER BY EVENTYM DESC
+	</select>
+	
+    <!-- 판매관리상세 조회 -->
+	<select id="SalesPromotion01S" parameterClass="java.util.HashMap" resultClass="java.util.LinkedHashMap">
+	SELECT * FROM 
+    (
+         select prdCD as "prdCD"    ,
+    	        prdNm as "prdNm"    ,
+		        resultQty as "resultQty"    ,
+		        resultUnitAmt as "resultUnitAmt"    ,
+		        payAmt as "payAmt"   
+		   from (   select  a.prdCD         ,  
+		                    b.prdNm     ,
+		                    a.resultQty     ,
+		                    a.resultUnitAmt     ,
+		                    a.payAmt   
+		               from GRLT01DT a    
+		              inner join GPRD01MT b     
+		                      on a.prdCD = b.prdCD   
+		              where a.eventYM =  #eventYM#
+		                and a.venueCD =  #venueCD#
+		                AND A.DIFFNO  =  #diffNo#
+		          ) t
+		    where payAmt > 0
+		 UNION 
+         select
+	            A.prdCD as "prdCD"    ,
+	            B.prdNm as "prdNm"    ,
+			        A.resultQty as "resultQty"    ,
+			        A.resultUnitAmt as "resultUnitAmt"    ,
+			        A.payAmt as "payAmt"   
+	       from  GRLT02DT A
+	       inner join GPRD01MT b     
+			       on a.prdCD = b.prdCD
+	       where a.eventYM  =  #eventYM#
+			 and a.venueCD  =  #venueCD#
+	         AND A.keymanID in (select KEYMANID from PMOB001DT
+		                      	WHERE APPID = #userID#
+		                    	)
+    ) 
+   ORDER BY 2   
+	</select>
+	
+    <!-- 계좌변경은행  조회 -->
+	<select id="BankList01S" parameterClass="java.util.HashMap" resultClass="java.util.LinkedHashMap">
+		SELECT COMCODE  as "bankCode",
+		       CODENAME as "bankName"
+		  FROM F_CODE
+		 WHERE CODEDIV   = 'BANKLIST'
+		   AND USEYN     = 'Y'
+		   AND ACTIVEFLG = 'U'
+		 ORDER BY SEQ
+	</select> 
+	
+	
+	<!-- 본인인증 완료  -->
+    <update id="API0100101U" parameterClass="com.kia.api.model.GAPI01MT">
+		update PMOB001MT
+		   set APPYN = 'Y'
+		 where APPID = #userID#
+	</update>
+	
+	<!-- 비밀번호변경  -->
+	<update id="API0100102U" parameterClass="com.kia.api.model.GAPI01MT">
+		UPDATE PMOB001MT
+		   SET APPPASSWD = F_MD5_CRIPT( #newPassword# ) ,
+			   INITPASSWDYN = 'Y'
+		 where APPID = #userID#
+	</update>
+	
+	<!-- 계약체결  -->
+	<update id="API0100103U" parameterClass="com.kia.api.model.GAPI01MT">
+		update PMOB001DT
+		   set CONTRACTDATE  = SYSDATE ,
+		       CONTRACTYN    = #contractYN# , 
+		       CONTRACT01    = #contract01# , 
+		       CONTRACT02    = #contract02# , 
+		       CONTRACT03    = #contract03# , 
+		       CONTRACT04    = #contract04# , 
+		       CONTRACT05    = #contract05# , 
+		       CONTRACT06    = #contract06# , 
+		       CONTRACT07    = #contract07# , 
+		       CONTRACT08    = #contract08# , 
+		       CONTRACT09    = #contract09# , 
+		       CONTRACT10    = #contract10# , 
+		       CONTRACTIMG   = #contractIMG# 
+		 where KEYMANID      = #keymanID#
+	</update>
+	
+	<!-- 개인정보 동의 연동  -->
+	<insert id="API0100103U1" parameterClass="com.kia.api.model.GAPI01MT">
+	merge into GKEY05MT t1
+		using dual
+		on (
+			t1.keymanID = #keymanID#
+			and t1.keymanDocTpCd = '100'
+		)
+		when not matched then
+			insert (
+				keymanID
+				, keymanDocTpCd
+				, docWorkDate
+				, keymanPrgsCd
+				, regID
+				, regDate
+			)
+			values (
+				#keymanID#
+				, '100'
+				, SYSDATE
+				, '400'
+				, #keymanID#
+				, sysdate
+			)
+		when matched then
+			update
+			set
+				keymanPrgsCd = '400'
+				, chgID = #keymanID#
+				, chgDate = sysdate
+	</insert>
+	
+	<!-- 프로그램 참여 동의 연동  -->
+	<insert id="API0100103U2" parameterClass="com.kia.api.model.GAPI01MT">
+	merge into GKEY05MT t1
+		using dual
+		on (
+			t1.keymanID = #keymanID#
+			and t1.keymanDocTpCd = '200'
+		)
+		when not matched then
+			insert (
+				keymanID
+				, keymanDocTpCd
+				, docWorkDate
+				, keymanPrgsCd
+				, regID
+				, regDate
+			)
+			values (
+				#keymanID#
+				, '200'
+				, SYSDATE
+				, '400'
+				, #keymanID#
+				, sysdate
+			)
+		when matched then
+			update
+			set
+				keymanPrgsCd = '400'
+				, chgID = #keymanID#
+				, chgDate = sysdate
+	</insert>
+	
+	<update id="API0100103U3" parameterClass="com.kia.api.model.GAPI01MT">
+		UPDATE GKEY01MT SET
+				REGIDNO = (SELECT REGIDNO FROM GKEY01MT 
+							WHERE KEYMANID IN (
+										    SELECT KEYMANID FROM PMOB001DT 
+										        WHERE APPID = (SELECT APPID FROM PMOB001DT 
+										        				WHERE KEYMANID = #keymanID#)
+										 					)
+							AND REGIDNO IS NOT NULL
+							AND ROWNUM = 1)
+		WHERE 
+            KEYMANID =  #keymanID#
+        AND REGIDNO IS NULL
+	</update>
+	
+	<!-- 계좌번호변경  -->
+	<update id="API0100104U" parameterClass="com.kia.api.model.GAPI01MT">
+		update GKEY01MT
+		   set BANKCD    = #bankCD# ,
+               ACCOUNTNO = #accountNO#,
+               HOLDERNM  = #holderNM#,
+               BANKYN    = 'Y'
+		 where KEYMANID  = #keymanID#
+	</update>
+	
+	<!-- 판매관리승인 업소 -->
+	<update id="API0100105U" parameterClass="com.kia.api.model.GAPI01MT">
+		update GRLT06MT
+		   set KEYCHKYN = '1'
+		 where EVENTYM  = #eventYM#
+		   AND VENUECD  = #venueCD#
+		   AND DIFFNO   = #diffNo#
+		   AND KEYMANID = #keymanID#
+	</update>
+	
+	<!-- 판매관리승인  브랜드-->
+	<update id="API0100106U" parameterClass="com.kia.api.model.GAPI01MT">
+		update GRLT02DT
+		   set KEYCHKYN = '1'
+		 where EVENTYM  = #eventYM#
+		   AND VENUECD  = #venueCD#
+		   AND PRDCD    = #prdCD#
+	</update>
+	
+	<!-- 판매촉진활동  -->
+	<insert id="API0100107U" parameterClass="com.kia.api.model.GAPI01MT">
+		merge into PMOB003MT t1
+			using dual
+			on (
+				t1.EVENTYM    = #eventYM#
+			   AND t1.VENUECD = #venueCD#
+			)
+			when not matched then
+				insert (
+				   SALECDYN01 , 
+			       SALECDYN02 , 
+			       SALECDYN03 , 
+			       SALECDYN04 , 
+			       SALECDYN05 , 
+			       SALECDYN06 , 
+			       SALECDYN07 , 
+			       SALECDYN08 , 
+			       SALECDYN09 , 
+			       SALECDYN10 ,
+				   REGID      ,
+				   REGDATE    ,
+				   EVENTYM    ,
+				   VENUECD
+				)
+				values (
+					#saleCD01# , 
+				    #saleCD02# , 
+				    #saleCD03# , 
+				    #saleCD04# , 
+				    #saleCD05# , 
+				    #saleCD06# , 
+				    #saleCD07# , 
+				    #saleCD08# , 
+				    #saleCD09# , 
+				    #saleCD10# , 
+				    #userID#   ,
+			    	SYSDATE	   ,
+			    	#eventYM#  ,
+			    	#venueCD#
+				)
+			when matched then
+				update
+			   set SALECDYN01    = #saleCD01# , 
+			       SALECDYN02    = #saleCD02# , 
+			       SALECDYN03    = #saleCD03# , 
+			       SALECDYN04    = #saleCD04# , 
+			       SALECDYN05    = #saleCD05# , 
+			       SALECDYN06    = #saleCD06# , 
+			       SALECDYN07    = #saleCD07# , 
+			       SALECDYN08    = #saleCD08# , 
+			       SALECDYN09    = #saleCD09# , 
+			       SALECDYN10    = #saleCD10# , 
+			       CHGID         = #userID#   ,
+			       CHGDATE       = SYSDATE
+	</insert>
+	
+	<!-- 실적계좌번호변경  브랜드-->
+	<update id="API0100108U1" parameterClass="com.kia.api.model.GAPI01MT">
+		update GRLT02DT
+		   set BANKCD    = #bankCD# ,
+               ACCOUNTNO = #accountNO#,
+               HOLDERNM  = #holderNM#
+		 where EVENTYM   = #eventYM#
+		   AND VENUECD   = #venueCD#
+		   AND PRDCD     = #prdCD#
+		   AND KEYMANID  = #keymanID#
+		   AND EVENTYM	 = #eventYM#
+	</update>
+	
+	<!-- 실적계좌번호변경 업소  -->
+	<update id="API0100108U2" parameterClass="com.kia.api.model.GAPI01MT">
+		update GRLT06MT
+		   set BANKCD    = #bankCD# ,
+               ACCOUNTNO = #accountNO#,
+               HOLDERNM  = #holderNM#
+		 where EVENTYM   = #eventYM#
+		   AND VENUECD   = #venueCD#
+		   AND DIFFNO    = #diffNo#		  
+		   AND KEYMANID  = #keymanID#
+		   AND EVENTYM	 = #eventYM#
+		                
+	</update>
+	
+	<!-- 판매관리반려 업소 -->
+	<update id="API0100109U1" parameterClass="com.kia.api.model.GAPI01MT">
+		update GRLT01MT
+		   set payStateCD = '40'
+			 , payCommt   = '키맨 반려 ['||(select keymanNm from GKEY01MT where keymanid = #keymanID# )||'( '||#keymanID#||' )] :'||#commt#
+			 , chgID      = #userID#
+			 , chgDate    = sysdate
+	     where eventYM    = #eventYM#
+	       and venueCD    = #venueCD#
+		   and diffNo     = #diffNo#   
+	</update>
+	
+	<!-- 판매관리반려 업소 키맨별-->
+	<update id="API0100109U1_1" parameterClass="com.kia.api.model.GAPI01MT">
+		update GRLT06MT
+		   set KEYCHKYN   = '3'
+			 , KEYCHKNOTE = #commt#
+			 , chgID      = #userID#
+			 , chgDate    = sysdate
+	     where eventYM    = #eventYM#
+	       and venueCD    = #venueCD#
+		   and diffNo     = #diffNo# 
+		   AND KEYMANID   = #keymanID#  
+	</update>
+	
+	<!-- 판매관리반려  브랜드-->
+	<update id="API0100109U2" parameterClass="com.kia.api.model.GAPI01MT">
+		update GRLT02DT
+		set
+			payStateCD = '40'
+			, KEYCHKYN = '3'
+			, payCommt = #commt#
+			, chgID = #userID#
+			, chgDate = sysdate
+		where
+			eventYM = #eventYM#
+		and venueCD = #venueCD#
+		and prdCD = #prdCD#
+		AND keymanID IN (SELECT KEYMANID FROM PMOB001DT
+		      	         WHERE APPID = #userID#)
+	</update>
+	
+	    <!-- 키맨확인 코드  조회 -->
+	<select id="KeyCode01S" parameterClass="java.util.HashMap" resultClass="java.util.LinkedHashMap">
+		SELECT COMCODE  as "keyCode",
+		       CODENAME as "keyName"
+		  FROM F_CODE
+		 WHERE CODEDIV   = 'KEYCHKYN'
+		   AND USEYN     = 'Y'
+		   AND ACTIVEFLG = 'U'
+		   AND COMCODE	 != '2'
+		   AND COMCODE	 != '3'
+		 ORDER BY SEQ
+	</select> 
+	
+	
+	<!-- 키맨내역 조회 -->
+	<select id="ApiKeyman01S" parameterClass="com.kia.api.model.GAPI01MT" resultClass="java.util.LinkedHashMap">
+		select
+			venueCD as "venueCD"
+			, venueNm as "venueNm"
+			, keymanID as "keymanID"
+			, keymanNm as "keymanNm"
+			, keymanTypeCD as "keymanTypeCD"
+			, regIDNo as "regIDNo"
+			, birthDate as "birthDate"
+			, dutyCD as "dutyCD"
+			, addr as "addr"
+			, phoneNo as "phoneNo"
+			, bankCD as "bankCD"
+			,(SELECT CODENAME FROM F_CODE
+		 		WHERE CODEDIV   = 'BANKLIST'
+		   		AND USEYN     = 'Y'
+		   		AND ACTIVEFLG = 'U'
+				AND COMCODE = bankCD) AS "bankNm"
+			, accountNo as "accountNo"
+			, holderNm as "holderNm"
+			, PkeymanYN as "PkeymanYN"
+			, note as "note"
+		from (
+			select 
+				a.venueCD
+				, b.venueNm
+			    , a.keymanID
+			    , a.keymanNm
+			    , a.keymanTypeCD
+			    , SCP.DEC_B64('DAMO','SCP','AES_256.SCPS',a.regIDNo) AS regIDNo
+			    , a.birthDate
+			    , a.dutyCD
+			    , a.addr
+			    , a.phoneNo
+			    , a.bankCD
+			    , a.accountNo
+			    , a.holderNm
+			    , a.PkeymanYN
+			    , a.note
+			from GKEY02MT a
+			inner join GVEN01MT b
+				on a.venueCD = b.venueCD
+			where 
+				a.keymanID = #empID#
+		) t
+		order by keymanID
+	</select>
+	
+	<!-- 키맨요청정보 수정 -->
+	<update id="API0100110U1" parameterClass="com.kia.api.model.GAPI01MT">
+		update GKEY02MT
+		set
+			addr = #addr#
+			, phoneNo = #phoneNo#
+			, note = #commt#
+			, chgID = #userID#
+			, chgDate = chgDate
+		where
+			keymanID = #keymanID#
+	</update>
+	
+	<!-- 키맨요청정보 수정 -->
+	<update id="API0100110U2" parameterClass="com.kia.api.model.GAPI01MT">
+		update GKEY02MT
+		set
+			birthDate = #birthDate#
+			, bankCD = #bankCD#
+			, accountNo = #accountNO#
+			, holderNm = #holderNM#
+			, chgID = #userID#
+			, chgDate = chgDate
+		where
+			keymanID = #keymanID#
+	</update>
+	
+	<select id="API0100120S" parameterClass="com.kia.api.model.GAPI01MT" resultClass="Integer">
+		select	count(BANKYN) cnt
+		  from	GKEY01MT
+		 where	keymanID = #keymanID#
+		   and  BANKYN   = 'Y'
+	</select>
+	
+	<!-- 키맨 주민번호 업데이트 수정 -->
+	<update id="API0100101U1" parameterClass="com.kia.api.model.GAPI01MT">
+		UPDATE GKEY01MT
+		SET
+			REGIDNO = SCP.ENC_B64('DAMO','SCP','AES_256.SCPS',#regIDNo#)
+		WHERE
+			KEYMANID = #keymanID#
+	</update>
+	
+	<!-- 생년월일 조회 -->
+	<select id="API0100130S" parameterClass="com.kia.api.model.GAPI01MT" resultClass="java.util.LinkedHashMap">
+   		<![CDATA[
+   		 SELECT BIRTHDATE as "birthDate" 
+           FROM GKEY01MT 
+          WHERE KEYMANID = #keymanID#
+   		 ]]>
+    </select>
+     
+	<!-- 이력 시퀀스 조회 -->
+    <select id="API0100140S" resultClass="java.util.LinkedHashMap">
+   		<![CDATA[
+   		 SELECT NICE_SEQ.NEXTVAL AS "SEQ" FROM DUAL
+   		]]>
+    </select>
+     
+	<!-- 이력 저장 본인인증-->
+    <insert id="API0100140U" parameterClass="com.kia.api.model.GAPI01MT">
+   		<![CDATA[ 
+   		MERGE INTO PMOB010MT t1
+			using dual
+			on (
+				t1.reqseq   = #seq#
+			)
+			when not matched then
+				insert (
+				   REQSEQ , 
+			       REGID , 
+			       REGDATE
+				)
+				values (
+					#seq# , 
+				    #userID# , 
+				    SYSDATE 
+				)
+			WHEN MATCHED THEN
+				UPDATE
+			   SET SCIPHERTIME   = SYSDATE , 
+			       RESSEQ    = #resSeq# , 
+			       AUTHTYPE    = #authType# , 
+			       DI    = #DI# , 
+			       CI    = #CI# , 
+			       NAME   = #name# , 
+			       GENDER   = #gender# , 
+			       BIRTHDATE   = #birthDate# , 
+			       NATIONAINFO   = #nationalinfo# , 
+			       MOBILENO   = #mobileNo# , 
+			       MOBILECO   = #mobileCo# , 
+			       CORPNO   = #corpNo# , 
+			       ERRCODE   = #errCode#
+			      
+   		]]>
+    </insert>
+     
+	<!-- 이력 저장 계좌번호 -->
+    <insert id="API0100140I" parameterClass="com.kia.api.model.GAPI01MT">
+   		<![CDATA[ 
+   		insert INTO PMOB011MT(
+   				NAME
+				, ACCHOLDER
+				, BANK_CD
+				, ACC_NUM
+				, BIRTH
+				, RSP_CD
+				, RSP_MESSAGE
+				, REGDT
+				)
+				values (
+					#name# , 
+				    #holderNM# , 
+				    #bankCD# , 
+				    #accountNO# , 
+				    #birthDate# , 
+				    #rspCd# , 
+				    #commt# , 
+				    SYSDATE 
+				)
+   		]]>
+    </insert>
+    
+    <!-- 로그인실패 횟수 조회(IP) -->
+	<select id="API0100150S" parameterClass="kr.co.nis.waf.system.auth.model.User" resultClass="java.util.LinkedHashMap">
+		select
+			CNT as "cnt"
+		from F_LOGIP
+		where
+			IP = #currentClientIp#
+	</select>
+	
+	<!-- 로그인실패 횟수 증가  -->
+	<insert id="API0100150I" parameterClass="kr.co.nis.waf.system.auth.model.User">
+	merge into F_LOGIP t1
+		using dual
+		on (
+			IP = #currentClientIp#
+		)
+		when not matched then
+			insert (
+				IP, CNT
+			)
+			values (
+				#currentClientIp#
+				, '1'
+				)
+		when matched then
+			update
+			set
+				CNT = CNT + 1
+	</insert>
+	
+	<!-- 로그인실패 횟수 초기화  -->
+	<update id="API0100150U" parameterClass="kr.co.nis.waf.system.auth.model.User">
+		UPDATE F_LOGIP SET CNT = '0'
+		WHERE IP = #currentClientIp#
+	</update>
+	
+	
+	<!-- 아이디로 사용자 등록여부 조회 -->
+	<select id="API0100160S" parameterClass="kr.co.nis.waf.system.auth.model.User" resultClass="java.lang.Integer">
+		select
+			count(*) as "count"
+		from (
+			SELECT * FROM PMOB001MT
+			where APPID     = #userID#
+			  AND USEYN   = 'Y'
+		     )
+	</select>
+	
+	<!-- 아이디로 사용자 상세 조회  -->    
+   	<select id="API0100161S" parameterClass="kr.co.nis.waf.system.auth.model.User" resultClass="java.util.LinkedHashMap">
+   		<![CDATA[
+   		 SELECT 
+   		        A.APPID  as "userID", 
+                A.APPNM  as "userName", 
+                C.BIRTHDATE as "birthDT"
+           FROM PMOB001MT A,
+           		PMOB001DT B,
+           		GKEY01MT  C
+          where A.APPID     = B.APPID
+            AND B.KEYMANID  = C.KEYMANID 
+          	AND A.APPID     = #userID#
+			AND A.USEYN     = 'Y'
+			AND ROWNUM = 1
+   		 ]]>
+     </select>
+     
+	<!-- 비밀번호 초기화  -->
+    <update id="API0100160U" parameterClass="com.kia.api.model.GAPI01MT">
+		UPDATE PMOB001MT
+		   SET APPPASSWD = F_MD5_CRIPT(
+										(SELECT SUBSTR(C.BIRTHDATE,3,10) || '123'
+								        FROM PMOB001MT A, PMOB001DT B, GKEY01MT  C
+								        WHERE A.APPID     = B.APPID
+								        AND B.KEYMANID  = C.KEYMANID 
+								        AND A.APPID     = #userID#
+										AND A.USEYN     = 'Y'
+										AND ROWNUM = 1)
+									  )
+		 WHERE APPID = #userID#
+	</update>
+</sqlMap>
+

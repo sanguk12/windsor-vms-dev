@@ -1,0 +1,499 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="LTC02001">
+	<!-- Paging 구현쿼리 Header 조각 -->
+    <sql id="LTC02001.paging.header">
+        <isPropertyAvailable property="pageNum">
+        select p.* from (
+            select
+<!--     		    ROWNUM as "rowNum", -->
+<!--     	        FLOOR((ROWNUM-1)/#displayNum#+1) as pageNum, -->
+    	        COUNT(*) OVER() as "totalCount",
+    	</isPropertyAvailable>
+    	<isNotPropertyAvailable property="pageNum">
+    		select
+    	</isNotPropertyAvailable>
+    </sql>
+    
+    <!-- Paging 구현쿼리 Header 조각 -->
+    <sql id="LTC02001.paging.footer">
+        <isPropertyAvailable property="pageNum">
+        ) p
+		where
+			p.pageNum = #pageNum#
+		</isPropertyAvailable>
+    </sql>
+	<!-- 선지원등록/지급요청 리스트 조회 -->
+	<select id="LTC0200101S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		<include refid="LTC02001.paging.header"/>
+			rank() over( order by a.supportID) as "rowNum",
+			FLOOR((rank() over(	order by a.supportID	)-1)/#displayNum#+1) as pageNum,
+			a.supportID as "supportID"
+			, b.venueCD as "venueCD"
+			, d.venueNm as "venueNm"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','VENUEGRADCD',d.venueGradCD,null) as "venueGradCD"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SEGMENTCD',d.segmentCD,null) as "segmentCD"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SUBSEGMENTCD',d.subSegmentCD,null) as "subSegmentCD"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD1',d.addrTpCD1,null) as "addrTpCD1"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD2',d.addrTpCD2,null) as "addrTpCD2"
+			, b.contractDateFrom as "contractDateFrom"
+			, b.contractDateTo as "contractDateTo"
+			, b.contractMonthCt as "contractMonthCt"
+			, b.minContractQty  as "minContractQty"
+			, b.targetrate as "targetRate"
+			, b.addpayrate as "addPayRate"
+			, b.gsvRate as "gsvRate"
+			, b.tcontractamt as "tcontractAmt"
+			, b.tpayamt as "tpayAmt"
+			, a.commt as "commt"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','LTCSTATECD',b.apprStateCD,null) as "apprStateCDNm"
+			, b.apprStateCD as "apprStateCD"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','APPRSTATECD',a.apprStateCD,null) as "apprStateCDNm_emp"
+			, a.apprStateCD as "apprStateCD_emp"
+			from GLTC02MT a
+			inner join GLTC01MT b
+				on a.supportID = b.supportID
+			inner join GEMP01MT c
+				on b.empID = c.empID
+			inner join GVEN01MT d
+				on b.venueCD = d.venueCD	
+			where
+				a.empID = #empID#
+				<![CDATA[
+				and b.contractDateTo >= #contractDateFrom#
+				and b.contractDateFrom <= #contractDateTo#
+				]]>
+				<isPropertyAvailable property="apprStateCD">
+				<isNotEmpty prepend="and" property="apprStateCD">
+						a.apprStateCD = #apprStateCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="rageSphereCD_S">
+				<isNotEmpty prepend="and" property="rageSphereCD_S">
+						b.rageSphereCD = #rageSphereCD_S#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="officeCD_S">
+				<isNotEmpty prepend="and" property="officeCD_S">
+						b.officeCD = #officeCD_S#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="venue_S">
+				<isNotEmpty prepend="and" property="venue_S">
+						b.venueCD = #venue_S#
+					</isNotEmpty>
+				</isPropertyAvailable>
+		<include refid="LTC02001.paging.footer"/>
+	</select>
+	
+	<!-- 선지원등록/지급요청 상세정보 -->
+	<select id="LTC0200102S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			supportID as "supportID"			
+			, venueCD as "venueCD"
+			, venueNm as "venueNm"
+			, contractDateFrom as "contractDateFrom"
+			, contractDateTo as "contractDateTo"
+			, contractMonthCt as "contractMonthCt"
+			, minContractQty as "minContractQty"
+			, targetRate as "targetRate"
+			, addPayRate as "addPayRate"
+			, threeMonthAvgTQty as "threeMonthAvgTQty"
+			, tcontractQty as "tcontractQty"
+			, tcontractAmt as "tcontractAmt"
+			, tpayAmt as "tpayAmt"
+			, gsvRate as "gsvRate"
+			, threeMonthAvgRate as "threeMonthAvgRate"
+			, apprStateCD as "apprStateCD"
+			, apprStateCD_emp as "apprStateCD_emp"
+			, commt as "commt"
+			, lastApprYN as "lastApprYN"
+			, levelNo as "levelNo"
+		from (
+			select
+				a.supportID,
+            	a.venueCD,
+            	b.venueNm,
+            	a.contractDateFrom,
+            	a.contractDateTo,
+            	a.contractMonthCt,
+            	a.minContractQty,
+            	a.targetRate,
+            	a.addPayRate,
+            	a.threeMonthAvgTQty,
+            	a.tcontractQty,
+            	a.tcontractAmt,
+            	a.tpayAmt,
+            	a.gsvRate,
+            	a.threeMonthAvgRate,
+            	a.apprStateCD,
+            	c.apprStateCD as apprStateCD_emp,
+            	c.commt,
+            	(
+				case when a.lapprLevelNo = c.levelNo then 'Y'
+				else 'N'
+				end
+				) as lastApprYN,
+				c.levelNo
+			from GLTC01MT a
+			inner join GVEN01MT b
+				on a.venueCD = b.venueCD
+			inner join GLTC02MT c
+				on a.supportID = c.supportID	
+			where
+				a.supportID = #supportID#
+				and c.empID= #empID#
+		)
+	</select>
+	
+	<!-- 선지원등록/지급요청 상세 제품정보 -->
+	<select id="LTC0200103S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			getLangDesc(#companyID#,#languageCD#,'F_CODE','KINDTPCD5',kindTpCD5,null) as "kindTpCD5Name"
+			, prdNm as "prdNm"
+			, factoryPrice as "factoryPrice"
+			, threeMonthAvgQty as "threeMonthAvgQty"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','QTYUNITCD',qtyUnitCD,null) as "qtyUnitCDName"
+			, enterQty as "enterQty"
+			, enterUnitAmt as "enterUnitAmt"
+			, contractAmt as "contractAmt"
+			, prdCD as "prdCD"
+			, gsv as "gsv"
+			, duty as "duty"
+			, wsdc as "wsdc"
+			, cogs as "cogs"
+		from (
+			select
+				b.kindTpCD5
+				, b.prdNm
+				, a.factoryPrice
+				, a.threeMonthAvgQty
+				, b.qtyUnitCD
+				, a.enterQty
+				, a.enterUnitAmt
+				, a.contractAmt
+				, b.prdCD
+				, NVL(b.gsv,0) as gsv
+			    , NVL(b.duty,0) as duty
+			    , NVL(b.wsdc,0) as wsdc
+			    , NVL(b.cogs,0) as cogs
+			from GLTC01DT a
+			inner join GPRD01MT b
+				on a.prdCD = b.prdCD
+			where
+				a.supportID = #supportID#
+		) t
+		order by prdCD
+	</select>
+	
+	<!-- 중기약정정보 승인상태 갱신 -->
+	<update id="LTC0200101U" parameterClass="com.kia.ltc.model.GLTC01MT">
+		update GLTC01MT
+		set
+			apprStateCD = #apprStateCD#
+			, chgID = #userID#
+			, chgDate = sysdate
+		where
+			supportID = #supportID#
+	</update>
+	
+	<!-- 중기약정승인정보 승인처리 -->
+	<update id="LTC0200102U" parameterClass="com.kia.ltc.model.GLTC01MT">
+		update GLTC02MT
+		set
+			apprStateCD = '50'
+			, commt = #commt#
+			, apprDate = sysdate
+			, chgID = #userID#
+			, chgDate = sysdate
+		where
+			supportID = #supportID#
+			and levelNo = #levelNo#
+	</update>
+	
+	<!-- 중기약정승인정보 상위자 승인요청처리 -->
+	<update id="LTC0200103U" parameterClass="com.kia.ltc.model.GLTC01MT">
+		update GLTC02MT
+		set
+			apprStateCD = '20'
+			, chgID = #userID#
+			, chgDate = sysdate
+		where
+			supportID = #supportID#
+			and levelNo = #levelNo#+1
+	</update>
+	
+	<!-- 중기약정승인정보 하위자 반려처리 -->
+	<update id="LTC0200104U" parameterClass="com.kia.ltc.model.GLTC01MT">
+		update GLTC02MT
+		set
+			apprStateCD = #apprStateCD#
+			, apprDate = sysdate
+			, commt = #commt#
+			, chgID = #userID#
+			, chgDate = sysdate
+		where
+			supportID = #supportID#
+			and empID = #empID#
+	</update>
+	
+	<!-- plan등록 정보 조회 -->
+	<select id="LTC0200104S" parameterClass="com.kia.ltc.model.GLTC01MT" resultClass="java.util.LinkedHashMap">
+		select 
+			t1.supportID as "supportID" 
+			, t1.venueCD as "venueCD"
+			, t1.dkmdTpCD as "dkmdTpCD"
+			, t1.empID as "empID"
+			, t1.rageSphereCD as "rageSphereCD"
+			, t1.officeCD as "officeCD"
+			, t1.teamCD as "teamCD"
+			, t1.contractDateFrom as "contractDateFrom"
+			, t1.contractDateTo as "contractDateTo"
+			, t1.contractMonthCt as "contractMonthCt"
+			, t1.minContractQty as "minContractQty"
+			, t1.targetRate as "targetRate"
+			, t1.addPayRate as "addPayRate"
+			, t1.threeMonthAvgTQty as "threeMonthAvgTQty"
+			, t1.tcontractQty as "tcontractQty"
+			, t1.tcontractAmt as "tcontractAmt"
+			, t1.tpayAmt as "tpayAmt"
+			, t1.gsvRate as "gsvRate"
+			, t1.threeMonthAvgRate as "threeMonthAvgRate"
+			, t1.apprStateCD as "apprStateCD"
+			, t2.territoryCD as "territoryCD"
+        from 
+            gltc01mt t1
+            inner join GEMP01MT t2
+				on t1.empID = t2.empID
+        where
+        	t1.supportID = #supportID#
+	</select>
+	
+	<select id="LTC0200105S" parameterClass="com.kia.ltc.model.GLTC01MT" resultClass="java.util.LinkedHashMap">
+		select 
+			t1.supportID as "supportID"
+			, t1.prdCD as "prdCD"
+			, t1.factoryPrice as "factoryPrice"
+			, t1.threeMonthAvgQty as "threeMonthAvgQty"
+			, t1.enterQty as "enterQty"
+			, t1.enterUnitAmt as "enterUnitAmt"
+			, t1.contractAmt as "contractAmt"
+			, t2.venueCD as "venueCD"
+			, t3.sdxYN as "sdxYN"
+        from 
+            gltc01dt t1
+            inner join gltc01mt t2
+            	on t1.supportID = t2.supportID
+            inner join gprd01mt t3
+            	on t1.prdCD = t3.prdCD
+        where
+        	t1.supportID = #supportID#
+	</select>
+	
+	<!-- Plan정보 업소단위 등록 -->
+	<insert id="LTC0200101I" parameterClass="java.util.Map">
+		insert into GPLN01MT (
+			eventYM
+			, venueCD
+			, dkmdTpCD
+			, empID
+			, rageSphereCD
+			, officeCD
+			, teamCD
+			, territoryCD
+			, programCD
+			, activityCD
+			, threeMonthAvgTQty
+			, planTQty
+			, tpayAmt
+			, gsvRate
+			, threeMonthAvgRate
+			, ltcSupportID
+			, apprStateCD
+			, regID
+			, regDate
+		)
+		values(
+			#eventYM#
+			, #venueCD#
+			, #dkmdTpCD#
+			, #empID#
+			, #rageSphereCD#
+			, #officeCD#
+			, #teamCD#
+			, #territoryCD#
+			, 'G1'
+			, '50'
+			, #threeMonthAvgTQty#
+			, #tcontractQty#
+			, #tcontractAmt#
+			, #gsvRate#
+			, #threeMonthAvgRate#
+			, #supportID# 
+			, '10'
+			, #empID#
+			, sysdate
+		)
+	</insert>
+	
+	<insert id="LTC0200102I" parameterClass="java.util.Map">
+		insert into GPLN01DT (
+			eventYM
+			, venueCD
+			, prdCD
+			, factoryPrice
+			, sdxYN
+			, threeMonthAvgQty
+			, planQty
+			, planUnitAmt
+			, payAmt
+			, regID
+			, regDate
+		)
+		values(
+			#eventYM#
+			, #venueCD#
+			, #prdCD#
+			, #factoryPrice#
+			, #sdxYN#
+			, #threeMonthAvgQty#
+			, #enterQty#
+			, #enterUnitAmt#
+			, #contractAmt#
+			, #empID#
+			, sysdate
+		)
+	</insert>
+	
+	<select id="LTC0200106S" parameterClass="com.kia.ltc.model.GLTC01MT" resultClass="java.util.LinkedHashMap">
+		select 
+			t1.ltcSupportID as "supportID",
+			t1.venueCD as "venueCD",
+			t1.eventYM as "eventYM",
+			DECODE(t1.apprStateCD, '10', 'D',
+									'20', 'U',
+									'30', 'U',
+									'40', 'I',
+									'50', 'I') as "activeFlg"
+        from 
+            gpln01mt t1
+        where
+        	t1.ltcSupportID = #supportID#
+        	and t1.activityCD = '50'
+	</select>
+	
+	<delete id="LTC0200101D" parameterClass="java.util.Map">
+		delete from GPLN01MT
+		where
+			ltcSupportID = #supportID#
+			and eventYM = #eventYM#
+			and activityCD = '50'
+	</delete>
+	
+	<delete id="LTC0200102D" parameterClass="java.util.Map">
+		delete from GPLN01DT
+		where
+			venueCD = #venueCD#
+			and eventYM = #eventYM#
+	</delete>
+	
+	<update id="LTC0200105U" parameterClass="java.util.Map">
+		update GPLN01MT
+		set
+			activityCD = '10'
+			, chgID = #userID#
+			, chgDate = sysdate
+		where
+			ltcSupportID = #supportID#
+			and eventYM = #eventYM#
+			and activityCD = '50'
+	</update>
+	
+	<select id="LTC0200107S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+			select 
+				a.supportID as "supportID"
+				, a.venueCD as "venueCD"
+				, c.venueNm as "venueNm"
+				, getLangDesc(#companyID#,#languageCD#,'F_CODE','VENUEGRADCD',c.venueGradCD,null) as "venueGradCDName"
+				, getLangDesc(#companyID#,#languageCD#,'F_CODE','SEGMENTCD',c.segmentCD,null) as "segmentCDName"
+				, getLangDesc(#companyID#,#languageCD#,'F_CODE','SUBSEGMENTCD',c.subSegmentCD,null) as "subSegmentCDName"
+				, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD1',c.addrTpCD1,null) as "addrTpCD1Name"
+				, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD2',c.addrTpCD2,null) as "addrTpCD2Name"
+				, a.contractDateFrom as "contractDateFrom"
+				, a.contractDateTo as "contractDateTo"
+				, a.contractMonthCt as "contractMonthCt"
+				, a.threeMonthAvgTQty as "threeMonthAvgTQty"
+				, a.minContractQty  as "minContractQty"
+				, a.targetrate as "targetRate"
+				, a.addpayrate as "addPayRate"
+				, a.gsvRate as "gsvRate"
+				, a.tcontractamt as "tcontractAmt"
+				, a.tpayamt as "tpayAmt"
+				, e.commt as "commt"
+				, getLangDesc(#companyID#,#languageCD#,'F_CODE','APPRSTATECD',e.apprStateCD,null) as "apprStateCDNm_emp"
+				, getLangDesc(#companyID#,#languageCD#,'F_CODE','LTCSTATECD',a.apprStateCD,null) as "apprStateCDNm"
+				, getLangDesc(#companyID#,#languageCD#,'F_CODE','KINDTPCD5',d.kindTpCD5,null) as "kindTpCD5Name"
+				, d.prdNm as "prdNm"
+				, d.factoryPrice as "factoryPrice"
+				, b.threeMonthAvgQty as "threeMonthAvgQty"
+				, getLangDesc(#companyID#,#languageCD#,'F_CODE','QTYUNITCD',d.qtyUnitCD,null) as "qtyUnitCDName"
+				, b.enterQty as "enterQty"
+				, b.enterUnitAmt as "enterUnitAmt"
+				, b.contractAmt as "contractAmt"
+				, nvl(round((d.gsv * b.enterQty) - (d.duty * b.enterQty) - (d.wsdc * b.enterQty) - b.contractAmt), 0)  as "nsv"
+				, nvl(round(((d.gsv * b.enterQty) - (d.duty * b.enterQty) - (d.wsdc * b.enterQty) - b.contractAmt - d.cogs)), 0) as "gp"
+				, nvl(round((case when ((d.gsv * b.enterQty) - (d.duty * b.enterQty) - (d.wsdc * b.enterQty) - b.contractAmt) = 0 then 0               
+				else round(((d.gsv * b.enterQty) - (d.duty * b.enterQty) - (d.wsdc * b.enterQty) - b.contractAmt - d.cogs) / ((d.gsv * b.enterQty) - (d.duty * b.enterQty) - (d.wsdc * b.enterQty) - b.contractAmt) * 100) end)), 0) as "gpRate" 
+			from gltc01mt a
+			inner join gltc01dt b
+				on a.supportID=b.supportID
+			inner join gven01mt c
+				on a.venueCD=c.venueCD
+			inner join gprd01mt d
+				on b.prdCD=d.prdCD	
+			inner join gltc02mt e
+				on a.supportID=e.supportID
+			where
+				e.empID = #empID#
+				<![CDATA[
+				and a.contractDateTo >= #contractDateFrom#
+				and a.contractDateFrom <= #contractDateTo#
+				]]>
+				<isPropertyAvailable property="apprStateCD">
+				<isNotEmpty prepend="and" property="apprStateCD">
+						e.apprStateCD = #apprStateCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="rageSphereCD_S">
+				<isNotEmpty prepend="and" property="rageSphereCD_S">
+						a.rageSphereCD = #rageSphereCD_S#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="officeCD_S">
+				<isNotEmpty prepend="and" property="officeCD_S">
+						a.officeCD = #officeCD_S#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="venue_S">
+				<isNotEmpty prepend="and" property="venue_S">
+						a.venueCD = #venue_S#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				order by a.supportID,d.prdCD
+	</select>	
+	
+	<select id="LTC0200108S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			apprGrpNm as "apprGrpNm"
+			, empID as "empID"
+			, (select empNm from GEMP01MT where empID = t.empID) as "empNm"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','APPRSTATECD',apprStateCD,null) as "apprStateCDName"
+			, to_char(apprDate, 'yyyy.mm.dd hh24:mi') as "apprDate"
+			, commt as "commt"
+		from GLTC02MT t
+		where
+			supportID = #supportID#
+		order by levelNo
+	</select>
+</sqlMap>

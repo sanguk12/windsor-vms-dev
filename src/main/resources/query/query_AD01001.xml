@@ -1,0 +1,1681 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="AD01001">
+	
+	<!-- 선지원계약ID -->
+	<select id="AD0100100S" parameterClass="com.kia.ad.model.GAD01MT" resultClass="java.util.LinkedHashMap">
+		select 'AD'||to_char(sysdate,'YYYY')||SUBSTR('000000' || ADSEQ.nextval,-6) as "adSupportID" 
+		from dual
+	</select>
+	
+	<!-- AD 조회 -->
+	<select id="AD0100101S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+	  select 
+	  	rowNumber as "rowNum"
+ 		, getLangDesc(#companyID#,#languageCD#,'F_CODE','CONTRACTDIVCD', t.contractdivcd, null) as "contractDivCD" 
+		, t.venuecd         as "venueCD"
+		, t.venuenm         as "venueNM"
+		, (select chainNm from gcha01mt where chainCD = t.chainCD)    as "chainName"
+		, t.startdt         as "startDT"  
+		, t.enddt           as "endDT"  
+		, t.contractmonth   as "contractMonth"  
+		, trunc(t.apAmt/1000)        as "apAmt"  	
+		, trunc(decode(
+		 (
+		 	SELECT NVL(sum(a.prdQty*c.efp),0) as GSV
+		 	FROM
+		 		GAD01DT A
+		 		INNER JOIN GAD01MT B
+		 		ON A.adSupportID = B.adSupportID
+		 		INNER JOIN GME01DT C
+		 		ON C.seq = B.seq
+		 		and A.prdCd = C.prdCd
+		 		where A.adSupportID=t.adSupportID
+		 ), 0, 0, (t.apAmt / (
+		 	SELECT NVL(sum(a.prdQty*c.efp),0) as GSV
+		 	FROM
+		 		GAD01DT A
+		 		INNER JOIN GAD01MT B
+		 		ON A.adSupportID = B.adSupportID
+		 		INNER JOIN GME01DT C
+		 		ON C.seq = B.seq
+		 		and A.prdCd = C.prdCd
+		 		where A.adSupportID=t.adSupportID
+		 ))* 100 
+		 ),1)  as "adCostPerGSV"	
+		, getLangDesc(#companyID#,#languageCD#,'F_CODE','CONTRACTSTATECD', t.contractstatecd, null)     as "contractStateName"
+		, getLangDesc(#companyID#,#languageCD#,'F_CODE', 'ADPAYSTATECD', t.paystatecd, null)   as "payStateName"    
+		, trunc(
+		 		decode(
+		 				(
+		 		  			SELECT
+            					NVL(sum(a.prdQty*c.efp), 0) as GSV     
+        		  			FROM
+            					GAD01DT A      
+        		  		    INNER JOIN GAD01MT B      
+                				ON A.adSupportID = B.adSupportID      
+        		  			INNER JOIN GME01DT C      
+                				ON C.seq = B.seq      
+                				AND A.prdCd = C.prdCd      
+        		  			WHERE
+            	    			A.adSupportID= t.adSupportID), 0, 0, 
+            	  			((SELECT
+            					NVL(sum(a.prdQty*c.efp), 0) as GSV     
+        		  			  FROM
+            					GAD01DT A      
+        		  			  INNER JOIN GAD01MT B      
+                				ON A.adSupportID = B.adSupportID      
+        		  			  INNER JOIN GME01DT C      
+                				ON C.seq = B.seq      
+                			    AND A.prdCd = C.prdCd      
+        		  			  WHERE
+            	    			A.adSupportID= t.adSupportID
+            	    		)/1000)
+            	    )) as "totalGSV"
+         , round((
+         		trunc(
+         			decode(
+         			   (SELECT
+            				NVL(sum(a.prdQty*c.efp), 0) as GSV     
+        		  		FROM
+            				GAD01DT A      
+        		  		INNER JOIN GAD01MT B      
+                			ON A.adSupportID = B.adSupportID      
+        		  		INNER JOIN GME01DT C      
+                			ON C.seq = B.seq      
+                			AND A.prdCd = C.prdCd      
+        		  		WHERE
+            	    	A.adSupportID= t.adSupportID), 0, 0,
+            	    	((SELECT
+            				NVL(sum(a.prdQty*c.efp), 0) as GSV     
+        		  		FROM
+            				GAD01DT A      
+        		  		INNER JOIN GAD01MT B      
+                			ON A.adSupportID = B.adSupportID      
+        		  		INNER JOIN GME01DT C      
+                			ON C.seq = B.seq      
+                			AND A.prdCd = C.prdCd      
+        		  		WHERE
+            	    	A.adSupportID= t.adSupportID)/1000)/decode(t.contractmonth, 0, null, t.contractmonth))
+            	    )))	     as "monthGSV"
+         , trunc((SELECT
+           			 NVL(sum(a.prdQty*c.eu), 0) as bestEmt      
+        		    FROM
+            			GAD01DT A      
+         			INNER JOIN GAD01MT B      
+                	  ON A.adSupportID = B.adSupportID      
+        			INNER JOIN GME01DT C      
+                	  ON C.seq = B.seq      
+                	  AND A.prdCd = C.prdCd      
+        			WHERE
+            			A.adSupportID= t.adSupportID)) as "totalVolume"
+          , round(
+          		trunc(
+          			decode(
+          			(
+	          			SELECT
+	           			 NVL(sum(a.prdQty*c.eu), 0) as bestEmt      
+	        		    FROM
+	            			GAD01DT A      
+	         			INNER JOIN GAD01MT B      
+	                	  ON A.adSupportID = B.adSupportID      
+	        			INNER JOIN GME01DT C      
+	                	  ON C.seq = B.seq      
+	                	  AND A.prdCd = C.prdCd      
+	        			WHERE
+	            			A.adSupportID= t.adSupportID), 0,0,
+	            		(SELECT
+	           			  NVL(sum(a.prdQty*c.eu), 0) as bestEmt      
+	        		     FROM
+	            			GAD01DT A      
+	         			 INNER JOIN GAD01MT B      
+	                	   ON A.adSupportID = B.adSupportID      
+	        			 INNER JOIN GME01DT C      
+	                	   ON C.seq = B.seq      
+	                	   AND A.prdCd = C.prdCd      
+	        			 WHERE
+	            			A.adSupportID= t.adSupportID)/decode(t.contractmonth, 0, null, t.contractmonth)))) as "monthVolume"
+		, getLangDesc(#companyID#,#languageCD#,'F_CODE','APPRSTATECD', t.apprstatecd, null)     as "apprStateName"
+		, t.commt		    as "commt"
+		, getLangDesc(#companyID#,#languageCD#,'F_CODE','BUCD', t.bucd, null)     as "buCDName"
+		, getLangDesc(#companyID#,#languageCD#,'F_CODE','REQUIREDADCD', t.requiredadcd1, null)     as "requiredADCD1Name"
+		, t.amt1 as "amt1"
+		, getLangDesc(#companyID#,#languageCD#,'F_CODE','REQUIREDADCD', t.requiredadcd2, null)     as "requiredADCD2Name"
+		, t.amt2 as "amt2"
+		, getLangDesc(#companyID#,#languageCD#,'F_CODE','REQUIREDADCD', t.requiredadcd3, null)     as "requiredADCD3Name"	 
+		, t.amt3 as "amt3"
+		, t.expccommt		as "expccommt"
+		, '보기'			    as "adHistory"
+		, '보기'			    as "file1"
+		, '보기'			    as "file2"
+		, '보기'			    as "file3"
+	    , (select count(*) from F_DocLink where companyID = #companyID# and linkDivCD = 'ADINPUT' and linkID = t.adSupportID) as "file1Cnt" 
+	    , (select count(*) from F_DocLink where companyID = #companyID# and linkDivCD = 'ADEVIDENCE' and linkID = t.adSupportID) as "file2Cnt" 
+	    , (select count(*) from F_DocLink where companyID = #companyID# and linkDivCD = 'ADCONFIRM' and linkID = t.adSupportID) as "file3Cnt" 
+		, t.apprstatecd		as "apprStateCD"
+		, t.contractstatecd	as "contractStateCD"
+		, t.paystatecd	    as "payStateCD"
+	    , t.apprexpc        as "apprExpc"
+	    , t.adSupportID     as "adSupportID"
+	    , t.regID			as "regID"
+	   from(
+			SELECT
+				e.*
+				, rank() over(
+					order by
+						adSupportID
+						, contractDivCD
+						, regID
+						, venueCD
+				) as rowNumber
+				, floor((rank() over(
+					order by
+						adSupportID
+						, contractDivCD
+						, regID
+						, venueCD
+					)-1)/#displayNum#+1) as pageNum
+			FROM (
+				SELECT 
+	  			  A.contractdivcd    
+			  	, A.venuecd         
+			  	, B.venuenm         
+			  	, C.chainCD         
+			  	, A.startdt         
+			  	, A.enddt           
+			  	, A.contractmonth   
+			  	, A.apAmt        
+			  	, A.contractstatecd 
+			  	, A.paystatecd      
+			  	, A.apprstatecd     
+			  	, A.commt     
+	          	, A.apprexpc    
+	          	, A.adSupportID  
+	          	, A.regID
+	          	, A.expccommt
+	          	, D.bucd
+			  	, D.requiredadcd1
+				, D.amt1
+				, D.requiredadcd2
+				, D.amt2
+				, D.requiredadcd3
+				, D.amt3		
+				FROM GAD01MT A
+			INNER JOIN GVEN01MT B
+				ON a.venuecd = b.venuecd
+			LEFT OUTER JOIN GCHA01DT C
+				ON A.venuecd = c.venuecd
+			LEFT OUTER JOIN gad07mt D
+		        ON A.adsupportid = D.adsupportid
+			WHERE 
+				1=1
+			AND (A.startdt between #startDT# AND #endDT# OR A.enddt between #startDT# AND #endDT#)  		
+			AND	A.regID = #empID#
+			<isPropertyAvailable property="rageSphereCD">
+				<isNotEmpty prepend="and" property="rageSphereCD">
+					A.rageSphereCD = #rageSphereCD#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="officeCD">
+				<isNotEmpty prepend="and" property="officeCD">
+					A.officeCD = #officeCD#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="venueGradCD">
+				<isNotEmpty prepend="and" property="venueGradCD">
+					B.VENUEGRADCD = #venueGradCD#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="payStateCD">
+				<isNotEmpty prepend="and" property="payStateCD">
+					A.PAYSTATECD = #payStateCD#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="venueCD">
+				<isNotEmpty prepend="and" property="venueCD">
+					A.venueCD = #venueCD#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="apprStateCD">
+				<isNotEmpty prepend="and" property="apprStateCD">
+					A.APPRSTATECD = #apprStateCD#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="contractStateCD">
+				<isNotEmpty prepend="and" property="contractStateCD">
+					A.CONTRACTSTATECD = #contractStateCD#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			)e
+			where 1=1
+		)t
+		where 1=1
+			<isPropertyAvailable property="pageNum">
+				<isNotEmpty prepend="and" property="pageNum">
+					pageNum = #pageNum#
+				</isNotEmpty>
+			</isPropertyAvailable>
+	</select>
+	
+	<!-- AD totalCount 조회 -->
+	<select id="AD0100102S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		SELECT
+			count(*) as "totalCount"
+		FROM GAD01MT A
+		INNER JOIN GVEN01MT B
+			ON a.venuecd = b.venuecd
+		LEFT OUTER JOIN GCHA01DT C
+			ON A.venuecd = c.venuecd
+		LEFT OUTER JOIN gad07mt D
+		    ON A.adsupportid = D.adsupportid
+		WHERE 
+			1=1
+		AND (A.startdt between #startDT# AND #endDT# OR A.enddt between #startDT# AND #endDT#)
+		AND	A.regID = #empID#  	
+		<isPropertyAvailable property="empID">
+			<isNotEmpty prepend="and" property="empID">
+				A.regID = #empID#
+			</isNotEmpty>
+		</isPropertyAvailable>
+		<isPropertyAvailable property="rageSphereCD">
+			<isNotEmpty prepend="and" property="rageSphereCD">
+				A.rageSphereCD = #rageSphereCD#
+			</isNotEmpty>
+		</isPropertyAvailable>
+		<isPropertyAvailable property="officeCD">
+			<isNotEmpty prepend="and" property="officeCD">
+				A.officeCD = #officeCD#
+			</isNotEmpty>
+		</isPropertyAvailable>
+		<isPropertyAvailable property="venueGradCD">
+			<isNotEmpty prepend="and" property="venueGradCD">
+				B.VENUEGRADCD = #venueGradCD#
+			</isNotEmpty>
+		</isPropertyAvailable>
+		<isPropertyAvailable property="payStateCD">
+			<isNotEmpty prepend="and" property="payStateCD">
+				A.PAYSTATECD = #payStateCD#
+			</isNotEmpty>
+		</isPropertyAvailable>
+		<isPropertyAvailable property="venueCD">
+			<isNotEmpty prepend="and" property="venueCD">
+				A.venueCD = #venueCD#
+			</isNotEmpty>
+		</isPropertyAvailable>
+		<isPropertyAvailable property="apprStateCD">
+			<isNotEmpty prepend="and" property="apprStateCD">
+				a.APPRSTATECD = #apprStateCD#
+			</isNotEmpty>
+		</isPropertyAvailable>
+		<isPropertyAvailable property="contractStateCD">
+			<isNotEmpty prepend="and" property="contractStateCD">
+				a.CONTRACTSTATECD = #contractStateCD#
+			</isNotEmpty>
+		</isPropertyAvailable>
+			
+	</select>
+	
+	<!-- AD 제품 조회 -->
+	<select id="AD0100103S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select 
+			t1.prdNm as "prdNm"
+			, 0 as "prdQty"
+			, t1.EFP as "EFP"
+			, t1.duty as "duty"
+			, t1.COGS as "COGS"
+			, t1.eu as "eu"
+			, t1.sdxYN as "sdxYN"
+			, t1.prdCD as "prdCD"
+            , t1.seq as "seq"
+            , getLangDesc(#companyID#,#languageCD#,'F_CODE','KINDTPCD5', t1.kindTpCD5, null) as "kindTpCD5"
+		from
+			(select
+				c.prdNm as prdNm,
+				a.EFP as EFP,
+				a.duty as duty,
+				a.COGS as COGS,
+				a.eu as eu,
+				c.sdxYN as sdxYN,
+				a.prdCD as prdCD,
+                a.seq as seq,
+                c.kindTpCD5 as kindTpCD5
+				from GME01DT a
+					INNER JOIN GME01MT b
+					ON a.seq = b.seq
+					INNER JOIN GPRD01MT c
+					ON a.prdCD = c.prdCD
+				where
+				1=1
+				and b.seq = (
+					 		select 
+					 			MAX(seq)
+					 		from
+					 			GME01MT
+					 		where 
+					 		activeYN = 'Y'	
+					 	)
+				<isPropertyAvailable property="prdNm">
+					<isNotEmpty prepend="and" property="prdNm">
+						upper(c.prdNm) like '%' ||upper(#prdNm# )||'%'
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="kindTpCD5">
+					<isNotEmpty prepend="and" property="kindTpCD5">
+						c.kindTpCD5 = #kindTpCD5#
+					</isNotEmpty>
+				</isPropertyAvailable>
+					) t1
+				ORDER BY t1.prdCD
+	</select>
+	
+	<select id="AD0100104S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select 
+			nvl(trunc(sum(a.prdQty*b.efp)/1000),0) "prevEfpSum",
+			nvl(trunc(sum(a.prdQty*b.duty)/1000),0) "prevDutySum",
+			nvl(trunc(sum(a.prdQty*b.cogs/1000)),0) "prevCogsSum"
+		from gad01dt a
+			inner join gme01dt b
+				on a.prdcd = b.prdcd
+			inner join gad01mt c
+				on a.adsupportid = c.adsupportid
+				and c.seq = b.seq
+		where 1=1
+			and a.adSupportId = (
+                select MIN(adSupportId) KEEP(DENSE_RANK FIRST ORDER BY enddt desc)
+                from gad01mt
+                where
+                endDt = (
+				select 
+					max(enddt)
+				from gad01mt
+                where 
+                    venueCD = #venueCD#
+                    and apprStateCD = '50'
+                    <![CDATA[and endDT < #startDT#]]>
+                    <isPropertyAvailable property="adSupportID">
+	        			<isNotEmpty prepend="and" property="adSupportID">
+	        				adSupportId != #adSupportID#
+	        			</isNotEmpty>
+	    			</isPropertyAvailable>
+				)
+				and venueCD = #venueCD#
+				and apprStateCD = '50'
+				<![CDATA[and endDT < #startDT#]]>
+				<isPropertyAvailable property="adSupportID">
+	        		<isNotEmpty prepend="and" property="adSupportID">
+	        			adSupportId != #adSupportID#
+	        		</isNotEmpty>
+	    		</isPropertyAvailable>
+            )
+		group by a.adSupportId
+	</select>
+	
+	<select id="AD0100105S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select 
+			nvl(trunc(apamt/1000), 0) as "prevAPamt",
+			nvl(trunc(posmamt/1000), 0)  as "prevPosmAmt",
+			nvl(contractmonth, 0)  as "prevContractMonth",
+			nvl(trunc(incAmt/1000), 0)  as "prevPayAmtSum"
+		from gad01mt
+		where
+			 1=1
+			and adSupportId = (
+                select MIN(adSupportId) KEEP(DENSE_RANK FIRST ORDER BY enddt desc)
+                from gad01mt
+                where
+                endDt = (
+				select 
+					max(enddt)
+				from gad01mt
+                where 
+                    venueCD = #venueCD#
+                    and apprStateCD = '50'
+                    <![CDATA[and endDT < #startDT#]]>
+                    <isPropertyAvailable property="adSupportID">
+	        			<isNotEmpty prepend="and" property="adSupportID">
+	        				adSupportId != #adSupportID#
+	        			</isNotEmpty>
+	    			</isPropertyAvailable>
+				)
+				and venueCD = #venueCD#
+				and apprStateCD = '50'
+				<![CDATA[and endDT < #startDT#]]>
+				<isPropertyAvailable property="adSupportID">
+	        		<isNotEmpty prepend="and" property="adSupportID">
+	        			adSupportId != #adSupportID#
+	        		</isNotEmpty>
+	    		</isPropertyAvailable>
+				
+            )
+	</select>
+	
+	<select id="AD0100106S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		 select 
+			sum(a.prdQty*b.eu) as "prevEuSum"
+		from gad01dt a
+			inner join gad01mt c
+			on a.adSupportId = c.adSupportId
+			inner join gme01dt b
+			on a.prdcd = b.prdcd
+			and b.seq = c.seq
+		where 1=1
+			and a.adSupportId = (
+                select MIN(adSupportId) KEEP(DENSE_RANK FIRST ORDER BY enddt desc)
+                from gad01mt
+                where
+                endDt = (
+				select 
+					max(enddt)
+				from gad01mt
+                where 
+                    venueCD = #venueCD#
+                    and apprStateCD = '50'
+                    <![CDATA[and endDT < #startDT#]]>
+                    <isPropertyAvailable property="adSupportID">
+	        			<isNotEmpty prepend="and" property="adSupportID">
+	        				adSupportId != #adSupportID#
+	        			</isNotEmpty>
+	    			</isPropertyAvailable>
+				)
+				and venueCD = #venueCD#
+				and apprStateCD = '50'
+				<![CDATA[and endDT < #startDT#]]>
+				<isPropertyAvailable property="adSupportID">
+	        		<isNotEmpty prepend="and" property="adSupportID">
+	        			adSupportId != #adSupportID#
+	        		</isNotEmpty>
+	    		</isPropertyAvailable>
+				
+            )
+		group by a.adSupportId
+	</select>
+	
+	<select id="AD0100107S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select 
+			nvl(decode(b.prdQty, 0, 0, round(a.sdxPrdQty / b.prdQty * 100 , 1)), 0) as "prevSdxMixRate"
+		from
+			(
+				select 
+					sum(a.prdqty) as sdxPrdQty
+				from gad01dt a
+					inner join gad01mt b
+					on a.adSupportId = b.adSupportId
+					inner join gme01dt c
+					on b.seq = c.seq
+					and a.prdcd = c.prdcd
+				where
+					a.adSupportId = (
+		                select MIN(adSupportId) KEEP(DENSE_RANK FIRST ORDER BY enddt desc)
+        		        from gad01mt
+                		where
+                			endDt = (
+								select 
+									max(enddt)
+								from gad01mt
+                				where 
+                    				venueCD = #venueCD#
+                    				and apprStateCD = '50'
+                    				<![CDATA[and endDT < #startDT#]]>
+                    				<isPropertyAvailable property="adSupportID">
+	        							<isNotEmpty prepend="and" property="adSupportID">
+	        								adSupportId != #adSupportID#
+	        							</isNotEmpty>
+	    							</isPropertyAvailable>
+							)
+							and venueCD = #venueCD#
+							and apprStateCD = '50'
+							<![CDATA[and endDT < #startDT#]]>
+							<isPropertyAvailable property="adSupportID">
+	        					<isNotEmpty prepend="and" property="adSupportID">
+	        						adSupportId != #adSupportID#
+	        					</isNotEmpty>
+	    					</isPropertyAvailable>
+            			)
+						and c.sdxyn = 'Y') a,
+				(select 
+					sum(a.prdqty) as prdQty
+				from gad01dt a
+					inner join gad01mt b
+					on a.adSupportId = b.adSupportId
+				where
+					a.adSupportId = (
+		                select MIN(adSupportId) KEEP(DENSE_RANK FIRST ORDER BY enddt desc)
+        		        from gad01mt
+                		where
+                			endDt = (
+								select 
+									max(enddt)
+								from gad01mt
+                				where 
+                    				venueCD = #venueCD#
+                    				and apprStateCD = '50'
+                    				<![CDATA[and endDT < #startDT#]]>
+                    				<isPropertyAvailable property="adSupportID">
+	        							<isNotEmpty prepend="and" property="adSupportID">
+	        								adSupportId != #adSupportID#
+	        							</isNotEmpty>
+	    							</isPropertyAvailable>
+							)
+							and venueCD = #venueCD#
+							and apprStateCD = '50'
+							<![CDATA[and endDT < #startDT#]]>
+							<isPropertyAvailable property="adSupportID">
+	        					<isNotEmpty prepend="and" property="adSupportID">
+	        						adSupportId != #adSupportID#
+	        					</isNotEmpty>
+	    					</isPropertyAvailable>
+            			)
+			) b
+	</select>
+	
+	<select id="AD0100108S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+	select 
+	  	 t.adSupportID   as "adSupportID" 
+		, t.venuecd         as "venueCD"
+		, t.venuenm         as "venueNm"
+		, t.startdt         as "startDT"  
+		, t.enddt           as "endDT"  
+        , t.apprstatecd		as "apprStateCD"
+        , getLangDesc(#companyID#,#languageCD#,'F_CODE','APPRSTATECD', t.apprstatecd, null)     as "apprStateName"
+        , t.contractstatecd	as "contractStateCD"
+        , getLangDesc(#companyID#,#languageCD#,'F_CODE','CONTRACTSTATECD', t.contractstatecd, null)     as "contractStateName"
+        , t.contractdivcd	as "contractDivCD"
+        , getLangDesc(#companyID#,#languageCD#,'F_CODE','CONTRACTDIVCD', t.contractdivcd, null)     as "contractDivCDNm"
+		, t.perfDivCD	as "perfDivCD"
+        , getLangDesc(#companyID#,#languageCD#,'F_CODE','PERFDIVCD', t.perfDivCD, null)     as "perfDivCDNm"
+        , t.contractmonth   as "contractMonth"  
+		, trunc(t.apAmt,-3)        as "APContract"  	
+        , trunc(t.posmAmt,-3)        as "POSM"  	
+        , t.incAmt        as "threePercentIncentive"  	
+        , t.totalAmt        as "total"  	
+        , t.prdTotalAmt as "totalVol"
+		, t.commt		    as "commt"
+		, t.rageSphereCD	    as "rageSphereCD"
+        , t.officeCD	    as "officeCD"
+	    , t.apprexpc        as "apprExpc"	 
+	    , t.seq as "seq"   
+	    , t.expcCommt        as "expcCommt"	 
+	    , t.BUCD as "buCD"
+	    , t.REQUIREDADCD1 as "requiredADCD1"
+	    , t.REQUIREDADCD2 as "requiredADCD2"
+	    , t.REQUIREDADCD3 as "requiredADCD3"
+	    , t.AMT1 as "amt1"
+	    , t.AMT2 as "amt2"
+	    , t.AMT3 as "amt3"
+	   from(
+			SELECT
+				a.adSupportID 
+                , a.venuecd
+                , b.venuenm
+                , a.startdt  
+                , a.enddt  
+                , a.apprstatecd
+                , a.contractstatecd
+                , a.contractdivcd
+                , a.perfDivCD
+                , a.contractmonth  
+                , a.apAmt  	
+                , a.posmAmt  	
+                , a.incAmt  	
+                , a.totalAmt  	
+                , a.prdTotalAmt
+                , a.commt
+                , a.rageSphereCD
+                , a.officeCD
+                , a.apprexpc	
+                , a.seq
+                , a.expcCommt
+                , c.BUCD
+                , c.REQUIREDADCD1
+                , c.REQUIREDADCD2
+                , c.REQUIREDADCD3
+                , c.AMT1
+                , c.AMT2
+                , c.AMT3
+            FROM GAD01MT a
+                INNER JOIN GVEN01MT b
+                ON a.venuecd = b.venuecd
+                LEFT OUTER JOIN GAD07MT c
+                ON a.adSupportID = c.adSupportID
+            WHERE 
+				1=1
+                and a.adSupportID = #adSupportID#
+                ) t
+	</select>
+	<select id="AD0100109S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+	select 
+			t1.prdNm as "prdNm"
+			, t1.prdQty as "prdQty"
+			, t1.EFP as "EFP"
+			, t1.duty as "duty"
+			, t1.COGS as "COGS"
+			, t1.eu as "eu"
+			, t1.sdxYN as "sdxYN"
+			, t1.prdCD as "prdCD"
+            , t1.seq as "seq"
+		from
+			(select
+				b.prdNm as prdNm,
+				a.prdQty as prdQty,
+				c.EFP as EFP,
+				c.duty as duty,
+				c.COGS as COGS,
+				c.eu as eu,
+				b.sdxYN as sdxYN,
+				a.prdCD as prdCD,
+                d.seq as seq
+				from GAD01DT a
+					INNER JOIN GPRD01MT b
+					ON a.prdCD = b.prdCD
+					INNER JOIN GME01DT c
+					ON a.prdCD = c.prdCD
+					INNER JOIN GME01MT d
+					ON c.seq = d.seq
+				where
+					 	a.adSupportID = #adSupportID#
+					 	and c.seq = #seq#
+					) t1
+	</select>
+	
+	<select id="AD0100110S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		SELECT
+    		b.adSupportId as "adSupportId"
+    	FROM
+        	gad02mt a
+        	INNER JOIN gad01mt b
+        	ON a.adSupportId = b.adSupportID
+    	WHERE
+        	1=1     
+        	and b.venueCD =  #venueCD#
+			<isPropertyAvailable  property="endDt">
+	        	<isNotEmpty property="endDt">
+	        			and (a.eventYm = #startDt# or a.eventYm = #endDt#)
+	        	</isNotEmpty>
+	    	</isPropertyAvailable>
+			<isNotPropertyAvailable  property="endDt">
+	        		and a.eventYm = #startDt#
+			</isNotPropertyAvailable>
+	    	<isPropertyAvailable property="adSupportID">
+	        	<isNotEmpty prepend="and" property="adSupportID">
+	        			b.adSupportId != #adSupportID#
+	        	</isNotEmpty>
+	    	</isPropertyAvailable>
+	</select>
+
+	<select id="AD0100111S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		SELECT DECODE(t2.adGSV, 0, 0, trunc(t1.rltGSV/t2.adGSV*100, 1)) as "targetRate"
+		FROM (
+    		SELECT
+       	 		NVL(sum(a.inputqty * b.efp), 0) as rltGSV
+    		FROM GRLT01DT a
+    		INNER JOIN GME01DT b
+				ON a.prdCd = b.prdCd
+			INNER JOIN GRLT01MT c
+                ON a.venueCD = c.venueCD
+                and a.eventYm = c.eventYm
+                and c.verifyStateCD = 'OK'
+	   	 	WHERE
+       	 		a.eventym between #startDt# and #endDt#
+        		and a.venueCD = #venueCD#
+        		and b.seq = (
+            		SELECT seq
+            		FROM GAD01MT
+            		WHERE adSupportID = #adSupportID#
+        		)
+		)t1,
+		(
+    		SELECT
+        		NVL(sum(a.prdQty * b.efp), 0) as adGSV
+    		FROM GAD02DT a
+    		INNER JOIN GME01DT b
+        		ON a.prdCd = b.prdCd
+    		INNER JOIN GAD01MT c
+        		ON b.seq = c.seq
+        		and a.adSupportID = c.adSupportID
+    		WHERE
+        		a.adSupportID = #adSupportID#
+                and a.eventym between #startDt# and (
+                        select MAX(eventYm)
+                        from grlt01mt
+                        WHERE
+                            eventym between #startDt# and #endDt#
+                            and venueCD = #venueCD#
+                            and verifyStateCD = 'OK'
+                    )
+		)t2
+	</select>
+	
+	<select id="AD0100112S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+        	docLinkID as "docLinkID", 
+            fileName as "fileName", 
+            fileURL as "fileURL", 
+            UUID as "UUID",
+            SUBSTR(fileName, LENGTH(fileName)-2, LENGTH(fileName)) as "fileTypeCD",
+            TO_CHAR(TO_NUMBER(ROUND(fileSize/1024,2)))||'k' as "fileSize"
+        from
+			F_DocLink
+        where
+            companyID = #companyID#
+        
+        and linkDivCD = #linkDivCD#
+        and linkID = #linkID#
+        <isPropertyAvailable property="linkID1">
+	        <isNotEmpty prepend="and" property="linkID1">
+	        	linkID1 = #linkID1#
+	        </isNotEmpty>
+        </isPropertyAvailable>
+        <isPropertyAvailable property="linkID2">
+	        <isNotEmpty prepend="and" property="linkID2">
+	        	linkID2 = #linkID2#
+	        </isNotEmpty>
+	    </isPropertyAvailable>
+	    <isPropertyAvailable property="linkID3">
+	        <isNotEmpty prepend="and" property="linkID3">
+	        	linkID3 = #linkID3#
+	        </isNotEmpty>
+	    </isPropertyAvailable>
+	    <isPropertyAvailable property="linkID4">
+	        <isNotEmpty prepend="and" property="linkID4">
+	        	linkID4 = #linkID4#
+	        </isNotEmpty>
+	    </isPropertyAvailable>
+	    <isPropertyAvailable property="linkID5">
+	        <isNotEmpty prepend="and" property="linkID5">
+	        	linkID5 = #linkID5#
+	        </isNotEmpty>
+	    </isPropertyAvailable>
+	</select>
+	
+	<select id="AD0100113S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select 
+			rageSphereCD as "rageSphereCD",
+			officeCD as "officeCD"
+		from gemp01mt 
+		where 
+			empid = #empID#
+	</select>
+	
+	<select id="AD0100114S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			t1.GSV as "compareGSV",
+			NVL(DECODE(t1.venuedivcd, '10', DECODE(t1.subsegmentcd,'110304', t1.attrib02, t1.attrib01), t1.attrib01), 0) as "compareGSVRate",
+			getLangDesc(#companyID#,#languageCD#,'F_CODE','TARGETRATE', '1', null)     as "compareTargetRate",
+			(select attrib01 from f_code where codeDiv = 'MINVOL' and comcode = t1.venueDivCD) as "compareMinVol",
+			(select attrib02 from f_code where codeDiv = 'MINVOL' and comcode = t1.venueDivCD) as "limitGsv",
+			(select attrib01 from f_code where codeDiv = 'COMPARECHGCOST' and comcode = t1.venueDivCD) as "compareChgCost",
+			t1.venueDivCD as "venueDivCD"
+		from
+			(select 
+				sum(b.prdqty*c.efp) as GSV,
+				d.subsegmentcd as subsegmentcd,
+				d.venuedivcd as venuedivcd,
+				NVL(e.attrib01,0) as attrib01,
+				NVL(e.attrib02,0) as attrib02
+			from 
+				GAD01MT a
+				INNER JOIN GAD01DT b
+					on a.adsupportid = b.adsupportid
+				INNER JOIN GME01DT c
+					on a.seq = c.seq
+					and b.prdCD = c.prdCD
+				INNER JOIN GVEN01MT d
+					on a.venueCD = d.venueCD
+				INNER JOIN F_CODE e
+					on e.codeDiv = 'VENUEDIVCD'
+					and e.comCode = d.venueDivCD
+			WHERE
+				1=1
+				and a.adSupportId = (
+                select MIN(adSupportId) KEEP(DENSE_RANK FIRST ORDER BY enddt desc)
+                from gad01mt
+                where
+                endDt = (
+				select 
+					max(enddt)
+				from gad01mt
+                where 
+                    venueCD = #venueCD#
+                    and apprStateCD = '50'
+                    and payStateCD = '10'
+                    <![CDATA[and endDT < #startDT#]]>
+                    <isPropertyAvailable property="adSupportID">
+	        			<isNotEmpty prepend="and" property="adSupportID">
+	        				adSupportId != #adSupportID#
+	        			</isNotEmpty>
+	    			</isPropertyAvailable>
+				)
+				and venueCD = #venueCD#
+				and apprStateCD = '50'
+				and payStateCD = '10'
+				<![CDATA[and endDT < #startDT#]]>
+				<isPropertyAvailable property="adSupportID">
+	        		<isNotEmpty prepend="and" property="adSupportID">
+	        			adSupportId != #adSupportID#
+	        		</isNotEmpty>
+	    		</isPropertyAvailable>
+            ) 
+				group by
+					d.subsegmentcd,d.venuedivcd,e.attrib01,e.attrib02
+			)t1
+	</select>
+	
+	<select id="AD0100115S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			NVL(DECODE(t1.venuedivcd, '10', DECODE(t1.subsegmentcd,'110304', t1.attrib02, t1.attrib01), t1.attrib01), 0) as "compareGSVRate",
+			getLangDesc(#companyID#,#languageCD#,'F_CODE','TARGETRATE', '1', null)     as "compareTargetRate",
+			(select attrib01 from f_code where codeDiv = 'MINVOL' and comcode = t1.venueDivCD) as "compareMinVol",
+			(select attrib02 from f_code where codeDiv = 'MINVOL' and comcode = t1.venueDivCD) as "limitGsv",
+			(select attrib01 from f_code where codeDiv = 'COMPARECHGCOST' and comcode = t1.venueDivCD) as "compareChgCost",
+			t1.venueDivCD as "venueDivCD"
+		from
+			(select 
+				a.subsegmentcd as subsegmentcd,
+				a.venuedivcd as venuedivcd,
+				NVL(b.attrib01,0) as attrib01,
+				NVL(b.attrib02,0) as attrib02
+			from 
+				GVEN01MT a
+				INNER JOIN F_CODE b
+					on b.codeDiv = 'VENUEDIVCD'
+					and b.comCode = a.venueDivCD
+			WHERE
+				1=1
+				and a.venueCD = #venueCD#
+			)t1
+	</select>
+	
+	<select id="AD0100116S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			t.contractDT as "contractDT"		
+		,	(case when t.targetRate <![CDATA[>=]]> 80 then '실적'
+							  else '미실적' end) as "perfDivCDNm"
+		, t.payStateCDNm as "payStateCDNm"
+		, t.contractStateCDNm as "contractStateCDNm"
+		, t.targetRate as "targetRate"
+		from(select
+			t1.startDT || ' ~ ' || t1.endDT as contractDT,
+			getLangDesc(#companyID#,#languageCD#,'F_CODE','ADPAYSTATECD', t1.payStateCD, null)     as payStateCDNm,
+			getLangDesc(#companyID#,#languageCD#,'F_CODE','CONTRACTSTATECD', t1.contractStateCD, null)     as contractStateCDNm,
+			DECODE(NVL(t1.targetrate,0), 0, 0 , trunc((SELECT
+                                             NVL(sum(a.inputqty * b.efp),0) as rltGSV       
+                                           FROM GRLT01DT a       
+                                            INNER JOIN GME01DT b     
+                                            ON a.prdCd = b.prdCd        
+                                            INNER JOIN GRLT01MT c
+                							ON a.venueCD = c.venueCD
+                							and a.eventYm = c.eventYm
+                							and c.verifyStateCD = 'OK'
+                                            WHERE
+                                                a.eventym between  t1.startDT and  t1.endDT 
+                                            and a.venuecd = #venueCD#
+                                            and b.seq = (
+                                                        SELECT seq               
+                                                        FROM GAD01MT               
+                                                        WHERE adSupportID = t1.adSupportID 
+                                                        )
+                                            )/t1.targetrate*100,1)) as targetRate 
+		from
+			(select 
+				a.startDT as startDT,
+				a.endDT as endDT,
+				a.payStateCD as payStateCD,
+				a.contractStateCD as contractStateCD,
+				sum(b.prdQty*c.efp) as targetRate,
+				a.adSupportID as adSupportID
+			from 
+				GAD01MT a 
+				INNER JOIN GAD02DT b
+				ON a.adSupportID = b.adSupportID
+				INNER JOIN GME01DT c
+				ON b.prdCD = c.prdCD
+				and a.seq = c.seq
+			WHERE
+				1=1
+				and a.venueCD = #venueCD#
+				and a.apprStateCD = '50'
+				and b.eventym between a.startDT 
+				and (
+                        select MAX(eventYm)
+                        from grlt01mt
+                        WHERE
+                            eventym between a.startDT and a.endDT
+                            and venueCD = #venueCD#
+                            and verifyStateCD = 'OK'
+                    )
+			group by a.startDT, a.endDT, a.perfDivCD, a.payStateCD, a.contractStateCD, a.adSupportID
+			ORDER BY a.startDT desc
+			)t1
+		)t	
+	</select>
+	
+	<select id="AD0100117S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select codename as "adWriteYN"
+		from f_code 
+		where 
+		codediv = 'ADWRITEYN' 
+		and comcode = 'ADWRITEYN' 
+		and useYn = 'Y'
+	</select>
+	
+	<!-- 계약서 내용 조회-->
+	<select id="AD0100118S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+	   SELECT 
+           TRUNC(T.apAmt, -3) || '원'    AS "Apcontract"
+       ,   T.venueCD as "venueCD"
+       ,   T.venueNm as "venueNm"
+       ,   SUBSTR(T.startDT, '1', '4') AS "year"
+       ,   SUBSTR(T.startDT, '5', '6') AS "month"
+       ,   getLangDesc(#companyID#,#languageCD#,'F_CODE','REQUIREDADCD', t.requiredAdCD1, null)     AS "requiredAdCD1"
+       ,   T.amt1  AS  "amt1"
+       ,   getLangDesc(#companyID#,#languageCD#,'F_CODE','REQUIREDADCD', t.requiredAdCD2, null)     AS "requiredAdCD2"
+       ,   T.amt2  AS  "amt2"
+       ,   getLangDesc(#companyID#,#languageCD#,'F_CODE','REQUIREDADCD', t.requiredAdCD3, null)     AS "requiredAdCD3"
+       ,   T.amt3  AS "amt3" 	
+	   FROM(
+			SELECT
+				A.adSupportID 
+              , A.venueCD
+              , B.venueNm
+              , A.startDT
+              , A.apAmt
+              , A.totalAmt
+              , C.requiredAdCD1
+              , C.amt1
+              , C.requiredAdCD2
+              , C.amt2
+              , C.requiredAdCD3
+              , C.amt3
+            FROM GAD01MT A
+            INNER JOIN GVEN01MT B
+                ON A.venueCD = B.venueCD
+           	LEFT OUTER JOIN GAD07MT C
+           		ON A.adSupportID = C.adSupportID
+            WHERE 
+				1=1
+            AND A.adSupportID = #adSupportID#
+           ) T
+	</select>
+	
+	<select id="AD0100119S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+			SELECT sum(tpayamt) as "prevIncentive"
+			FROM GRLT01MT a
+			INNER JOIN GAD01MT b
+				ON a.venueCd = b.venueCd
+				and a.eventYm between b.startDT and b.endDT
+            WHERE 
+				1=1
+                and b.adSupportId = (
+                select MIN(adSupportId) KEEP(DENSE_RANK FIRST ORDER BY enddt desc)
+                from gad01mt
+                where
+                endDt = (
+				select 
+					max(enddt)
+				from gad01mt
+                where 
+                    venueCD = #venueCD#
+                    and apprStateCD = '50'
+                    and contractStateCD = '10'
+					<isPropertyAvailable property="selDt">
+		        		<isNotEmpty prepend="and" property="selDt">
+					<![CDATA[endDT < #startDt#]]>
+	        			</isNotEmpty>
+	    			</isPropertyAvailable>
+                    <isPropertyAvailable property="adSupportID">
+	        			<isNotEmpty prepend="and" property="adSupportID">
+	        				adSupportId != #adSupportID#
+	        			</isNotEmpty>
+	    			</isPropertyAvailable>
+				)
+				and venueCD = #venueCD#
+				and apprStateCD = '50'
+				and contractStateCD = '10'
+				<isPropertyAvailable property="selDt">
+	        		<isNotEmpty prepend="and" property="selDt">
+				<![CDATA[endDT < #startDt#]]>
+	        		</isNotEmpty>
+	    		</isPropertyAvailable>
+				<isPropertyAvailable property="adSupportID">
+	        		<isNotEmpty prepend="and" property="adSupportID">
+	        			adSupportId != #adSupportID#
+	        		</isNotEmpty>
+	    		</isPropertyAvailable>
+            )
+            and a.verifyStateCD = 'OK'
+	</select>
+	
+	<!-- 직전계약 달성율 -->
+	<select id="AD0100120S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			NVL(t.targetRate, -1) as "prevTargetRate"
+		from(select
+			MAX(DECODE(NVL(t1.targetrate, -1), 0, 0 , trunc((SELECT
+                NVL(sum(a.inputqty * b.efp),0) as rltGSV       
+                FROM
+				    GRLT01DT a       
+					INNER JOIN GME01DT b     
+                    ON a.prdCd = b.prdCd        
+                    INNER JOIN GRLT01MT c
+                	ON a.venueCD = c.venueCD
+                	and a.eventYm = c.eventYm
+                	and c.verifyStateCD = 'OK'
+                    WHERE
+                    a.eventym between  t1.startDT and  t1.endDT 
+                    and a.venuecd = #venueCD#
+                    and b.seq = (
+                    	SELECT seq               
+                        FROM	GAD01MT               
+                        WHERE adSupportID = t1.adSupportID 
+						)
+					)/t1.targetrate*100,1))
+                ) KEEP(DENSE_RANK FIRST ORDER BY enddt desc) as targetRate 
+		from
+			(select 
+				a.startDT as startDT,
+				a.endDT as endDT,
+				sum(b.prdQty*c.efp) as targetRate,
+				a.adSupportID as adSupportID
+			from 
+				GAD01MT a 
+				INNER JOIN GAD02DT b
+				ON a.adSupportID = b.adSupportID
+				INNER JOIN GME01DT c
+				ON b.prdCD = c.prdCD
+				and a.seq = c.seq
+			WHERE
+				1=1
+				and a.adSupportId = (
+                	select MIN(adSupportId) KEEP(DENSE_RANK FIRST ORDER BY enddt desc)
+                	from gad01mt
+                	where
+                		endDt = (
+						select 
+							max(enddt)
+						from gad01mt
+                		where
+                			1=1 
+							and venueCD = #venueCD#
+							and apprStateCD = '50'
+							and payStateCD = '10'
+							and endDT <![CDATA[<]]> #startDt#
+							<isPropertyAvailable property="adSupportID">
+	        					<isNotEmpty prepend="and" property="adSupportID">
+	        						adSupportId != #adSupportID#
+	        					</isNotEmpty>
+	    					</isPropertyAvailable>
+				)
+					and venueCD = #venueCD#
+					and apprStateCD = '50'
+					and payStateCD = '10'
+					<isPropertyAvailable property="adSupportID">
+		        		<isNotEmpty prepend="and" property="adSupportID">
+	        				adSupportId != #adSupportID#
+	        			</isNotEmpty>
+	    			</isPropertyAvailable>
+			)
+			and b.eventym between a.startDT and (
+                        select MAX(eventYm)
+                        from grlt01mt
+                        WHERE
+                            eventym between a.startDT and a.endDT
+                            and venueCD = #venueCD#
+                            and verifyStateCD = 'OK'
+                    )
+			group by a.startDT, a.endDT, a.adSupportID
+			ORDER BY a.startDT desc
+			)t1
+		)t	
+	</select>
+	
+	<!--업소 체인 여부 조회 -->
+	<select id="AD0100121S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		SELECT 
+			COUNT(*) AS "chainCnt"
+		FROM gcha01mt A
+		INNER JOIN gcha01dt  B
+			ON A.chainCD = B.chainCD
+		WHERE 	
+			B.venueCD = #venueCD#
+	</select>
+	
+	<!--계약 등록 날짜 기준 체인 업소 AD GSV 합산-->
+	<select id="AD0100122S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		SELECT 
+			NVL(SUM(t3.prdQty * t4.efp), 0) AS "chainGSV" 
+		FROM   gad01mt t1
+		     , (SELECT DISTINCT 
+		       		x.adsupportid
+		        FROM   gad01mt x
+		        INNER JOIN gad02mt y
+		           ON x.adsupportid = y.adsupportid
+		        INNER JOIN gcha01dt z
+		           ON x.venueCD = z.venueCD
+		        WHERE  ( y.eventYM BETWEEN (SELECT 
+		        								MIN(a.startDT)
+		                                    FROM   
+		                                    	gad01mt a
+		                                    INNER JOIN gad02mt b
+		                                       ON a.adSupportID = b.adSupportID
+		                                    INNER JOIN gcha01dt c
+		                                       ON a.venueCD = c.venueCD
+		                                    WHERE  
+		                                    	c.chainCD = (SELECT 
+		                                    						chainCD
+		                                                        FROM   gcha01dt
+		                                                        WHERE
+		                                           					venueCD = #venueCD#)
+		                                     AND b.eventym = #startDt#) 
+		            				AND #startDt# )
+		               AND z.chainCD = (SELECT 
+		               						chainCD
+		                                FROM   
+		                                	gcha01DT
+		                                WHERE  
+		                                	venueCD = #venueCD#)
+		               AND x.apprstatecd = '50'
+		               AND x.paystatecd = '10'
+		               ) t2
+		     , gad02dt t3
+		     , gme01dt t4
+		WHERE  
+			t1.adSupportID = t2.adSupportID
+		AND t1.adSupportID = t3.adSupportID
+		AND t3.prdCD = t4.prdCD
+		AND t1.seq = t4.seq
+	</select>
+	
+	<!--계약 등록 날짜 기준 체인 업소 AD Result 합산-->
+	<select id="AD0100123S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		SELECT 
+		NVL(SUM((SELECT 
+					SUM(o.inputQty * q.efp) AS resultGsv
+        		 FROM   
+        			grlt01dt o
+        		 INNER JOIN grlt01mt p
+        			ON o.venueCD = p.venueCD
+         			AND o.eventYM = p.eventYM
+        		 INNER JOIN gme01dt q
+            		ON o.prdCD = q.prdCD
+        		 INNER JOIN gprd01mt r
+            		ON o.prdCD = r.prdCD
+            	 WHERE  
+            	 	   o.venueCD = t.venueCD
+                   AND o.eventYM between t.startdt and t.enddt 
+                   AND q.seq = t.seq
+                   AND p.verifyStateCD = 'OK'
+                   )), 0) AS "rltGsv"
+		FROM   (SELECT
+					z.venuecd,
+               		y.startdt,
+               		y.enddt,
+               		y.seq
+        		FROM 
+               	(SELECT DISTINCT 
+               		h.adsupportID,
+               		h.startdt,
+               		h.enddt,
+               		j.chainCD,
+               		h.seq
+                 FROM   
+                 	gad01mt h
+                 INNER JOIN gad02mt i
+                 	ON h.adsupportID = i.adsupportID
+                 INNER JOIN gcha01dt j
+                 	ON h.venueCD = j.venueCD
+                 WHERE  
+                 	(i.eventYM BETWEEN(SELECT 
+                 							MIN(a.startdt)
+                                       FROM   
+                                       		gad01mt a
+                                       INNER JOIN gad02mt b
+                                       		ON a.adsupportID = b.adsupportID
+                                       INNER JOIN gcha01dt c
+                                       		ON a.venueCD = c.venueCD
+                                       WHERE  
+                                       		c.chainCD = (SELECT 
+                                       						chainCD
+                                                         FROM   
+                                                         	gcha01dt
+                                                         WHERE
+                                                  			venueCD = #venueCD#)
+                                        AND b.eventYM = #startDt#) 
+                                     AND
+                                          #startDt# )
+                       AND j.chainCD = (SELECT chainCD
+                                        FROM   gcha01dt
+                                        WHERE  venueCD = #venueCD#)
+                       AND h.apprstatecd = '50'
+                       AND h.paystatecd = '10') y
+              , gcha01dt z
+        WHERE  
+        	y.chaincd = z.chaincd
+        )t 
+	</select>
+	
+	<!--직전계약 기준  체인 업소 AD GSV 합산-->
+	<select id="AD0100124S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		SELECT
+		    NVL(SUM(t3.prdQty * t4.efp),
+		    0) AS "chainGSV"    
+		FROM
+		    gad01mt t1        ,
+		    (SELECT
+		        DISTINCT             x.adsupportid           
+		    FROM
+		        gad01mt x           
+		    INNER JOIN
+		        gad02mt y              
+		            ON x.adsupportid = y.adsupportid           
+		    INNER JOIN
+		        gcha01dt z              
+		            ON x.venueCD = z.venueCD           
+		    WHERE
+		        (
+		            y.eventYM BETWEEN (SELECT
+		                				max(a.endDT)                                       
+		            				   FROM
+		                					gad01mt a                                       
+		            				   INNER JOIN gad02mt b                                          
+		                    				ON a.adSupportID = b.adSupportID                                       
+		            				   INNER JOIN gcha01dt c                                          
+		                    		   		ON a.venueCD = c.venueCD                                       
+		            				   WHERE
+		                					c.chainCD = (SELECT
+		                    								chainCD                                                           
+		                								 FROM
+		                    								gcha01dt                                                           
+		                								 WHERE
+		                    								venueCD =  #venueCD#)
+		            				  AND a.apprstatecd = '50'                  
+		        					  AND a.paystatecd = '10' 
+		                    		  )                    
+		               		AND  #startDt# 
+		        )                  
+		        AND z.chainCD = (
+		            SELECT
+		                chainCD                                   
+		            FROM
+		                gcha01DT                                   
+		            WHERE
+		                venueCD =  #venueCD#
+		        )                  
+		        AND x.apprstatecd = '50'                  
+		        AND x.paystatecd = '10'                  
+		    ) t2        , 
+		    gad02dt t3  ,
+		    gme01dt t4   
+		WHERE
+		    t1.adSupportID = t2.adSupportID   
+		    AND t1.adSupportID = t3.adSupportID   
+		    AND t3.prdCD = t4.prdCD   
+		    AND t1.seq = t4.seq 
+	</select>
+	
+	<!--직전계약 기준 체인 업소 AD Result 합산-->
+	<select id="AD0100125S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		 SELECT
+	        NVL(SUM((SELECT
+	            SUM(o.inputQty * q.efp) AS resultGsv            
+	        FROM
+	            grlt01dt o            
+	        INNER JOIN
+	            grlt01mt p            
+	                ON o.venueCD = p.venueCD             
+	                AND o.eventYM = p.eventYM            
+	        INNER JOIN
+	            gme01dt q               
+	                ON o.prdCD = q.prdCD            
+	        INNER JOIN
+	            gprd01mt r               
+	                ON o.prdCD = r.prdCD               
+	        WHERE
+	            o.venueCD = t.venueCD                    
+	            AND o.eventYM between t.startdt and t.enddt                    
+	            AND q.seq = t.seq                    
+	            AND p.verifyStateCD = 'OK'                    
+	            )),
+	        0) AS "rltGsv"   
+	    FROM
+	        (SELECT
+	            z.venueCD,
+	            y.startdt,
+	            y.enddt,
+	            y.seq           
+	        FROM
+	            (SELECT DISTINCT                   
+	                h.adsupportID,
+	                h.startdt,
+	                h.enddt,
+	                h.seq,
+	                j.chaincd
+	            FROM
+	                gad01mt h                  
+	            INNER JOIN
+	                gad02mt i                   
+	                    ON h.adsupportID = i.adsupportID                  
+	            INNER JOIN
+	                gcha01dt j                   
+	                    ON h.venueCD = j.venueCD                  
+	            WHERE
+	                (
+	                    i.eventYM BETWEEN	(SELECT
+		                        				MAX(a.enddt)                                        
+		                    				  FROM
+		                        				gad01mt a                                        
+		                    				  INNER JOIN gad02mt b     	                                     
+		                            			ON a.adsupportID = b.adsupportID                                        
+		                    				  INNER JOIN gcha01dt c                                          
+		                            			ON a.venueCD = c.venueCD                                        
+		                    				  WHERE
+		                        			  	c.chainCD = (SELECT
+		                            							chainCD                                                          
+		                        							 FROM
+		                            							gcha01dt                                                          
+		                        							 WHERE
+		                            							venueCD =  #venueCD#)                                         
+		                             		  AND a.apprstatecd = '50'                  
+		            						  AND a.paystatecd = '10'     
+		                            		)                                       
+	                        AND #startDt#
+	                )                        
+	                AND j.chainCD = (
+	                    SELECT
+	                        chainCD                                         
+	                    FROM
+	                        gcha01dt                                         
+	                    WHERE
+	                        venueCD =  #venueCD#
+	                )                        
+	                AND h.apprstatecd = '50'                        
+	                AND h.paystatecd = '10'
+	            ) y               , gcha01dt z         
+	        WHERE
+	            y.chaincd = z.chaincd         
+	        )t   
+	</select>
+	
+	<!--업소 체인 계약 여부 조회 -->
+	<select id="AD0100126S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		SELECT
+		  COUNT(*) AS "chainADContractCnt"                                  
+		FROM gad01mt a                                        
+		INNER JOIN gad02mt b     	                                     
+			ON a.adsupportID = b.adsupportID                                        
+		INNER JOIN gcha01dt c                                          
+			ON a.venueCD = c.venueCD                                        
+		WHERE
+			c.chainCD = (SELECT
+							chainCD                                                          
+					 	 FROM
+							gcha01dt                                                          
+					 	 WHERE
+							venueCD =  #venueCD#)                                         
+		AND a.apprstatecd = '50'                  
+		AND a.paystatecd = '10'     
+	</select>
+	
+	<!--insert -->
+	<insert id="AD0100101I" parameterClass="com.kia.ad.model.GAD01MT">
+		insert into GAD01MT (
+			ADSUPPORTID,
+			VENUECD,
+			STARTDT,
+			ENDDT,
+			APPRSTATECD,
+			CONTRACTDIVCD,
+			PERFDIVCD,
+			DKMDTPCD,
+			CONTRACTMONTH,
+			APAMT,
+			POSMAMT,
+			INCAMT,
+			TOTALAMT,
+			PRDTOTALAMT,
+			COMMT,
+			APPRCOMMT,
+			RAGESPHERECD,
+			OFFICECD,
+			TEAMCD,
+			TERRITORYCD,
+			REGID,
+			REGDATE,
+			CHGID,
+			CHGDATE,
+			LAPPRLEVELNO,
+			APPREXPC,
+			seq,
+			expcCommt
+		)
+		select
+			#adSupportID#
+			, #venueCD#
+			, #startDT#
+			, #endDT#
+			, #apprStateCD#
+			, #contractDivCD#
+			, #perfDivCD#
+			, #dkmdtpCD#
+			, #contractMonth#
+			, #apAmt#
+			, #posmAmt#
+			, #incAmt#
+			, #totalAmt#
+			, #prdTotalAmt#
+			, #commt#
+			, ''
+			, #rageSphereCD#
+			, #officeCD#
+			, teamCD
+			, territoryCD
+			, #userID#
+			, sysDate
+			, #userID#
+			, sysDate
+			, ''
+			, #apprExpc#
+			, #seq#
+			, #expcCommt#
+		from GEMP01MT
+		where
+			empID = #empID#
+	</insert>
+	
+	<insert id="AD0100102I" parameterClass="com.kia.ad.model.GAD01MT">
+		insert into GAD01DT (
+			adSupportID
+			, prdCD
+			, prdQty
+		)
+		values (
+			#adSupportID#
+			, #prdCD#
+			, #prdQty#
+		)
+	</insert>
+	
+	<insert id="AD0100103I" parameterClass="com.kia.ad.model.GAD01MT">
+		insert into GAD02MT (
+			ADSUPPORTID,
+			VENUECD,
+			EVENTYM,
+			ACTIVEYN,
+			DKMDTPCD,
+			APAMT,
+			POSMAMT,
+			INCAMT,
+			TOTALAMT,
+			PRDTOTALAMT,
+			COMMT,
+			RAGESPHERECD,
+			OFFICECD,
+			TEAMCD,
+			TERRITORYCD,
+			REGID,
+			REGDATE,
+			CHGID,
+			CHGDATE,
+			APPREXPC,
+			PERFDIVCD
+		)
+		select
+			   #adSupportID#
+			, #venueCD#
+			, #eventYm#
+			, #activeYN#
+			, #dkmdtpCD#
+			, trunc($apAmt$/$contractMonth$,5)
+			, trunc($posmAmt$/$contractMonth$,5)
+			, trunc($incAmt$/$contractMonth$,5)
+			, trunc($totalAmt$/$contractMonth$,5)
+			, trunc($prdTotalAmt$/$contractMonth$,5)
+			, #commt#
+			, rageSphereCD
+			, officeCD
+			, teamCD
+			, territoryCD
+			, #userID#
+			, sysDate
+			, #userID#
+			, sysDate
+			, #apprExpc#
+			, #perfDivCD#
+		from GEMP01MT
+		where
+			empID = #empID#
+	</insert>
+	
+	<insert id="AD0100104I" parameterClass="com.kia.ad.model.GAD01MT">
+		insert into GAD02DT (
+			adSupportID
+			, eventYm
+			, prdCD
+			, prdQty
+		)
+		values (
+			#adSupportID#
+			, #eventYm#
+			, #prdCD#
+			, trunc($prdQty$/$contractMonth$,5)
+		)
+	</insert>
+	
+	<insert id="AD0100105I" parameterClass="com.kia.ad.model.GAD01MT">
+		insert into GAD07MT (
+			ADSUPPORTID
+			, BUCD
+			, REQUIREDADCD1
+			, AMT1
+			, REQUIREDADCD2
+			, AMT2
+			, REQUIREDADCD3
+			, AMT3
+		)
+		values (
+			#adSupportID#
+			, #buCD#
+			, #requiredADCD1#
+			, #amt1#
+			, #requiredADCD2#
+			, #amt2#
+			, #requiredADCD3#
+			, #amt3#
+		)
+	</insert>
+	
+<!-- update -->
+	<update id="AD0100101U" parameterClass="com.kia.ad.model.GAD01MT">
+		update GAD01MT 
+		set
+			VENUECD = #venueCD#
+			, STARTDT = #startDT#
+			, ENDDT = #endDT#
+			, APPRSTATECD = #apprStateCD#
+			, CONTRACTDIVCD = #contractDivCD#
+			, PERFDIVCD = #perfDivCD#
+			, CONTRACTMONTH = #contractMonth#
+			, APAMT = #apAmt#
+			, POSMAMT = #posmAmt#
+			, INCAMT = #incAmt#
+			, TOTALAMT = #totalAmt#
+			, PRDTOTALAMT = #prdTotalAmt#
+			, COMMT = #commt#
+			, CHGID = #userID#
+			, CHGDATE = sysDate
+			, APPREXPC = #apprExpc#
+			, SEQ = #seq#
+			, expcCommt = #expcCommt#
+		where
+			adSupportID = #adSupportID#
+	</update>
+	<update id="AD0100102U" parameterClass="com.kia.ad.model.GAD01MT">
+		update GAD01DT set
+			prdQty = #prdQty#
+		where
+			adSupportID = #adSupportID#
+			and prdCD= #prdCD#
+	</update>
+	<update id="AD0100103U" parameterClass="com.kia.ad.model.GAD01MT">
+		merge into GAD07MT t1 
+		using dual
+		on (
+			ADSUPPORTID = #adSupportID#
+		)
+		when not matched then 
+			insert (
+				ADSUPPORTID
+				, BUCD
+				, REQUIREDADCD1
+				, AMT1
+				, REQUIREDADCD2
+				, AMT2
+				, REQUIREDADCD3
+				, AMT3
+			)
+			values (
+				#adSupportID#
+				, #buCD#
+				, #requiredADCD1#
+				, #amt1#
+				, #requiredADCD2#
+				, #amt2#
+				, #requiredADCD3#
+				, #amt3#
+			)
+		when matched then
+			update set
+				BUCD = #buCD#
+				, REQUIREDADCD1 = #requiredADCD1#
+				, REQUIREDADCD2 = #requiredADCD2#
+				, REQUIREDADCD3 = #requiredADCD3#
+				, AMT1 = #amt1#
+				, AMT2 = #amt2#
+				, AMT3 = #amt3#
+	</update>
+	<update id="AD0100104U" parameterClass="com.kia.ad.model.GAD01MT">
+		update GAD01MT set
+			APPRSTATECD = #apprStateCD#
+			, CHGID = #userID#
+			, CHGDATE = sysDate
+			, ADCHGFLG = #adChgFlg#
+		where ADSUPPORTID = #adSupportID#
+	</update>
+	
+<!-- delete -->
+	<delete id="AD0100101D" parameterClass="com.kia.ad.model.GAD01MT">
+		delete from GAD02MT where adSupportID =  #adSupportID#
+	</delete>
+	
+	<delete id="AD0100102D" parameterClass="com.kia.ad.model.GAD01MT">
+		delete from GAD02DT where adSupportID =  #adSupportID#
+	</delete>
+	
+	<delete id="AD0100103D" parameterClass="com.kia.ad.model.GAD01MT">
+		delete from GAD01DT 
+		where 
+		adSupportID =  #adSupportID#
+		and prdCD = #prdCD#
+	</delete>
+
+</sqlMap>

@@ -1,0 +1,548 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="MIL02002">
+	
+	<!-- 마일리지 지급승인 리스트 조회 -->
+	<select id="MIL0200201S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			mileageID as "mileageID"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','RAGESPHERECD',rageSphereCD,null) as "rageSphereCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','OFFICECD',officeCD,null) as "officeCDName"
+			<isPropertyAvailable property="grpID">
+				<isNotEmpty property="grpID">
+			, (case when (select dkmdtpcd from GEMP01MT where empID=t.empID) != 'DK' then '' else empNm end) as "empNm"
+				</isNotEmpty>
+				<isEmpty property="grpID">
+			, empNm as "empNm"
+				</isEmpty>
+			</isPropertyAvailable>
+			, venueCD as "venueCD"
+			, venueNm as "venueNm"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','VENUEGRADCD',venueGradCD,null) as "venueGradCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SEGMENTCD',segmentCD,null) as "segmentCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SUBSEGMENTCD',subSegmentCD,null) as "subSegmentCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD1',addrTpCD1,null) as "addrTpCD1Name"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD2',addrTpCD2,null) as "addrTpCD2Name"
+			, contractDateFrom as "contractDateFrom"
+			, contractDateTo as "contractDateTo"
+			, contractMonthCt as "contractMonthCt"
+			, apAmt as "apAmt"
+			, targetRate as "targetRate"
+			, msTargetRate as "msTargetRate"
+			, tcontractQty as "tcontractQty"
+			, gsvAmt as "gsvAmt"
+			, gsvRate as "gsvRate"
+			, stipulationAmt as "stipulationAmt"
+			, contractAmt as "contractAmt"
+			, contractTaxAmt as "contractTaxAmt"
+			, addContractAmt as "addContractAmt"
+			, addContractTaxAmt as "addContractTaxAmt"
+			, payRequestDate as "payRequestDate"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','MILEAGESTATECD',mileageStateCD,null) as "mileageStateCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','MILEAGESTATECD',mileageStateCD_emp,null) as "mileageStateCD_empName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','MILEAGEPAYTPCD',mileagePayTPCD,null) as "mileagePayTPCDName"
+			, transferDate as "transferDate"
+			, commt as "commt"
+			, apprCommt as "apprCommt"
+			, mileageStateCD as "mileageStateCD"
+			, mileageStateCD_emp as "mileageStateCD_emp"
+			, mileagePayTPCD as "mileagePayTPCD"
+			, levelNo as "levelNo"
+			, lastApprYN as "lastApprYN"
+		from (
+			select
+				a.mileageID
+				, c.rageSphereCD
+				, c.officeCD
+				, c.empNm
+				, a.venueCD
+				, b.venueNm
+				, b.venueGradCD
+				, b.segmentCD
+				, b.subSegmentCD
+				, b.addrTpCD1
+				, b.addrTpCD2
+				, a.contractDateFrom
+				, a.contractDateTo
+				, a.contractMonthCt
+				, a.apAmt
+				, a.targetRate
+				, a.msTargetRate
+				, a.tcontractQty
+				, a.gsvAmt
+				, a.gsvRate
+				, a.stipulationAmt
+				, a.contractAmt
+				, a.contractTaxAmt
+				, a.addContractAmt
+				, a.addContractTaxAmt
+				, a.payRequestDate
+				, a.mileageStateCD
+				, d.mileageStateCD as mileageStateCD_emp
+				, a.mileagePayTPCD
+				, a.transferDate
+				, a.commt
+				, d.commt as apprCommt
+				, c.empID
+				, d.levelNo
+				, (
+					case when a.lapprLevelNo = d.levelNo then 'Y'
+					else 'N'
+					end
+				) as lastApprYN
+			from GMIL02MT a
+			inner join GVEN01MT b
+				on a.venueCD = b.venueCD
+			inner join GEMP01MT c
+				on a.empID = c.empID
+			inner join GMIL05MT d
+				on a.mileageID = d.mileageID
+				<!-- result승인라인('000000')의 권역장 라인의 한단계아래 사원들정보를 가져와서 뿌림. 
+				마일리지의 승인라인('000003')은 권역장이 빠져있어서 조회할수 없기때문에 이렇게 구현(하드코딩) -->
+				<isEqual property="rageSphereBoss" compareValue="Y">
+					and d.empID in (
+						select
+						  t2.empid
+						from gapp01dt t1
+						inner join gapp01dt t2
+						on t1.apprgrpid = t2.papprgrpid
+						where
+						t1.empid = #empID#
+						and t1.apprtpid = '000000'
+					)
+				</isEqual>
+				<isEqual property="rageSphereBoss" compareValue="N">
+					and d.empID = #empID#
+				</isEqual>
+				and d.apprTpID = #apprTpID#
+			where
+				(
+					a.payRequestDate between #payRequestDateFrom# and #payRequestDateTo#
+					or a.payRequestDate between #payRequestDateFrom# and #payRequestDateTo#
+				)
+				and d.mileageStateCD in (
+					select comCode
+					from F_CODE
+					where
+						codediv='MILEAGESTATECD'
+						and activeFlg = 'U'
+						and useYN = 'Y'
+						and attrib02 = 'MNG'
+				)
+				<isPropertyAvailable property="mileageStateCD">
+					<isNotEmpty prepend="and" property="mileageStateCD">
+						d.mileageStateCD  = #mileageStateCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="periodLongTerm">
+					<isNotEmpty prepend="and" property="periodLongTerm">
+						a.contractMonthCt <![CDATA[>=]]> #periodLongTerm#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="periodShortTerm">
+					<isNotEmpty prepend="and" property="periodShortTerm">
+						a.contractMonthCt <![CDATA[<]]> #periodShortTerm#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="venue_S">
+					<isNotEmpty prepend="and" property="venue_S">
+						a.venueCD = #venue_S#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="rageSphereCD_S">
+					<isNotEmpty prepend="and" property="rageSphereCD_S">
+						c.rageSphereCD = #rageSphereCD_S#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="officeCD_S">
+					<isNotEmpty prepend="and" property="officeCD_S">
+						c.officeCD = #officeCD_S#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="mileagePayTPCD">
+					<isNotEmpty prepend="and" property="mileagePayTPCD">
+						mileagePayTPCD = #mileagePayTPCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+		) t
+		order by mileageID
+	</select>
+	
+	<!-- 마일리지 지급승인 상세정보 -->
+	<select id="MIL0200202S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			mileageID as "mileageID"
+			, venueCD as "venueCD"
+			, venueNm as "venueNm"
+			, to_char(to_date(contractDateFrom, 'yyyymm'), 'yyyy.mm')||'~'||to_char(to_date(contractDateTo, 'yyyymm'), 'yyyy.mm') as "contractDate"
+			, contractMonthCt as "contractMonthCt"
+			, apAmt as "apAmt"
+			, targetRate as "targetRate"
+			, msTargetRate as "msTargetRate"
+			, tcontractQty as "tcontractQty"
+			, gsvAmt as "gsvAmt"
+			, gsvRate as "gsvRate"
+			, stipulationAmt as "stipulationAmt"
+			, contractAmt as "contractAmt"
+			, contractTaxAmt as "contractTaxAmt"
+			, addContractAmt as "addContractAmt"
+			, addContractTaxAmt as "addContractTaxAmt"
+			, payRequestDate as "payRequestDate"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','MILEAGESTATECD',mileageStateCD,null) as "mileageStateCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','MILEAGEPAYTPCD',mileagePayTPCD,null) as "mileagePayTPCDName"
+			, mileageStateCD as "mileageStateCD"
+			, mileagePayTPCD as "mileagePayTPCD"
+			, commt as "commt"
+			, apprCommt as "apprCommt"
+			, empID as "empID"
+			, levelNo as "levelNo"
+			, lastApprYN as "lastApprYN"
+		from (
+			select
+				a.mileageID
+				, a.venueCD
+				, b.venueNm
+				, a.contractDateFrom
+				, a.contractDateTo
+				, a.contractMonthCt
+				, a.apAmt
+				, a.targetRate
+				, a.msTargetRate
+				, a.tcontractQty
+				, a.gsvAmt
+				, a.gsvRate
+				, a.stipulationAmt
+				, a.contractAmt
+				, a.contractTaxAmt
+				, a.addContractAmt
+				, a.addContractTaxAmt
+				, a.payRequestDate
+				, c.mileageStateCD
+				, a.mileagePayTPCD
+				, a.commt
+				, c.commt apprCommt
+				, a.empID
+				, c.levelNo
+				, (
+					case when a.lapprLevelNo = c.levelNo then 'Y'
+					else 'N'
+					end
+				) as lastApprYN
+			from GMIL02MT a
+			inner join GVEN01MT b
+				on a.venueCD = b.venueCD
+			inner join GMIL05MT c
+				on a.mileageID = c.mileageID
+				<isEqual property="rageSphereBoss" compareValue="Y">
+					and c.empID in (
+						select
+						  t2.empid
+						from gapp01dt t1
+						inner join gapp01dt t2
+						on t1.apprgrpid = t2.papprgrpid
+						where
+						t1.empid = #empID#
+						and t1.apprtpid = '000000'
+					)
+				</isEqual>
+				<isEqual property="rageSphereBoss" compareValue="N">
+					and c.empID = #empID#
+				</isEqual>
+				and c.apprTpID = #apprTpID#
+			where
+				a.mileageID = #mileageID#
+		)
+	</select>
+	
+	<!-- 마일리지 지급승인 상세 제품정보 -->
+	<select id="MIL0200203S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			eventYM as "eventYM"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','KINDTPCD5',kindTpCD5,null) as "kindTpCD5Name"
+			, prdNm as "prdNm"
+			, factoryPrice as "factoryPrice"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','QTYUNITCD',qtyUnitCD,null) as "qtyUnitCDName"
+			, contractQty as "contractQty"
+			, plnEnterQty as "plnEnterQty"
+			, plnEnterUnitAmt as "plnEnterUnitAmt"
+			, rltEnterQty as "rltEnterQty"
+			, rltEnterUnitAmt as "rltEnterUnitAmt"
+			, payAmt as "payAmt"
+			, plnAddEnterUnitAmt as "plnAddEnterUnitAmt"
+			, addEnterUnitAmt as "addEnterUnitAmt"
+			, addPayAmt as "addPayAmt"
+			, prdCD as "prdCD"
+		from (
+			select
+				a.eventYM
+				, b.kindTpCD5
+				, b.prdNm
+				, a.factoryPrice
+				, b.qtyUnitCD
+				, a.contractQty
+				, a.plnEnterQty
+				, a.plnEnterUnitAmt
+				, a.rltEnterQty
+				, a.rltEnterUnitAmt
+				, a.payAmt
+				, a.plnAddEnterUnitAmt
+				, a.addEnterUnitAmt
+				, a.addPayAmt
+				, b.prdCD
+			from GMIL02DT a
+			inner join GPRD01MT b
+				on a.prdCD = b.prdCD
+			where
+				a.mileageID = #mileageID#
+		) t
+	</select>
+	
+	<!-- 마일리지 지급승인 승인 및 반려 -->
+	<update id="MIL0200201U" parameterClass="com.kia.mil.model.GMIL01MT">
+		update GMIL02MT
+		set
+			payApprDate = to_char(sysdate, 'yyyymmdd')
+			, mileageStateCD = #mileageStateCD#
+			, verifyStateCD = #verifyStateCD#
+			<!-- , commt = #commt# -->
+			, chgID = #userID#
+			, chgDate = sysdate
+		where
+			mileageID = #mileageID#
+	</update>
+
+	<!--  mileage승인정보 승인처리 -->
+	<update id="MIL0200202U" parameterClass="com.kia.mil.model.GMIL01MT">
+		update GMIL05MT
+		set
+			mileageStateCD = '50'
+			, commt = #apprCommt#
+			, apprDate = sysdate
+			, chgID = #userID#
+			, chgDate = sysdate
+		where
+			mileageID = #mileageID#
+			and levelNo = #levelNo#
+			and apprTpID = #apprTpID#
+	</update>
+	
+	<!--  mileage승인정보 상위자 승인요청처리 -->
+	<update id="MIL0200203U" parameterClass="com.kia.mil.model.GMIL01MT">
+		update GMIL05MT
+		set
+			mileageStateCD = '20'
+			, chgID = #userID#
+			, chgDate = sysdate
+		where
+			mileageID = #mileageID#
+			and levelNo = #levelNo#+1
+			and apprTpID = #apprTpID#
+	</update>	
+
+	<!--  mileage승인정보 하위자 반려처리 -->
+	<update id="MIL0200204U" parameterClass="com.kia.mil.model.GMIL01MT">
+		update GMIL05MT
+		set
+			mileageStateCD = #mileageStateCD#
+			, apprDate = sysdate
+			, commt = #apprCommt#
+			, chgID = #userID#
+			, chgDate = sysdate
+		where
+			mileageID = #mileageID#
+			and empID = #empID#
+			and apprTpID = #apprTpID#
+	</update>
+
+	<!-- 마일리지 결과생성  -->
+	<insert id="MIL0200201I" parameterClass="com.kia.mil.model.GMIL01MT">
+		insert into GMIL02MT (
+			mileageID
+			, venueCD
+			, dkmdTpcD
+			, empID
+			, rageSphereCD
+			, officeCD
+			, teamCD
+			, contractDateFrom
+			, contractDateTo
+			, contractMonthCt
+			, apAmt
+			, targetRate
+			, msTargetRate
+			, tcontractQty
+			, gsvAmt
+			, gsvRate
+			, contractAmt
+			, contractTaxAmt
+			, addContractAmt
+			, addContractTaxAmt 
+			, stipulationAmt
+			, subtractAmt
+			, payRequestDate
+			, mileageStateCD
+			, mileagePayTPCD
+			, regID
+			, regDate
+		)
+		select
+			mileageID
+			, venueCD
+			, dkmdTpcD
+			, empID
+			, rageSphereCD
+			, officeCD
+			, teamCD
+			, contractDateFrom
+			, contractDateTo
+			, contractMonthCt
+			, 0
+			, 0
+			, 0
+			, 0
+			, 0
+			, 0
+			, 0
+			, 0
+			, 0
+			, 0
+			, 0
+			, 0
+			, payRequestDate
+			, '10'
+			, mileagePayTPCD
+			, #userID#
+			, sysdate
+		from GMIL01MT
+		where
+			mileageID = #mileageID#
+	</insert>
+
+	<!-- 마일리지 상세결과생성  -->
+	<insert id="MIL0200202I" parameterClass="com.kia.mil.model.GMIL01MT">
+		insert into GMIL02DT (
+			eventYM
+			, MILEAGEID
+			, PRDCD
+			, FACTORYPRICE
+			, CONTRACTQTY
+			, PLNENTERQTY
+			, PLNENTERUNITAMT
+			, PLNADDENTERUNITAMT
+			, RLTENTERQTY
+			, RLTDDENTERUNITAMT
+			, RLTPAYAMT
+			, RLTADDPAYAMT
+			, REGID
+			, REGDATE
+		)
+		select
+			eventYM
+			, mileageID
+			, PRDCD
+			, FACTORYPRICE
+			, 0
+			, ENTERQTY
+			, ENTERUNITAMT
+			, ADDENTERUNITAMT
+			, 0
+			, 0
+			, 0
+			, 0
+			, #userID#
+			, sysdate
+		from GMIL01DT
+		where
+			mileageID = #mileageID#
+	</insert>
+
+	<!-- 반려시 메일보낼 하위승인자들 정보(상태가 비어있거나, 승인요청인 사람 제외) -->
+	<select id="MIL0200204S" parameterClass="com.kia.mil.model.GMIL01MT" resultClass="java.util.LinkedHashMap">
+		select
+			empID as "empID"
+			, max(empNm) as "empNm"
+			, max(emailAddr) as "emailAddr"
+		from (
+			select
+				b.empID
+				, empNm
+				, emailAddr
+				, b.mileageStateCD
+			from GMIL02MT a
+			inner join GMIL05MT b
+				on a.mileageID = b.mileageID
+			inner join GEMP01MT c
+				on b.empID = c.empID
+			where
+				a.mileageID = #mileageID#
+				and (b.mileageStateCD is not null and b.mileageStateCD != '20')
+		)
+		group by empID
+	</select>
+
+	<!-- 마일리지 최종승인때 Result테이블의 마일리지 여부에 'Y'로 업데이트 쳐주기위하여 마일리지조회 -->
+	<select id="MIL0200205S" parameterClass="com.kia.mil.model.GMIL01MT" resultClass="java.util.LinkedHashMap">
+		select
+			contractDateFrom as "contractDateFrom"
+			, contractDateTo as "contractDateTo"
+			, venueCD as "venueCD"
+		from GMIL02MT
+		where
+			mileageID = #mileageID#
+	</select>
+
+	<!--  mileage승인정보마일리지여부 업데이트 -->
+	<update id="MIL0200205U" parameterClass="com.kia.mil.model.GMIL01MT">
+		merge into GRLT01MT t1
+		using
+		(
+			select
+				contractDateFrom
+        		,contractDateTo
+				, venueCD
+			from GMIL02MT
+			where
+				mileageID = #mileageID#
+		) t2
+		on
+		(
+			t1.eventYM between t2.contractDateFrom and t2.contractDateTo
+			and t1.venueCD = t2.venueCD
+			and t1.apprstateCD = '50'
+		)
+		when matched then
+			update
+			set
+				t1.mileageYN = 'Y'
+	</update>
+
+	<!--  mileage승인정보 마일리지여부 업데이트(브랜드단위) -->
+	<update id="MIL0200206U" parameterClass="com.kia.mil.model.GMIL01MT">
+		merge into GRLT02DT t1
+		using
+		(
+			select
+				x1.eventYM
+				, x2.venueCD
+				, x1.prdCD
+			from GMIL02DT x1
+		    inner join
+		    	GMIL02MT X2
+		    	on x1.mileageid = x1.mileageid
+			where
+				x1.mileageID = #mileageID#
+		) t2
+		on
+		(
+			t1.eventYM = t2.eventYM
+			and t1.venueCD = t2.venueCD
+			and t1.prdCD = t2.prdCD
+			and t1.apprstateCD = '50'
+		)
+		when matched then
+			update
+			set
+				t1.mileageYN = 'Y'
+	</update>
+</sqlMap>

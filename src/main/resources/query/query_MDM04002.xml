@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="MDM04002">
+    
+	<!-- 실적반영기간조회 -->
+	<select id="MDM0400201S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+        select
+		    SUBSTR(t1.eventYM,0,4) as "yearCD",
+		    getLangDesc(#companyID#, #languageCD#, 'F_CODE', 'YEARCD', SUBSTR(t1.eventYM,0,4), NULL) as "eventYear",
+		    SUBSTR(t1.eventYM,5,2) as "monthCD",
+		    getLangDesc(#companyID#, #languageCD#, 'F_CODE', 'MONTHCD', SUBSTR(t1.eventYM,5,2), NULL) as "eventMonth",
+		    t1.applyDateFrom as "applyDateFrom",
+		    t1.applyDateTo as "applyDateTo"
+		from GEVN02MT t1
+		where
+		    t1.eventYM LIKE #yearCD#||'%'
+        order by
+        	SUBSTR(t1.eventYM,0,4),
+        	SUBSTR(t1.eventYM,5,2),
+        	t1.applyDateFrom,
+        	t1.applyDateTo
+    </select>
+    
+    <!-- 실적반영기간 삭제 -->
+	<insert id="MDM0400202D" parameterClass="com.kia.mdm.model.GEVN02MT">
+		delete from GEVN02MT
+		where
+			eventYM = #eventYM#
+	</insert>
+    
+    <!-- 실적반영기간 count 체크 GEVN02MT -->
+    <select id="MDM0400203S" parameterClass="com.kia.mdm.model.GEVN02MT" resultClass="java.lang.Integer">
+		select
+		    count(eventYM) as "cnt"
+		from
+			GEVN02MT
+		where
+			eventYM = #eventYM#
+	</select>
+	
+	<!-- 실적반영기간 수정 -->
+    <update id="MDM0400204U" parameterClass="com.kia.mdm.model.GEVN02MT">
+        update GEVN02MT
+        set
+        	eventYM = #eventYM#,
+			applyDateFrom = #applyDateFrom#,
+			applyDateTo = #applyDateTo#,
+        	chgID = #userID#, 
+        	chgDate = SYSDATE
+        where
+        	eventYM = #eventYM#
+    </update>
+	
+	<!-- 실적반영기간 등록 -->
+	<insert id="MDM0400205I" parameterClass="com.kia.mdm.model.GEVN02MT">    
+        insert into GEVN02MT (
+        	eventYM, 
+        	applyDateFrom, 
+        	applyDateTo, 
+            regID, 
+            regDate
+        ) values (
+        	#eventYM#, 
+        	#applyDateFrom#, 
+        	#applyDateTo#, 
+            #userID#,
+            SYSDATE
+        )
+    </insert>
+    
+    <!-- gdat01mt 스케쥴 등록   -->
+    <insert id="MDM0400206I" parameterClass="com.kia.mdm.model.GDAT01MT">    
+    	insert into gdat01mt(
+		    GDATID,
+	        planResultCD,
+	        STARTDATE,
+	        ENDDATE,
+	        REGEMPID,
+	        FILENAME
+	    ) values (
+		    #GDATID#,
+		    #planResultTpCD#,
+		    #STARTDATE#,
+		    #ENDDATE#,
+		    #REGEMPID#,
+		    #FILENAME#
+	    )
+    </insert>
+    
+    <select id="MDM0400207S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+       SELECT
+	   		 GDATID,
+	   		 getLangDesc(#companyID#,#languageCD#,'F_CODE','PLANRESULTTPCD',PLANRESULTCD,null) as "PLANRESULTCD",
+		     STARTDATE,
+		     ENDDATE,
+		     REGEMPID,
+			 REGDATE,
+		     ACTIVEFLG,
+		     FILENAME
+	   FROM  
+	   		 gdat01mt
+	   WHERE 
+	   		 STARTDATE=#startDate#
+	   AND   ENDDATE=#endDate#   
+	   <isPropertyAvailable property="planResultTpCD" >
+        	<isNotEmpty prepend="and" property="planResultTpCD">
+        		planResultCD=#planResultTpCD#
+        	</isNotEmpty>
+       </isPropertyAvailable>
+       <isPropertyAvailable property="USETYPE3CD" >
+        	<isNotEmpty prepend="and" property="USETYPE3CD">
+        		ACTIVEFLG=#USETYPE3CD#
+        	</isNotEmpty>
+       </isPropertyAvailable>
+       order by  ACTIVEFLG,planResultCD
+	  </select>
+	  
+	  <select id="MDM0400208S" parameterClass="com.kia.mdm.model.GDAT01MT" resultClass="java.lang.Integer">
+		select count(*) as "cnt" 
+		from gdat01mt
+		where PLANRESULTCD=#planResultTpCD#
+		and to_Char(regdate,'yy/mm/dd')=to_Char(sysdate,'yy/mm/dd')
+	  </select> 
+	  
+	  <select id="MDM0400209S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap" >
+		SELECT
+			getLangDesc(#companyID#,#languageCD#,'F_CODE','PLANRESULTTPCD',#planResultTpCD#,null) as "rstype"
+		from
+			dual
+		
+	  </select> 
+	  
+	   <select id="MDM0400210S" parameterClass="com.kia.mdm.model.GDAT01MT" resultClass="java.util.LinkedHashMap">
+	   <!--MDM0400210S  -->
+		   SELECT
+		   		 GDATID,
+			     STARTDATE,
+			     ENDDATE,
+			     REGEMPID,
+				 REGDATE,
+			     ACTIVEFLG,
+			     FILENAME
+		   FROM  
+		   		 gdat01mt
+		   WHERE
+		   		  FILENAME=<![CDATA[#FILENAME#]]>
+	  </select> 
+    
+    
+    
+</sqlMap>

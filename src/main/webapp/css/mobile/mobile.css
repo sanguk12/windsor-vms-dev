@@ -1,0 +1,18 @@
+@CHARSET "utf-8";
+
+.myInfo .inputList li.agree .terms {overflow-y:scroll; width:97%; height:80px; border:1px solid #bbbbbb;}
+.myInfo .inputList li.agree .terms ul {padding:10px;}
+.myInfo .inputList li.agree .terms ul li {padding:0; font-size:11px; margin-bottom:5px; zoom:1;}
+.myInfo .inputList li.agree .terms ul li:after {content:''; display:block; clear:both;}
+.myInfo .inputList li.agree .terms ul li.last {margin-top:10px; padding-top:10px; border-top:1px solid #303030;}
+.myInfo .inputList li.agree .terms ul li .num {float:left; margin-right:5px;  }
+.myInfo .inputList li.agree .terms ul li .article {overflow:hidden;}
+.myInfo .inputList li.agree .inputWrap {margin-top:5px;}
+.signCheckbox {margin:0 auto; margin-left:10px; margin-right:10px; padding:0; border:0; width:18px;}
+
+.signCheck {display:block; float:none; margin-top:5px; margin-bottom:5px; }
+/* .myInfo .inputList li .dt {width:195px;}
+.myInfo .inputList li .inputWrap {width:60%;}
+.myInfo .inputList li.agree .terms {height:160px;}
+.myInfo .inputList li.agree .terms ul {padding:15px;}
+.myInfo .inputList li.agree .terms ul li {margin-bottom:10px;} */

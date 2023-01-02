@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="KEY03004">
+	<!-- Paging 구현쿼리 Header 조각 -->
+    <sql id="KEY03004.paging.header">
+        <isPropertyAvailable property="pageNum">
+        select p.* from (
+            select
+<!--     		    ROWNUM as "rowNum", -->
+<!--     	        FLOOR((ROWNUM-1)/#displayNum#+1) as pageNum, -->
+    	        COUNT(*) OVER() as "totalCount",
+    	</isPropertyAvailable>
+    	<isNotPropertyAvailable property="pageNum">
+    		select
+    	</isNotPropertyAvailable>
+    </sql>
+    
+    <!-- Paging 구현쿼리 Header 조각 -->
+    <sql id="KEY03004.paging.footer">
+        <isPropertyAvailable property="pageNum">
+        ) p
+		where
+			p.pageNum = #pageNum#
+		</isPropertyAvailable>
+    </sql>
+    
+	<!-- 계약내역 조회 -->
+	<select id="KEY0300401S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+	<include refid="KEY03004.paging.header"/>
+		rank() over( order by t4.requestDate,t4.KEYMANNM) as "rowNum",
+		FLOOR((rank() over(	order by t4.requestDate,t4.KEYMANNM	)-1)/#displayNum#+1) as pageNum,
+		t4.REQUESTDATE as "requestDate",
+		t4.REQUESTSTATECD as "requestStateCD",
+		getLangDesc('0000001', 'KR', 'F_CODE', 'REQUESTSTATECD', t4.REQUESTSTATECD, NULL) as "requestStateCDNm",
+		t4.KEYMANNM as "keymanNm",
+		t1.APPID as "appID",
+		REPLACE(t3.PHONENO,'-','') as "phoneNo",
+		t5.VENUENM as "venueNm",
+		nvl(t2.appYN,'N') as "appYN",
+		nvl(t1.CONTRACT01,'N') as "personInfoAgreeYN",
+		nvl(t1.CONTRACT02,'N') as "infoGatherAgreeYN",
+		nvl(t1.CONTRACT03,'N') as "promotionEventAgreeYN",
+		nvl(t1.CONTRACT04,'N') as "consignmentAgreeYN",
+		nvl(t1.CONTRACT05,'N') as "ownerKeymanAgreeYN",
+		nvl(t1.CONTRACTYN,'N') as "contractYN",
+		t1.COUNT as "count"
+	from PMOB001DT t1
+		inner join PMOB001MT t2
+		on t1.appID = t2.appID
+		inner join GKEY01MT t3
+		on t1.keymanID = t3.keymanID
+		inner join GKEY02MT t4
+		on t1.keymanID = t4.keymanID
+		inner join GVEN01MT t5
+		on t3.venueCD = t5.VENUECD
+		inner join GEMP01MT t6
+		on t5.territoryCD = t6.territoryCD
+	where 
+		t6.empID = #empID#
+		<isPropertyAvailable property="requestDateFrom" >
+        	<isNotEmpty prepend="and" property="requestDateFrom">
+				t4.REQUESTDATE between #requestDateFrom# and #requestDateTo#
+        	</isNotEmpty>
+        </isPropertyAvailable>
+        <isPropertyAvailable property="requestStateCD" >
+        	<isNotEmpty prepend="and" property="requestStateCD">
+				t4.REQUESTSTATECD = #requestStateCD#
+        	</isNotEmpty>
+        </isPropertyAvailable>
+        <isPropertyAvailable property="keymanNm" >
+        	<isNotEmpty prepend="and" property="keymanNm">
+				t4.keymanNm = #keymanNm#
+        	</isNotEmpty>
+        </isPropertyAvailable>
+        <isPropertyAvailable property="venueCD" >
+        	<isNotEmpty prepend="and" property="venueCD">
+				t3.venueCD = #venueCD#
+        	</isNotEmpty>
+        </isPropertyAvailable>
+        <isPropertyAvailable property="appYN" >
+        	<isNotEmpty prepend="and" property="appYN">
+				t2.appYN = #appYN#
+        	</isNotEmpty>
+        </isPropertyAvailable>
+        <isPropertyAvailable property="contractYN" >
+        	<isNotEmpty prepend="and" property="contractYN">
+				t1.contractYN = #contractYN#
+        	</isNotEmpty>
+        </isPropertyAvailable>
+        <isPropertyAvailable property="phoneNo" >
+        	<isNotEmpty prepend="and" property="phoneNo">
+				t3.phoneNo = #phoneNo#
+        	</isNotEmpty>
+        </isPropertyAvailable>
+	<include refid="KEY03004.paging.footer"/>
+	</select>
+	
+	<!-- 계약내역 조회  임시-->
+<!-- 	<select id="KEY0300401S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap"> -->
+<!-- 	select -->
+<!-- 		'1' as "rowNum", -->
+<!-- 		'1' as "pageNum", -->
+<!-- 		'20180101' as "requestDate", -->
+<!-- 		'10' as "requestStateCD", -->
+<!-- 		getLangDesc('000001', 'KR', 'F_CODE', 'REQUESTSTATECD', '10', NULL) as "requestStateCDNm", -->
+<!-- 		'홍길동' as "keymanNm", -->
+<!-- 		'82591134' as "appID", -->
+<!-- 		'01082591134' as "phoneNo", -->
+<!-- 		'성남' as "venueNm", -->
+<!-- 		'Y' as "appYN", -->
+<!-- 		'Y' as "contractYN" -->
+<!-- 	from dual -->
+<!-- 	</select> -->	
+	
+	<insert id="KEY03004SENDSMS" parameterClass="java.util.Map">
+    	<!-- INSERT INTO LINK_SERVER.DIAGEO_EORDER.DBO.MSG_QUEUE -->
+		insert into msg_queue (mseq,msg_type,dstaddr,callback,stat,text,request_time)
+		values
+		(msg_queue_seq.nextval, '1', #phoneNo#, #callback#, '0', #text#, sysdate)
+    </insert>
+	
+	<update id="KEY0300401U" parameterClass="java.util.Map">
+    	<!-- INSERT INTO LINK_SERVER.DIAGEO_EORDER.DBO.MSG_QUEUE -->
+		update PMOB001DT
+		set COUNT = COUNT+1
+		where appID=#appID#
+    </update>
+</sqlMap>

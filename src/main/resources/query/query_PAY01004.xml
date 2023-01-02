@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="PAY01004">
+	
+	<!-- 검증오류 승인요청 브랜드단위 리스트 조회 -->
+	<select id="PAY0100401S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			getLangDesc(#companyID#,#languageCD#,'F_CODE','ACTIVITYCD',activityCD,null) as "activityCDName"
+			, venueCD as "venueCD"
+			, venueNm as "venueNm"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','VENUEGRADCD',venueGradCD,null) as "venueGradCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SEGMENTCD',segmentCD,null) as "segmentCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SUBSEGMENTCD',subSegmentCD,null) as "subSegmentCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD1',addrTpCD1,null) as "addrTpCD1Name"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD2',addrTpCD2,null) as "addrTpCD2Name"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','KINDTPCD5',kindTpCD5,null) as "kindTpCD5Name"
+			, prdNm as "prdNm"
+			, nvl(eu,'0') as "eu"
+			, nvl(factoryPrice,'0') as "factoryPrice"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','QTYUNITCD',qtyUnitCD,null) as "qtyUnitCDName"
+			, nvl(planQty,'0') as "planQty"
+			, nvl(planUnitAmt,'0') as "planUnitAmt"
+			, nvl(rfidQty,'0') as "rfidQty"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','RESULTTPCD',resultTpCD,null) as "resultTpCDName"
+			, nvl(resultQty,'0') as "resultQty"
+			, nvl(resultUnitAmt,'0') as "resultUnitAmt"
+			, nvl(guidAmt,'0') as "guidAmt"
+			, nvl(payAmt,'0') as "payAmt"
+			, nvl(targetQty,'0') as "targetQty"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SDXTPCD',sdxTpCD,null) as "sdxTpCDName"
+			, nvl(targetRate,'0') as "targetRate"
+			, nvl(gsvRate,'0') as "gsvRate"
+			, commt as "commt"
+			, keymanNm as "keymanName"
+			, keymanID as "keymanID"
+			, verifyErrCommt as "verifyErrCommt"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','VERIFYSTATECD',verifyStateCD,null) as "verifyStateCDName"
+			, activityCD as "activityCD"
+			, venueGradCD as "venueGradCD"
+			, segmentCD as "segmentCD"
+			, subSegmentCD as "subSegmentCD"
+			, addrTpCD1 as "addrTpCD1"
+			, addrTpCD2 as "addrTpCD2"
+			, kindTpCD5 as "kindTpCD5"
+			, qtyUnitCD as "qtyUnitCD"
+			, resultTpCD as "resultTpCD"
+			, sdxTpCD as "sdxTpCD"
+			, verifyStateCD as "verifyStateCD"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','BANKCD',bankCD,null) as "bankCDName"
+			, prdCD as "prdCD"
+			, sdxYN as "sdxYN"
+			, bankCD as "bankCD"
+			, accountNo as "accountNo"
+			, holderNm as "holderNm"
+		from (
+			select
+				a.activityCD
+				, a.venueCD
+				, b.venueNm
+				, b.venueGradCD
+				, b.segmentCD
+				, b.subSegmentCD
+				, b.addrTpCD1
+				, b.addrTpCD2
+				, d.kindTpCD5
+				, c.prdCD
+				, d.prdNm
+				, d.eu
+				, c.factoryPrice
+				, d.qtyUnitCD
+				, e.planQty
+				, e.planUnitAmt
+				, c.rfidQty
+				, c.resultTpCD
+				, c.resultQty
+				, c.resultUnitAmt
+				, c.guidAmt
+				, c.payAmt
+				, c.targetQty
+				, c.sdxTpCD
+				, c.targetRate
+				, c.gsvRate
+				, c.commt
+				, f.keymanNm
+				, c.keymanID
+				, c.verifyErrCommt
+				, c.verifyStateCD
+				, c.sdxYN
+				, f.bankCD
+				, f.accountNo
+				, f.holderNm
+			from GRLT02MT a
+			inner join GVEN01MT b
+				on a.venueCD = b.venueCD
+			inner join GRLT02DT c
+				on a.eventYM = c.eventYM
+				and a.venueCD = c.venueCD
+			inner join GPRD01MT	d
+				on c.prdCD = d.prdCD	
+			inner join GPLN02DT e
+				on c.eventYM = e.eventYM
+				and c.venueCD = e.venueCD
+				and c.prdCD = e.prdCD
+			left outer join GKEY01MT f
+				on c.keymanID = f.keymanID	
+			where
+				a.eventYM = #eventYM#
+			and a.programCD = 'G1'
+			and a.empID = #empID#
+			<isPropertyAvailable property="activityCD">
+				<isNotEmpty prepend="and" property="activityCD">
+					a.activityCD = #activityCD#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="venueGradCD">
+				<isNotEmpty prepend="and" property="venueGradCD">
+					b.venueGradCD = #venueGradCD#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="segmentCD">
+				<isNotEmpty prepend="and" property="segmentCD">
+					b.segmentCD = #segmentCD#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="subSegmentCD">
+				<isNotEmpty prepend="and" property="subSegmentCD">
+					b.subSegmentCD = #subSegmentCD#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="overGuidAmt">
+				<isNotEmpty prepend="and" property="overGuidAmt">
+					<isEqual property="overGuidAmt" compareValue="Y">
+						c.resultUnitAmt > c.guidAmt
+					</isEqual>
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="addrTpCD1">
+				<isNotEmpty prepend="and" property="addrTpCD1">
+					b.addrTpCD1 = #addrTpCD1#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="addrTpCD2">
+				<isNotEmpty prepend="and" property="addrTpCD2">
+					b.addrTpCD2 = #addrTpCD2#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="kindTpCD5">
+				<isNotEmpty prepend="and" property="kindTpCD5">
+				 	d.kindTpCD5 = #kindTpCD5#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="verifyStateCD">
+				<isNotEmpty prepend="and" property="verifyStateCD">
+					c.verifyStateCD = #verifyStateCD#
+				</isNotEmpty>
+			</isPropertyAvailable>
+		) t
+		order by 
+			venueCD,
+			prdCD
+	</select>
+	
+	<!-- 검증오류 승인요청 -->
+	<insert id="PAY0100401I" parameterClass="com.kia.rlt.model.GRLT02MT">
+		insert into GRLT08MT (
+			eventYM
+			, venueCD
+			, prdCD
+			, apprTpID
+			, levelNo
+			, apprGrpNm
+			, empID
+			, apprStateCD
+			, apprDate
+			, regID
+			, regDate
+		)
+		select
+			#eventYM#
+			, #venueCD#
+			, #prdCD#
+			, #apprTpID#
+			, lv
+			, apprGrpNm
+			, empID
+			, (
+				case when lv=1 then '50'
+				when lv=2 then '20'
+				end
+			) as apprStateCD
+			, (
+				case when lv=1 then sysdate
+				end
+			) as apprDate
+			, #userID#
+			, sysdate
+		from (
+			select
+				level as lv
+				, apprGrpNm
+				, empID
+			from GAPP01DT t
+			where
+				apprTpID = #apprTpID#
+			connect by prior papprGrpID = apprGrpID and apprTpID = #apprTpID#
+			start with apprGrpID = (
+				select
+					apprGrpID
+				from GAPP01DT
+				Where
+					empID = #empID#
+					and apprTpID = #apprTpID#
+			)  and apprTpID = #apprTpID#
+		)
+	</insert>
+	
+	<!-- 검증오류 검증상태 갱신 -->
+	<update id="PAY0100401U" parameterClass="com.kia.rlt.model.GRLT02MT">
+		update GRLT02DT
+		set
+			verifyStateCD = #verifyStateCD#
+			, lapprLevelNo = (
+				select
+					max(lv) as lv
+				from (
+					select
+						level as lv
+						, apprGrpNm
+						, empID
+					from GAPP01DT t
+					where
+						apprTpID = #apprTpID#
+					connect by prior papprGrpID = apprGrpID and apprTpID = #apprTpID#
+					start with apprGrpID = (
+						select
+							apprGrpID
+						from GAPP01DT
+						Where
+							empID = #empID#
+							and apprTpID = #apprTpID#
+					)
+				)
+			)
+			, chgID = #userID#
+			, chgDate = sysdate
+		where
+			eventYM = #eventYM#
+			and venueCD = #venueCD#
+			and prdCD = #prdCD#
+	</update>
+	
+	<!-- 검증오류 승인요청취소 -->
+	<delete id="PAY0100401D" parameterClass="com.kia.rlt.model.GRLT02MT">
+		delete from GRLT08MT
+		where
+			eventYM = #eventYM#
+		and venueCD = #venueCD#
+		and prdCD = #prdCD#
+		and apprTpID = #apprTpID#
+	</delete>
+	
+</sqlMap>

@@ -1,0 +1,714 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="ANL01011">	
+
+	<select id="ANL0101101S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			rowNumber as "rowNum"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','DKMDTPCD',dkmdTpCD,null) as "dkmdTpCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','RAGESPHERECD',rageSphereCD_reg,null) as "rageSphereCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','OFFICECD',officeCD_reg,null) as "officeCDName"
+			<isPropertyAvailable property="grpID">
+				<isNotEmpty property="grpID">
+			, (case when (select dkmdtpcd from GEMP01MT where empID=t.empID) != 'DK' then '' else (select empNm from GEMP01MT where empID=t.empID) end) as "empNm"
+				</isNotEmpty>
+				<isEmpty property="grpID">
+			, (select empNm from GEMP01MT where empID=t.empID) as "empNm"
+				</isEmpty>
+			</isPropertyAvailable>
+			, venueCD as "venueCD"
+			, venueNm as "venueNm"
+			, wsSapCD as "wsSapCD"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','WSSAPCD',wsSapCD,null) as "wsSapCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','VENUEGRADCD',venueGradCD,null) as "venueGradCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SEGMENTCD',segmentCD,null) as "segmentCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SUBSEGMENTCD',subSegmentCD,null) as "subSegmentCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD1',addrTpCD1,null) as "addrTpCD1Name"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD2',addrTpCD2,null) as "addrTpCD2Name"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD3',addrTpCD3,null) as "addrTpCD3Name"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD4',addrTpCD4,null) as "addrTpCD4Name"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','KINDTPCD5',kindTpCD5,null) as "kindTpCD5Name"
+			, prdNm as "prdNm"
+			, resultQty as "resultQty"
+			, finalUnitAmt as "finalUnitAmt"
+			, round(resultQty * eu, 5) as "euResultQty"
+			, eventCnt as "eventCnt"
+		from (
+			select
+				 t4.*
+				 , rank() over(
+					order by
+						dkmdTpCD
+						, rageSphereCD_reg
+						, officeCD_reg
+						, empID
+						, venueCD
+						, kindTpCD5
+				) as rowNumber
+				 , floor((rank() over(
+					order by
+						dkmdTpCD
+						, rageSphereCD_reg
+						, officeCD_reg
+						, empID
+						, venueCD
+						, kindTpCD5
+					)-1)/#displayNum#+1) as pageNum
+			from (
+				select
+					 t3.*
+					 , (
+						select attrib02
+						from F_CODE
+						where
+							useYN='Y'
+							and activeFlg='U'
+							and codediv='OFFICECD'
+							and comCode=t3.officeCD
+					 ) as rageSphereCD
+				from (
+					select
+						 t2.*
+						 , (
+							select attrib02
+							from F_CODE
+							where
+								useYN='Y'
+								and activeFlg='U'
+								and codediv='TEAMCD'
+								and comCode=t2.teamCD
+						 ) as officeCD
+					from (
+						select
+							 t1.*
+							 , (
+								select attrib02
+								from F_CODE
+								where
+									useYN='Y'
+									and activeFlg='U'
+									and codediv='TERRITORYCD'
+									and comCode=t1.territoryCD
+							 ) as teamCD
+						from (
+						select
+							max(dkmdTpCD) as dkmdTpCD
+								, max(rageSphereCD) as rageSphereCD_reg
+								, max(officeCD) as officeCD_reg
+								, max(empID) as empID
+								, venueCD
+								, max(venueNm) as venueNm
+								, max(wsSapCD) as wsSapCD
+								, max(venueGradCD) as venueGradCD
+								, max(segmentCD) as segmentCD
+								, max(subSegmentCD) as subSegmentCD
+								, max(addrTpCD1) as addrTpCD1
+								, max(addrTpCD2) as addrTpCD2
+								, max(addrTpCD3) as addrTpCD3
+								, max(addrTpCD4) as addrTpCD4
+								, max(prdNm) as prdNm
+								, avg(resultQty) as resultQty
+								, avg(resultUnitAmt) as resultUnitAmt
+								, avg(payAmt) as payAmt
+								, avg(finalUnitAmt) as finalUnitAmt
+								, kindTpCD5
+								, max(territoryCD) as territoryCD
+								, avg(eu) as eu
+								, sum(decode(nvl(resultQty,0),0,0,1)) as eventCnt
+						from (
+							select
+								max(dkmdTpCD) as dkmdTpCD
+								, max(rageSphereCD) as rageSphereCD
+								, max(officeCD) as officeCD
+								, max(empID) as empID
+								, venueCD
+								, max(venueNm) as venueNm
+								, max(wsSapCD) as wsSapCD
+								, max(venueGradCD) as venueGradCD
+								, max(segmentCD) as segmentCD
+								, max(subSegmentCD) as subSegmentCD
+								, max(addrTpCD1) as addrTpCD1
+								, max(addrTpCD2) as addrTpCD2
+								, max(addrTpCD3) as addrTpCD3
+								, max(addrTpCD4) as addrTpCD4
+								, max(prdNm) as prdNm
+								, sum(resultQty) as resultQty
+								, sum(resultUnitAmt) as resultUnitAmt
+								, sum(payAmt) as payAmt
+								, sum(finalUnitAmt) as finalUnitAmt
+								, kindTpCD5
+								, max(territoryCD) as territoryCD
+								, avg(eu) as eu
+							from (
+								select
+									a.dkmdTpCD
+									, a.rageSphereCD
+									, a.officeCD
+									, a.empID
+									, a.venueCD
+									, f.venueNm
+									, f.wsSapCD
+									, venueGradCD
+									, segmentCD
+									, subSegmentCD
+									, addrTpCD1
+									, addrTpCD2
+									, addrTpCD3
+									, addrTpCD4
+									, e.kindTpCD5
+									, e.prdNm
+									, b.resultQty
+									, b.resultUnitAmt
+									, (
+										round (
+											case when excPayTpCD='NPAY' then 
+												(((resultQty * resultUnitAmt) * (payRate/100)) / (targetRate/100)) * 1.2
+											else
+												resultQty * resultUnitAmt 
+											end
+										)
+									) as payAmt
+									, (
+										case when resultQty=0 then 0
+										else round((
+										round (
+											case when excPayTpCD='NPAY' then 
+												(((resultQty * resultUnitAmt) * (payRate/100)) / (targetRate/100)) * 1.2
+											else
+												resultQty * resultUnitAmt 
+											end
+										)
+									)/resultQty)
+										end
+									) as finalUnitAmt
+									, b.prdCD
+									, f.territoryCD
+									, e.eu
+									, a.eventYM
+								from GRLT01MT a
+								inner join GRLT01DT b
+									on a.eventYM = b.eventYM
+									and a.venueCD = b.venueCD
+									and a.diffNo = b.diffNo
+								inner join GPLN01MT c
+									on a.eventYM = c.eventYM
+									and a.venueCD = c.venueCD
+								inner join GPLN01DT d
+									on b.eventYM = d.eventYM
+									and b.venueCD = d.venueCD
+									and b.prdCD = d.prdCD
+								inner join GPRD01MT e
+									on b.prdCD = e.prdCD
+								inner join GVEN01MT f
+									on a.venueCD = f.venueCD
+								where
+									a.apprStateCD = '50'
+									and a.eventYM between #eventFromYM# and #eventToYM#
+									<isPropertyAvailable property="diffNo">
+										<isNotEmpty prepend="and" property="diffNo">
+											a.diffNo = #diffNo#
+										</isNotEmpty>
+									</isPropertyAvailable>
+									<isPropertyAvailable property="programCD">
+										<isNotEmpty prepend="and" property="programCD">
+											a.programCD = #programCD#
+										</isNotEmpty>
+									</isPropertyAvailable>
+									<isPropertyAvailable property="dkmdTpCD">
+										<isNotEmpty prepend="and" property="dkmdTpCD">
+											f.dkmdTpCD = #dkmdTpCD#
+										</isNotEmpty>
+									</isPropertyAvailable>
+									<isPropertyAvailable property="activityCD">
+										<isNotEmpty prepend="and" property="activityCD">
+											a.activityCD = #activityCD#
+										</isNotEmpty>
+									</isPropertyAvailable>
+									<isPropertyAvailable property="kindTpCD2_S">
+										<isNotEmpty prepend="and" property="kindTpCD2_S">
+											kindTpCD2 = #kindTpCD2_S#
+										</isNotEmpty>
+									</isPropertyAvailable>
+									<isPropertyAvailable property="kindTpCD5_S">
+										<isNotEmpty prepend="and" property="kindTpCD5_S">
+											kindTpCD5 = #kindTpCD5_S#
+										</isNotEmpty>
+									</isPropertyAvailable>
+									<isPropertyAvailable property="prdNm_S">
+										<isNotEmpty prepend="and" property="prdNm_S">
+											e.prdNm like '%'||#prdNm_S#||'%'
+										</isNotEmpty>
+									</isPropertyAvailable>
+									<isPropertyAvailable property="prdCDs">
+							        	<iterate property="prdCDs" open="and d.prdCD in (" close=")" conjunction=",">
+							        		#prdCDs[]#
+							        	</iterate>
+							        </isPropertyAvailable>
+							    <!-- 브랜드단위 업소들은 일단 주석처리  추가해달라고 하면 주석을 풀면됨-->
+								<!-- union all
+								select
+									a.dkmdTpCD
+									, a.rageSphereCD
+									, a.officeCD
+									, a.empID
+									, a.venueCD
+									, f.venueNm
+									, f.wsSapCD
+									, venueGradCD
+									, segmentCD
+									, subSegmentCD
+									, addrTpCD1
+									, addrTpCD2
+									, addrTpCD3
+									, addrTpCD4
+									, e.kindTpCD5
+									, e.prdNm
+									, b.resultQty
+									, b.resultUnitAmt
+									, resultQty * resultUnitAmt as payAmt
+									, resultUnitAmt as finalUnitAmt
+									, b.prdCD
+									, f.territoryCD
+									, e.eu
+									, a.eventYM
+								from GRLT02MT a
+								inner join GRLT02DT b
+									on a.eventYM = b.eventYM
+									and a.venueCD = b.venueCD
+								inner join GPLN02MT c
+									on a.eventYM = c.eventYM
+									and a.venueCD = c.venueCD
+								inner join GPLN02DT d
+									on b.eventYM = d.eventYM
+									and b.venueCD = d.venueCD
+									and b.prdCD = d.prdCD
+								inner join GPRD01MT e
+									on b.prdCD = e.prdCD
+								inner join GVEN01MT f
+									on a.venueCD = f.venueCD
+								where
+									b.apprStateCD = '50'
+									and a.eventYM between #eventFromYM# and #eventToYM#
+									<isPropertyAvailable property="diffNo">
+										<isNotEmpty prepend="and" property="diffNo">
+											a.diffNo = #diffNo#
+										</isNotEmpty>
+									</isPropertyAvailable>
+									<isPropertyAvailable property="programCD">
+										<isNotEmpty prepend="and" property="programCD">
+											a.programCD = #programCD#
+										</isNotEmpty>
+									</isPropertyAvailable>
+									<isPropertyAvailable property="dkmdTpCD">
+										<isNotEmpty prepend="and" property="dkmdTpCD">
+											f.dkmdTpCD = #dkmdTpCD#
+										</isNotEmpty>
+									</isPropertyAvailable>
+									<isPropertyAvailable property="activityCD">
+										<isNotEmpty prepend="and" property="activityCD">
+											a.activityCD = #activityCD#
+										</isNotEmpty>
+									</isPropertyAvailable>
+									<isPropertyAvailable property="kindTpCD2_S">
+										<isNotEmpty prepend="and" property="kindTpCD2_S">
+											kindTpCD2 = #kindTpCD2_S#
+										</isNotEmpty>
+									</isPropertyAvailable>
+									<isPropertyAvailable property="kindTpCD5_S">
+										<isNotEmpty prepend="and" property="kindTpCD5_S">
+											kindTpCD5 = #kindTpCD5_S#
+										</isNotEmpty>
+									</isPropertyAvailable>
+									<isPropertyAvailable property="prdNm_S">
+										<isNotEmpty prepend="and" property="prdNm_S">
+											e.prdNm like '%'||#prdNm_S#||'%'
+										</isNotEmpty>
+									</isPropertyAvailable>
+									<isPropertyAvailable property="prdCDs">
+							        	<iterate property="prdCDs" open="and d.prdCD in (" close=")" conjunction=",">
+							        		#prdCDs[]#
+							        	</iterate>
+							        </isPropertyAvailable> -->
+							) x1
+							group by venueCD, kindTpCD5, eventYM
+							) x2
+							group by venueCD, kindTpCD5
+						) t1
+					) t2
+				) t3
+			) t4
+			where 1=1
+				<isPropertyAvailable property="rageSphereCD">
+					<isNotEmpty prepend="and" property="rageSphereCD">
+						rageSphereCD = #rageSphereCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="officeCD">
+					<isNotEmpty prepend="and" property="officeCD">
+						officeCD = #officeCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="rageSphereCD_S">
+					<isNotEmpty prepend="and" property="rageSphereCD_S">
+						rageSphereCD = #rageSphereCD_S#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="officeCD_S">
+					<isNotEmpty prepend="and" property="officeCD_S">
+						officeCD = #officeCD_S#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="teamCD_S">
+					<isNotEmpty prepend="and" property="teamCD_S">
+						teamCD = #teamCD_S#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="territoryCD">
+					<isNotEmpty prepend="and" property="territoryCD">
+						territoryCD = #territoryCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="venueCD">
+					<isNotEmpty prepend="and" property="venueCD">
+						venueCD = #venueCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+		) t
+		where 1=1
+			<isPropertyAvailable property="pageNum">
+				<isNotEmpty prepend="and" property="pageNum">
+					pageNum = #pageNum#
+				</isNotEmpty>
+			</isPropertyAvailable>
+	</select>
+	
+	<select id="ANL0101102S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			count(*) as "totalCount"
+		from (
+			select
+				 t3.*
+				 , (
+					select attrib02
+					from F_CODE
+					where
+						useYN='Y'
+						and activeFlg='U'
+						and codediv='OFFICECD'
+						and comCode=t3.officeCD
+				 ) as rageSphereCD
+			from (
+				select
+					 t2.*
+					 , (
+						select attrib02
+						from F_CODE
+						where
+							useYN='Y'
+							and activeFlg='U'
+							and codediv='TEAMCD'
+							and comCode=t2.teamCD
+					 ) as officeCD
+				from (
+					select
+						 t1.*
+						 , (
+							select attrib02
+							from F_CODE
+							where
+								useYN='Y'
+								and activeFlg='U'
+								and codediv='TERRITORYCD'
+								and comCode=t1.territoryCD
+						 ) as teamCD
+					from (
+					select
+						max(dkmdTpCD) as dkmdTpCD
+							, max(rageSphereCD) as rageSphereCD_reg
+							, max(officeCD) as officeCD_reg
+							, max(empID) as empID
+							, venueCD
+							, max(venueNm) as venueNm
+							, max(wsSapCD) as wsSapCD
+							, max(venueGradCD) as venueGradCD
+							, max(segmentCD) as segmentCD
+							, max(subSegmentCD) as subSegmentCD
+							, max(addrTpCD1) as addrTpCD1
+							, max(addrTpCD2) as addrTpCD2
+							, max(addrTpCD3) as addrTpCD3
+							, max(addrTpCD4) as addrTpCD4
+							, max(prdNm) as prdNm
+							, avg(resultQty) as resultQty
+							, avg(resultUnitAmt) as resultUnitAmt
+							, avg(payAmt) as payAmt
+							, avg(finalUnitAmt) as finalUnitAmt
+							, kindTpCD5
+							, max(territoryCD) as territoryCD
+							, avg(eu) as eu
+					from (
+						select
+							max(dkmdTpCD) as dkmdTpCD
+							, max(rageSphereCD) as rageSphereCD
+							, max(officeCD) as officeCD
+							, max(empID) as empID
+							, venueCD
+							, max(venueNm) as venueNm
+							, max(wsSapCD) as wsSapCD
+							, max(venueGradCD) as venueGradCD
+							, max(segmentCD) as segmentCD
+							, max(subSegmentCD) as subSegmentCD
+							, max(addrTpCD1) as addrTpCD1
+							, max(addrTpCD2) as addrTpCD2
+							, max(addrTpCD3) as addrTpCD3
+							, max(addrTpCD4) as addrTpCD4
+							, max(prdNm) as prdNm
+							, sum(resultQty) as resultQty
+							, sum(resultUnitAmt) as resultUnitAmt
+							, sum(payAmt) as payAmt
+							, sum(finalUnitAmt) as finalUnitAmt
+							, kindTpCD5
+							, max(territoryCD) as territoryCD
+							, avg(eu) as eu
+						from (
+							select
+								a.dkmdTpCD
+								, a.rageSphereCD
+								, a.officeCD
+								, a.empID
+								, a.venueCD
+								, f.venueNm
+								, f.wsSapCD
+								, venueGradCD
+								, segmentCD
+								, subSegmentCD
+								, addrTpCD1
+								, addrTpCD2
+								, addrTpCD3
+								, addrTpCD4
+								, e.kindTpCD5
+								, e.prdNm
+								, b.resultQty
+								, b.resultUnitAmt
+								, (
+									round (
+										case when excPayTpCD='NPAY' then 
+											(((resultQty * resultUnitAmt) * (payRate/100)) / (targetRate/100)) * 1.2
+										else
+											resultQty * resultUnitAmt 
+										end
+									)
+								) as payAmt
+								, (
+									case when resultQty=0 then 0
+									else round((
+									round (
+										case when excPayTpCD='NPAY' then 
+											(((resultQty * resultUnitAmt) * (payRate/100)) / (targetRate/100)) * 1.2
+										else
+											resultQty * resultUnitAmt 
+										end
+									)
+								)/resultQty)
+									end
+								) as finalUnitAmt
+								, b.prdCD
+								, f.territoryCD
+								, e.eu
+								, a.eventYM
+							from GRLT01MT a
+							inner join GRLT01DT b
+								on a.eventYM = b.eventYM
+								and a.venueCD = b.venueCD
+								and a.diffNo = b.diffNo
+							inner join GPLN01MT c
+								on a.eventYM = c.eventYM
+								and a.venueCD = c.venueCD
+							inner join GPLN01DT d
+								on b.eventYM = d.eventYM
+								and b.venueCD = d.venueCD
+								and b.prdCD = d.prdCD
+							inner join GPRD01MT e
+								on b.prdCD = e.prdCD
+							inner join GVEN01MT f
+								on a.venueCD = f.venueCD
+							where
+								a.apprStateCD = '50'
+								and a.eventYM between #eventFromYM# and #eventToYM#
+								<isPropertyAvailable property="diffNo">
+									<isNotEmpty prepend="and" property="diffNo">
+										a.diffNo = #diffNo#
+									</isNotEmpty>
+								</isPropertyAvailable>
+								<isPropertyAvailable property="programCD">
+									<isNotEmpty prepend="and" property="programCD">
+										a.programCD = #programCD#
+									</isNotEmpty>
+								</isPropertyAvailable>
+								<isPropertyAvailable property="dkmdTpCD">
+									<isNotEmpty prepend="and" property="dkmdTpCD">
+										f.dkmdTpCD = #dkmdTpCD#
+									</isNotEmpty>
+								</isPropertyAvailable>
+								<isPropertyAvailable property="activityCD">
+									<isNotEmpty prepend="and" property="activityCD">
+										a.activityCD = #activityCD#
+									</isNotEmpty>
+								</isPropertyAvailable>
+								<isPropertyAvailable property="categoryCD1">
+									<isNotEmpty prepend="and" property="categoryCD1">
+										categoryCD1 = #categoryCD1#
+									</isNotEmpty>
+								</isPropertyAvailable>
+								<isPropertyAvailable property="categoryCD2">
+									<isNotEmpty prepend="and" property="categoryCD2">
+										categoryCD2 = #categoryCD2#
+									</isNotEmpty>
+								</isPropertyAvailable>
+								<isPropertyAvailable property="prdNm_S">
+									<isNotEmpty prepend="and" property="prdNm_S">
+										e.prdNm like '%'||#prdNm_S#||'%'
+									</isNotEmpty>
+								</isPropertyAvailable>
+								<isPropertyAvailable property="prdCDs">
+						        	<iterate property="prdCDs" open="and d.prdCD in (" close=")" conjunction=",">
+						        		#prdCDs[]#
+						        	</iterate>
+						        </isPropertyAvailable>
+						    <!-- 브랜드단위 업소들은 일단 주석처리  추가해달라고 하면 주석을 풀면됨-->
+							<!-- union all
+							select
+								a.dkmdTpCD
+								, a.rageSphereCD
+								, a.officeCD
+								, a.empID
+								, a.venueCD
+								, f.venueNm
+								, f.wsSapCD
+								, venueGradCD
+								, segmentCD
+								, subSegmentCD
+								, addrTpCD1
+								, addrTpCD2
+								, addrTpCD3
+								, addrTpCD4
+								, e.kindTpCD5
+								, e.prdNm
+								, b.resultQty
+								, b.resultUnitAmt
+								, resultQty * resultUnitAmt as payAmt
+								, resultUnitAmt as finalUnitAmt
+								, b.prdCD
+								, f.territoryCD
+								, e.eu
+								, a.eventYM
+							from GRLT02MT a
+							inner join GRLT02DT b
+								on a.eventYM = b.eventYM
+								and a.venueCD = b.venueCD
+							inner join GPLN02MT c
+								on a.eventYM = c.eventYM
+								and a.venueCD = c.venueCD
+							inner join GPLN02DT d
+								on b.eventYM = d.eventYM
+								and b.venueCD = d.venueCD
+								and b.prdCD = d.prdCD
+							inner join GPRD01MT e
+								on b.prdCD = e.prdCD
+							inner join GVEN01MT f
+								on a.venueCD = f.venueCD
+							where
+								b.apprStateCD = '50'
+								and a.eventYM between #eventFromYM# and #eventToYM#
+								<isPropertyAvailable property="diffNo">
+									<isNotEmpty prepend="and" property="diffNo">
+										a.diffNo = #diffNo#
+									</isNotEmpty>
+								</isPropertyAvailable>
+								<isPropertyAvailable property="programCD">
+									<isNotEmpty prepend="and" property="programCD">
+										a.programCD = #programCD#
+									</isNotEmpty>
+								</isPropertyAvailable>
+								<isPropertyAvailable property="dkmdTpCD">
+									<isNotEmpty prepend="and" property="dkmdTpCD">
+										f.dkmdTpCD = #dkmdTpCD#
+									</isNotEmpty>
+								</isPropertyAvailable>
+								<isPropertyAvailable property="activityCD">
+									<isNotEmpty prepend="and" property="activityCD">
+										a.activityCD = #activityCD#
+									</isNotEmpty>
+								</isPropertyAvailable>
+								<isPropertyAvailable property="kindTpCD2_S">
+									<isNotEmpty prepend="and" property="kindTpCD2_S">
+										kindTpCD2 = #kindTpCD2_S#
+									</isNotEmpty>
+								</isPropertyAvailable>
+								<isPropertyAvailable property="kindTpCD5_S">
+									<isNotEmpty prepend="and" property="kindTpCD5_S">
+										kindTpCD5 = #kindTpCD5_S#
+									</isNotEmpty>
+								</isPropertyAvailable>
+								<isPropertyAvailable property="prdNm_S">
+									<isNotEmpty prepend="and" property="prdNm_S">
+										e.prdNm like '%'||#prdNm_S#||'%'
+									</isNotEmpty>
+								</isPropertyAvailable>
+								<isPropertyAvailable property="prdCDs">
+						        	<iterate property="prdCDs" open="and d.prdCD in (" close=")" conjunction=",">
+						        		#prdCDs[]#
+						        	</iterate>
+						        </isPropertyAvailable> -->
+						) x1
+						group by venueCD, kindTpCD5, eventYM
+						) x2
+						group by venueCD, kindTpCD5
+					) t1
+				) t2
+			) t3
+		) t
+		where 1=1
+			<isPropertyAvailable property="rageSphereCD">
+				<isNotEmpty prepend="and" property="rageSphereCD">
+					rageSphereCD = #rageSphereCD#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="officeCD">
+				<isNotEmpty prepend="and" property="officeCD">
+					officeCD = #officeCD#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="rageSphereCD_S">
+				<isNotEmpty prepend="and" property="rageSphereCD_S">
+					rageSphereCD = #rageSphereCD_S#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="officeCD_S">
+				<isNotEmpty prepend="and" property="officeCD_S">
+					officeCD = #officeCD_S#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="teamCD_S">
+				<isNotEmpty prepend="and" property="teamCD_S">
+					teamCD = #teamCD_S#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="territoryCD">
+				<isNotEmpty prepend="and" property="territoryCD">
+					territoryCD = #territoryCD#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="venueCD">
+				<isNotEmpty prepend="and" property="venueCD">
+					venueCD = #venueCD#
+				</isNotEmpty>
+			</isPropertyAvailable>
+	</select>
+
+	<select id="ANL0101103S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			months_between(to_date(#toYearMonth#,'YYYYMM'),to_date(#fromYearMonth#,'YYYYMM'))+1 as "cnt"
+		from DUAL
+	</select>
+</sqlMap>

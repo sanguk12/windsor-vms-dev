@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="KEY03003D" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
+	<property name="ireport.zoom" value="1.4641000000000006"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="192"/>
+	<parameter name="path" class="java.lang.String"/>
+	<parameter name="keymanID" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[select
+   b.venueNm as "venueNm"
+   , nvl(f.reprsnm,' ') as "rePrsNm"
+   , substr(f.reprsbirthdate,0,4) || '.' || substr(f.reprsbirthdate,5,2) || '.' || substr(f.reprsbirthdate,7,2) as "rePrsBirthDate"
+   , substr(d.DocWorkDate,0,4) || '.' || substr(d.DocWorkDate,5,2) || '.' || substr(d.DocWorkDate,7,2) as "DocWorkDate"
+   , A.keymannm as "keyManNm"
+   , substr(a.birthdate,0,4) || '.' || substr(a.birthdate,5,2) || '.' || substr(a.birthdate,7,2) as "birthDate"
+   , E.FILEURL || E.UUID as "URL"
+from GKEY01MT a
+inner join
+    GVEN01MT b
+    on a.venueCD = b.venueCD
+left outer join gkey05mt d
+    on A.KEYMANID = d.KEYMANID
+    and d.keymandoctpcd = '200'
+left outer join
+     f_doclink e
+     on d.filedoclink = e.doclinkid
+LEFT OUTER JOIN
+     GKEY07MT f
+     on A.KEYMANID = F.KEYMANID
+     and d.keymandoctpcd = f.keymandoctpcd
+     and f.keymandoctpcd = '200'
+WHERE A.KEYMANID = $P{keymanID}]]>
+	</queryString>
+	<field name="venueNm" class="java.lang.String"/>
+	<field name="rePrsNm" class="java.lang.String"/>
+	<field name="rePrsBirthDate" class="java.lang.String"/>
+	<field name="DocWorkDate" class="java.lang.String"/>
+	<field name="keyManNm" class="java.lang.String"/>
+	<field name="birthDate" class="java.lang.String"/>
+	<field name="URL" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="89" splitType="Stretch">
+			<staticText>
+				<reportElement x="12" y="21" width="532" height="46"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="맑은 고딕" size="22" isBold="true" pdfFontName="malgun.ttf" pdfEncoding="Identity-H"/>
+				</textElement>
+				<text><![CDATA[인센티브 프로그램 참여 동의서]]></text>
+			</staticText>
+		</band>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="82" splitType="Stretch">
+			<staticText>
+				<reportElement x="34" y="20" width="494" height="43"/>
+				<textElement>
+					<font fontName="맑은 고딕" isBold="true" pdfFontName="malgun.ttf" pdfEncoding="Identity-H"/>
+				</textElement>
+				<text><![CDATA[본인은 아래 업소의 사업자 (또는사업자로부터 운영권을 위임 받은 자)로서 디아지오코리아의 트레이드 키맨 인센티브 프로그램에 대해 설명을 듣고 이해 했으며 본 업소에 종사하고 있는 아래의 인원들이 프로그램에 참여하는 것에 동의 합니다. ]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="507" splitType="Stretch">
+			<staticText>
+				<reportElement x="110" y="211" width="31" height="20"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="맑은 고딕" isBold="true" pdfFontName="malgun.ttf" pdfEncoding="Identity-H"/>
+				</textElement>
+				<text><![CDATA[서명*]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="87" y="143" width="57" height="20"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="맑은 고딕" isBold="true" pdfFontName="malgun.ttf" pdfEncoding="Identity-H"/>
+				</textElement>
+				<text><![CDATA[작성일자*]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="87" y="100" width="57" height="20"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="맑은 고딕" isBold="true" pdfFontName="malgun.ttf" pdfEncoding="Identity-H"/>
+				</textElement>
+				<text><![CDATA[생년월일*]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="87" y="62" width="57" height="20"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="맑은 고딕" isBold="true" pdfFontName="malgun.ttf" pdfEncoding="Identity-H"/>
+				</textElement>
+				<text><![CDATA[본인성명*]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="99" y="25" width="45" height="20"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="맑은 고딕" isBold="true" pdfFontName="malgun.ttf" pdfEncoding="Identity-H"/>
+				</textElement>
+				<text><![CDATA[업소명*]]></text>
+			</staticText>
+			<image scaleImage="FillFrame" hAlign="Center" vAlign="Middle" onErrorType="Icon">
+				<reportElement x="177" y="189" width="166" height="73"/>
+				<graphicElement>
+					<pen lineWidth="1.0"/>
+				</graphicElement>
+				<imageExpression class="java.lang.String"><![CDATA[$P{path}+"/upload/"+$F{URL}]]></imageExpression>
+			</image>
+			<staticText>
+				<reportElement x="52" y="350" width="87" height="20"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="맑은 고딕" isBold="true" pdfFontName="malgun.ttf" pdfEncoding="Identity-H"/>
+				</textElement>
+				<text><![CDATA[트레이드 키맨명*]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="277" y="350" width="87" height="20"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="맑은 고딕" isBold="true" pdfFontName="malgun.ttf" pdfEncoding="Identity-H"/>
+				</textElement>
+				<text><![CDATA[키맨 생년월일*]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="177" y="25" width="228" height="20"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="맑은 고딕" pdfFontName="malgun.ttf" pdfEncoding="Identity-H"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{venueNm}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="177" y="62" width="228" height="20"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="맑은 고딕" pdfFontName="malgun.ttf" pdfEncoding="Identity-H"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{rePrsNm}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="177" y="100" width="100" height="20"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="맑은 고딕" pdfFontName="malgun.ttf" pdfEncoding="Identity-H"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{rePrsBirthDate}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="177" y="143" width="100" height="20"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="맑은 고딕" pdfFontName="malgun.ttf" pdfEncoding="Identity-H"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{DocWorkDate}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="150" y="350" width="88" height="20"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="맑은 고딕" pdfFontName="malgun.ttf" pdfEncoding="Identity-H"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{keyManNm}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="364" y="350" width="62" height="20"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="맑은 고딕" pdfFontName="malgun.ttf" pdfEncoding="Identity-H"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{birthDate}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="34" y="399" width="482" height="60"/>
+				<textElement>
+					<font fontName="맑은 고딕" isBold="true" pdfFontName="malgun.ttf" pdfEncoding="Identity-H"/>
+				</textElement>
+				<text><![CDATA[첨부
+
+1) 작성자가 등기상 사업자일 경우:사업자 등록증 (필수) 및 인감증명서 (인감을 찍었을 경우에만)
+2) 작성자가 등기상 사업자가 아닐 경우: 대표권 위임 확인서 (첨부문서 포함)]]></text>
+			</staticText>
+		</band>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band splitType="Stretch"/>
+	</summary>
+</jasperReport>

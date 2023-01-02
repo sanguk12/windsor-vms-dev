@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="KEY01002">
+	
+	<!-- 키맨신청내역 조회 -->
+	<select id="KEY0100201S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			requestDate as "requestDate"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','REQUESTTPCD',requestTpCD,null) as "requestTpCDName"
+			, venueCD as "venueCD"
+			, venueNm as "venueNm"
+			, keymanID as "keymanID"
+			, keymanNm as "keymanNm"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','KEYMANTYPECD',keymanTypeCD,null) as "keymanTypeCDName"
+			, birthDate as "birthDate"
+			, addr as "addr"
+			, phoneNo as "phoneNo"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','BANKCD',bankCD,null) as "bankCDName"
+			, bankCD as "bankCD"
+			, accountNo as "accountNo"
+			, holderNm as "holderNm"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','REQUESTSTATECD',requestStateCD,null) as "requestStateCDName"
+			, requestTpCD as "requestTpCD"
+			, keymanTypeCD as "keymanTypeCD"
+			, requestStateCD as "requestStateCD"
+			, pKeymanYN as "pKeymanYN"
+			, LicenceChkYn as "licenceChkYn"
+		from (
+			select 
+				a.requestDate
+				, a.venueCD
+				, b.venueNm
+				, a.requestTpCD
+			    , a.keymanID
+			    , a.keymanNm
+			    , a.keymanTypeCD
+			    , a.birthDate
+			    , a.addr
+			    , a.phoneNo
+			    , a.bankCD
+			    , a.accountNo
+			    , a.holderNm
+			    , a.requestStateCD
+			    , a.pKeymanYN
+			    , a.LicenceChkYn
+			from GKEY02MT a
+			inner join GVEN01MT b
+				on a.venueCD = b.venueCD
+			<!--2015.01.21. taejoon.jang 
+			inner join GEMP01MT	 c
+				on a.empID = c.empID
+				and b.territoryCD = c.territoryCD
+			 -->
+			where 
+				a.requestDate between #requestDateFrom# and #requestDateTo#
+				and a.empID = #empID#
+				<isPropertyAvailable property="venueCD">
+					<isNotEmpty prepend="and" property="venueCD">
+						upper(a.venueCD) = upper(#venueCD#)
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="keymanNm" >
+		        	<isNotEmpty prepend="and" property="keymanNm">
+		        		upper(a.keymanNm) like '%'||upper(#keymanNm#)||'%'
+		        	</isNotEmpty>
+		        </isPropertyAvailable>
+		        <isPropertyAvailable property="requestStateCD">
+					<isNotEmpty prepend="and" property="requestStateCD">
+						a.requestStateCD = #requestStateCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+		) t
+		order by 
+			requestDate desc,
+			requestTpCD,
+			venueCD,
+			keymanID
+	</select>
+	
+</sqlMap>

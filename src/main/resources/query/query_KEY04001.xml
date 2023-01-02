@@ -1,0 +1,495 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="KEY04001">
+	
+	<!-- 키맨동의서등록 목록조회 -->
+	<select id="KEY0400101S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+	        rowNumber as "rowNum"    ,
+	        empId,
+	        empNm as "empNm"    , 																																	<!-- 담당자 -->
+	        venueCD as "venueCD"    , 																																<!-- 업소코드 -->
+	        venueNm as "venueNm"    , 																																<!-- 업소명 -->
+	        keymanID as "keymanID"    , 																																<!-- 키맨id --> 
+	        keymanNm as "keymanNm"    , 																															<!-- 키맨명 -->
+	        doc_100_prgs, 																																				<!-- 개인정보동의서    문서상태 코드 --> 
+	        getLangDesc(#companyID#, #languageCD#, 'F_CODE', 'KEYMANPRGSCD', doc_100_prgs, null) as "doc_100_prgs_NM" , 	<!-- 개인정보동의서 문서상태명 -->
+	        doc_200_prgs, 																																				<!-- 프로그램동의서    문서상태 코드 -->
+	        getLangDesc(#companyID#, #languageCD#, 'F_CODE', 'KEYMANPRGSCD', doc_200_prgs, null) as "doc_200_prgs_NM" , 	<!-- 프로그램동의서 문서상태명 --> 
+	        doc_300_prgs, 																																				<!-- 사업자등록증       문서상태 코드 --> 
+	        getLangDesc(#companyID#, #languageCD#, 'F_CODE', 'KEYMANPRGSCD', doc_300_prgs, null) as "doc_300_prgs_NM" , 	<!-- 사업자등록증 문서상태명 --> 
+	        doc_400_prgs, 																																				<!-- 대표권위임확인서  문서상태 코드 -->                   
+	        getLangDesc(#companyID#, #languageCD#, 'F_CODE', 'KEYMANPRGSCD', doc_400_prgs, null) as "doc_400_prgs_NM" , 	<!-- 대표권위임확인서 문서상태명 -->
+	        keymanTypeCD as "keymanTypeCD"    , 																												<!-- 키맨타입 -->
+	        docfinshfl as "docFinishFl",																																	<!-- 서류완료여부 코드 -->
+        	getLangDesc( '000001' /**P*/,'KR' /**P*/,'F_CODE','DOCFINSHFL',docfinshfl,null) as "docFinshFlNm"    ,									<!-- 서류완료여부 코드명 -->																		
+	        getLangDesc(#companyID#, #languageCD#, 'F_CODE', 'KEYMANTYPECD', keymanTypeCD, null) as "keymanTypeCDName", <!-- 키맨타입명 -->
+	        getLangDesc(#companyID#, #languageCD#, 'F_CODE', 'DOCMNGFL', docmngfl, null) as "docMngFlNm", <!-- 키맨타입명 -->
+	        birthDate as "birthDate"    , 																																<!-- 생년월일 -->
+	        dutyCD as "dutyCD"    ,      																																<!-- 직책코드 --> 
+	        getLangDesc(#companyID#, #languageCD#, 'F_CODE', 'DUTYCD', dutyCD, null) as "dutyCDName"    , 							<!-- 직책명 -->
+	        addr as "addr"    ,																																			<!-- 주소 --> 
+	        phoneNo as "phoneNo"    ,																																<!-- 연락처 -->
+	        bankCD as "bankCD"    , 																																	<!-- 은행코드 --> 
+	        getLangDesc(#companyID#, #languageCD#, 'F_CODE', 'BANKCD', bankCD, null) as "bankCDName"    , 							<!-- 은행명 --> 
+	        accountNo as "accountNo"    , 																															<!-- 계좌번호 --> 
+	        holderNm as "holderNm"    , 																															<!-- 예금주명 --> 
+	        PkeymanYN as "PkeymanYN"    ,  																														<!-- 대표키면 여부 -->
+	        getLangDesc(#companyID#, #languageCD#, 'F_CODE', 'ACTIVEYN', activeYN, null) as "activeYNName"    ,
+	        activeYN as "activeYN"    , 																																<!-- 관리여부 --> 
+	        oldKeymanID as "oldKeymanID"    , 																													<!-- 구키맨id --> 
+	        note as "note"    ,  																																			<!-- 비고 -->
+	        lApplyDate as "lApplyDate" ,  																																<!-- 최종적용일자 -->  
+	    	docNeedYn as "docNeedYn"
+	    from
+	        (    
+	        select
+	            rank() over(order by a.venueCD, a.keymanID) as rowNumber,
+            	floor((rank() over(order by a.venueCD, a.keymanID)-1)/#displayNum#+1) as pageNum,
+	            c.empid      ,
+	            c.empNm     ,
+	            a.venueCD     ,
+	            b.venueNm     ,
+	            a.keymanID     ,
+	            a.keymanNm     ,
+	            a.keymanTypeCD     ,
+	            a.docfinshfl,
+	            a.docmngfl     ,
+	            a.birthDate     ,
+	            a.dutyCD     ,
+	            a.addr     ,
+	            a.phoneNo     ,
+	            a.bankCD     ,
+	            a.accountNo     ,
+	            a.holderNm     ,
+	            a.PkeymanYN     ,
+	            a.activeYN     ,
+	            a.oldKeymanID     ,
+	            a.note     ,
+	            a.lApplyDate,
+	            a.docNeedYn,
+	            case when d.KeymanPrgsCd  is null then '999' else  d.KeymanPrgsCd end  as doc_100_prgs, <!-- 개인정보동의서  문서상태  값이 없으면 '999' 세팅 -->
+	            case when e.KeymanPrgsCd  is null then '999' else  e.KeymanPrgsCd end  as doc_200_prgs, <!-- 프로그램동의서   문서상태  값이 없으면 '999' 세팅 -->
+	            case when f.KeymanPrgsCd  is null then '999' else   f.KeymanPrgsCd end  as doc_300_prgs, <!-- 사업자등록증      문서상태  값이 없으면 '999' 세팅 -->
+	            case when g.KeymanPrgsCd  is null then '999' else  g.KeymanPrgsCd end  as doc_400_prgs <!-- 대표권위임확인서  문서상태  값이 없으면 '999' 세팅 -->
+	        from
+	            GKEY01MT a     
+	        inner join
+	            GVEN01MT b     
+	                on a.venueCD = b.venueCD     
+	        inner join 
+	            GEMP01MT c     
+	                on b.territoryCD = c.territoryCD     
+	                and c.empid      = #empID#        <!-- ******************** 로그인한 사원의 세션 사원번호 세팅   ******************************* -->
+	         left outer join gkey05mt d                <!-- KEYMAN문서정보MASTER -->       
+	         on    A.KEYMANID = d.KEYMANID
+	         and  d.KEYMANDOCTPCD = '100'     <!-- 개인정보동의서 -->
+	         left outer join gkey05mt e                <!-- KEYMAN문서정보MASTER -->       
+	         on    A.KEYMANID = e.KEYMANID
+	         and  e.KEYMANDOCTPCD = '200'     <!-- 프로그램동의서 -->
+	         left outer join gkey05mt f                <!-- KEYMAN문서정보MASTER -->  
+	         on    A.KEYMANID = f.KEYMANID
+	         and  f.KEYMANDOCTPCD = '300'     <!-- 사업자등록증 -->
+	         left outer join gkey05mt g                <!-- KEYMAN문서정보MASTER -->       
+	         on    A.KEYMANID = g.KEYMANID
+	         and  g.KEYMANDOCTPCD = '400'     <!-- 대표권위임확인 -->                 
+	        where 1=1 and a.activeyn ='Y'   and c.WORKSTATCD='01'    
+	        <isPropertyAvailable property="lApplyDateFrom">
+				<isNotEmpty prepend="and" property="lApplyDateFrom">
+					a.lApplyDate between #lApplyDateFrom# and #lApplyDateTo# 
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="venueCD">
+				<isNotEmpty prepend="and" property="venueCD">
+					upper(a.venueCD) = upper(#venueCD#)
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="keyManNm">
+				<isNotEmpty prepend="and" property="keyManNm">
+					a.keymanNm like  '%' || #keyManNm# || '%'
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="docuConfirmChk">
+				<isNotEmpty prepend="and" property="docuConfirmChk">
+					( d.KeymanPrgsCd IN ( '200' ,'300' ) or  e.KeymanPrgsCd IN ( '200' ,'300' ) or  f.KeymanPrgsCd IN ( '200' ,'300' ) or  g.KeymanPrgsCd IN ( '200' ,'300' )  ) <!-- 문서확인건 조회  체크 선택시 조건절 추가 -->
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="DocFinshFl">
+				<isNotEmpty prepend="and" property="DocFinshFl">
+					a.DocFinshFl = #DocFinshFl#
+				</isNotEmpty>
+			</isPropertyAvailable>
+		) t
+		where 1=1
+			<isPropertyAvailable property="pageNum">
+				and pageNum = #pageNum#
+			</isPropertyAvailable>
+	</select>
+	
+	<select id="KEY0400102S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap"> <!-- 키맨동의서등록 목록 페이징 -->
+		select
+			count(*) as "totalCount"
+		from GKEY01MT a
+		inner join GVEN01MT b
+			on a.venueCD = b.venueCD
+		inner join 
+			GEMP01MT c     
+				on b.territoryCD = c.territoryCD     
+				and c.empid = #empID#        <!-- ******************** 로그인한 사원의 세션 사원번호 세팅   ******************************* -->
+		left outer join gkey05mt d                <!-- KEYMAN문서정보MASTER -->       
+	    	on A.KEYMANID = d.KEYMANID
+	        and d.KEYMANDOCTPCD = '100'     <!-- 개인정보동의서 -->
+		left outer join gkey05mt e                <!-- KEYMAN문서정보MASTER -->       
+			on A.KEYMANID = e.KEYMANID
+	        and e.KEYMANDOCTPCD = '200'     <!-- 프로그램동의서 -->
+		left outer join gkey05mt f                <!-- KEYMAN문서정보MASTER -->  
+			on A.KEYMANID = f.KEYMANID
+			and f.KEYMANDOCTPCD = '300'     <!-- 사업자등록증 -->
+		left outer join gkey05mt g                <!-- KEYMAN문서정보MASTER -->       
+			on A.KEYMANID = g.KEYMANID
+	        and g.KEYMANDOCTPCD = '400'     <!-- 대표권위임확인 -->                 
+		where 1=1 and a.activeyn ='Y'   and c.WORKSTATCD='01'
+			<isPropertyAvailable property="lApplyDateFrom">
+				<isNotEmpty prepend="and" property="lApplyDateFrom">
+					a.lApplyDate between #lApplyDateFrom# and #lApplyDateTo# 
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="venueCD">
+				<isNotEmpty prepend="and" property="venueCD">
+					upper(a.venueCD) = upper(#venueCD#)
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="keyManNm">
+				<isNotEmpty prepend="and" property="keyManNm">
+					a.keymanNm like  '%' || #keyManNm# || '%'
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="docuConfirmChk">
+				<isNotEmpty prepend="and" property="docuConfirmChk">
+					( d.KeymanPrgsCd IN ( '200' ,'300' ) or  e.KeymanPrgsCd IN ( '200' ,'300' ) or  f.KeymanPrgsCd IN ( '200' ,'300' ) or  g.KeymanPrgsCd IN ( '200' ,'300' )  ) <!-- 문서확인건 조회  체크 선택시 조건절 추가 -->
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="DocFinshFl">
+				<isNotEmpty prepend="and" property="DocFinshFl">
+					a.DocFinshFl = #DocFinshFl#
+				</isNotEmpty>
+			</isPropertyAvailable>
+	</select>
+	
+	<select id="KEY0400103S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">	<!-- 키맨동의서 조회(사업자등록증, 대표권위임확인서) -->
+		select   
+			a.venueCD as "venueCD" , 					<!-- 업소코드 --> 
+			b.venueNm as "venueNm" , 					<!-- 업소명 --> 
+			a.keymanID as "keymanID" , 					<!-- 키맨ID -->
+			a.keymanNm as "keymanNm" , 				<!-- 키맨명 --> 
+			a.birthDate as "birthDate" ,  					<!-- 키맨생년월일 -->
+			A.DocFinshFl as "DocFinshFl" ,  				<!-- 서류완료여부 -->
+			getLangDesc(#companyID#, #languageCD#, 'F_CODE', 'DOCFINSHFL', A.DocFinshFl, null) as "DocFinshFlNm" , 			<!-- 서류완료여부명 -->
+			CASE WHEN D.KEYMANID IS NULL THEN 'NONE' ELSE 'EXIST' END AS DataFg,  												<!-- 문서생성상태 --> 
+			d.DocWorkDate , 									<!-- 문서작성일자 -->
+			case when d.KeymanPrgsCd is null then '999' else d.KeymanPrgsCd end as "keyManPrgsCd" , 		<!-- 문서진행상태 -->                  
+			case when D.KeymanPrgsCd is null then '문서없음' else getLangDesc(#companyID#, #languageCD#, 'F_CODE','KEYMANPRGSCD', D.KeymanPrgsCd, null) end as "KeymanPrgsNm"    , <!-- 문서진행상태명 -->
+			d.DocComment as "DocComment" , 		<!-- COMMENT --> 
+			d.FileDocLink as "FileDocLink" ,     			<!-- 문서첨부파일ID     문서가  '300' : 사업자등록증 및 '400'  대표권위임확인서인 경우 사용 -->
+			e.FileUrl as "fileUrl" ,								<!-- 이미지폴더경로 -->
+			e.uuid as "uuid"									<!-- 이미지파일경로 -->
+		from
+    		GKEY01MT a     
+		inner join
+    		GVEN01MT b     
+        	on a.venueCD = b.venueCD     
+		left outer join gkey05mt d									<!-- KEYMAN 문서정보 MASTER -->       
+			on A.KEYMANID = d.KEYMANID
+			and  d.KEYMANDOCTPCD = #wordType#		<!-- KEYMAN  목록에서 선택한 문서 종류 세팅 -->
+		left outer join f_doclink e
+			on d.filedoclink = e.doclinkid
+		WHERE A.KEYMANID = #kmID#
+	</select>
+	
+	<insert id="KEY0400101I" parameterClass="com.kia.key.model.GKEY05MT">
+		merge into GKEY05MT t1
+		using dual
+		on (
+			t1.keymanID = #keymanID#
+			and t1.keymanDocTpCd = #keymanDocTpCd#
+		)
+		when not matched then
+			insert (
+				keymanID
+				, keymanDocTpCd
+				, docWorkDate
+				, keymanPrgsCd
+				, signDocLinkID1
+				, signDocLinkID2
+				, fileDocLink
+				, regID
+				, regDate
+			)
+			values (
+				#keymanID#
+				, #keymanDocTpCd#
+				, #docWorkDate#
+				, '100'
+				, #signDocLinkID1#
+				, #signDocLinkID2#
+				, #fileDocLink#
+				, #regID#
+				, sysdate
+			)
+		when matched then
+			update
+			set
+				keymanPrgsCd = #keymanPrgsCd#
+				, fileDocLink = #fileDocLink#
+				, chgID = #regID#
+				, chgDate = sysdate
+	</insert>
+	
+	<insert id="KEY0400102I" parameterClass="com.kia.key.model.GKEY06MT">
+		merge into GKEY06MT t1
+		using dual
+		on (
+			t1.keymanID = #keymanID#
+			and t1.keymanDocTpCd = #keymanDocTpCd#
+		)
+		when not matched then
+			insert (
+				keymanID
+				, keymanDocTpCd
+				, docChkYn1
+				, docChkYn2
+				, docChkYn3
+				, docChkYn4
+				, keymanNm
+				, regID
+				, regDate
+			)
+			values (
+				#keymanID#
+				, #keymanDocTpCd#
+				, #docChkYn1#
+				, #docChkYn2#
+				, #docChkYn3#
+				, #docChkYn4#
+				, #keymanNm#
+				, #userID#
+				, sysdate
+			)
+		when matched then
+			update
+			set
+				docChkYn1 = #docChkYn1#
+				, docChkYn2 = #docChkYn2#
+				, docChkYn3 = #docChkYn3#
+				, docChkYn4 = #docChkYn4#
+				, chgID = #userID#
+				, chgDate = sysdate
+	</insert>
+	
+	<insert id="KEY0400103I" parameterClass="com.kia.key.model.GKEY07MT">
+		merge into GKEY07MT t1
+		using dual
+		on (
+			t1.keymanID = #keymanID#
+			and t1.keymanDocTpCd = #keymanDocTpCd#
+		)
+		when not matched then
+			insert (
+				keymanID
+				, keymanDocTpCd
+				, reprsNm
+				, reprsBirthDate
+				, keymanNm
+				, keymanBirthDate
+				, regID
+				, regDate
+			)
+			values (
+				#keymanID#
+				, #keymanDocTpCd#
+				, #reprsNm#
+				, #reprsBirthDate#
+				, #keymanNm#
+				, #keymanBirthDate#
+				, #userID#
+				, sysdate
+			)
+		when matched then
+			update
+			set
+				reprsNm = #reprsNm#
+				, reprsBirthDate = #reprsBirthDate#
+				, keymanNm = #keymanNm#
+				, keymanBirthDate = #keymanBirthDate#
+				, chgID = #userID#
+				, chgDate = sysdate
+	</insert>
+	
+	<parameterMap id="GKEY08MT01M" class="com.kia.key.model.GKEY08MT">
+        <parameter property="keymanID" jdbcType="VARCHAR2"/>
+        <parameter property="keymanDocTpCd" jdbcType="VARCHAR2"/>
+        <parameter property="signvector1" jdbcType="CLOB"/> 
+        <parameter property="userID" jdbcType="VARCHAR2"/>
+    </parameterMap> 
+	
+	<insert id="KEY0400104I" parameterMap="GKEY08MT01M">
+			insert into GKEY08MT (
+				keymanID
+				, keymanDocTpCd
+				, signvector1
+				, regID
+				, regDate
+			)
+			values (
+				?
+				, ?
+				, ?
+				, ?
+				, sysdate
+			)
+	</insert>
+	
+	<parameterMap id="GKEY08MT02M" class="com.kia.key.model.GKEY08MT">
+        <parameter property="signvector1" jdbcType="CLOB"/> 
+        <parameter property="userID" jdbcType="VARCHAR2"/>
+        <parameter property="keymanID" jdbcType="VARCHAR2"/>
+        <parameter property="keymanDocTpCd" jdbcType="VARCHAR2"/>
+    </parameterMap> 
+	
+	<update id="KEY0400102U" parameterMap="GKEY08MT02M">
+		update GKEY08MT
+		set
+			signvector1 = ?
+			, chgID = ?
+			, chgDate = sysdate
+		where
+			keymanID = ?
+			and keymanDocTpCd = ?
+	</update>
+	
+	<!-- 키맨요청정보 수정 -->
+	<update id="KEY0400101U" parameterClass="com.kia.key.model.GKEY05MT">
+		update GKEY05MT
+		set
+			keymanPrgsCd = #keymanPrgsCd#
+			, docComment = #docComment#
+			, chgID = #regID#
+			, chgDate = sysdate
+		where
+			keymanID = #keymanID#
+			and keymanDocTpCd = #keymanDocTpCd#
+	</update>
+	
+	
+	<select id="KEY0400104S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">	<!-- 키맨동의서 조회(개인정보동의서) -->
+		select   
+			a.venueCD as "venueCD"  					<!-- 업소코드 --> 
+			, b.venueNm as "venueNm"  					<!-- 업소명 --> 
+			, a.keymanID as "keymanID"  					<!-- 키맨ID -->
+			, a.keymanNm as "keymanNm"  				<!-- 키맨명 --> 
+			, a.birthDate as "birthDate"   					<!-- 키맨생년월일 -->
+			, A.DocFinshFl as "DocFinshFl"   				<!-- 서류완료여부 -->
+			, getLangDesc(#companyID#, #languageCD#, 'F_CODE', 'DOCFINSHFL', A.DocFinshFl, null) as "DocFinshFlNm"  			<!-- 서류완료여부명 -->
+			, CASE WHEN D.KEYMANID IS NULL THEN 'NONE' ELSE 'EXIST' END AS DataFg  												<!-- 문서생성상태 --> 
+			, d.DocWorkDate as "docWorkDate" 									<!-- 문서작성일자 -->
+			, case when d.KeymanPrgsCd is null then '999' else d.KeymanPrgsCd end as "keyManPrgsCd"  		<!-- 문서진행상태 -->                  
+			, case when D.KeymanPrgsCd is null then '문서없음' else getLangDesc(#companyID#, #languageCD#, 'F_CODE','KEYMANPRGSCD', D.KeymanPrgsCd, null) end as "KeymanPrgsNm"    <!-- 문서진행상태명 -->
+			, F.DocChkYn1 as "docChkYn1"
+	        , F.DocChkYn2 as "docChkYn2" 
+	        , F.DocChkYn3 as "docChkYn3"
+	        , F.DocChkYn4 as "docChkYn4"
+	        , F.KeyManNm as "keyManNm"
+	        , e.FileUrl as "fileUrl"								<!-- 이미지폴더경로 -->
+			, e.uuid as "uuid"									<!-- 이미지파일경로 -->
+			, d.doccomment as "comment"
+			, d.filedoclink as "docLinkID"
+		from
+    		GKEY01MT a     
+		inner join
+    		GVEN01MT b     
+        	on a.venueCD = b.venueCD     
+		left outer join gkey05mt d									<!-- KEYMAN 문서정보 MASTER -->       
+			on A.KEYMANID = d.KEYMANID
+			and  d.KEYMANDOCTPCD = #wordType#		<!-- KEYMAN  목록에서 선택한 문서 종류 세팅 -->
+		left outer join f_doclink e
+			on d.filedoclink = e.doclinkid
+		LEFT OUTER JOIN GKEY06MT f
+         	on     A.KEYMANID = F.KEYMANID
+         	AND   F.KEYMANDOCTPCD = #wordType#
+		WHERE A.KEYMANID = #kmID#
+	</select>
+	
+	<select id="KEY0400105S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		SELECT 
+			nvl(T1.SIGNVECTOR1, ' ') as "SIGNVECTOR1"
+			, nvl(T1.SIGNVECTOR2, ' ') as "SIGNVECTOR2"			
+          FROM GKEY08MT T1
+       WHERE T1.KEYMANID  = #kmID#  
+          AND  T1.KEYMANDOCTPCD = #wordType#
+	</select>
+	
+	<select id="KEY0400106S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">	<!-- 키맨동의서 조회(인센티브동의서) -->
+		select   
+			a.venueCD as "venueCD"  					<!-- 업소코드 --> 
+			, b.venueNm as "venueNm"  					<!-- 업소명 --> 
+			, a.keymanID as "keymanID"  					<!-- 키맨ID -->
+			, a.keymanNm as "keymanNm"  				<!-- 키맨명 --> 
+			, a.birthDate as "birthDate"   					<!-- 키맨생년월일 -->
+			, A.DocFinshFl as "DocFinshFl"   				<!-- 서류완료여부 -->
+			, getLangDesc(#companyID#, #languageCD#, 'F_CODE', 'DOCFINSHFL', A.DocFinshFl, null) as "DocFinshFlNm"  			<!-- 서류완료여부명 -->
+			, CASE WHEN D.KEYMANID IS NULL THEN 'NONE' ELSE 'EXIST' END AS DataFg  												<!-- 문서생성상태 --> 
+			, d.DocWorkDate as "docWorkDate"  									<!-- 문서작성일자 -->
+			, case when d.KeymanPrgsCd is null then '999' else d.KeymanPrgsCd end as "keyManPrgsCd"  		<!-- 문서진행상태 -->                  
+			, case when D.KeymanPrgsCd is null then '문서없음' else getLangDesc(#companyID#, #languageCD#, 'F_CODE','KEYMANPRGSCD', D.KeymanPrgsCd, null) end as "KeymanPrgsNm"    <!-- 문서진행상태명 -->
+			, F.StoreNm as "storeNm"
+	        , F.ReprsNm as "reprsNm" 
+	        , F.ReprsBirthDate as "reprsBirthDate"
+	        , e.FileUrl as "fileUrl"								<!-- 이미지폴더경로 -->
+			, e.uuid as "uuid"									<!-- 이미지파일경로 -->
+			, d.doccomment as "comment"
+			, d.filedoclink as "docLinkID"
+		from
+    		GKEY01MT a     
+		inner join
+    		GVEN01MT b     
+        	on a.venueCD = b.venueCD     
+		left outer join gkey05mt d									<!-- KEYMAN 문서정보 MASTER -->       
+			on A.KEYMANID = d.KEYMANID
+			and  d.KEYMANDOCTPCD = #wordType#		<!-- KEYMAN  목록에서 선택한 문서 종류 세팅 -->
+		left outer join f_doclink e
+			on d.filedoclink = e.doclinkid
+		LEFT OUTER JOIN GKEY07MT f
+         	on     A.KEYMANID = F.KEYMANID
+         	AND   F.KEYMANDOCTPCD = #wordType#
+		WHERE A.KEYMANID = #kmID#
+	</select>
+	
+	<select id="KEY0400107S" parameterClass="com.kia.key.model.GKEY08MT" resultClass="Integer">
+		select
+			count(*)
+		from
+			GKEY08MT
+		where
+			keymanID = #keymanID#
+			and keymanDocTpCd = #keymanDocTpCd#
+	</select>
+	
+	<!-- 사인 이미지 출력시 Validation -->
+	<select id="KEY0400108S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select count(*) as "searchCount"
+        from    F_DocLink 
+        where   companyID = #companyID#
+        and     docLinkID = #docLinkID#
+	</select>
+	
+	<!-- 사진 회전시 UUID변경 -->
+	<update id="KEY0400103U" parameterClass="kr.co.nis.waf.system.cms.model.DocLink">
+		update F_DocLink
+		set
+			uuid = #uuID#
+		where
+			companyID = #companyID#
+        and docLinkID = #docLinkID#
+	</update>
+</sqlMap>

@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="ANL02006">
+	
+	<!-- ************** -->
+	<!-- *** SELECT *** -->
+	<!-- ************** -->
+	
+	<!-- 조건: Data구분 조회 -->
+    <select id="ANL0200601S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+        select
+        	t1.comCode as "comCode" 
+            , NVL(t2.pkDesc,t1.codeName) as "codeName"
+        from
+        	F_Code t1
+        	left outer join (
+        		select *
+        		from
+        			F_LangDescription
+        		where
+        		languageCD = #languageCD#
+        		and tableID = 'F_CODE'
+        		and pkID1 = #codeDiv#
+        		)  t2
+        	  on t1.codeDiv = t2.pkID1
+        	  and t1.comCode = t2.pkID2
+        where
+        	t1.codeDiv = #codeDiv#
+        and t1.comCode in ('23', '24', '25')
+        and t1.useYN = 'Y'
+        and t1.activeFlg = 'U'
+        order by
+            t1.seq, t1.comCode
+    </select>
+	
+	<!-- 조건: 지점 조회 -->
+    <select id="ANL0200602S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+        select t1. Branch  AS "branchCd"
+       			, t1. Branch  AS "branchNm"
+		  from eslt_branch_mt t1
+		 where t1.useyn = 'Y' 
+		 	<isPropertyAvailable property="empID">
+				<isNotEmpty prepend="and" property="empID">
+					t1.empID = #empID#
+				</isNotEmpty>
+			</isPropertyAvailable>
+    </select>
+    
+    <!-- 조건: 업로드 가능여부 조회 -->
+    <select id="ANL0200603S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+        select T1.COMCODE 
+               , T1.CODENAME
+               , NVL(UPPER(T1.ATTRIB01),'N')  AS "UesYn" <!-- 업로드 가능여부 Y  :가능  N 불가능 표시 -->
+               , (case when(NVL(UPPER(T1.ATTRIB01),'N') = 'Y') then '가능' else '불가능' end)  AS "UesYnNm"
+          from F_CODE T1
+         where T1.CODEDIV   = 'ESLT_OUTLOOK_YN'
+           and T1.COMCODE = '10'
+    </select>
+    
+    <!-- 월Shipment Outlook |지점 : 기존 데이터 여부 조회 -->
+    <select id="ANL0200604S" parameterClass="com.kia.anl.model.ESLT_SH_FC" resultClass="Integer">
+        select count(*)
+		  from ESLT_SH_FC
+		 where
+			fy = upper(#fy#)
+			and period = upper(#period#)
+			and branch = upper(#branch#)
+			and esltProduct = upper(#esltProduct#)
+			and productL2 = upper(#productL2#)
+			and productL3 = upper(#productL3#)
+    </select>
+    
+    <!-- 월DC Outlook |지점 : 기존 데이터 여부 조회 -->
+    <select id="ANL0200605S" parameterClass="com.kia.anl.model.ESLT_DC_FC" resultClass="Integer">
+        select count(*)
+		  from ESLT_DC_FC
+		 where
+			fy = upper(#fy#)
+			and period = upper(#period#)
+			and branch = upper(#branch#)
+			and dataType = upper(#dataType#)
+			and productL2 = upper(#productL2#)
+    </select>
+    
+    <!-- 월채권  Outlook |지점 : 기존 데이터 여부 조회 -->
+    <select id="ANL0200606S" parameterClass="com.kia.anl.model.ESLT_CD_FC" resultClass="Integer">
+        select count(*)
+		  from ESLT_CD_FC
+		 where
+			fy = upper(#fy#)
+			and period = upper(#period#)
+			and branch = upper(#branch#)
+			and dataType = upper(#dataType#)
+    </select>
+    
+    
+	<!-- ************** -->
+	<!-- *** UPDATE *** -->
+	<!-- ************** -->
+	
+	<!-- Shipment Forecast 업로드 : 월Shipment  Outlook |지점 기존 데이터 수정 -->
+	<update id="ANL0200601U" parameterClass="com.kia.anl.model.ESLT_SH_FC">
+		update ESLT_SH_FC
+		set
+			outVolume = upper(#outVolume#)
+			, chgId = #userID#
+			, chgDate = sysdate
+		where
+			fy = upper(#fy#)
+			and period = upper(#period#)
+			and branch = upper(#branch#)
+			and esltProduct = upper(#esltProduct#)
+			and productL2 = upper(#productL2#)
+			and productL3 = upper(#productL3#)
+	</update>
+	
+	<!-- Shipment Forecast 업로드 : 월Shipment Outlook |지점 기존 데이터 수정 -->
+	<update id="ANL0200602U" parameterClass="com.kia.anl.model.ESLT_DC_FC">
+		update ESLT_DC_FC
+		set
+			outVolume = upper(#outVolume#)
+			, chgId = #userID#
+			, chgDate = sysdate
+		where
+			fy = upper(#fy#)
+			and period = upper(#period#)
+			and branch = upper(#branch#)
+			and dataType = upper(#dataType#)
+			and productL2 = upper(#productL2#)
+	</update>
+	
+	<!-- Shipment Forecast 업로드 : 월Shipment  Outlook |지점 기존 데이터 수정 -->
+	<update id="ANL0200603U" parameterClass="com.kia.anl.model.ESLT_CD_FC">
+		update ESLT_CD_FC
+		set
+			outVolume = upper(#outVolume#)
+			, chgId = #userID#
+			, chgDate = sysdate
+		where
+			fy = upper(#fy#)
+			and period = upper(#period#)
+			and branch = upper(#branch#)
+			and dataType = upper(#dataType#)
+	</update>
+	
+</sqlMap>

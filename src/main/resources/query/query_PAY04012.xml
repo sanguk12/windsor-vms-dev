@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="PAY04012">
+	
+	<!-- Paging 구현쿼리 Header 조각 -->
+    <sql id="PAY04012.paging.header">
+        <isPropertyAvailable property="pageNum">
+        select p.* from (
+            select
+    	        count(*) over() as "totalCount",
+    	</isPropertyAvailable>
+    	<isNotPropertyAvailable property="pageNum">
+    		select
+    	</isNotPropertyAvailable>
+    </sql>
+    
+    <!-- Paging 구현쿼리 Header 조각 -->
+    <sql id="PAY04012.paging.footer">
+        <isPropertyAvailable property="pageNum">
+        ) p
+		where
+			p.pageNum = #pageNum#
+		</isPropertyAvailable>
+    </sql>
+	
+	<!-- 지급처리 리스트 조회 -->
+	<select id="PAY0401201S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		<include refid="PAY04012.paging.header"/>
+			rank() over(
+				order by
+					rageSphereCD
+					, officeCD
+					, teamCD
+					, empID
+					, venueCD
+					, mileageID
+			) as "rowNum"
+			, floor((rank() over(
+				order by
+					rageSphereCD
+					, officeCD
+					, teamCD
+					, empID
+					, venueCD
+					, mileageID
+			)-1)/#displayNum#+1) as pageNum
+			<!-- 
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','PROGRAMCD',programCD,null) as "programCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ACTIVITYCD',activityCD,null) as "activityCDName"
+			 -->
+			, mileageID as "mileageID"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','RAGESPHERECD',rageSphereCD,null) as "rageSphereCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','OFFICECD',officeCD,null) as "officeCDName"
+			<isPropertyAvailable property="grpID">
+				<isNotEmpty property="grpID">
+			, (case when (select dkmdtpcd from GEMP01MT where empID=t.empID) != 'DK' then '' else (select empNm from GEMP01MT where empID=t.empID) end) as "empNm"
+				</isNotEmpty>
+				<isEmpty property="grpID">
+			, (select empNm from GEMP01MT where empID=t.empID) as "empNm"
+				</isEmpty>
+			</isPropertyAvailable>
+			, venueCD as "venueCD"
+			, venueNm as "venueNm"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','VENUEGRADCD',venueGradCD,null) as "venueGradCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SEGMENTCD',segmentCD,null) as "segmentCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SUBSEGMENTCD',subSegmentCD,null) as "subSegmentCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD1',addrTpCD1,null) as "addrTpCD1Name"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD2',addrTpCD2,null) as "addrTpCD2Name"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','MILEAGEPAYTPCD',mileagePayTPCD,null) as "mileagePayTPCDName"
+			, contractAmt as "contractAmt"
+			, addContractAmt as "addContractAmt"
+			, payAmt_keyman as "payAmt_keyman"
+			, payApprDate as "payApprDate"
+			, payCommt as "payCommt"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','PAYSTATECD',payStateCD,null) as "payStateCDName"
+			, payStateCD as "payStateCD"
+			, transferDueDate as "transferDueDate"
+			, transferDate as "transferDate"
+		from (
+			select
+				mileageID
+				,rageSphereCD
+				, officeCD
+				, teamCD
+				, empID
+				, a.venueCD
+				, venueNm
+				, venueGradCD
+				, segmentCD
+				, subSegmentCD
+				, addrTpCD1
+				, addrTpCD2
+				, contractAmt
+				, addContractAmt
+				, (select sum(payAmt) from GMIL03MT where mileageID=a.mileageID) as payAmt_keyman
+				, payApprDate
+				, payCommt
+				, payStateCD
+				, transferDate
+				, transferDueDate
+				, mileagePayTPCD
+			from GMIL02MT a
+			inner join GVEN01MT b
+				on a.venueCD = b.venueCD
+			where
+				<![CDATA[
+				a.contractDateTo >= #contractDateFrom#
+				and a.contractDateFrom <= #contractDateTo#
+				]]>
+				<isPropertyAvailable property="dkmdTpCD">
+					<isNotEmpty prepend="and" property="dkmdTpCD">
+						a.dkmdTpCD = #dkmdTpCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="rageSphereCD">
+					<isNotEmpty prepend="and" property="rageSphereCD">
+						rageSphereCD = #rageSphereCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="officeCD">
+					<isNotEmpty prepend="and" property="officeCD">
+						officeCD = #officeCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="payStateCD">
+					<isNotEmpty prepend="and" property="payStateCD">
+						payStateCD = #payStateCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="transferDate">
+					<isNotEmpty prepend="and" property="transferDate">
+						a.transferDate = #transferDate#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="mileagePayTPCD">
+					<isNotEmpty prepend="and" property="mileagePayTPCD">
+						mileagePayTPCD = #mileagePayTPCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+		) t
+		<include refid="PAY04012.paging.footer"/>
+	</select>
+	
+	<!-- 지급 키맨 수정, 지급금액가져오기 -->
+	<select id="PAY0401202S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			nvl(addContractAmt,0) as "tpayAmt"
+		from GMIL02MT
+		where
+			mileageID = #mileageID#
+	</select>
+	
+	<!-- 지급신청 상태 -->
+	<update id="PAY0401201U" parameterClass="com.kia.mil.model.GMIL01MT">
+		update GMIL02MT
+		set
+			payStateCD = #payStateCD#
+			, payApprDate = ''
+			, payCommt = ''
+			, chgID = #userID#
+			, chgDate = sysdate
+		where
+			mileageID = #mileageID#
+	</update>
+	
+	<!-- 재검증요청 -->
+	<update id="PAY0401202U" parameterClass="com.kia.mil.model.GMIL01MT">
+		update GMIL02MT
+		set
+			verifyStateCD = #verifyStateCD#
+			, payStateCD = ''
+			, payApprDate = ''
+			, payCommt = ''
+			, chgID = #userID#
+			, chgDate = sysdate
+		where
+			mileageID = #mileageID#
+	</update>
+
+	<!-- 지급예정일 입력 -->
+	<update id="PAY0401203U" parameterClass="com.kia.mil.model.GMIL01MT">
+		update GMIL02MT
+		set
+			transferDueDate = #transferDueDate#
+			, chgID = #userID#
+			, chgDate = sysdate
+		where
+			mileageID = #mileageID#
+	</update>
+
+	<!-- 지급 키맨 수정, 지급금액가져오기 -->
+	<select id="PAY0401203S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			nvl(addContractAmt,0) as "tpayAmt"
+		from GMIL02MT
+		where
+			mileageID = #mileageID#
+	</select>
+
+	<!-- 지급키맨등록 키맨목록 -->
+	<select id="PAY0401204S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			keymanID as "keymanID"
+			, keymanNm as "keymanNm"
+			, birthDate as "birthDate"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','BANKCD',bankCD,null) as "bankCDName"
+			, accountNo as "accountNo"
+			, pkeymanYN as "pkeymanYN"
+			, holderNm as "holderNm"
+			, bankCD as "bankCD"
+		from (
+			select
+				keymanID
+				, keymanNm
+				, birthDate
+				, accountNo
+				, bankCD
+				, pkeymanYN
+				, holderNm
+			from GKEY01MT
+			where
+				venueCD = #venueCD#
+				and activeYN = 'Y'
+				and keymanID not in (
+					select keymanID
+					from GMIL03MT
+					where
+						mileageID = #mileageID#
+					and payTpCD = #payTpCD#
+				)
+		)
+		order by pkeymanYN desc, keymanID
+	</select>
+	
+	<!-- 지급키맨등록 키맨목록 -->
+	<select id="PAY0401205S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			keymanID as "keymanID"
+			, keymanNm as "keymanNm"
+			, birthDate as "birthDate"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','BANKCD',bankCD,null) as "bankCDName"
+			, accountNo as "accountNo"
+			, payAmt as "payAmt"
+			, pkeymanYN as "pkeymanYN"
+			, holderNm as "holderNm"
+			, bankCD as "bankCD"
+		from (
+			select
+				b.keymanID
+				, a.keymanNm
+				, a.birthDate
+				, b.accountNo
+				, b.bankCD
+				, b.payAmt
+				, a.pkeymanYN
+				, b.holderNm
+			from GKEY01MT a
+			inner join GMIL03MT b
+				on a.keymanID = b.keymanID
+			where
+				b.mileageID = #mileageID#
+			and payTpCD = #payTpCD#
+		)
+		order by pkeymanYN desc, keymanID
+	</select>
+</sqlMap>

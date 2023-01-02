@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="KEY03002">
+	
+	<!-- 키맨인증 리스트 조회 -->
+	<select id="KEY0300201S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			rowNumber as "rowNum"
+			<isPropertyAvailable property="grpID">
+				<isNotEmpty property="grpID">
+			, (case when (select dkmdtpcd from GEMP01MT where empID=t.empID) != 'DK' then '' else empNm end) as "empNm"
+				</isNotEmpty>
+				<isEmpty property="grpID">
+			, empNm as "empNm"
+				</isEmpty>
+			</isPropertyAvailable>
+			, venueCD as "venueCD"
+			, venueNm as "venueNm"
+			, keymanID as "keymanID"
+			, keymanNm as "keymanNm"
+			, keymanTypeCD as "keymanTypeCD"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','KEYMANTYPECD',keymanTypeCD,null) as "keymanTypeCDName"
+			<!-- , regIDNo as "regIDNo" -->
+			<isPropertyAvailable property="grpID2">
+				<isNotEmpty property="grpID2">
+					, regIDNo as "regIDNo"
+				</isNotEmpty>
+				<isEmpty property="grpID2">
+					,'' as "regIDNo"
+				</isEmpty>
+			</isPropertyAvailable>
+			, birthDate as "birthDate"
+			, dutyCD as "dutyCD"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','DUTYCD',dutyCD,null) as "dutyCDName"
+			, addr as "addr"
+			, phoneNo as "phoneNo"
+			, bankCD as "bankCD"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','BANKCD',bankCD,null) as "bankCDName"
+			, accountNo as "accountNo"
+			, holderNm as "holderNm"
+			, PkeymanYN as "PkeymanYN"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ACTIVEYN',activeYN,null) as "activeYNName"
+			, activeYN as "activeYN"
+			, oldKeymanID as "oldKeymanID"
+			, note as "note"
+			, lApplyDate as "lApplyDate"
+		from (
+			select
+				rank() over(order by keymanID) as rowNumber
+				, floor((rank() over(order by keymanID)-1)/#displayNum#+1) as pageNum
+				, c.empNm
+				, a.venueCD
+				, b.venueNm
+				, a.keymanID
+				, a.keymanNm
+				, a.keymanTypeCD
+				, SCP.DEC_B64('DAMO','SCP','AES_256.SCPS',a.regIDNo) AS regIDNo
+				, a.birthDate
+				, a.dutyCD
+				, a.addr
+				, a.phoneNo
+				, a.bankCD
+				, a.accountNo
+				, a.holderNm
+				, a.PkeymanYN
+				, a.activeYN
+				, a.oldKeymanID
+				, a.note
+				, a.lApplyDate
+				, c.empID
+			from GKEY01MT a
+				inner join GVEN01MT b
+				on a.venueCD = b.venueCD
+				left outer join GEMP01MT c
+				on b.territoryCD = c.territoryCD
+				and c.workStatCD = '01'
+			where 
+				a.lApplyDate between #lApplyDateFrom# and #lApplyDateTo#
+			<isPropertyAvailable property="venueGradCD">
+				<isNotEmpty prepend="and" property="venueGradCD">
+					b.venueGradCD = #venueGradCD#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="addrTpCD1">
+				<isNotEmpty prepend="and" property="addrTpCD1">
+					b.addrTpCD1 = #addrTpCD1#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="addrTpCD2">
+				<isNotEmpty prepend="and" property="addrTpCD2">
+					b.addrTpCD2 = #addrTpCD2#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="venueCD">
+				<isNotEmpty prepend="and" property="venueCD">
+					upper(a.venueCD) = upper(#venueCD#)
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="empNm">
+				<isNotEmpty prepend="and" property="empNm">
+					upper(c.empNm) like '%'||upper(#empNm#)||'%'
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="activeYN">
+				<isNotEmpty prepend="and" property="activeYN">
+					a.activeYN = #activeYN#
+				</isNotEmpty>
+			</isPropertyAvailable>
+		) t
+		where 1=1
+			<isPropertyAvailable property="pageNum">
+				and pageNum = #pageNum#
+			</isPropertyAvailable>
+	</select>
+	
+	<select id="KEY0300202S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			count(*) as "totalCount"
+		from GKEY01MT a
+			inner join GVEN01MT b
+			on a.venueCD = b.venueCD
+			left outer join GEMP01MT c
+			on b.territoryCD = c.territoryCD
+			and c.workStatCD = '01'
+		where
+			a.lApplyDate between #lApplyDateFrom# and #lApplyDateTo#
+		<isPropertyAvailable property="venueGradCD">
+			<isNotEmpty prepend="and" property="venueGradCD">
+				b.venueGradCD = #venueGradCD#
+			</isNotEmpty>
+		</isPropertyAvailable>
+		<isPropertyAvailable property="addrTpCD1">
+			<isNotEmpty prepend="and" property="addrTpCD1">
+				b.addrTpCD1 = #addrTpCD1#
+			</isNotEmpty>
+		</isPropertyAvailable>
+		<isPropertyAvailable property="addrTpCD2">
+			<isNotEmpty prepend="and" property="addrTpCD2">
+				b.addrTpCD2 = #addrTpCD2#
+			</isNotEmpty>
+		</isPropertyAvailable>
+		<isPropertyAvailable property="venueCD">
+			<isNotEmpty prepend="and" property="venueCD">
+				upper(a.venueCD) = upper(#venueCD#)
+			</isNotEmpty>
+		</isPropertyAvailable>
+		<isPropertyAvailable property="empNm">
+			<isNotEmpty prepend="and" property="empNm">
+				upper(c.empNm) like '%'||upper(#empNm#)||'%'
+			</isNotEmpty>
+		</isPropertyAvailable>
+		<isPropertyAvailable property="activeYN">
+			<isNotEmpty prepend="and" property="activeYN">
+				a.activeYN = #activeYN#
+			</isNotEmpty>
+		</isPropertyAvailable>
+	</select>
+	
+	<!-- 키맨 관리여부 업데이트 -->
+	<update id="KEY0300201U" parameterClass="com.kia.key.model.GKEY01MT">
+		update GKEY01MT
+		set
+			regIDNo = SCP.ENC_B64('DAMO','SCP','AES_256.SCPS',#regIDNo#)
+			, birthDate = #birthDate#
+			, activeYN = #activeYN#
+			, chgID = #userID#
+			, chgDate = sysdate
+		where
+			keymanID = #keymanID#
+	</update>
+	
+</sqlMap>

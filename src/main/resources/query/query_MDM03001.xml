@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="MDM03001">
+    
+	<!-- 제품정보조회 -->
+	<select id="MDM0300101S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+        select
+		    t1.categoryCD1 as "categoryCD1",
+		    getLangDesc(#companyID#, #languageCD#, 'F_CODE', 'CATEGORYCD1', t1.categoryCD1, NULL) as "categoryCD1Name",
+		    t1.categoryCD2 as "categoryCD2",
+		    getLangDesc(#companyID#, #languageCD#, 'F_CODE', 'CATEGORYCD2', t1.categoryCD2, NULL) as "categoryCD2Name",
+		    t1.categoryCD3 as "categoryCD3",
+		    getLangDesc(#companyID#, #languageCD#, 'F_CODE', 'CATEGORYCD3', t1.categoryCD3, NULL) as "categoryCD3Name",
+		    t1.categoryCD4 as "categoryCD4",
+		    getLangDesc(#companyID#, #languageCD#, 'F_CODE', 'CATEGORYCD4', t1.categoryCD4, NULL) as "categoryCD4Name",
+		    t1.categoryCD5 as "categoryCD5",
+		    getLangDesc(#companyID#, #languageCD#, 'F_CODE', 'CATEGORYCD5', t1.categoryCD5, NULL) as "categoryCD5Name",
+		    t1.prdCD as "prdCD", 
+		    t1.prdSAPCD as "prdSAPCD",
+		    t1.prdNm as "prdNm",
+		    t1.prdShCD as "prdShCD",
+		    getLangDesc(#companyID#, #languageCD#, 'F_CODE', 'PRDSHCD', t1.prdShCD, NULL) as "prdShCDName",
+		    t1.factoryPrice as "factoryPrice",
+		    t1.ml as "ml",
+		    t1.unit as "unit",
+		    t1.eu as "eu",
+		    t1.sdxYN as "sdxYN",
+		    getLangDesc(#companyID#, #languageCD#, 'F_CODE', 'SDXYN', t1.sdxYN, NULL) as "sdxYNName",
+		    t1.qtyUnitCD as "qtyUnitCD",
+		    getLangDesc(#companyID#, #languageCD#, 'F_CODE', 'QTYUNITCD', t1.qtyUnitCD, NULL) as "qtyUnitCDName",
+		    t1.dkRivalTpCD as "dkRivalTpCD",
+		    getLangDesc(#companyID#, #languageCD#, 'F_CODE', 'DKRIVALTPCD', t1.dkRivalTpCD, NULL) as "dkRivalTpCDName",
+		    t1.kindTpCD1 as "kindTpCD1",
+		    getLangDesc(#companyID#, #languageCD#, 'F_CODE', 'KINDTPCD1', t1.kindTpCD1, NULL) as "kindTpCD1Name",
+		    t1.kindTpCD2 as "kindTpCD2",
+		    getLangDesc(#companyID#, #languageCD#, 'F_CODE', 'KINDTPCD2', t1.kindTpCD2, NULL) as "kindTpCD2Name",
+		    t1.kindTpCD3 as "kindTpCD3",
+		    getLangDesc(#companyID#, #languageCD#, 'F_CODE', 'KINDTPCD3', t1.kindTpCD3, NULL) as "kindTpCD3Name",
+		    t1.kindTpCD4 as "kindTpCD4",
+		    getLangDesc(#companyID#, #languageCD#, 'F_CODE', 'KINDTPCD4', t1.kindTpCD4, NULL) as "kindTpCD4Name",
+		    t1.kindTpCD5 as "kindTpCD5",
+		    getLangDesc(#companyID#, #languageCD#, 'F_CODE', 'KINDTPCD5', t1.kindTpCD5, NULL) as "kindTpCD5Name",
+		    t1.incntTpCD as "incntTpCD",
+		    t1.activeYN as "activeYN",
+		    getLangDesc(#companyID#, #languageCD#, 'F_CODE', 'ACTIVEYN', t1.activeYN, NULL) as "activeYNName",
+		    t1.angelPrd16CD as "angelPrd16CD",
+		    t1.angelPrdMlCD as "angelPrdMlCD",
+		    nvl(trunc(t1.gsv, 2), 0) as "gsv",
+		    nvl(trunc(t1.wsdc, 2), 0) as "wsdc",
+		    nvl(trunc(t1.cogs, 2), 0) as "cogs",
+		    nvl(trunc(t1.duty, 2), 0) as "duty"
+		from
+		    GPRD01MT t1
+		where 
+			1=1
+			<isPropertyAvailable property="categoryCD1" >
+	        	<isNotEmpty prepend="and" property="categoryCD1">
+	        		t1.categoryCD1 = #categoryCD1#
+	        	</isNotEmpty>
+	        </isPropertyAvailable>
+	        <isPropertyAvailable property="categoryCD2" >
+	        	<isNotEmpty prepend="and" property="categoryCD2">
+	        		t1.categoryCD2 = #categoryCD2#
+	        	</isNotEmpty>
+	        </isPropertyAvailable>
+	        <isPropertyAvailable property="categoryCD3" >
+	        	<isNotEmpty prepend="and" property="categoryCD3">
+	        		t1.categoryCD3 = #categoryCD3#
+	        	</isNotEmpty>
+	        </isPropertyAvailable>
+	        <isPropertyAvailable property="categoryCD4" >
+	        	<isNotEmpty prepend="and" property="categoryCD4">
+	        		t1.categoryCD4 = #categoryCD4#
+	        	</isNotEmpty>
+	        </isPropertyAvailable>
+	        <isPropertyAvailable property="dkRivalTpCD" >
+	        	<isNotEmpty prepend="and" property="dkRivalTpCD">
+	        		t1.dkRivalTpCD = #dkRivalTpCD#
+	        	</isNotEmpty>
+	        </isPropertyAvailable>
+	        <isPropertyAvailable property="activeYN" >
+	        	<isNotEmpty prepend="and" property="activeYN">
+	        		t1.activeYN = #activeYN#
+	        	</isNotEmpty>
+	        </isPropertyAvailable>
+	        <isPropertyAvailable property="prdCD" >
+	        	<isNotEmpty prepend="and" property="prdCD">
+	        		t1.prdCD = #prdCD#
+	        	</isNotEmpty>
+	        </isPropertyAvailable>
+		order by categoryCD1
+		, categoryCD2
+		, categoryCD3
+		, categoryCD4
+		, categoryCD5
+		, prdCD
+    </select>
+    
+    <!-- 제품코드생성 -->
+<!-- 	<select id="MDM0300102S" parameterClass="com.kia.mdm.model.GPRD01MT" resultClass="java.lang.String">    -->
+<!--     	select  -->
+<!--     		#dkRivalTpCD#||LPAD(NVL(MAX(to_number(SUBSTR(t1.prdCD, 3)))+1,1),6,'0') as prdCD -->
+<!-- 	  	from  -->
+<!--   			GPRD01MT t1 -->
+<!-- 		where  -->
+<!-- 			t1.prdCD like #dkRivalTpCD#||'%' -->
+<!-- 	</select> -->
+	<select id="MDM0300102S" parameterClass="com.kia.mdm.model.GPRD01MT" resultClass="java.lang.String">   
+    	select 
+    		LPAD(NVL(MAX(to_number(SUBSTR(t1.prdCD, 3)))+1,1),6,'0') as prdCD
+	  	from 
+  			GPRD01MT t1
+	</select>
+	
+	<!-- 제품정보등록-->
+	<insert id="MDM0300103I" parameterClass="com.kia.mdm.model.GPRD01MT">    
+        insert into GPRD01MT (
+        	prdCD, 
+        	prdSAPCD, 
+        	prdNm, 
+        	prdShCD, 
+        	categoryCD1, 
+        	categoryCD2,
+            categoryCD3, 
+            categoryCD4, 
+            categoryCD5, 
+            factoryPrice, 
+            ml, 
+            unit, 
+            eu, 
+            sdxYN, 
+            qtyUnitCD, 
+            dkRivalTpCD, 
+            kindTpCD1, 
+            kindTpCD2, 
+            kindTpCD3, 
+            kindTpCD4, 
+            kindTpCD5, 
+            incntTpCD, 
+            activeYN, 
+            angelPrd16CD, 
+            angelPrdMlCD,
+            regID, 
+            regDate
+        ) values (
+        	#prdCD#, 
+        	#prdSAPCD#, 
+        	#prdNm#, 
+        	#prdShCD#, 
+        	#categoryCD1#, 
+        	#categoryCD2#,
+            #categoryCD3#, 
+            #categoryCD4#, 
+            #categoryCD5#, 
+			#factoryPrice#,
+          	#ml#, 
+          	#unit#, 
+          	#eu#, 
+          	#sdxYN#, 
+          	#qtyUnitCD#, 
+          	#dkRivalTpCD#, 
+            #kindTpCD1#, 
+            #kindTpCD2#, 
+            #kindTpCD3#, 
+            #kindTpCD4#, 
+            #kindTpCD5#, 
+            #incntTpCD#, 
+            #activeYN#,
+            #angelPrd16CD#,
+            #angelPrdMlCD#,
+            #userID#,
+            SYSDATE
+        )
+    </insert>
+    
+    <!-- 제품정보수정 -->
+    <update id="MDM0300104U" parameterClass="com.kia.mdm.model.GPRD01MT">
+        update GPRD01MT
+        set
+        	prdSAPCD = #prdSAPCD#,
+        	prdNm = #prdNm#,
+        	prdShCD = #prdShCD#,
+			categoryCD1 = #categoryCD1#,
+        	categoryCD2 = #categoryCD2#,
+			categoryCD3 = #categoryCD3#,
+			categoryCD4 = #categoryCD4#,
+			categoryCD5 = #categoryCD5#,
+			factoryPrice = #factoryPrice#,
+			ml = #ml#,
+        	unit = #unit#,
+        	eu = #eu#,
+        	sdxYN = #sdxYN#,
+        	qtyUnitCD = #qtyUnitCD#,
+        	dkRivalTpCD = #dkRivalTpCD#,
+        	kindTpCD1 = #kindTpCD1#,
+			kindTpCD2 = #kindTpCD2#,
+			kindTpCD3 = #kindTpCD3#,
+			kindTpCD4 = #kindTpCD4#,
+        	kindTpCD5 = #kindTpCD5#, 
+        	incntTpCD = #incntTpCD#, 
+        	activeYN = #activeYN#, 
+        	angelPrd16CD = #angelPrd16CD#, 
+        	angelPrdMlCD = #angelPrdMlCD#, 
+        	chgID = #userID#, 
+        	chgDate = SYSDATE
+        where
+        	prdCD = #prdCD#
+    </update>
+    
+    <!-- 제품SAP코드 중복체크 -->
+	<select id="MDM0300105S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">   
+    	select
+		    count(prdSAPCD) as "cnt"
+		from
+			GPRD01MT
+		where
+		    prdSAPCD = #prdSAPCD#
+	</select>
+</sqlMap>

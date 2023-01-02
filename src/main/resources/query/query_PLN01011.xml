@@ -1,0 +1,292 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="PLN01011">	
+	<select id="PLN0101101S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		<![CDATA[
+		 SELECT b2.Summary as "summary" , b2.typename as "summaryN", nvl(a2.qty,0)  as "volume", nvl(a2.amt,0) as "incentive", nvl(a2.gsv,0) as "GSV",
+		        CASE WHEN a2.ng IS NULL AND a2.gsv IS NULL  THEN 0
+		             WHEN a2.ng = 0  AND a2.gsv = 0  THEN 0
+		             WHEN a2.ng = 0  AND a2.gsv <> 0 THEN 0
+		             WHEN a2.ng <> 0 AND a2.gsv = 0  THEN round((a2.ng)*100,2) 
+		             ELSE round((a2.ng/a2.gsv)*100,2) END as "NGGSV" ,
+			    nvl(a2.apprStateCDName,'0') as "apprStateCDName",
+                nvl(a2.apprStateCD,'0') as "apprStateCD"        
+		]]>
+		   FROM (
+		    SELECT 'Total' as Summary,'Target' as typeName,
+		           '1' AS SEQ1,'1' AS SEQ2, E2.empID,
+		           0 as Qty,  0 as Amt, 0 AS GSV, 0 AS NG ,
+		           '0' AS apprStateCDName, '0' AS apprStateCD    
+		      FROM GEMP01MT E2
+		     WHERE E2.empID = #empID# 
+		     UNION ALL
+		    SELECT 'Total' as Summary,'PLAN' as typeName,
+		           '1' AS SEQ1,'2' AS SEQ2, E2.empID,
+		           0 as Qty,  0 as Amt, 0 AS GSV, 0 AS NG  ,
+		           '0' AS apprStateCDName, '0' AS apprStateCD 
+		      FROM GEMP01MT E2
+		     WHERE E2.empID = #empID#  
+		     UNION ALL
+		    SELECT 'Local Whishky' as Summary,'Target' as typeName,
+		           '2' AS SEQ1,'1' AS SEQ2, E2.empID,
+		           0 as Qty,  0 as Amt, 0 AS GSV, 0 AS NG  ,
+		           '0' AS apprStateCDName, '0' AS apprStateCD 
+		      FROM GEMP01MT E2
+		     WHERE E2.empID = #empID#  
+		     UNION ALL
+		    SELECT 'Local Whishky' as Summary,'PLAN' as typeName,
+		           '2' AS SEQ1,'2' AS SEQ2, E2.empID,
+		           0 as Qty,  0 as Amt, 0 AS GSV, 0 AS NG  ,
+		           '0' AS apprStateCDName, '0' AS apprStateCD 
+		      FROM GEMP01MT E2
+		     WHERE E2.empID = #empID#  
+		     UNION ALL
+		    SELECT 'International Whishky' as Summary,'Target' as typeName,
+		           '3' AS SEQ1,'1' AS SEQ2, E2.empID,
+		           0 as Qty,  0 as Amt, 0 AS GSV, 0 AS NG  ,
+		           '0' AS apprStateCDName, '0' AS apprStateCD 
+		      FROM GEMP01MT E2
+		     WHERE E2.empID = #empID#  
+		     UNION ALL
+		    SELECT 'International Whishky' as Summary,'PLAN' as typeName,
+		           '3' AS SEQ1,'2' AS SEQ2, E2.empID,
+		           0 as Qty,  0 as Amt, 0 AS GSV, 0 AS NG  ,
+		           '0' AS apprStateCDName, '0' AS apprStateCD 
+		      FROM GEMP01MT E2
+		     WHERE E2.empID = #empID#  ) B2,
+		   (  
+		       SELECT Summary,typeName,SEQ1,SEQ2, empID,
+		              round(Qty/3) as Qty , round(Amt/3) as Amt, 
+		              round(GSV/3) AS GSV ,  round(NG/3) AS NG ,
+			          apprStateCDName, apprStateCD 
+		         FROM (
+		            SELECT 'Total' as Summary, 'Target' as typeName,   
+		                   '1' AS SEQ1,'1' AS SEQ2, a1.empID,
+		                   sum(B1.RESULTQTY) as Qty,
+		                   sum(B1.PAYAMT) as Amt,
+		                   SUM(P1.GSV * B1.RESULTQTY ) AS GSV,
+		                   SUM(B1.PAYAMT) AS NG ,
+                           '0' as apprStateCDName,
+                           '0' as apprStateCD       
+		              from GRLT01MT a1      
+		             inner join GRLT01DT B1                  
+		                     on a1.eventYM = B1.eventYM                  
+		                    and a1.venueCD = B1.venueCD 
+		             inner join GPRD01MT P1                  
+		                     on B1.prdCD = P1.prdCD                     
+		             where a1.eventYM between  to_char(add_months(to_date(#eventYM#||'01' ,'YYYYMMDD'), -4),'YYYYMM') and  to_char(add_months(to_date(#eventYM#||'01' ,'YYYYMMDD'), -1),'YYYYMM')     
+		               and a1.empID = #empID#		               
+		             GROUP BY A1.empID )  
+		         UNION ALL
+		        SELECT 'Total' as Summary, 'PLAN' as typeName,    
+		               '1' AS SEQ1,'2' AS SEQ2, A1.empID,
+		               sum(B1.PLANQTY) as Qty,
+		               sum(B1.PAYAMT) as Amt,
+		               SUM(P1.GSV * B1.PLANQTY )AS GSV,
+		               SUM(B1.PAYAMT )AS NG,
+                       getLangDesc('000001','KR','F_CODE','APPRSTATECD',a1.apprStateCD,null) as apprStateCDName,
+			           a1.apprStateCD as apprStateCD
+		          from GPLN01MT a1      
+		         inner join GPLN01DT B1                  
+		                 on a1.eventYM = B1.eventYM                  
+		                and a1.venueCD = B1.venueCD 
+		         inner join GPRD01MT P1                  
+		                 on B1.prdCD = P1.prdCD          
+		         where a1.eventYM =  #eventYM#
+		           and a1.empID   =  #empID#
+		           AND A1.CHGID IS NOT NULL
+		           <isPropertyAvailable property="apprStateCD">
+						<isNotEmpty prepend="and" property="apprStateCD">
+							a1.apprStateCD = #apprStateCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+		         GROUP BY A1.empID   , a1.apprStateCD     
+		       Union all
+		       SELECT Summary,typeName,SEQ1,SEQ2, empID,
+		              round(Qty/3) as Qty , round(Amt/3) as Amt, 
+		              round(GSV/3) AS GSV ,  round(NG/3) AS NG ,
+			          apprStateCDName, apprStateCD 
+		         FROM (
+		            SELECT 'Local Whishky' as Summary, 'Target' as typeName,   
+		                   '2' AS SEQ1,'1' AS SEQ2, a1.empID,
+		                   sum(B1.RESULTQTY) as Qty,
+		                   sum(B1.PAYAMT) as Amt,
+		                   SUM(P1.GSV * B1.RESULTQTY ) AS GSV,
+		                   SUM(B1.PAYAMT ) AS NG,
+                           '0' as apprStateCDName,
+                           '0' as apprStateCD       
+		              from GRLT01MT a1      
+		             inner join GRLT01DT B1                  
+		                     on a1.eventYM = B1.eventYM                  
+		                    and a1.venueCD = B1.venueCD 
+		             inner join GPRD01MT P1                  
+		                     on B1.prdCD = P1.prdCD
+		                    and P1.KINDTPCD3 = '10' 
+		             where a1.eventYM between  to_char(add_months(to_date(#eventYM#||'01' ,'YYYYMMDD'), -4),'YYYYMM') and  to_char(add_months(to_date(#eventYM#||'01' ,'YYYYMMDD'), -1),'YYYYMM')            
+		               and a1.empID = #empID#		               
+		             GROUP BY a1.empID )     
+		        UNION ALL
+		        SELECT 'Local Whishky' as Summary, 'PLAN' as typeName,    
+		               '2' AS SEQ1,'2' AS SEQ2, A1.empID,
+		               sum(B1.PLANQTY) as Qty,
+		               sum(B1.PAYAMT) as Amt,
+		               SUM(P1.GSV * B1.PLANQTY )AS GSV,
+		               SUM(B1.PAYAMT  )AS NG,
+                       getLangDesc('000001','KR','F_CODE','APPRSTATECD',a1.apprStateCD,null) as apprStateCDName,
+			           a1.apprStateCD as apprStateCD
+		          from GPLN01MT a1      
+		         inner join GPLN01DT B1                  
+		                 on a1.eventYM = B1.eventYM                  
+		                and a1.venueCD = B1.venueCD 
+		         inner join GPRD01MT P1                  
+		                 on B1.prdCD = P1.prdCD          
+		                and P1.KINDTPCD3 = '10' 
+		         where a1.eventYM = #eventYM#
+		           and A1.empID = #empID# 
+		           AND A1.CHGID IS NOT NULL
+		           <isPropertyAvailable property="apprStateCD">
+						<isNotEmpty prepend="and" property="apprStateCD">
+							a1.apprStateCD = #apprStateCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+		         GROUP BY A1.empID, a1.apprStateCD
+		         UNION ALL  
+		       SELECT Summary,typeName,SEQ1,SEQ2, empID,
+		              round(Qty/3) as Qty , round(Amt/3) as Amt, 
+		              round(GSV/3) AS GSV ,  round(NG/3) AS NG ,
+			          apprStateCDName, apprStateCD 
+		         FROM (		           
+		            SELECT 'International Whishky' as Summary, 'Target' as typeName,   
+		                   '3' AS SEQ1,'1' AS SEQ2, a1.empID,
+		                   sum(B1.RESULTQTY) as Qty,
+		                   sum(B1.PAYAMT) as Amt,
+		                   NVL(SUM(P1.GSV * B1.RESULTQTY ),0) AS GSV,
+		                   SUM(B1.PAYAMT  ) AS NG,
+                           '0' as apprStateCDName,
+                           '0' as apprStateCD       
+		              from GRLT01MT a1      
+		             inner join GRLT01DT B1                  
+		                     on a1.eventYM = B1.eventYM                  
+		                    and a1.venueCD = B1.venueCD 
+		             inner join GPRD01MT P1                  
+		                     on B1.prdCD = P1.prdCD  
+		                    and P1.KINDTPCD3 = '20' 
+		             where a1.eventYM between  to_char(add_months(to_date(#eventYM#||'01' ,'YYYYMMDD'), -4),'YYYYMM') and  to_char(add_months(to_date(#eventYM#||'01' ,'YYYYMMDD'), -1),'YYYYMM')          
+		               and a1.empID = #empID# 		              
+		             GROUP BY A1.empID   )        
+		         UNION ALL		        
+		        SELECT 'International Whishky' as Summary, 'PLAN' as typeName,    
+		               '3' AS SEQ1,'2' AS SEQ2, A1.empID,
+		               sum(B1.PLANQTY) as Qty,
+		               sum(B1.PAYAMT) as Amt,
+		               NVL(SUM(P1.GSV * B1.PLANQTY ),0) AS GSV,
+		               SUM(B1.PAYAMT  )AS NG,
+                       getLangDesc('000001','KR','F_CODE','APPRSTATECD',a1.apprStateCD,null) as apprStateCDName,
+			           a1.apprStateCD as apprStateCD
+		          from GPLN01MT a1      
+		         inner join GPLN01DT B1                  
+		                 on a1.eventYM = B1.eventYM                  
+		                and a1.venueCD = B1.venueCD 
+		         inner join GPRD01MT P1                  
+		                 on B1.prdCD = P1.prdCD          
+		                 and P1.KINDTPCD3 = '20'
+		         where a1.eventYM = #eventYM#
+		           and a1.empID = #empID# 		           
+		           AND A1.CHGID IS NOT NULL
+		           <isPropertyAvailable property="apprStateCD">
+						<isNotEmpty prepend="and" property="apprStateCD">
+							a1.apprStateCD = #apprStateCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+		         GROUP BY A1.empID , a1.apprStateCD       
+		    ) A2
+		where b2.empID = a2.empID(+)		 
+          and b2.SEQ1  = a2.seq1(+)
+          and b2.SEQ2  = a2.seq2(+)
+		ORDER BY b2.empID,b2.SEQ1,b2.SEQ2   	  
+	</select>	
+	
+	<!-- 반려된 것 데이터 삭제 -->
+	<delete id="PLN0101101D" parameterClass="com.kia.pln.model.GPLN01MT">
+		delete from GPLN03MT
+		 where eventYM = #eventYM#
+		   and venueCD in (  select venuecd from gpln01mt
+				              where eventym     = #eventYM#
+				                and empid       = #empID#
+                          )
+	</delete>
+	
+	<!-- Plan승인요청 -->
+	<insert id="PLN0101101I" parameterClass="com.kia.pln.model.GPLN01MT">
+		insert into GPLN03MT (
+			eventYM	, venueCD	, levelNo	, apprGrpNm	, empID,
+			apprStateCD	, apprDate, regID, regDate
+		)
+		select #eventYM#
+			 , A.venueCD
+			 , lv
+			 , apprGrpNm
+			 , empID
+			 , ( case when lv=1 then '50'
+				      when lv=2 then '20'
+				  end
+			   ) as apprStateCD
+			, (	case when lv=1 then sysdate
+				end
+			   ) as apprDate
+			, #userID#	, sysdate
+		from (	select level as lv,
+				       apprGrpNm,
+				       empID
+			      from GAPP01DT t
+			     where apprTpID = #apprTpID#
+			   connect by prior papprGrpID = apprGrpID and apprTpID = #apprTpID#
+			     start with apprGrpID = ( select apprGrpID from GAPP01DT
+				                           Where empID = #empID#
+					                         and apprTpID = #apprTpID#
+			                            )  
+			            and apprTpID = #apprTpID#
+		     ) b,
+		     (  select venuecd from gpln01mt
+                 where eventym     = #eventYM#
+                   and empid       = #empID#
+                   and apprStateCD = '10' 
+               ) A
+        order by a.venuecd , b.lv
+	</insert>
+	
+	<!-- Plan정보 승인상태 갱신 -->
+	<update id="PLN0101101U" parameterClass="com.kia.pln.model.GPLN01MT">
+		update GPLN01MT
+		   set apprStateCD = #apprStateCD#
+			 , lapprLevelNo = (
+			   select max(lv) as lv
+				from ( select level as lv
+						    , apprGrpNm
+						    , empID
+					     from GAPP01DT t
+					    where apprTpID = #apprTpID#
+					  connect by prior papprGrpID = apprGrpID
+					    start with apprGrpID = (
+								    select apprGrpID from GAPP01DT
+								     Where empID    = #empID#
+									   and apprTpID = #apprTpID#
+					               )
+				     ) 
+			   )
+			, chgID   = #userID#
+			, chgDate = sysdate
+	  where eventYM   = #eventYM#
+	 	and empID     = #empID#
+	</update>
+	
+	<!-- 업소별 저장상태 체크 -->
+	<select id="PLN0101102S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		SELECT COUNT(*) as chngIsNullCnt
+		FROM GPLN01MT
+		WHERE EVENTYM = #eventYM#
+		AND EMPID = #empID#
+		AND CHGID IS NULL
+	</select>
+</sqlMap>

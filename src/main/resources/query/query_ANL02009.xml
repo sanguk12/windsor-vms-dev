@@ -1,0 +1,1457 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="ANL02009">
+
+	<select id="ANL0200901S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		SELECT   T1.DataLv1 
+              ,t1.DataLv1_NM
+              ,t1.DataLv2
+              ,t1.DataLv2_NM          
+              ,t1.DataLv3
+              ,t1.DataLv3_NM
+              ,T1.DispSeq
+              <!--전년 SH Actual 실적 -->
+             , NVL(t2.p_sh_ac_Vol01,0) AS  sh_ac_P01 <!--전년P01볼륨-->
+             , NVL(t2.p_sh_ac_Vol02,0) AS  sh_ac_P02 <!--전년P02볼륨-->
+             , NVL(t2.p_sh_ac_Vol03,0) AS  sh_ac_P03<!--전년P03볼륨-->
+			 , NVL(t2.p_sh_ac_Vol04,0) AS  sh_ac_P04<!--전년P04볼륨-->
+			 , NVL(t2.p_sh_ac_Vol05,0) AS  sh_ac_P05<!--전년P05볼륨-->
+			 , NVL(t2.p_sh_ac_Vol06,0) AS  sh_ac_P06<!--전년P06볼륨-->
+			 , NVL(t2.p_sh_ac_Vol07,0) AS  sh_ac_P07<!--전년P07볼륨-->
+			 , NVL(t2.p_sh_ac_Vol08,0) AS  sh_ac_P08<!--전년P08볼륨-->
+			 , NVL(t2.p_sh_ac_Vol09,0) AS  sh_ac_P09<!--전년P09볼륨-->
+			 , NVL(t2.p_sh_ac_Vol10,0) AS  sh_ac_P10<!--전년P10볼륨-->
+			 , NVL(t2.p_sh_ac_Vol11,0) AS  sh_ac_P11<!--전년P11볼륨-->
+             , NVL(t2.p_sh_ac_Vol12,0) AS  sh_ac_P12 <!--전년P12볼륨 -->
+             <!--당년 SH  Forecast      -->
+             , NVL(t3.n_sh_for_Vol01,0) AS  sh_for_P01 <!--당년P01볼륨-->
+             , NVL(t3.n_sh_for_Vol02,0) AS  sh_for_P02 <!--당년P02볼륨-->
+             , NVL(t3.n_sh_for_Vol03,0) AS  sh_for_P03<!--당년P03볼륨-->
+			 , NVL(t3.n_sh_for_Vol04,0) AS  sh_for_P04<!--당년P04볼륨-->
+			 , NVL(t3.n_sh_for_Vol05,0) AS  sh_for_P05<!--당년P05볼륨-->
+			 , NVL(t3.n_sh_for_Vol06,0) AS  sh_for_P06<!--당년P06볼륨-->
+			 , NVL(t3.n_sh_for_Vol07,0) AS  sh_for_P07<!--당년P07볼륨-->
+			 , NVL(t3.n_sh_for_Vol08,0) AS  sh_for_P08<!--당년P08볼륨-->
+			 , NVL(t3.n_sh_for_Vol09,0) AS  sh_for_P09<!--당년P09볼륨-->
+			 , NVL(t3.n_sh_for_Vol10,0) AS  sh_for_P10<!--당년P10볼륨-->
+			 , NVL(t3.n_sh_for_Vol11,0) AS  sh_for_P11<!--당년P11볼륨-->
+             , NVL(t3.n_sh_for_Vol12,0) AS  sh_for_P12 <!--당년P12볼륨 -->
+             <!--당년  SH  Actual(Outlook)      -->
+             <!-- 당년실적이 있으면 실적으로 없으면 Outlook으로 보여줌-->
+             , CASE WHEN  t2.N_sh_ac_Vol01 IS NULL and NVL(t5.C_N_sh_ac_Vol01,0) >0 THEN 0 WHEN  t2.N_sh_ac_Vol01 IS NULL and NVL(t5.C_N_sh_ac_Vol01,0) =0 THEN NVL(t3.N_sh_out_Vol01,0) ELSE  NVL(t2.N_sh_ac_Vol01,0)  END  AS  sh_out_P01 <!--당년P01볼륨-->	
+             , CASE WHEN  t2.N_sh_ac_Vol02 IS NULL and NVL(t5.C_N_sh_ac_Vol02,0) >0 THEN 0 WHEN  t2.N_sh_ac_Vol02 IS NULL and NVL(t5.C_N_sh_ac_Vol02,0) =0 THEN NVL(t3.N_sh_out_Vol02,0) ELSE  NVL(t2.N_sh_ac_Vol02,0)  END  AS  sh_out_P02 <!--당년P02볼륨-->
+             , CASE WHEN  t2.N_sh_ac_Vol03 IS NULL and NVL(t5.C_N_sh_ac_Vol03,0) >0 THEN 0 WHEN  t2.N_sh_ac_Vol03 IS NULL and NVL(t5.C_N_sh_ac_Vol03,0) =0 THEN NVL(t3.N_sh_out_Vol03,0) ELSE  NVL(t2.N_sh_ac_Vol03,0)  END  AS  sh_out_P03 <!--당년P03볼륨-->
+             , CASE WHEN  t2.N_sh_ac_Vol04 IS NULL and NVL(t5.C_N_sh_ac_Vol04,0) >0 THEN 0 WHEN  t2.N_sh_ac_Vol04 IS NULL and NVL(t5.C_N_sh_ac_Vol04,0) =0 THEN NVL(t3.N_sh_out_Vol04,0) ELSE  NVL(t2.N_sh_ac_Vol04,0)  END  AS  sh_out_P04 <!--당년P04볼륨-->
+             , CASE WHEN  t2.N_sh_ac_Vol05 IS NULL and NVL(t5.C_N_sh_ac_Vol05,0) >0 THEN 0 WHEN  t2.N_sh_ac_Vol05 IS NULL and NVL(t5.C_N_sh_ac_Vol05,0) =0 THEN NVL(t3.N_sh_out_Vol05,0) ELSE  NVL(t2.N_sh_ac_Vol05,0)  END  AS  sh_out_P05 <!--당년P05볼륨-->
+             , CASE WHEN  t2.N_sh_ac_Vol06 IS NULL and NVL(t5.C_N_sh_ac_Vol06,0) >0 THEN 0 WHEN  t2.N_sh_ac_Vol06 IS NULL and NVL(t5.C_N_sh_ac_Vol06,0) =0 THEN NVL(t3.N_sh_out_Vol06,0) ELSE  NVL(t2.N_sh_ac_Vol06,0)  END  AS  sh_out_P06 <!--당년P06볼륨-->
+             , CASE WHEN  t2.N_sh_ac_Vol07 IS NULL and NVL(t5.C_N_sh_ac_Vol07,0) >0 THEN 0 WHEN  t2.N_sh_ac_Vol07 IS NULL and NVL(t5.C_N_sh_ac_Vol07,0) =0 THEN NVL(t3.N_sh_out_Vol07,0) ELSE  NVL(t2.N_sh_ac_Vol07,0)  END  AS  sh_out_P07 <!--당년P07볼륨-->
+             , CASE WHEN  t2.N_sh_ac_Vol08 IS NULL and NVL(t5.C_N_sh_ac_Vol08,0) >0 THEN 0 WHEN  t2.N_sh_ac_Vol08 IS NULL and NVL(t5.C_N_sh_ac_Vol08,0) =0 THEN NVL(t3.N_sh_out_Vol08,0) ELSE  NVL(t2.N_sh_ac_Vol08,0)  END  AS  sh_out_P08 <!--당년P08볼륨-->
+             , CASE WHEN  t2.N_sh_ac_Vol09 IS NULL and NVL(t5.C_N_sh_ac_Vol09,0) >0 THEN 0 WHEN  t2.N_sh_ac_Vol09 IS NULL and NVL(t5.C_N_sh_ac_Vol09,0) =0 THEN NVL(t3.N_sh_out_Vol09,0) ELSE  NVL(t2.N_sh_ac_Vol09,0)  END  AS  sh_out_P09 <!--당년P09볼륨-->
+             , CASE WHEN  t2.N_sh_ac_Vol10 IS NULL and NVL(t5.C_N_sh_ac_Vol10,0) >0 THEN 0 WHEN  t2.N_sh_ac_Vol10 IS NULL and NVL(t5.C_N_sh_ac_Vol10,0) =0 THEN NVL(t3.N_sh_out_Vol10,0) ELSE  NVL(t2.N_sh_ac_Vol10,0)  END  AS  sh_out_P10 <!--당년P10볼륨-->
+             , CASE WHEN  t2.N_sh_ac_Vol11 IS NULL and NVL(t5.C_N_sh_ac_Vol11,0) >0 THEN 0 WHEN  t2.N_sh_ac_Vol11 IS NULL and NVL(t5.C_N_sh_ac_Vol11,0) =0 THEN NVL(t3.N_sh_out_Vol11,0) ELSE  NVL(t2.N_sh_ac_Vol11,0)  END  AS  sh_out_P11 <!--당년P11볼륨-->
+             , CASE WHEN  t2.N_sh_ac_Vol12 IS NULL and NVL(t5.C_N_sh_ac_Vol12,0) >0 THEN 0 WHEN  t2.N_sh_ac_Vol12 IS NULL and NVL(t5.C_N_sh_ac_Vol12,0) =0 THEN NVL(t3.N_sh_out_Vol12,0) ELSE  NVL(t2.N_sh_ac_Vol12,0)  END  AS  sh_out_P12 <!--당년P12볼륨--> 
+            
+             <!--, CASE WHEN  t2.N_sh_ac_Vol01 IS NULL THEN NVL(t3.N_sh_out_Vol01,0) ELSE  NVL(t2.N_sh_ac_Vol01,0)  END  AS  sh_out_P01 당년P01볼륨-->
+             <!--, CASE WHEN  t2.N_sh_ac_Vol02 IS NULL THEN NVL(t3.N_sh_out_Vol02,0) ELSE  NVL(t2.N_sh_ac_Vol02,0)  END  AS  sh_out_P02 당년P02볼륨-->
+             <!--, CASE WHEN  t2.N_sh_ac_Vol03 IS NULL THEN NVL(t3.N_sh_out_Vol03,0) ELSE  NVL(t2.N_sh_ac_Vol03,0)  END  AS  sh_out_P03 당년P03볼륨-->
+			 <!--, CASE WHEN  t2.N_sh_ac_Vol04 IS NULL THEN NVL(t3.N_sh_out_Vol04,0) ELSE  NVL(t2.N_sh_ac_Vol04,0)  END  AS  sh_out_P04 당년P04볼륨-->
+			 <!--, CASE WHEN  t2.N_sh_ac_Vol05 IS NULL THEN NVL(t3.N_sh_out_Vol05,0) ELSE  NVL(t2.N_sh_ac_Vol05,0)  END  AS  sh_out_P05 당년P05볼륨-->
+			 <!--, CASE WHEN  t2.N_sh_ac_Vol06 IS NULL THEN NVL(t3.N_sh_out_Vol06,0) ELSE  NVL(t2.N_sh_ac_Vol06,0)  END  AS  sh_out_P06 당년P06볼륨-->
+			 <!--, CASE WHEN  t2.N_sh_ac_Vol07 IS NULL THEN NVL(t3.N_sh_out_Vol07,0) ELSE  NVL(t2.N_sh_ac_Vol07,0)  END  AS  sh_out_P07 당년P07볼륨-->
+			 <!--, CASE WHEN  t2.N_sh_ac_Vol08 IS NULL THEN NVL(t3.N_sh_out_Vol08,0) ELSE  NVL(t2.N_sh_ac_Vol08,0)  END  AS  sh_out_P08 당년P08볼륨-->
+			 <!--, CASE WHEN  t2.N_sh_ac_Vol09 IS NULL THEN NVL(t3.N_sh_out_Vol09,0) ELSE  NVL(t2.N_sh_ac_Vol09,0)  END  AS  sh_out_P09 당년P09볼륨-->
+			 <!--, CASE WHEN  t2.N_sh_ac_Vol10 IS NULL THEN NVL(t3.N_sh_out_Vol10,0) ELSE  NVL(t2.N_sh_ac_Vol10,0)  END  AS  sh_out_P10 당년P10볼륨-->
+			 <!--, CASE WHEN  t2.N_sh_ac_Vol11 IS NULL THEN NVL(t3.N_sh_out_Vol11,0) ELSE  NVL(t2.N_sh_ac_Vol11,0)  END  AS  sh_out_P11 당년P11볼륨-->
+             <!--, CASE WHEN  t2.N_sh_ac_Vol12 IS NULL THEN NVL(t3.N_sh_out_Vol12,0) ELSE  NVL(t2.N_sh_ac_Vol12,0)  END  AS  sh_out_P12 당년P12볼륨-->
+             <!--당년 SH Targer      -->
+             , NVL(t4.n_sh_tg_Vol01,0) AS  sh_tg_P01<!--당년P01볼륨-->
+             , NVL(t4.n_sh_tg_Vol02,0) AS  sh_tg_P02<!--당년P02볼륨-->
+             , NVL(t4.n_sh_tg_Vol03,0) AS  sh_tg_P03<!--당년P03볼륨-->
+			 , NVL(t4.n_sh_tg_Vol04,0) AS  sh_tg_P04<!--당년P04볼륨-->
+			 , NVL(t4.n_sh_tg_Vol05,0) AS  sh_tg_P05<!--당년P05볼륨-->
+			 , NVL(t4.n_sh_tg_Vol06,0) AS  sh_tg_P06<!--당년P06볼륨-->
+			 , NVL(t4.n_sh_tg_Vol07,0) AS  sh_tg_P07<!--당년P07볼륨-->
+			 , NVL(t4.n_sh_tg_Vol08,0) AS  sh_tg_P08<!--당년P08볼륨-->
+			 , NVL(t4.n_sh_tg_Vol09,0) AS  sh_tg_P09<!--당년P09볼륨-->
+			 , NVL(t4.n_sh_tg_Vol10,0) AS  sh_tg_P10<!--당년P10볼륨-->
+			 , NVL(t4.n_sh_tg_Vol11,0) AS  sh_tg_P11<!--당년P11볼륨-->
+             , NVL(t4.n_sh_tg_Vol12,0) AS  sh_tg_P12 <!--당년P12볼륨 -->
+	  FROM (
+	        <!--1) 주테이블정보 -->
+	        SELECT
+			    t1.DataLv1 as DataLv1,
+			    t1.DataLv1_NM as DataLv1_NM,
+			    t1.DataLv2 as DataLv2,
+			    t1.DataLv2_NM as DataLv2_NM,
+			    t1.DataLv3 as DataLv3,
+			    t1.DataLv3_NM as DataLv3_NM,
+			    t1.SortNo as SortNo,
+			    t2.dispseq as DispSeq
+			FROM
+			    (SELECT   
+			        t1.ProductL2      AS DataLv1, 
+			        t1.ProductL2      AS DataLv1_NM,
+			        t1.ProductL3      AS DataLv2, 
+			        t1.ProductL3      AS DataLv2_NM,          
+			        t1.EsltProduct    AS DataLv3,
+			        t1.EsltProduct    AS DataLv3_NM,  
+			        max(t2.dispSeq) AS    SortNo     
+			    FROM     
+			        eslt_product_mt t1
+			    inner join 
+			        ESLT_PRODUCT_SEQ t2
+			        on t2.EsltProduct = t2.EsltProduct
+			    group by t1.ProductL2, t1.ProductL3, t1.EsltProduct) t1
+			    INNER JOIN 
+			        ESLT_PRODUCT_SEQ_TEMP t2
+			        on t1.datalv2 = t2.datalv2 and t1.datalv3 = t2.EsltProduct 
+		) T1
+		LEFT OUTER JOIN
+		(
+			<!--2) shipMent  실적(actual) 볼륨 구하기 쿼리(전년 +당년)  -->
+			SELECT 
+			            t2.ProductL2 AS DataLv1, 
+			            t2.ProductL3 AS DataLv2, 
+			            t2.EsltProduct AS DataLv3
+			            <!--전년도 P01 ~ P12 볼륨 -->
+			            , SUM( CASE WHEN T1.FY||T1.Period = #Lfy#||'P01' THEN NVL(T1.VOLUME,0) ELSE 0 END )    AS p_sh_ac_Vol01 <!--전년P01볼륨 -->
+			            , SUM( CASE WHEN T1.FY||T1.Period = #Lfy#||'P02' THEN NVL(T1.VOLUME,0) ELSE 0 END )    AS p_sh_ac_Vol02 <!--전년P02볼륨 -->
+			            , SUM( CASE WHEN T1.FY||T1.Period = #Lfy#||'P03' THEN NVL(T1.VOLUME,0) ELSE 0 END )    AS p_sh_ac_Vol03<!--전년P03볼륨 -->
+						, SUM( CASE WHEN T1.FY||T1.Period = #Lfy#||'P04' THEN NVL(T1.VOLUME,0) ELSE 0 END )    AS p_sh_ac_Vol04<!--전년P04볼륨 -->
+						, SUM( CASE WHEN T1.FY||T1.Period = #Lfy#||'P05' THEN NVL(T1.VOLUME,0) ELSE 0 END )    AS p_sh_ac_Vol05<!--전년P05볼륨 -->
+						, SUM( CASE WHEN T1.FY||T1.Period = #Lfy#||'P06' THEN NVL(T1.VOLUME,0) ELSE 0 END )    AS p_sh_ac_Vol06<!--전년P06볼륨 -->
+						, SUM( CASE WHEN T1.FY||T1.Period = #Lfy#||'P07' THEN NVL(T1.VOLUME,0) ELSE 0 END )    AS p_sh_ac_Vol07<!--전년P07볼륨 -->
+						, SUM( CASE WHEN T1.FY||T1.Period = #Lfy#||'P08' THEN NVL(T1.VOLUME,0) ELSE 0 END )    AS p_sh_ac_Vol08<!--전년P08볼륨 -->
+						, SUM( CASE WHEN T1.FY||T1.Period = #Lfy#||'P09' THEN NVL(T1.VOLUME,0) ELSE 0 END )    AS p_sh_ac_Vol09<!--전년P09볼륨 -->
+						, SUM( CASE WHEN T1.FY||T1.Period = #Lfy#||'P10' THEN NVL(T1.VOLUME,0) ELSE 0 END )    AS p_sh_ac_Vol10<!--전년P10볼륨 -->
+						, SUM( CASE WHEN T1.FY||T1.Period = #Lfy#||'P11' THEN NVL(T1.VOLUME,0) ELSE 0 END )    AS p_sh_ac_Vol11<!--전년P11볼륨 -->
+			            , SUM( CASE WHEN T1.FY||T1.Period = #Lfy#||'P12'  THEN NVL(T1.VOLUME,0) ELSE 0 END )   AS p_sh_ac_Vol12  <!--전년P12볼륨 -->    
+			            <!--당년도 P01 ~ P12볼륨        -->
+			            , SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P01'  THEN NVL(T1.VOLUME,0) END) AS N_sh_ac_Vol01   <!--금년P01볼륨 -->
+			            , SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P02'  THEN NVL(T1.VOLUME,0) END) AS N_sh_ac_Vol02   <!--금년P02볼륨 -->
+			            , SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P03'  THEN NVL(T1.VOLUME,0) END) AS N_sh_ac_Vol03   <!--금년P03볼륨 -->
+			            , SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P04'  THEN NVL(T1.VOLUME,0) END) AS N_sh_ac_Vol04   <!--금년P04볼륨 -->
+			            , SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P05'  THEN NVL(T1.VOLUME,0) END) AS N_sh_ac_Vol05   <!--금년P05볼륨 -->
+			            , SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P06'  THEN NVL(T1.VOLUME,0) END) AS N_sh_ac_Vol06   <!--금년P06볼륨 -->
+			            , SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P07'  THEN NVL(T1.VOLUME,0) END) AS N_sh_ac_Vol07   <!--금년P07볼륨 -->
+			            , SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P08'  THEN NVL(T1.VOLUME,0) END) AS N_sh_ac_Vol08   <!--금년P08볼륨 -->
+			            , SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P09'  THEN NVL(T1.VOLUME,0) END) AS N_sh_ac_Vol09   <!--금년P09볼륨 -->
+			            , SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P10'  THEN NVL(T1.VOLUME,0) END) AS N_sh_ac_Vol10   <!--금년P10볼륨 -->
+			            , SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P11'  THEN NVL(T1.VOLUME,0) END) AS N_sh_ac_Vol11   <!--금년P11볼륨 -->
+			            , SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P12'  THEN NVL(T1.VOLUME,0) END) AS N_sh_ac_Vol12   <!--금년P12볼륨 -->
+			from ESLT_SH_ACT T1 <!--월SH실적|도매장|ESLT-->
+			inner join eslt_product_mt t2 <!--품목속성정보|eslt-->
+			  on t1.ProductL7 = t2.ProductL7
+			inner join ESLT_CUSTOMER_MT t4 <!-- 거래처정보|도매장|ESLT -->
+			  on t1.CustomerCd = t4.CustomerCd
+			inner join ESLT_BRANCH_MT T5    <!-- 지점정보|도매상|ESLT -->
+			  on t4.Branch = T5.Branch
+			where 1=1  
+			    <!-- AND t1.FY = #fy# -->
+				<isPropertyAvailable property="channel">
+					<isNotEmpty property="channel">
+		                 AND  t5.CHANNEL  =  #channel#			<!-- 검색조건 입력시 조건삽입 -->
+	                </isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="region">
+					<isNotEmpty property="region">
+		                 AND  T5.Region  =  #region#			<!-- 검색조건 입력시 조건삽입 -->
+	                </isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="branch">
+					<isNotEmpty property="branch">
+		                 AND  T5.Branch  =  #branch#			<!-- 검색조건 입력시 조건삽입 -->
+	                </isNotEmpty>
+				</isPropertyAvailable>
+			group by t2.ProductL2, t2.ProductL3, t2.EsltProduct
+		) T2
+			ON     T1.DataLv1    = T2.DataLv1
+			AND   T1.DataLv2    = T2.DataLv2
+			AND   T1.DataLv3    = T2.DataLv3
+			LEFT OUTER  JOIN
+		(
+			<!-- 3) shipMent Forecast   및 outlook 데이타 구하기 쿼리(당년)   -->
+			SELECT 
+			           t1.ProductL2  AS DataLv1, 
+			           t1.ProductL3  AS DataLv2, 
+			           t1.EsltProduct AS DataLv3
+			          <!--당년도 P01 ~ P12 Forecast 볼륨 -->     
+			            ,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P01'     THEN NVL(T1.ForVolume,0) ELSE 0 END )      AS N_sh_for_Vol01   <!--금년P01 Forecast 볼륨 --> 
+			            ,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P02'     THEN NVL(T1.ForVolume,0) ELSE 0 END )      AS N_sh_for_Vol02   <!--금년P02 Forecast 볼륨 -->
+			            ,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P03'     THEN NVL(T1.ForVolume,0) ELSE 0 END )      AS N_sh_for_Vol03   <!--금년P03 Forecast 볼륨 -->
+			            ,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P04'     THEN NVL(T1.ForVolume,0) ELSE 0 END )      AS N_sh_for_Vol04   <!--금년P04 Forecast 볼륨 -->
+			            ,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P05'     THEN NVL(T1.ForVolume,0) ELSE 0 END )      AS N_sh_for_Vol05   <!--금년P05 Forecast 볼륨 -->
+			            ,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P06'     THEN NVL(T1.ForVolume,0) ELSE 0 END )      AS N_sh_for_Vol06   <!--금년P06 Forecast 볼륨 -->
+			            ,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P07'     THEN NVL(T1.ForVolume,0) ELSE 0 END )      AS N_sh_for_Vol07   <!--금년P07 Forecast 볼륨 -->
+			            ,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P08'     THEN NVL(T1.ForVolume,0) ELSE 0 END )      AS N_sh_for_Vol08   <!--금년P08 Forecast 볼륨 -->
+			            ,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P09'     THEN NVL(T1.ForVolume,0) ELSE 0 END )      AS N_sh_for_Vol09   <!--금년P09 Forecast 볼륨 -->
+			            ,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P10'      THEN NVL(T1.ForVolume,0) ELSE 0 END )     AS N_sh_for_Vol10   <!--금년P10 Forecast 볼륨 -->
+			            ,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P11'      THEN NVL(T1.ForVolume,0) ELSE 0 END )     AS N_sh_for_Vol11   <!--금년P11 Forecast 볼륨 -->
+			            ,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P12'      THEN NVL(T1.ForVolume,0) ELSE 0 END )     AS N_sh_for_Vol12   <!--금년P12 Forecast 볼륨 -->
+			            <!-- 당년도 P01 ~ P12 outlook 볼륨 -->     
+			            ,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P01'     THEN NVL(T1.OutVolume,0) ELSE 0 END )      AS N_sh_out_Vol01   <!--금년P01 outlook 볼륨 -->
+			            ,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P02'     THEN NVL(T1.OutVolume,0) ELSE 0 END )      AS N_sh_out_Vol02   <!--금년P02 outlook 볼륨 -->
+			            ,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P03'     THEN NVL(T1.OutVolume,0) ELSE 0 END )      AS N_sh_out_Vol03   <!--금년P03 outlook 볼륨 -->
+			            ,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P04'     THEN NVL(T1.OutVolume,0) ELSE 0 END )      AS N_sh_out_Vol04   <!--금년P04 outlook 볼륨 -->
+			            ,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P05'     THEN NVL(T1.OutVolume,0) ELSE 0 END )      AS N_sh_out_Vol05   <!--금년P05 outlook 볼륨 -->
+			            ,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P06'     THEN NVL(T1.OutVolume,0) ELSE 0 END )      AS N_sh_out_Vol06   <!--금년P06 outlook 볼륨 -->
+			            ,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P07'     THEN NVL(T1.OutVolume,0) ELSE 0 END )      AS N_sh_out_Vol07   <!--금년P07 outlook 볼륨 -->
+			            ,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P08'     THEN NVL(T1.OutVolume,0) ELSE 0 END )      AS N_sh_out_Vol08   <!--금년P08 outlook 볼륨 -->
+			            ,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P09'     THEN NVL(T1.OutVolume,0) ELSE 0 END )      AS N_sh_out_Vol09   <!--금년P09 outlook 볼륨 -->
+			            ,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P10'      THEN NVL(T1.OutVolume,0) ELSE 0 END )     AS N_sh_out_Vol10   <!--금년P10 outlook 볼륨 -->
+			            ,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P11'      THEN NVL(T1.OutVolume,0) ELSE 0 END )     AS N_sh_out_Vol11   <!--금년P11 outlook 볼륨 -->
+			            ,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P12'      THEN NVL(T1.OutVolume,0) ELSE 0 END )     AS N_sh_out_Vol12   <!--금년P12 outlook 볼륨 -->
+			from ESLT_SH_FC  T1 <!--월SH예측|지점|ESLT-->
+			inner join ESLT_BRANCH_MT T5    <!-- 지점정보|도매상|ESLT-->
+			  on t1.Branch = T5.Branch
+			where  
+			    t1.FY = #fy#
+				<isPropertyAvailable property="channel">
+					<isNotEmpty property="channel">
+		                 AND  t5.CHANNEL  =  #channel#			<!-- 검색조건 입력시 조건삽입 -->
+	                </isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="region">
+					<isNotEmpty property="region">
+		                 AND  T5.Region  =  #region#			<!-- 검색조건 입력시 조건삽입 -->
+	                </isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="branch">
+					<isNotEmpty property="branch">
+		                 AND  T5.Branch  =  #branch#			<!-- 검색조건 입력시 조건삽입 -->
+	                </isNotEmpty>
+				</isPropertyAvailable>
+			group by t1.ProductL2, t1.ProductL3, t1.EsltProduct
+		) T3
+			ON     T1.DataLv1    = T3.DataLv1
+			AND   T1.DataLv2    = T3.DataLv2
+			AND   T1.DataLv3    = T3.DataLv3
+			LEFT OUTER JOIN
+		(
+			<!--4) shipMent Target 데이타 구하기 쿼리(당년)  -->
+			SELECT 
+						t2.ProductL2   AS  DataLv1
+                		,t2.ProductL3   AS DataLv2
+                		,t2.EsltProduct AS DataLv3
+			           <!--당년도 P01 ~ P12 Target 볼륨-->     
+			            ,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P01'     THEN NVL(T1.Volume,0) ELSE 0 END )      AS N_sh_tg_Vol01   <!--금년P01 Target 볼륨 -->
+			            ,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P02'     THEN NVL(T1.Volume,0) ELSE 0 END )      AS N_sh_tg_Vol02   <!--금년P02 Target 볼륨 -->
+			            ,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P03'     THEN NVL(T1.Volume,0) ELSE 0 END )      AS N_sh_tg_Vol03   <!--금년P03 Target 볼륨 -->
+			            ,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P04'     THEN NVL(T1.Volume,0) ELSE 0 END )      AS N_sh_tg_Vol04   <!--금년P04 Target 볼륨 -->
+			            ,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P05'     THEN NVL(T1.Volume,0) ELSE 0 END )      AS N_sh_tg_Vol05   <!--금년P05 Target 볼륨 -->
+			            ,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P06'     THEN NVL(T1.Volume,0) ELSE 0 END )      AS N_sh_tg_Vol06   <!--금년P06 Target 볼륨 -->
+			            ,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P07'     THEN NVL(T1.Volume,0) ELSE 0 END )      AS N_sh_tg_Vol07   <!--금년P07 Target 볼륨 -->
+			            ,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P08'     THEN NVL(T1.Volume,0) ELSE 0 END )      AS N_sh_tg_Vol08   <!--금년P08 Target 볼륨 -->
+			            ,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P09'     THEN NVL(T1.Volume,0) ELSE 0 END )      AS N_sh_tg_Vol09   <!--금년P09 Target 볼륨 -->
+			            ,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P10'     THEN NVL(T1.Volume,0) ELSE 0 END )      AS N_sh_tg_Vol10   <!--금년P10 Target 볼륨 -->
+			            ,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P11'     THEN NVL(T1.Volume,0) ELSE 0 END )      AS N_sh_tg_Vol11   <!--금년P11 Target 볼륨 -->
+			            ,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P12'     THEN NVL(T1.Volume,0) ELSE 0 END )     AS N_sh_tg_Vol12   <!--금년P12 Target 볼륨 -->
+			from ESLT_SH_TG  T1 <!--월SH목표|지점|ESLT-->
+			    inner join eslt_product_mt t2<!--품목속성정보|eslt-->
+			      on t1.ProductL7 = t2.ProductL7
+			inner join ESLT_BRANCH_MT T5    <!-- 지점정보|도매상|ESLT-->
+			  on t1.Branch = T5.Branch
+			where  
+			    t1.FY = #fy#
+				<isPropertyAvailable property="channel">
+					<isNotEmpty property="channel">
+		                 AND  t5.CHANNEL  =  #channel#			<!-- 검색조건 입력시 조건삽입 -->
+	                </isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="region">
+					<isNotEmpty property="region">
+		                 AND  T5.Region  =  #region#			<!-- 검색조건 입력시 조건삽입 -->
+	                </isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="branch">
+					<isNotEmpty property="branch">
+		                 AND  T5.Branch  =  #branch#			<!-- 검색조건 입력시 조건삽입 -->
+	                </isNotEmpty>
+				</isPropertyAvailable>
+			group by t2.ProductL2, t2.ProductL3, t2.EsltProduct
+		) T4
+		ON     T1.DataLv1    = T4.DataLv1
+		AND   T1.DataLv2    = T4.DataLv2
+		AND   T1.DataLv3    = T4.DataLv3
+		LEFT OUTER JOIN
+		(
+			<!--2) shipMent  실적(actual) 볼륨 구하기 쿼리(전년 +당년)  -->
+			SELECT 
+			            t2.ProductL2 AS DataLv1, 
+			            t2.ProductL3 AS DataLv2 
+			            <!--당년도 P01 ~ P12볼륨        -->
+			            , COUNT( CASE WHEN T1.FY||T1.Period = #fy#||'P01'  THEN NVL(T1.VOLUME,0) END) AS C_N_sh_ac_Vol01   <!--금년P01볼륨 -->
+			            , COUNT( CASE WHEN T1.FY||T1.Period = #fy#||'P02'  THEN NVL(T1.VOLUME,0) END) AS C_N_sh_ac_Vol02   <!--금년P02볼륨 -->
+			            , COUNT( CASE WHEN T1.FY||T1.Period = #fy#||'P03'  THEN NVL(T1.VOLUME,0) END) AS C_N_sh_ac_Vol03   <!--금년P03볼륨 -->
+			            , COUNT( CASE WHEN T1.FY||T1.Period = #fy#||'P04'  THEN NVL(T1.VOLUME,0) END) AS C_N_sh_ac_Vol04   <!--금년P04볼륨 -->
+			            , COUNT( CASE WHEN T1.FY||T1.Period = #fy#||'P05'  THEN NVL(T1.VOLUME,0) END) AS C_N_sh_ac_Vol05   <!--금년P05볼륨 -->
+			            , COUNT( CASE WHEN T1.FY||T1.Period = #fy#||'P06'  THEN NVL(T1.VOLUME,0) END) AS C_N_sh_ac_Vol06   <!--금년P06볼륨 -->
+			            , COUNT( CASE WHEN T1.FY||T1.Period = #fy#||'P07'  THEN NVL(T1.VOLUME,0) END) AS C_N_sh_ac_Vol07   <!--금년P07볼륨 -->
+			            , COUNT( CASE WHEN T1.FY||T1.Period = #fy#||'P08'  THEN NVL(T1.VOLUME,0) END) AS C_N_sh_ac_Vol08   <!--금년P08볼륨 -->
+			            , COUNT( CASE WHEN T1.FY||T1.Period = #fy#||'P09'  THEN NVL(T1.VOLUME,0) END) AS C_N_sh_ac_Vol09   <!--금년P09볼륨 -->
+			            , COUNT( CASE WHEN T1.FY||T1.Period = #fy#||'P10'  THEN NVL(T1.VOLUME,0) END) AS C_N_sh_ac_Vol10   <!--금년P10볼륨 -->
+			            , COUNT( CASE WHEN T1.FY||T1.Period = #fy#||'P11'  THEN NVL(T1.VOLUME,0) END) AS C_N_sh_ac_Vol11   <!--금년P11볼륨 -->
+			            , COUNT( CASE WHEN T1.FY||T1.Period = #fy#||'P12'  THEN NVL(T1.VOLUME,0) END) AS C_N_sh_ac_Vol12   <!--금년P12볼륨 -->
+			from ESLT_SH_ACT T1 <!--월SH실적|도매장|ESLT-->
+			inner join eslt_product_mt t2 <!--품목속성정보|eslt-->
+			  on t1.ProductL7 = t2.ProductL7
+			inner join ESLT_CUSTOMER_MT t4 <!-- 거래처정보|도매장|ESLT -->
+			  on t1.CustomerCd = t4.CustomerCd
+			inner join ESLT_BRANCH_MT T5    <!-- 지점정보|도매상|ESLT -->
+			  on t4.Branch = T5.Branch
+			where 1=1  
+			    <!-- AND t1.FY = #fy# -->
+				<isPropertyAvailable property="channel">
+					<isNotEmpty property="channel">
+		                 AND  t5.CHANNEL  =  #channel#			<!-- 검색조건 입력시 조건삽입 -->
+	                </isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="region">
+					<isNotEmpty property="region">
+		                 AND  T5.Region  =  #region#			<!-- 검색조건 입력시 조건삽입 -->
+	                </isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="branch">
+					<isNotEmpty property="branch">
+		                 AND  T5.Branch  =  #branch#			<!-- 검색조건 입력시 조건삽입 -->
+	                </isNotEmpty>
+				</isPropertyAvailable>
+			group by t2.ProductL2, t2.ProductL3
+		) T5
+			ON     T1.DataLv1    = T5.DataLv1
+			AND   T1.DataLv2    = T5.DataLv2
+		Order By   t1.DataLv1 DESC , t1.DispSeq
+	</select>
+	
+	<select id="ANL0200902S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		SELECT   T1.DataLv1 
+              , t1.DataLv1_NM
+              , t1.DataLv2
+              , t1.DataLv2_NM          
+              <!-- 전년 DC Actual 실적 -->
+             , NVL(t2.p_dc_ac_Vol01,0) AS  dc_ac_P01 <!--전년P01볼륨-->
+			, NVL(t2.p_dc_ac_Vol02,0) AS  dc_ac_P02 <!--전년P02볼륨-->
+			, NVL(t2.p_dc_ac_Vol03,0) AS  dc_ac_P03 <!--전년P03볼륨-->
+			, NVL(t2.p_dc_ac_Vol04,0) AS  dc_ac_P04 <!--전년P04볼륨-->
+			, NVL(t2.p_dc_ac_Vol05,0) AS  dc_ac_P05 <!--전년P05볼륨-->
+			, NVL(t2.p_dc_ac_Vol06,0) AS  dc_ac_P06 <!--전년P06볼륨-->
+			, NVL(t2.p_dc_ac_Vol07,0) AS  dc_ac_P07 <!--전년P07볼륨-->
+			, NVL(t2.p_dc_ac_Vol08,0) AS  dc_ac_P08 <!--전년P08볼륨-->
+			, NVL(t2.p_dc_ac_Vol09,0) AS  dc_ac_P09 <!--전년P09볼륨-->
+			, NVL(t2.p_dc_ac_Vol10,0) AS  dc_ac_P10 <!--전년P10볼륨-->
+			, NVL(t2.p_dc_ac_Vol11,0) AS  dc_ac_P11 <!--전년P11볼륨-->
+			, NVL(t2.p_dc_ac_Vol12,0) AS  dc_ac_P12 <!--전년P12볼륨--> 
+             <!-- 당년 DC  Forecast -->
+             , NVL(t4.n_dc_for_Vol01,0) AS  dc_for_P01 <!--당년P01볼륨-->
+			, NVL(t4.n_dc_for_Vol02,0) AS  dc_for_P02 <!--당년P02볼륨-->
+			, NVL(t4.n_dc_for_Vol03,0) AS  dc_for_P03 <!--당년P03볼륨-->
+			, NVL(t4.n_dc_for_Vol04,0) AS  dc_for_P04 <!--당년P04볼륨-->
+			, NVL(t4.n_dc_for_Vol05,0) AS  dc_for_P05 <!--당년P05볼륨-->
+			, NVL(t4.n_dc_for_Vol06,0) AS  dc_for_P06 <!--당년P06볼륨-->
+			, NVL(t4.n_dc_for_Vol07,0) AS  dc_for_P07 <!--당년P07볼륨-->
+			, NVL(t4.n_dc_for_Vol08,0) AS  dc_for_P08 <!--당년P08볼륨-->
+			, NVL(t4.n_dc_for_Vol09,0) AS  dc_for_P09 <!--당년P09볼륨-->
+			, NVL(t4.n_dc_for_Vol10,0) AS  dc_for_P10 <!--당년P10볼륨-->
+			, NVL(t4.n_dc_for_Vol11,0) AS  dc_for_P11 <!--당년P11볼륨-->
+			, NVL(t4.n_dc_for_Vol12,0) AS  dc_for_P12 <!--당년P12볼륨--> 
+             <!-- 당년  SH  Actual(Outlook)  -->
+             <!-- DC인 경우 당년실적 , 당년예상실적, 당년OUT 순차조회하여 있는데이타 세팅-->
+             <!-- GSV인 경우 DC레벨에서 조회했던 데이타 그룹항목으로 데이타 세팅  -->
+             
+             ,CASE WHEN T1.DataLv1 = 'DC' THEN             
+                   CASE WHEN  t2.N_dc_ac_Vol01 IS NULL and  NVL(t6.C_N_dc_ac_Vol01,0) =0 THEN 
+                   		CASE WHEN  t3.N_dc_fcac_Vol01 IS NULL and NVL(t7.C_N_dc_fcac_Vol01,0) =0 THEN  NVL(t4.N_dc_out_Vol01,0)
+                   		     WHEN  t3.N_dc_fcac_Vol01 IS NULL and NVL(t7.C_N_dc_fcac_Vol01,0) >0 THEN  0 
+                   			ELSE NVL(t3.N_dc_fcac_Vol01,0)  END
+                   		WHEN	t2.N_dc_ac_Vol01 IS NULL and  NVL(t6.C_N_dc_ac_Vol01,0) >0 THEN 0		
+                   ELSE  NVL(t2.N_dc_ac_Vol01,0) END
+             ELSE <!-- GSV  -->
+                 CASE WHEN  lag(t2.N_dc_ac_Vol01, 1, 0) over(ORDER BY T1.DataSort)  IS NULL THEN   <!--  DC쪽 AC실적이 없으면 SELECT문의  2번째 전  ROW값 가지고 오기  --> 
+                      CASE WHEN  lag(t3.N_dc_fcac_Vol01, 2, 0) over(ORDER BY T1.DataSort)  IS NULL  THEN NVL(t4.N_dc_out_Vol01,0)
+                      ELSE NVL(t3.N_dc_fcac_Vol01,0)  END
+                 ELSE  NVL(t2.N_dc_ac_Vol01,0) END          
+              END   AS dc_out_P01<!-- 당년P01볼륨 -->
+             ,CASE WHEN T1.DataLv1 = 'DC' THEN
+                   CASE WHEN  t2.N_dc_ac_Vol02 IS NULL  and  NVL(t6.C_N_dc_ac_Vol02,0) =0 THEN 
+                         CASE WHEN  t3.N_dc_fcac_Vol02 IS NULL and NVL(t7.C_N_dc_fcac_Vol02,0) =0 THEN  NVL(t4.N_dc_out_Vol02,0) 
+                              WHEN  t3.N_dc_fcac_Vol02 IS NULL and NVL(t7.C_N_dc_fcac_Vol02,0) >0 THEN  0
+                         ELSE NVL(t3.N_dc_fcac_Vol02,0)  END
+                        WHEN  t2.N_dc_ac_Vol02 IS NULL  and  NVL(t6.C_N_dc_ac_Vol02,0) >0 THEN 0 
+                   ELSE  NVL(t2.N_dc_ac_Vol02,0) END
+             ELSE <!--  GSV  -->
+                 CASE WHEN  lag(t2.N_dc_ac_Vol02, 2, 0) over(ORDER BY T1.DataSort)  IS NULL THEN 
+                      CASE WHEN  lag(t3.N_dc_fcac_Vol02, 2, 0) over(ORDER BY T1.DataSort)  IS NULL THEN NVL(t4.N_dc_out_Vol02,0)
+                       ELSE NVL(t3.N_dc_fcac_Vol02,0)  END
+                 ELSE  NVL(t2.N_dc_ac_Vol02,0) END          
+             END   AS dc_out_P02<!-- 당년P02볼륨 --> 
+             ,CASE WHEN T1.DataLv1 = 'DC' THEN
+                   CASE WHEN  t2.N_dc_ac_Vol03 IS NULL and  NVL(t6.C_N_dc_ac_Vol03,0) =0 THEN 
+                         CASE WHEN  t3.N_dc_fcac_Vol03 IS NULL and NVL(t7.C_N_dc_fcac_Vol03,0) =0 THEN  NVL(t4.N_dc_out_Vol03,0) 
+                              WHEN  t3.N_dc_fcac_Vol03 IS NULL and NVL(t7.C_N_dc_fcac_Vol03,0) >0 THEN  0
+                         ELSE NVL(t3.N_dc_fcac_Vol03,0)  END
+                        WHEN  t2.N_dc_ac_Vol03 IS NULL and  NVL(t6.C_N_dc_ac_Vol03,0) >0 THEN 0 
+                   ELSE  NVL(t2.N_dc_ac_Vol03,0) END
+             ELSE <!--  GSV  -->
+                 CASE WHEN  lag(t2.N_dc_ac_Vol03, 2, 0) over(ORDER BY T1.DataSort)  IS NULL THEN 
+                      CASE WHEN  lag(t3.N_dc_fcac_Vol03, 2, 0) over(ORDER BY T1.DataSort)  IS NULL THEN NVL(t4.N_dc_out_Vol03,0)
+                       ELSE NVL(t3.N_dc_fcac_Vol03,0)  END
+                 ELSE  NVL(t2.N_dc_ac_Vol03,0) END          
+             END   AS dc_out_P03<!-- 당년P03볼륨 -->
+             ,CASE WHEN T1.DataLv1 = 'DC' THEN
+                   CASE WHEN  t2.N_dc_ac_Vol04 IS NULL  and  NVL(t6.C_N_dc_ac_Vol04,0) =0 THEN 
+                         CASE WHEN  t3.N_dc_fcac_Vol04 IS NULL  and NVL(t7.C_N_dc_fcac_Vol04,0) =0 THEN  NVL(t4.N_dc_out_Vol04,0) 
+                              WHEN  t3.N_dc_fcac_Vol04 IS NULL  and NVL(t7.C_N_dc_fcac_Vol04,0) >0 THEN 0
+                         ELSE NVL(t3.N_dc_fcac_Vol04,0)  END
+                        WHEN  t2.N_dc_ac_Vol04 IS NULL  and  NVL(t6.C_N_dc_ac_Vol04,0) >0 THEN 0 
+                   ELSE  NVL(t2.N_dc_ac_Vol04,0) END
+             ELSE <!-- GSV  -->
+                 CASE WHEN  lag(t2.N_dc_ac_Vol04, 2, 0) over(ORDER BY T1.DataSort)  IS NULL THEN
+                      CASE WHEN  lag(t3.N_dc_fcac_Vol04, 2, 0) over(ORDER BY T1.DataSort)  IS NULL THEN NVL(t4.N_dc_out_Vol04,0)
+                       ELSE NVL(t3.N_dc_fcac_Vol04,0)  END
+                 ELSE  NVL(t2.N_dc_ac_Vol04,0) END          
+             END   AS dc_out_P04<!-- 당년P04볼륨 -->
+             ,CASE WHEN T1.DataLv1 = 'DC' THEN
+                   CASE WHEN  t2.N_dc_ac_Vol05 IS NULL  and  NVL(t6.C_N_dc_ac_Vol05,0) =0 THEN 
+                         CASE WHEN  t3.N_dc_fcac_Vol05 IS NULL and NVL(t7.C_N_dc_fcac_Vol05,0) =0 THEN  NVL(t4.N_dc_out_Vol05,0) 
+                              WHEN  t3.N_dc_fcac_Vol05 IS NULL and NVL(t7.C_N_dc_fcac_Vol05,0) >0 THEN  0
+                         ELSE NVL(t3.N_dc_fcac_Vol05,0)  END
+                        WHEN  t2.N_dc_ac_Vol05 IS NULL  and  NVL(t6.C_N_dc_ac_Vol05,0) >0 THEN 0 
+                   ELSE  NVL(t2.N_dc_ac_Vol05,0) END
+             ELSE<!--  GSV --> 
+                 CASE WHEN  lag(t2.N_dc_ac_Vol05, 2, 0) over(ORDER BY T1.DataSort)  IS NULL THEN
+                      CASE WHEN  lag(t3.N_dc_fcac_Vol05, 2, 0) over(ORDER BY T1.DataSort)  IS NULL THEN NVL(t4.N_dc_out_Vol05,0)
+                       ELSE NVL(t3.N_dc_fcac_Vol05,0)  END
+                 ELSE  NVL(t2.N_dc_ac_Vol05,0) END          
+             END   AS dc_out_P05<!-- 당년P05볼륨 -->
+             ,CASE WHEN T1.DataLv1 = 'DC' THEN
+                   CASE WHEN  t2.N_dc_ac_Vol06 IS NULL and  NVL(t6.C_N_dc_ac_Vol06,0) =0 THEN 
+                         CASE WHEN  t3.N_dc_fcac_Vol06 IS NULL and NVL(t7.C_N_dc_fcac_Vol06,0) =0 THEN  NVL(t4.N_dc_out_Vol06,0) 
+                              WHEN  t3.N_dc_fcac_Vol06 IS NULL and NVL(t7.C_N_dc_fcac_Vol06,0) >0 THEN  0
+                         ELSE NVL(t3.N_dc_fcac_Vol06,0)  END
+                        WHEN  t2.N_dc_ac_Vol06 IS NULL and  NVL(t6.C_N_dc_ac_Vol06,0) >0 THEN 0 
+                   ELSE  NVL(t2.N_dc_ac_Vol06,0) END
+             ELSE <!-- GSV  -->
+                 CASE WHEN  lag(t2.N_dc_ac_Vol06, 2, 0) over(ORDER BY T1.DataSort)  IS NULL THEN
+                      CASE WHEN  lag(t3.N_dc_fcac_Vol06, 2, 0) over(ORDER BY T1.DataSort)  IS NULL THEN NVL(t4.N_dc_out_Vol06,0)
+                       ELSE NVL(t3.N_dc_fcac_Vol06,0)  END
+                 ELSE  NVL(t2.N_dc_ac_Vol06,0) END          
+             END   AS dc_out_P06<!-- 당년P06볼륨 -->
+             ,CASE WHEN T1.DataLv1 = 'DC' THEN
+                   CASE WHEN  t2.N_dc_ac_Vol07 IS NULL and  NVL(t6.C_N_dc_ac_Vol07,0) =0 THEN 
+                         CASE WHEN  t3.N_dc_fcac_Vol07 IS NULL and NVL(t7.C_N_dc_fcac_Vol07,0) =0 THEN  NVL(t4.N_dc_out_Vol07,0)
+                              WHEN  t3.N_dc_fcac_Vol07 IS NULL and NVL(t7.C_N_dc_fcac_Vol07,0) >0 THEN  0 
+                         ELSE NVL(t3.N_dc_fcac_Vol07,0)  END
+                        WHEN  t2.N_dc_ac_Vol07 IS NULL and  NVL(t6.C_N_dc_ac_Vol07,0) >0 THEN 0  
+                   ELSE  NVL(t2.N_dc_ac_Vol07,0) END
+             ELSE <!-- GSV  -->
+                 CASE WHEN  lag(t2.N_dc_ac_Vol07, 2, 0) over(ORDER BY T1.DataSort)  IS NULL THEN  
+                      CASE WHEN  lag(t3.N_dc_fcac_Vol07, 2, 0) over(ORDER BY T1.DataSort)  IS NULL THEN NVL(t4.N_dc_out_Vol07,0)
+                       ELSE NVL(t3.N_dc_fcac_Vol07,0)  END
+                 ELSE  NVL(t2.N_dc_ac_Vol07,0) END          
+             END   AS dc_out_P07<!--당년P07볼륨 -->
+             ,CASE WHEN T1.DataLv1 = 'DC' THEN
+                   CASE WHEN  t2.N_dc_ac_Vol08 IS NULL and  NVL(t6.C_N_dc_ac_Vol08,0) =0 THEN 
+                         CASE WHEN  t3.N_dc_fcac_Vol08 IS NULL and NVL(t7.C_N_dc_fcac_Vol08,0) =0 THEN  NVL(t4.N_dc_out_Vol08,0) 
+                              WHEN  t3.N_dc_fcac_Vol08 IS NULL and NVL(t7.C_N_dc_fcac_Vol08,0) >0 THEN  0
+                         ELSE NVL(t3.N_dc_fcac_Vol08,0)  END
+                        WHEN  t2.N_dc_ac_Vol08 IS NULL and  NVL(t6.C_N_dc_ac_Vol08,0) >0 THEN 0 
+                   ELSE  NVL(t2.N_dc_ac_Vol08,0) END
+             ELSE <!-- GSV  -->
+                 CASE WHEN  lag(t2.N_dc_ac_Vol08, 2, 0) over(ORDER BY T1.DataSort)  IS NULL THEN
+                      CASE WHEN  lag(t3.N_dc_fcac_Vol08, 2, 0) over(ORDER BY T1.DataSort)  IS NULL THEN NVL(t4.N_dc_out_Vol08,0)
+                       ELSE NVL(t3.N_dc_fcac_Vol08,0)  END
+                 ELSE  NVL(t2.N_dc_ac_Vol08,0) END          
+             END   AS dc_out_P08<!-- 당년P08볼륨 -->
+             ,CASE WHEN T1.DataLv1 = 'DC' THEN
+                   CASE WHEN  t2.N_dc_ac_Vol09 IS NULL and  NVL(t6.C_N_dc_ac_Vol09,0) =0 THEN 
+                         CASE WHEN  t3.N_dc_fcac_Vol09 IS NULL and NVL(t7.C_N_dc_fcac_Vol09,0) =0 THEN  NVL(t4.N_dc_out_Vol09,0) 
+                              WHEN  t3.N_dc_fcac_Vol09 IS NULL and NVL(t7.C_N_dc_fcac_Vol09,0) >0 THEN  0
+                         ELSE NVL(t3.N_dc_fcac_Vol09,0)  END
+                        WHEN  t2.N_dc_ac_Vol09 IS NULL and  NVL(t6.C_N_dc_ac_Vol09,0) >0 THEN 0 
+                   ELSE  NVL(t2.N_dc_ac_Vol09,0) END
+             ELSE <!-- GSV  -->
+                 CASE WHEN  lag(t2.N_dc_ac_Vol09, 2, 0) over(ORDER BY T1.DataSort)  IS NULL THEN 
+                      CASE WHEN  lag(t3.N_dc_fcac_Vol09, 2, 0) over(ORDER BY T1.DataSort)  IS NULL THEN NVL(t4.N_dc_out_Vol09,0)
+                       ELSE NVL(t3.N_dc_fcac_Vol09,0)  END
+                 ELSE  NVL(t2.N_dc_ac_Vol09,0) END          
+             END   AS dc_out_P09<!-- 당년P09볼륨 -->
+             ,CASE WHEN T1.DataLv1 = 'DC' THEN
+                   CASE WHEN  t2.N_dc_ac_Vol10 IS NULL and  NVL(t6.C_N_dc_ac_Vol10,0) =0 THEN 
+                         CASE WHEN  t3.N_dc_fcac_Vol10 IS NULL and NVL(t7.C_N_dc_fcac_Vol10,0) =0 THEN  NVL(t4.N_dc_out_Vol10,0)
+                              WHEN  t3.N_dc_fcac_Vol10 IS NULL and NVL(t7.C_N_dc_fcac_Vol10,0) >0 THEN  0 
+                         ELSE NVL(t3.N_dc_fcac_Vol10,0)  END
+                        WHEN  t2.N_dc_ac_Vol10 IS NULL and  NVL(t6.C_N_dc_ac_Vol10,0) >0 THEN 0   
+                   ELSE  NVL(t2.N_dc_ac_Vol10,0) END
+             ELSE <!-- GSV  -->
+                 CASE WHEN  lag(t2.N_dc_ac_Vol10, 2, 0) over(ORDER BY T1.DataSort)  IS NULL THEN
+                      CASE WHEN  lag(t3.N_dc_fcac_Vol10, 2, 0) over(ORDER BY T1.DataSort)  IS NULL THEN NVL(t4.N_dc_out_Vol10,0)
+                       ELSE NVL(t3.N_dc_fcac_Vol10,0)  END
+                 ELSE  NVL(t2.N_dc_ac_Vol10,0) END          
+             END   AS dc_out_P10<!-- 당년P10볼륨 -->
+             ,CASE WHEN T1.DataLv1 = 'DC' THEN
+                   CASE WHEN  t2.N_dc_ac_Vol11 IS NULL and  NVL(t6.C_N_dc_ac_Vol11,0) =0 THEN 
+                         CASE WHEN  t3.N_dc_fcac_Vol11 IS NULL and NVL(t7.C_N_dc_fcac_Vol11,0) =0 THEN  NVL(t4.N_dc_out_Vol11,0)
+                              WHEN  t3.N_dc_fcac_Vol11 IS NULL and NVL(t7.C_N_dc_fcac_Vol11,0) >0 THEN  0 
+                         ELSE NVL(t3.N_dc_fcac_Vol11,0)  END
+                        WHEN  t2.N_dc_ac_Vol11 IS NULL and  NVL(t6.C_N_dc_ac_Vol11,0) >0 THEN 0 
+                   ELSE  NVL(t2.N_dc_ac_Vol11,0) END
+             ELSE <!-- GSV  -->
+                 CASE WHEN  lag(t2.N_dc_ac_Vol11, 2, 0) over(ORDER BY T1.DataSort)  IS NULL THEN 
+                      CASE WHEN  lag(t3.N_dc_fcac_Vol11, 2, 0) over(ORDER BY T1.DataSort)  IS NULL THEN NVL(t4.N_dc_out_Vol11,0)
+                       ELSE NVL(t3.N_dc_fcac_Vol11,0)  END
+                 ELSE  NVL(t2.N_dc_ac_Vol11,0) END          
+             END   AS dc_out_P11<!-- 당년P11볼륨 -->
+             ,CASE WHEN T1.DataLv1 = 'DC' THEN
+                   CASE WHEN  t2.N_dc_ac_Vol12 IS NULL and  NVL(t6.C_N_dc_ac_Vol12,0) =0 THEN 
+                         CASE WHEN  t3.N_dc_fcac_Vol12 IS NULL and NVL(t7.C_N_dc_fcac_Vol12,0) =0 THEN  NVL(t4.N_dc_out_Vol12,0) 
+                              WHEN  t3.N_dc_fcac_Vol12 IS NULL and NVL(t7.C_N_dc_fcac_Vol12,0) >0 THEN  0
+                         ELSE NVL(t3.N_dc_fcac_Vol12,0)  END
+                        WHEN  t2.N_dc_ac_Vol12 IS NULL and  NVL(t6.C_N_dc_ac_Vol12,0) >0 THEN 0  
+                   ELSE  NVL(t2.N_dc_ac_Vol12,0) END
+             ELSE <!-- GSV  -->
+                 CASE WHEN  lag(t2.N_dc_ac_Vol12, 2, 0) over(ORDER BY T1.DataSort)  IS NULL THEN
+                      CASE WHEN  lag(t3.N_dc_fcac_Vol12, 2, 0) over(ORDER BY T1.DataSort)  IS NULL THEN NVL(t4.N_dc_out_Vol12,0)
+                       ELSE NVL(t3.N_dc_fcac_Vol12,0)  END
+                 ELSE  NVL(t2.N_dc_ac_Vol12,0) END          
+             END   AS dc_out_P12<!-- 당년P12볼륨 -->
+            <!--  당년 cd Target  -->
+             , NVL(t5.n_dc_tg_Vol01,0) AS  dc_tg_p01 <!--당년P01볼륨-->
+			, NVL(t5.n_dc_tg_Vol02,0) AS  dc_tg_p02 <!--당년P02볼륨-->
+			, NVL(t5.n_dc_tg_Vol03,0) AS  dc_tg_p03 <!--당년P03볼륨-->
+			, NVL(t5.n_dc_tg_Vol04,0) AS  dc_tg_p04 <!--당년P04볼륨-->
+			, NVL(t5.n_dc_tg_Vol05,0) AS  dc_tg_p05 <!--당년P05볼륨-->
+			, NVL(t5.n_dc_tg_Vol06,0) AS  dc_tg_p06 <!--당년P06볼륨-->
+			, NVL(t5.n_dc_tg_Vol07,0) AS  dc_tg_p07 <!--당년P07볼륨-->
+			, NVL(t5.n_dc_tg_Vol08,0) AS  dc_tg_p08 <!--당년P08볼륨-->
+			, NVL(t5.n_dc_tg_Vol09,0) AS  dc_tg_p09 <!--당년P09볼륨-->
+			, NVL(t5.n_dc_tg_Vol10,0) AS  dc_tg_p10 <!--당년P10볼륨-->
+			, NVL(t5.n_dc_tg_Vol11,0) AS  dc_tg_p11 <!--당년P11볼륨-->
+			, NVL(t5.n_dc_tg_Vol12,0) AS  dc_tg_p12 <!--당년P12볼륨-->  
+		FROM (
+		        <!-- 1) 주테이블정보 --> 
+		        SELECT   rownum as DataSort ,
+		                      T1.DataLv1            AS DataLv1 , <!-- DC , GSV -->
+		                      T1.DataLv1_NM      AS DataLv1_NM,    
+		                      T2.ProductL2             as  DataLv2,
+		                      T2.ProductL2             as  DataLv2_NM
+		        FROM  (SELECT   'DC' AS DataLv1 
+		                        , 'W.S DC Spending' AS DataLv1_NM
+		                      FROM DUAL    
+		                    UNION ALL
+		                    SELECT 'GSV' 
+		                                ,'Total GSV' 
+		                      FROM DUAL                
+		                   ) T1
+		                   INNER join
+		                   (SELECT ProductL2 
+		                      FROM   eslt_product_mt t2<!--품목속성정보|eslt -->
+		                    GROUP BY T2.ProductL2  <!-- WHISK / NON WHISKY -->
+		                  ) T2  
+		               ON 1=1
+		) T1
+		LEFT OUTER JOIN
+		(
+		        <!--2) DC  실적(actual) 볼륨 구하기 쿼리(전년 +당년)  --> 
+		                    SELECT 'DC' as  DataLv1  <!-- W.S DC Spending 실적  -->
+		                                ,t1.ProductL2  AS DataLv2
+		                                <!-- 전년도 P01 ~ P12 볼륨 -->
+		                                , SUM( CASE WHEN T1.FY||T1.Period = #Lfy#||'P01'  THEN NVL(T1.VOLUME,0) ELSE null END )    AS p_dc_ac_Vol01  <!--전년P01볼륨 -->
+										, SUM( CASE WHEN T1.FY||T1.Period = #Lfy#||'P02'  THEN NVL(T1.VOLUME,0) ELSE null END )    AS p_dc_ac_Vol02  <!--전년P02볼륨 -->
+										, SUM( CASE WHEN T1.FY||T1.Period = #Lfy#||'P03'  THEN NVL(T1.VOLUME,0) ELSE null END )    AS p_dc_ac_Vol03  <!--전년P02볼륨 -->
+										, SUM( CASE WHEN T1.FY||T1.Period = #Lfy#||'P04'  THEN NVL(T1.VOLUME,0) ELSE null END )    AS p_dc_ac_Vol04  <!--전년P02볼륨 -->
+										, SUM( CASE WHEN T1.FY||T1.Period = #Lfy#||'P05'  THEN NVL(T1.VOLUME,0) ELSE null END )    AS p_dc_ac_Vol05  <!--전년P02볼륨 -->
+										, SUM( CASE WHEN T1.FY||T1.Period = #Lfy#||'P06'  THEN NVL(T1.VOLUME,0) ELSE null END )    AS p_dc_ac_Vol06  <!--전년P02볼륨 -->
+										, SUM( CASE WHEN T1.FY||T1.Period = #Lfy#||'P07'  THEN NVL(T1.VOLUME,0) ELSE null END )    AS p_dc_ac_Vol07  <!--전년P02볼륨 -->
+										, SUM( CASE WHEN T1.FY||T1.Period = #Lfy#||'P08'  THEN NVL(T1.VOLUME,0) ELSE null END )    AS p_dc_ac_Vol08  <!--전년P02볼륨 -->
+										, SUM( CASE WHEN T1.FY||T1.Period = #Lfy#||'P09'  THEN NVL(T1.VOLUME,0) ELSE null END )    AS p_dc_ac_Vol09  <!--전년P02볼륨 -->
+										, SUM( CASE WHEN T1.FY||T1.Period = #Lfy#||'P10'  THEN NVL(T1.VOLUME,0) ELSE null END )    AS p_dc_ac_Vol10  <!--전년P02볼륨 -->
+										, SUM( CASE WHEN T1.FY||T1.Period = #Lfy#||'P11'  THEN NVL(T1.VOLUME,0) ELSE null END )    AS p_dc_ac_Vol11  <!--전년P02볼륨 -->
+										, SUM( CASE WHEN T1.FY||T1.Period = #Lfy#||'P12'  THEN NVL(T1.VOLUME,0) ELSE null END )    AS p_dc_ac_Vol12  <!--전년P12볼륨 -->   
+										 <!-- 금년도 P01 ~ P12 볼륨 -->        
+										, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P01'  THEN NVL(T1.VOLUME,0) ELSE null END ) / 1000      AS N_dc_ac_Vol01   <!--금년P01볼륨-->
+										, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P02'  THEN NVL(T1.VOLUME,0) ELSE null END ) / 1000     AS N_dc_ac_Vol02   <!--금년P02볼륨-->
+										, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P03'  THEN NVL(T1.VOLUME,0) ELSE null END ) / 1000     AS N_dc_ac_Vol03   <!--금년P03볼륨-->
+										, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P04'  THEN NVL(T1.VOLUME,0) ELSE null END ) / 1000     AS N_dc_ac_Vol04   <!--금년P04볼륨-->
+										, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P05'  THEN NVL(T1.VOLUME,0) ELSE null END ) / 1000     AS N_dc_ac_Vol05   <!--금년P05볼륨-->
+										, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P06'  THEN NVL(T1.VOLUME,0) ELSE null END ) / 1000     AS N_dc_ac_Vol06   <!--금년P06볼륨-->
+										, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P07'  THEN NVL(T1.VOLUME,0) ELSE null END ) / 1000     AS N_dc_ac_Vol07   <!--금년P07볼륨-->
+										, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P08'  THEN NVL(T1.VOLUME,0) ELSE null END ) / 1000    AS N_dc_ac_Vol08   <!--금년P08볼륨-->
+										, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P09'  THEN NVL(T1.VOLUME,0) ELSE null END ) / 1000     AS N_dc_ac_Vol09   <!--금년P09볼륨-->
+										, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P10'  THEN NVL(T1.VOLUME,0) ELSE null END ) / 1000     AS N_dc_ac_Vol10   <!--금년P10볼륨-->
+										, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P11'  THEN NVL(T1.VOLUME,0) ELSE null END ) / 1000     AS N_dc_ac_Vol11   <!--금년P11볼륨-->
+										, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P12'  THEN NVL(T1.VOLUME,0) ELSE null END ) / 1000     AS N_dc_ac_Vol12   <!--금년P12볼륨-->             
+		                    from eslt_DC_act T1 <!-- 월SH실적|도매장|ESLT -->
+		                    inner join ESLT_CUSTOMER_MT t4 <!-- 거래처정보|도매장|ESLT -->
+		                      on t1.CustomerCd = t4.CustomerCd
+		                    inner join ESLT_BRANCH_MT T5    <!-- 지점정보|도매상|ESLT -->
+		                      on t4.Branch = T5.Branch
+		                   where t1.FY  BETWEEN  #Lfy#  AND #fy#
+								<isPropertyAvailable property="channel">
+									<isNotEmpty property="channel">
+						                 AND  t5.CHANNEL  =  #channel#			<!-- 검색조건 입력시 조건삽입 -->
+					                </isNotEmpty>
+								</isPropertyAvailable>
+								<isPropertyAvailable property="region">
+									<isNotEmpty property="region">
+						                 AND  T5.Region  =  #region#			<!-- 검색조건 입력시 조건삽입 -->
+					                </isNotEmpty>
+								</isPropertyAvailable>
+								<isPropertyAvailable property="branch">
+									<isNotEmpty property="branch">
+						                 AND  T5.Branch  =  #branch#			<!-- 검색조건 입력시 조건삽입 -->
+					                </isNotEmpty>
+								</isPropertyAvailable>
+		                    group by t1.ProductL2 
+		                    UNION ALL
+		                    SELECT 
+		                    			'GSV' as  DataLv1  <!-- Total GSV 실적  ( Shipment Amount 실적의미) --> 
+		                                , t2.ProductL2 as  DataLv2
+		                                <!-- 전년도 P01 ~ P12 볼륨 -->
+		                                , SUM( CASE WHEN T1.FY||T1.Period = #Lfy#||'P01'  THEN NVL(T1.AMOUNT,0) ELSE null END )    AS p_dc_ac_Vol01  <!--전년P01볼륨 -->
+										, SUM( CASE WHEN T1.FY||T1.Period = #Lfy#||'P02'  THEN NVL(T1.AMOUNT,0) ELSE null END )    AS p_dh_ac_Vol02  <!--전년P02볼륨 -->
+										, SUM( CASE WHEN T1.FY||T1.Period = #Lfy#||'P03'  THEN NVL(T1.AMOUNT,0) ELSE null END )    AS p_dh_ac_Vol03  <!--전년P03볼륨 -->
+										, SUM( CASE WHEN T1.FY||T1.Period = #Lfy#||'P04'  THEN NVL(T1.AMOUNT,0) ELSE null END )    AS p_dh_ac_Vol04  <!--전년P04볼륨 -->
+										, SUM( CASE WHEN T1.FY||T1.Period = #Lfy#||'P05'  THEN NVL(T1.AMOUNT,0) ELSE null END )    AS p_dh_ac_Vol05  <!--전년P05볼륨 -->
+										, SUM( CASE WHEN T1.FY||T1.Period = #Lfy#||'P06'  THEN NVL(T1.AMOUNT,0) ELSE null END )    AS p_dh_ac_Vol06  <!--전년P06볼륨 -->
+										, SUM( CASE WHEN T1.FY||T1.Period = #Lfy#||'P07'  THEN NVL(T1.AMOUNT,0) ELSE null END )    AS p_dh_ac_Vol07  <!--전년P07볼륨 -->
+										, SUM( CASE WHEN T1.FY||T1.Period = #Lfy#||'P08'  THEN NVL(T1.AMOUNT,0) ELSE null END )    AS p_dh_ac_Vol08  <!--전년P08볼륨 -->
+										, SUM( CASE WHEN T1.FY||T1.Period = #Lfy#||'P09'  THEN NVL(T1.AMOUNT,0) ELSE null END )    AS p_dh_ac_Vol09  <!--전년P09볼륨 -->
+										, SUM( CASE WHEN T1.FY||T1.Period = #Lfy#||'P10'  THEN NVL(T1.AMOUNT,0) ELSE null END )    AS p_dh_ac_Vol10  <!--전년P10볼륨 -->
+										, SUM( CASE WHEN T1.FY||T1.Period = #Lfy#||'P11'  THEN NVL(T1.AMOUNT,0) ELSE null END )    AS p_dh_ac_Vol11  <!--전년P11볼륨 -->
+										, SUM( CASE WHEN T1.FY||T1.Period = #Lfy#||'P12'  THEN NVL(T1.AMOUNT,0) ELSE null END )    AS p_dh_ac_Vol12  <!--전년P12볼륨 -->    
+										<!-- 금년도 P01 ~ P12 볼륨 -->    
+										, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P01'  THEN NVL(T1.AMOUNT,0) ELSE null END ) / 1000    AS N_dh_ac_Vol01   <!--금년P01볼륨-->
+										, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P02'  THEN NVL(T1.AMOUNT,0) ELSE null END ) / 1000    AS N_dh_ac_Vol02   <!--금년P02볼륨-->
+										, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P03'  THEN NVL(T1.AMOUNT,0) ELSE null END ) / 1000    AS N_dh_ac_Vol03   <!--금년P03볼륨-->
+										, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P04'  THEN NVL(T1.AMOUNT,0) ELSE null END ) / 1000    AS N_dh_ac_Vol04   <!--금년P04볼륨-->
+										, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P05'  THEN NVL(T1.AMOUNT,0) ELSE null END ) / 1000    AS N_dh_ac_Vol05   <!--금년P05볼륨-->
+										, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P06'  THEN NVL(T1.AMOUNT,0) ELSE null END ) / 1000    AS N_dh_ac_Vol06   <!--금년P06볼륨-->
+										, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P07'  THEN NVL(T1.AMOUNT,0) ELSE null END ) / 1000    AS N_dh_ac_Vol07   <!--금년P07볼륨-->
+										, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P08'  THEN NVL(T1.AMOUNT,0) ELSE null END ) / 1000    AS N_dh_ac_Vol08   <!--금년P08볼륨-->
+										, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P09'  THEN NVL(T1.AMOUNT,0) ELSE null END ) / 1000    AS N_dh_ac_Vol09   <!--금년P09볼륨-->
+										, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P10'  THEN NVL(T1.AMOUNT,0) ELSE null END ) / 1000    AS N_dh_ac_Vol10   <!--금년P10볼륨-->
+										, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P11'  THEN NVL(T1.AMOUNT,0) ELSE null END ) / 1000    AS N_dh_ac_Vol11   <!--금년P11볼륨-->
+										, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P12'  THEN NVL(T1.AMOUNT,0) ELSE null END ) / 1000    AS N_dh_ac_Vol12   <!--금년P12볼륨-->             
+		                    from eslt_SH_act T1 <!-- 월SH실적|도매장|ESLT -->
+		                    inner join eslt_product_mt t2<!-- 품목속성정보|eslt -->
+		                      on t1.ProductL7 = t2.ProductL7
+		                    inner join ESLT_CUSTOMER_MT t4 <!-- 거래처정보|도매장|ESLT -->
+		                      on t1.CustomerCd = t4.CustomerCd
+		                    inner join ESLT_BRANCH_MT T5    <!-- 지점정보|도매상|ESLT -->
+		                      on t4.Branch = T5.Branch
+		                   where t1.FY  BETWEEN  #Lfy#  AND #fy#
+							<isPropertyAvailable property="channel">
+								<isNotEmpty property="channel">
+					                 AND  t5.CHANNEL  =  #channel#			<!-- 검색조건 입력시 조건삽입 -->
+				                </isNotEmpty>
+							</isPropertyAvailable>
+							<isPropertyAvailable property="region">
+								<isNotEmpty property="region">
+					                 AND  T5.Region  =  #region#			<!-- 검색조건 입력시 조건삽입 -->
+				                </isNotEmpty>
+							</isPropertyAvailable>
+							<isPropertyAvailable property="branch">
+								<isNotEmpty property="branch">
+					                 AND  T5.Branch  =  #branch#			<!-- 검색조건 입력시 조건삽입 -->
+				                </isNotEmpty>
+							</isPropertyAvailable>
+		                    group by t2.ProductL2
+		 ) T2
+		 ON     T1.DataLv1    = T2.DataLv1
+		AND    T1.DataLv2    = T2.DataLv2
+		LEFT OUTER JOIN 
+		(
+		      <!-- 2-2) DC 예상실적 데이타 구하기  -->
+		    SELECT 
+		                 t1.DATATYPE as DataLv1
+		                , t1.ProductL2  as DataLv2
+		                <!-- 당년도 P01 ~ P12 예상실적 --> 
+		                , SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P01'     THEN NVL(T1.Volume,0) ELSE null END )      AS N_dc_fcac_Vol01   <!--금년P01 예상실적 볼륨--> 
+						, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P02'     THEN NVL(T1.Volume,0) ELSE null END )      AS N_dc_fcac_Vol02   <!--금년P02 예상실적 볼륨--> 
+						, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P03'     THEN NVL(T1.Volume,0) ELSE null END )      AS N_dc_fcac_Vol03   <!--금년P03 예상실적 볼륨--> 
+						, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P04'     THEN NVL(T1.Volume,0) ELSE null END )      AS N_dc_fcac_Vol04   <!--금년P04 예상실적 볼륨--> 
+						, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P05'     THEN NVL(T1.Volume,0) ELSE null END )      AS N_dc_fcac_Vol05   <!--금년P05 예상실적 볼륨--> 
+						, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P06'     THEN NVL(T1.Volume,0) ELSE null END )      AS N_dc_fcac_Vol06   <!--금년P06 예상실적 볼륨--> 
+						, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P07'     THEN NVL(T1.Volume,0) ELSE null END )      AS N_dc_fcac_Vol07   <!--금년P07 예상실적 볼륨--> 
+						, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P08'     THEN NVL(T1.Volume,0) ELSE null END )      AS N_dc_fcac_Vol08   <!--금년P08 예상실적 볼륨--> 
+						, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P09'     THEN NVL(T1.Volume,0) ELSE null END )      AS N_dc_fcac_Vol09   <!--금년P09 예상실적 볼륨--> 
+						, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P10'     THEN NVL(T1.Volume,0) ELSE null END )      AS N_dc_fcac_Vol10   <!--금년P10 예상실적 볼륨--> 
+						, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P11'     THEN NVL(T1.Volume,0) ELSE null END )      AS N_dc_fcac_Vol11   <!--금년P11 예상실적 볼륨--> 
+						, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P12'     THEN NVL(T1.Volume,0) ELSE null END )     AS N_dc_fcac_Vol12   <!--금년P12 예상실적 볼륨-->        
+		    from ESLT_DC_FCACT  T1            <!-- 월DC예상실적|지점|ESLT -->
+		    inner join ESLT_BRANCH_MT T5    <!-- 지점정보|도매상|ESLT -->
+		      on t1.Branch = T5.Branch
+		    where  
+			    t1.FY = #fy#
+				<isPropertyAvailable property="channel">
+					<isNotEmpty property="channel">
+		                 AND  t5.CHANNEL  =  #channel#			<!-- 검색조건 입력시 조건삽입 -->
+	                </isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="region">
+					<isNotEmpty property="region">
+		                 AND  T5.Region  =  #region#			<!-- 검색조건 입력시 조건삽입 -->
+	                </isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="branch">
+					<isNotEmpty property="branch">
+		                 AND  T5.Branch  =  #branch#			<!-- 검색조건 입력시 조건삽입 -->
+	                </isNotEmpty>
+				</isPropertyAvailable>
+		    group by t1.DATATYPE, t1.ProductL2
+		 ) T3  
+		  ON     T1.DataLv1    = T3.DataLv1
+		 AND    T1.DataLv2    = T3.DataLv2
+		LEFT OUTER JOIN 
+		( 
+		          <!-- 3) forecast 및 아웃룩실적구하기-->
+		          <!--DC Forecast   및 outlook 데이타 구하기 쿼리(당년)  --> 
+		        SELECT 
+		                     t1.DATATYPE as DataLv1
+		                    , t1.ProductL2 as DataLv2
+		                      <!-- 당년도 P01 ~ P12 Forecast 볼륨  -->    
+		                    , SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P01'     THEN NVL(T1.ForVolume,0) ELSE null END )      AS N_dc_for_Vol01   <!--금년P01 Forecast 볼륨 -->
+							, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P02'     THEN NVL(T1.ForVolume,0) ELSE null END )      AS N_dc_for_Vol02   <!--금년P02 Forecast 볼륨 -->
+							, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P03'     THEN NVL(T1.ForVolume,0) ELSE null END )      AS N_dc_for_Vol03   <!--금년P03 Forecast 볼륨 -->
+							, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P04'     THEN NVL(T1.ForVolume,0) ELSE null END )      AS N_dc_for_Vol04   <!--금년P04 Forecast 볼륨 -->
+							, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P05'     THEN NVL(T1.ForVolume,0) ELSE null END )      AS N_dc_for_Vol05   <!--금년P05 Forecast 볼륨 -->
+							, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P06'     THEN NVL(T1.ForVolume,0) ELSE null END )      AS N_dc_for_Vol06   <!--금년P06 Forecast 볼륨 -->
+							, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P07'     THEN NVL(T1.ForVolume,0) ELSE null END )      AS N_dc_for_Vol07   <!--금년P07 Forecast 볼륨 -->
+							, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P08'     THEN NVL(T1.ForVolume,0) ELSE null END )      AS N_dc_for_Vol08   <!--금년P08 Forecast 볼륨 -->
+							, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P09'     THEN NVL(T1.ForVolume,0) ELSE null END )      AS N_dc_for_Vol09   <!--금년P09 Forecast 볼륨 -->
+							, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P10'     THEN NVL(T1.ForVolume,0) ELSE null END )      AS N_dc_for_Vol10   <!--금년P10 Forecast 볼륨 -->
+							, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P11'     THEN NVL(T1.ForVolume,0) ELSE null END )      AS N_dc_for_Vol11   <!--금년P11 Forecast 볼륨 -->
+							, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P12'     THEN NVL(T1.ForVolume,0) ELSE null END )      AS N_dc_for_Vol12   <!--금년P12 Forecast 볼륨 -->       
+							<!--당년도 P01 ~ P12 outlook 볼륨-->     
+							, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P01'     THEN NVL(T1.OutVolume,0) ELSE null END )      AS N_dc_out_Vol01   <!--금년P01 outlook 볼륨--> 
+							, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P02'     THEN NVL(T1.OutVolume,0) ELSE null END )      AS N_dc_out_Vol02   <!--금년P02 outlook 볼륨--> 
+							, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P03'     THEN NVL(T1.OutVolume,0) ELSE null END )      AS N_dc_out_Vol03   <!--금년P03 outlook 볼륨--> 
+							, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P04'     THEN NVL(T1.OutVolume,0) ELSE null END )      AS N_dc_out_Vol04   <!--금년P04 outlook 볼륨--> 
+							, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P05'     THEN NVL(T1.OutVolume,0) ELSE null END )      AS N_dc_out_Vol05   <!--금년P05 outlook 볼륨--> 
+							, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P06'     THEN NVL(T1.OutVolume,0) ELSE null END )      AS N_dc_out_Vol06   <!--금년P06 outlook 볼륨--> 
+							, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P07'     THEN NVL(T1.OutVolume,0) ELSE null END )      AS N_dc_out_Vol07   <!--금년P07 outlook 볼륨--> 
+							, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P08'     THEN NVL(T1.OutVolume,0) ELSE null END )      AS N_dc_out_Vol08   <!--금년P08 outlook 볼륨--> 
+							, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P09'     THEN NVL(T1.OutVolume,0) ELSE null END )      AS N_dc_out_Vol09   <!--금년P09 outlook 볼륨--> 
+							, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P10'     THEN NVL(T1.OutVolume,0) ELSE null END )      AS N_dc_out_Vol10   <!--금년P10 outlook 볼륨--> 
+							, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P11'     THEN NVL(T1.OutVolume,0) ELSE null END )      AS N_dc_out_Vol11   <!--금년P11 outlook 볼륨--> 
+							, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P12'     THEN NVL(T1.OutVolume,0) ELSE null END )      AS N_dc_out_Vol12   <!--금년P12 outlook 볼륨-->             
+		        from ESLT_DC_FC  T1 <!-- 월DC예측|지점|ESLT -->
+		        inner join ESLT_BRANCH_MT T5    <!--  지점정보|도매상|ESLT -->
+		          on t1.Branch = T5.Branch
+		       where  
+			    t1.FY = #fy#
+				<isPropertyAvailable property="channel">
+					<isNotEmpty property="channel">
+		                 AND  t5.CHANNEL  =  #channel#			<!-- 검색조건 입력시 조건삽입 -->
+	                </isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="region">
+					<isNotEmpty property="region">
+		                 AND  T5.Region  =  #region#			<!-- 검색조건 입력시 조건삽입 -->
+	                </isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="branch">
+					<isNotEmpty property="branch">
+		                 AND  T5.Branch  =  #branch#			<!-- 검색조건 입력시 조건삽입 -->
+	                </isNotEmpty>
+				</isPropertyAvailable>
+		        group by t1.DATATYPE, t1.ProductL2
+		 ) T4 
+		  ON     T1.DataLv1    = T4.DataLv1
+		 AND    T1.DataLv2    = T4.DataLv2
+		 LEFT OUTER JOIN 
+		( 
+		        <!-- 4) DC Target 데이타 구하기 쿼리(당년)   -->
+		        SELECT 
+		        			T1.DATATYPE as DataLv1
+		                    , t1.ProductL2  as DataLv2
+		                     <!--  당년도 P01 ~ P12 Target 볼륨      -->
+		                    , SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P01'     THEN NVL(T1.Volume,0) ELSE null END )      AS N_dc_tg_Vol01   <!--금년P01 Target 볼륨--> 
+							, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P02'     THEN NVL(T1.Volume,0) ELSE null END )      AS N_dc_tg_Vol02   <!--금년P02 Target 볼륨--> 
+							, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P03'     THEN NVL(T1.Volume,0) ELSE null END )      AS N_dc_tg_Vol03   <!--금년P03 Target 볼륨-->
+							, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P04'     THEN NVL(T1.Volume,0) ELSE null END )      AS N_dc_tg_Vol04   <!--금년P04 Target 볼륨-->
+							, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P05'     THEN NVL(T1.Volume,0) ELSE null END )      AS N_dc_tg_Vol05   <!--금년P05 Target 볼륨-->
+							, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P06'     THEN NVL(T1.Volume,0) ELSE null END )      AS N_dc_tg_Vol06   <!--금년P06 Target 볼륨-->
+							, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P07'     THEN NVL(T1.Volume,0) ELSE null END )      AS N_dc_tg_Vol07   <!--금년P07 Target 볼륨-->
+							, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P08'     THEN NVL(T1.Volume,0) ELSE null END )      AS N_dc_tg_Vol08   <!--금년P08 Target 볼륨-->
+							, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P09'     THEN NVL(T1.Volume,0) ELSE null END )      AS N_dc_tg_Vol09   <!--금년P09 Target 볼륨-->
+							, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P10'     THEN NVL(T1.Volume,0) ELSE null END )      AS N_dc_tg_Vol10   <!--금년P10 Target 볼륨-->
+							, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P11'     THEN NVL(T1.Volume,0) ELSE null END )      AS N_dc_tg_Vol11   <!--금년P11 Target 볼륨-->
+							, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P12'     THEN NVL(T1.Volume,0) ELSE null END )      AS N_dc_tg_Vol12   <!--금년P12 Target 볼륨-->                              
+		        from ESLT_DC_TG  T1 <!--월DC목표|지점|ESLT -->
+		        inner join ESLT_BRANCH_MT T5    <!-- 지점정보|도매상|ESLT -->
+		          on t1.Branch = T5.Branch
+		       where  
+			    t1.FY = #fy#
+				<isPropertyAvailable property="channel">
+					<isNotEmpty property="channel">
+		                 AND  t5.CHANNEL  =  #channel#			<!-- 검색조건 입력시 조건삽입 -->
+	                </isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="region">
+					<isNotEmpty property="region">
+		                 AND  T5.Region  =  #region#			<!-- 검색조건 입력시 조건삽입 -->
+	                </isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="branch">
+					<isNotEmpty property="branch">
+		                 AND  T5.Branch  =  #branch#			<!-- 검색조건 입력시 조건삽입 -->
+	                </isNotEmpty>
+				</isPropertyAvailable>
+		        group by t1.DATATYPE, t1.ProductL2
+		  ) T5 
+		  ON     T1.DataLv1    = T5.DataLv1
+		 AND    T1.DataLv2    = T5.DataLv2
+		 LEFT OUTER JOIN 
+		 (
+		        <!--2) DC  실적(actual) 볼륨 구하기 쿼리(전년 +당년)  --> 
+		                    SELECT 'DC' as  DataLv1  <!-- W.S DC Spending 실적  -->
+		                                	 <!-- 금년도 P01 ~ P12 볼륨 -->        
+										, COUNT( CASE WHEN T1.FY||T1.Period = #fy#||'P01'  THEN NVL(T1.VOLUME,0) ELSE null END )      AS C_N_dc_ac_Vol01   <!--금년P01볼륨-->
+										, COUNT( CASE WHEN T1.FY||T1.Period = #fy#||'P02'  THEN NVL(T1.VOLUME,0) ELSE null END )      AS C_N_dc_ac_Vol02   <!--금년P02볼륨-->
+										, COUNT( CASE WHEN T1.FY||T1.Period = #fy#||'P03'  THEN NVL(T1.VOLUME,0) ELSE null END )      AS C_N_dc_ac_Vol03   <!--금년P03볼륨-->
+										, COUNT( CASE WHEN T1.FY||T1.Period = #fy#||'P04'  THEN NVL(T1.VOLUME,0) ELSE null END )      AS C_N_dc_ac_Vol04   <!--금년P04볼륨-->
+										, COUNT( CASE WHEN T1.FY||T1.Period = #fy#||'P05'  THEN NVL(T1.VOLUME,0) ELSE null END )      AS C_N_dc_ac_Vol05   <!--금년P05볼륨-->
+										, COUNT( CASE WHEN T1.FY||T1.Period = #fy#||'P06'  THEN NVL(T1.VOLUME,0) ELSE null END )      AS C_N_dc_ac_Vol06   <!--금년P06볼륨-->
+										, COUNT( CASE WHEN T1.FY||T1.Period = #fy#||'P07'  THEN NVL(T1.VOLUME,0) ELSE null END )      AS C_N_dc_ac_Vol07   <!--금년P07볼륨-->
+										, COUNT( CASE WHEN T1.FY||T1.Period = #fy#||'P08'  THEN NVL(T1.VOLUME,0) ELSE null END )      AS C_N_dc_ac_Vol08   <!--금년P08볼륨-->
+										, COUNT( CASE WHEN T1.FY||T1.Period = #fy#||'P09'  THEN NVL(T1.VOLUME,0) ELSE null END )      AS C_N_dc_ac_Vol09   <!--금년P09볼륨-->
+										, COUNT( CASE WHEN T1.FY||T1.Period = #fy#||'P10'  THEN NVL(T1.VOLUME,0) ELSE null END )      AS C_N_dc_ac_Vol10   <!--금년P10볼륨-->
+										, COUNT( CASE WHEN T1.FY||T1.Period = #fy#||'P11'  THEN NVL(T1.VOLUME,0) ELSE null END )      AS C_N_dc_ac_Vol11   <!--금년P11볼륨-->
+										, COUNT( CASE WHEN T1.FY||T1.Period = #fy#||'P12'  THEN NVL(T1.VOLUME,0) ELSE null END )      AS C_N_dc_ac_Vol12   <!--금년P12볼륨-->             
+		                    from eslt_DC_act T1 <!-- 월SH실적|도매장|ESLT -->
+		                    inner join ESLT_CUSTOMER_MT t4 <!-- 거래처정보|도매장|ESLT -->
+		                      on t1.CustomerCd = t4.CustomerCd
+		                    inner join ESLT_BRANCH_MT T5    <!-- 지점정보|도매상|ESLT -->
+		                      on t4.Branch = T5.Branch
+		                   where t1.FY  BETWEEN  #Lfy#  AND #fy#
+								<isPropertyAvailable property="channel">
+									<isNotEmpty property="channel">
+						                 AND  t5.CHANNEL  =  #channel#			<!-- 검색조건 입력시 조건삽입 -->
+					                </isNotEmpty>
+								</isPropertyAvailable>
+								<isPropertyAvailable property="region">
+									<isNotEmpty property="region">
+						                 AND  T5.Region  =  #region#			<!-- 검색조건 입력시 조건삽입 -->
+					                </isNotEmpty>
+								</isPropertyAvailable>
+								<isPropertyAvailable property="branch">
+									<isNotEmpty property="branch">
+						                 AND  T5.Branch  =  #branch#			<!-- 검색조건 입력시 조건삽입 -->
+					                </isNotEmpty>
+								</isPropertyAvailable>
+		                    UNION ALL
+		                    SELECT 
+		                    			'GSV' as  DataLv1  <!-- Total GSV 실적  ( Shipment Amount 실적의미) --> 
+		                              	   <!-- 금년도 P01 ~ P12 볼륨 -->    
+										, COUNT( CASE WHEN T1.FY||T1.Period = #fy#||'P01'  THEN NVL(T1.AMOUNT,0) ELSE null END )      AS C_N_dh_ac_Vol01   <!--금년P01볼륨-->
+										, COUNT( CASE WHEN T1.FY||T1.Period = #fy#||'P02'  THEN NVL(T1.AMOUNT,0) ELSE null END )      AS C_N_dh_ac_Vol02   <!--금년P02볼륨-->
+										, COUNT( CASE WHEN T1.FY||T1.Period = #fy#||'P03'  THEN NVL(T1.AMOUNT,0) ELSE null END )      AS C_N_dh_ac_Vol03   <!--금년P03볼륨-->
+										, COUNT( CASE WHEN T1.FY||T1.Period = #fy#||'P04'  THEN NVL(T1.AMOUNT,0) ELSE null END )      AS C_N_dh_ac_Vol04   <!--금년P04볼륨-->
+										, COUNT( CASE WHEN T1.FY||T1.Period = #fy#||'P05'  THEN NVL(T1.AMOUNT,0) ELSE null END )      AS C_N_dh_ac_Vol05   <!--금년P05볼륨-->
+										, COUNT( CASE WHEN T1.FY||T1.Period = #fy#||'P06'  THEN NVL(T1.AMOUNT,0) ELSE null END )      AS C_N_dh_ac_Vol06   <!--금년P06볼륨-->
+										, COUNT( CASE WHEN T1.FY||T1.Period = #fy#||'P07'  THEN NVL(T1.AMOUNT,0) ELSE null END )      AS C_N_dh_ac_Vol07   <!--금년P07볼륨-->
+										, COUNT( CASE WHEN T1.FY||T1.Period = #fy#||'P08'  THEN NVL(T1.AMOUNT,0) ELSE null END )      AS C_N_dh_ac_Vol08   <!--금년P08볼륨-->
+										, COUNT( CASE WHEN T1.FY||T1.Period = #fy#||'P09'  THEN NVL(T1.AMOUNT,0) ELSE null END )      AS C_N_dh_ac_Vol09   <!--금년P09볼륨-->
+										, COUNT( CASE WHEN T1.FY||T1.Period = #fy#||'P10'  THEN NVL(T1.AMOUNT,0) ELSE null END )      AS C_N_dh_ac_Vol10   <!--금년P10볼륨-->
+										, COUNT( CASE WHEN T1.FY||T1.Period = #fy#||'P11'  THEN NVL(T1.AMOUNT,0) ELSE null END )      AS C_N_dh_ac_Vol11   <!--금년P11볼륨-->
+										, COUNT( CASE WHEN T1.FY||T1.Period = #fy#||'P12'  THEN NVL(T1.AMOUNT,0) ELSE null END )      AS C_N_dh_ac_Vol12   <!--금년P12볼륨-->             
+		                    from eslt_SH_act T1 <!-- 월SH실적|도매장|ESLT -->
+		                    inner join eslt_product_mt t2<!-- 품목속성정보|eslt -->
+		                      on t1.ProductL7 = t2.ProductL7
+		                    inner join ESLT_CUSTOMER_MT t4 <!-- 거래처정보|도매장|ESLT -->
+		                      on t1.CustomerCd = t4.CustomerCd
+		                    inner join ESLT_BRANCH_MT T5    <!-- 지점정보|도매상|ESLT -->
+		                      on t4.Branch = T5.Branch
+		                   where t1.FY  BETWEEN  #Lfy#  AND #fy#
+							<isPropertyAvailable property="channel">
+								<isNotEmpty property="channel">
+					                 AND  t5.CHANNEL  =  #channel#			<!-- 검색조건 입력시 조건삽입 -->
+				                </isNotEmpty>
+							</isPropertyAvailable>
+							<isPropertyAvailable property="region">
+								<isNotEmpty property="region">
+					                 AND  T5.Region  =  #region#			<!-- 검색조건 입력시 조건삽입 -->
+				                </isNotEmpty>
+							</isPropertyAvailable>
+							<isPropertyAvailable property="branch">
+								<isNotEmpty property="branch">
+					                 AND  T5.Branch  =  #branch#			<!-- 검색조건 입력시 조건삽입 -->
+				                </isNotEmpty>
+							</isPropertyAvailable>
+		 ) T6
+		 ON     T1.DataLv1    = T6.DataLv1
+		 LEFT OUTER JOIN 
+		(
+		      <!-- 2-2) DC 예상실적 데이타 구하기  -->
+		    SELECT 
+		                 t1.DATATYPE as DataLv1
+		                <!-- 당년도 P01 ~ P12 예상실적 --> 
+		                , COUNT( CASE WHEN T1.FY||T1.Period = #fy#||'P01'     THEN NVL(T1.Volume,0) ELSE null END )      AS C_N_dc_fcac_Vol01   <!--금년P01 예상실적 볼륨--> 
+						, COUNT( CASE WHEN T1.FY||T1.Period = #fy#||'P02'     THEN NVL(T1.Volume,0) ELSE null END )      AS C_N_dc_fcac_Vol02   <!--금년P02 예상실적 볼륨--> 
+						, COUNT( CASE WHEN T1.FY||T1.Period = #fy#||'P03'     THEN NVL(T1.Volume,0) ELSE null END )      AS C_N_dc_fcac_Vol03   <!--금년P03 예상실적 볼륨--> 
+						, COUNT( CASE WHEN T1.FY||T1.Period = #fy#||'P04'     THEN NVL(T1.Volume,0) ELSE null END )      AS C_N_dc_fcac_Vol04   <!--금년P04 예상실적 볼륨--> 
+						, COUNT( CASE WHEN T1.FY||T1.Period = #fy#||'P05'     THEN NVL(T1.Volume,0) ELSE null END )      AS C_N_dc_fcac_Vol05   <!--금년P05 예상실적 볼륨--> 
+						, COUNT( CASE WHEN T1.FY||T1.Period = #fy#||'P06'     THEN NVL(T1.Volume,0) ELSE null END )      AS C_N_dc_fcac_Vol06   <!--금년P06 예상실적 볼륨--> 
+						, COUNT( CASE WHEN T1.FY||T1.Period = #fy#||'P07'     THEN NVL(T1.Volume,0) ELSE null END )      AS C_N_dc_fcac_Vol07   <!--금년P07 예상실적 볼륨--> 
+						, COUNT( CASE WHEN T1.FY||T1.Period = #fy#||'P08'     THEN NVL(T1.Volume,0) ELSE null END )      AS C_N_dc_fcac_Vol08   <!--금년P08 예상실적 볼륨--> 
+						, COUNT( CASE WHEN T1.FY||T1.Period = #fy#||'P09'     THEN NVL(T1.Volume,0) ELSE null END )      AS C_N_dc_fcac_Vol09   <!--금년P09 예상실적 볼륨--> 
+						, COUNT( CASE WHEN T1.FY||T1.Period = #fy#||'P10'     THEN NVL(T1.Volume,0) ELSE null END )      AS C_N_dc_fcac_Vol10   <!--금년P10 예상실적 볼륨--> 
+						, COUNT( CASE WHEN T1.FY||T1.Period = #fy#||'P11'     THEN NVL(T1.Volume,0) ELSE null END )      AS C_N_dc_fcac_Vol11   <!--금년P11 예상실적 볼륨--> 
+						, COUNT( CASE WHEN T1.FY||T1.Period = #fy#||'P12'     THEN NVL(T1.Volume,0) ELSE null END )      AS C_N_dc_fcac_Vol12   <!--금년P12 예상실적 볼륨-->        
+		    from ESLT_DC_FCACT  T1            <!-- 월DC예상실적|지점|ESLT -->
+		    inner join ESLT_BRANCH_MT T5    <!-- 지점정보|도매상|ESLT -->
+		      on t1.Branch = T5.Branch
+		    where  
+			    t1.FY = #fy#
+				<isPropertyAvailable property="channel">
+					<isNotEmpty property="channel">
+		                 AND  t5.CHANNEL  =  #channel#			<!-- 검색조건 입력시 조건삽입 -->
+	                </isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="region">
+					<isNotEmpty property="region">
+		                 AND  T5.Region  =  #region#			<!-- 검색조건 입력시 조건삽입 -->
+	                </isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="branch">
+					<isNotEmpty property="branch">
+		                 AND  T5.Branch  =  #branch#			<!-- 검색조건 입력시 조건삽입 -->
+	                </isNotEmpty>
+				</isPropertyAvailable>
+		    group by t1.DATATYPE, t1.ProductL2
+		 ) T7  
+		 ON     T1.DataLv1    = T7.DataLv1
+		 ORDER BY T1.DataLv1 ASC, T1.DataLv2 DESC
+	</select>
+	
+	<select id="ANL0200903S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		SELECT   
+					 T1.DataLv1        AS DataLv1 
+		              ,T1.DataLv1_NM AS  DataLv1_NM
+		             <!--전년 CD Actual 실적 -->
+		            , NVL(t2.p_cd_ac_Vol01,0) AS  cd_ac_P01<!--전년P01볼륨-->
+					, NVL(t2.p_cd_ac_Vol02,0) AS  cd_ac_P02<!--전년P02볼륨-->
+					, NVL(t2.p_cd_ac_Vol03,0) AS  cd_ac_P03<!--전년P03볼륨-->
+					, NVL(t2.p_cd_ac_Vol04,0) AS  cd_ac_P04<!--전년P04볼륨-->
+					, NVL(t2.p_cd_ac_Vol05,0) AS  cd_ac_P05<!--전년P05볼륨-->
+					, NVL(t2.p_cd_ac_Vol06,0) AS  cd_ac_P06<!--전년P06볼륨-->
+					, NVL(t2.p_cd_ac_Vol07,0) AS  cd_ac_P07<!--전년P07볼륨-->
+					, NVL(t2.p_cd_ac_Vol08,0) AS  cd_ac_P08<!--전년P08볼륨-->
+					, NVL(t2.p_cd_ac_Vol09,0) AS  cd_ac_P09<!--전년P09볼륨-->
+					, NVL(t2.p_cd_ac_Vol10,0) AS  cd_ac_P10<!--전년P10볼륨-->
+					, NVL(t2.p_cd_ac_Vol11,0) AS  cd_ac_P11<!--전년P11볼륨-->
+					, NVL(t2.p_cd_ac_Vol12,0) AS  cd_ac_P12<!--전년P12볼륨-->
+		             <!--줌-->
+		             <!--당년 SH  Forecast      -->
+		            , NVL(t3.n_cd_for_Vol01,0) AS  cd_for_P01<!--당년P01볼륨-->
+		            , NVL(t3.n_cd_for_Vol02,0) AS  cd_for_P02<!--당년P01볼륨-->
+					, NVL(t3.n_cd_for_Vol03,0) AS  cd_for_P03<!--당년P02볼륨-->
+					, NVL(t3.n_cd_for_Vol04,0) AS  cd_for_P04<!--당년P03볼륨-->
+					, NVL(t3.n_cd_for_Vol05,0) AS  cd_for_P05<!--당년P04볼륨-->
+					, NVL(t3.n_cd_for_Vol06,0) AS  cd_for_P06<!--당년P05볼륨-->
+					, NVL(t3.n_cd_for_Vol07,0) AS  cd_for_P07<!--당년P06볼륨-->
+					, NVL(t3.n_cd_for_Vol08,0) AS  cd_for_P08<!--당년P07볼륨-->
+					, NVL(t3.n_cd_for_Vol09,0) AS  cd_for_P09<!--당년P08볼륨-->
+					, NVL(t3.n_cd_for_Vol10,0) AS  cd_for_P10<!--당년P09볼륨-->
+					, NVL(t3.n_cd_for_Vol11,0) AS  cd_for_P11<!--당년P10볼륨-->
+					, NVL(t3.n_cd_for_Vol12,0) AS  cd_for_P12<!--당년P11볼륨-->
+		             <!--당년  SH  Actual(Outlook)      -->
+		             <!-- 당년실적이 있으면 실적으로 없으면 Outlook으로 보여줌 -->
+		            , CASE WHEN  t2.N_cd_ac_Vol01 IS NULL and NVL(t4.C_N_cd_ac_Vol01,0) =0 THEN NVL(t3.N_cd_out_Vol01,0) WHEN  t2.N_cd_ac_Vol01 IS NULL and NVL(t4.C_N_cd_ac_Vol01,0) >0 THEN 0 ELSE  NVL(t2.N_cd_ac_Vol01,0)  END  AS  cd_out_P01<!--당년P01볼륨-->
+					, CASE WHEN  t2.N_cd_ac_Vol02 IS NULL and NVL(t4.C_N_cd_ac_Vol02,0) =0 THEN NVL(t3.N_cd_out_Vol02,0) WHEN  t2.N_cd_ac_Vol02 IS NULL and NVL(t4.C_N_cd_ac_Vol02,0) >0 THEN 0 ELSE  NVL(t2.N_cd_ac_Vol02,0)  END  AS  cd_out_P02<!--당년P02볼륨-->
+					, CASE WHEN  t2.N_cd_ac_Vol03 IS NULL and NVL(t4.C_N_cd_ac_Vol03,0) =0 THEN NVL(t3.N_cd_out_Vol03,0) WHEN  t2.N_cd_ac_Vol03 IS NULL and NVL(t4.C_N_cd_ac_Vol03,0) >0 THEN 0 ELSE  NVL(t2.N_cd_ac_Vol03,0)  END  AS  cd_out_P03<!--당년P03볼륨-->
+					, CASE WHEN  t2.N_cd_ac_Vol04 IS NULL and NVL(t4.C_N_cd_ac_Vol04,0) =0 THEN NVL(t3.N_cd_out_Vol04,0) WHEN  t2.N_cd_ac_Vol04 IS NULL and NVL(t4.C_N_cd_ac_Vol04,0) >0 THEN 0 ELSE  NVL(t2.N_cd_ac_Vol04,0)  END  AS  cd_out_P04<!--당년P04볼륨-->
+					, CASE WHEN  t2.N_cd_ac_Vol05 IS NULL and NVL(t4.C_N_cd_ac_Vol05,0) =0 THEN NVL(t3.N_cd_out_Vol05,0) WHEN  t2.N_cd_ac_Vol05 IS NULL and NVL(t4.C_N_cd_ac_Vol05,0) >0 THEN 0 ELSE  NVL(t2.N_cd_ac_Vol05,0)  END  AS  cd_out_P05<!--당년P05볼륨-->
+					, CASE WHEN  t2.N_cd_ac_Vol06 IS NULL and NVL(t4.C_N_cd_ac_Vol06,0) =0 THEN NVL(t3.N_cd_out_Vol06,0) WHEN  t2.N_cd_ac_Vol06 IS NULL and NVL(t4.C_N_cd_ac_Vol06,0) >0 THEN 0 ELSE  NVL(t2.N_cd_ac_Vol06,0)  END  AS  cd_out_P06<!--당년P06볼륨-->
+					, CASE WHEN  t2.N_cd_ac_Vol07 IS NULL and NVL(t4.C_N_cd_ac_Vol07,0) =0 THEN NVL(t3.N_cd_out_Vol07,0) WHEN  t2.N_cd_ac_Vol07 IS NULL and NVL(t4.C_N_cd_ac_Vol07,0) >0 THEN 0 ELSE  NVL(t2.N_cd_ac_Vol07,0)  END  AS  cd_out_P07<!--당년P07볼륨-->
+					, CASE WHEN  t2.N_cd_ac_Vol08 IS NULL and NVL(t4.C_N_cd_ac_Vol08,0) =0 THEN NVL(t3.N_cd_out_Vol08,0) WHEN  t2.N_cd_ac_Vol08 IS NULL and NVL(t4.C_N_cd_ac_Vol08,0) >0 THEN 0 ELSE  NVL(t2.N_cd_ac_Vol08,0)  END  AS  cd_out_P08<!--당년P08볼륨-->
+					, CASE WHEN  t2.N_cd_ac_Vol09 IS NULL and NVL(t4.C_N_cd_ac_Vol09,0) =0 THEN NVL(t3.N_cd_out_Vol09,0) WHEN  t2.N_cd_ac_Vol09 IS NULL and NVL(t4.C_N_cd_ac_Vol09,0) >0 THEN 0 ELSE  NVL(t2.N_cd_ac_Vol09,0)  END  AS  cd_out_P09<!--당년P09볼륨-->
+					, CASE WHEN  t2.N_cd_ac_Vol10 IS NULL and NVL(t4.C_N_cd_ac_Vol10,0) =0 THEN NVL(t3.N_cd_out_Vol10,0) WHEN  t2.N_cd_ac_Vol10 IS NULL and NVL(t4.C_N_cd_ac_Vol10,0) >0 THEN 0 ELSE  NVL(t2.N_cd_ac_Vol10,0)  END  AS  cd_out_P10<!--당년P10볼륨-->
+					, CASE WHEN  t2.N_cd_ac_Vol11 IS NULL and NVL(t4.C_N_cd_ac_Vol11,0) =0 THEN NVL(t3.N_cd_out_Vol11,0) WHEN  t2.N_cd_ac_Vol11 IS NULL and NVL(t4.C_N_cd_ac_Vol11,0) >0 THEN 0 ELSE  NVL(t2.N_cd_ac_Vol11,0)  END  AS  cd_out_P11<!--당년P11볼륨-->
+					, CASE WHEN  t2.N_cd_ac_Vol12 IS NULL and NVL(t4.C_N_cd_ac_Vol12,0) =0 THEN NVL(t3.N_cd_out_Vol12,0) WHEN  t2.N_cd_ac_Vol12 IS NULL and NVL(t4.C_N_cd_ac_Vol12,0) >0 THEN 0 ELSE  NVL(t2.N_cd_ac_Vol12,0)  END  AS  cd_out_P12<!--당년P12볼륨-->
+		FROM  (SELECT  'NM'      AS DataLv1 
+		                        ,'Normal' AS DataLv1_NM
+		              FROM DUAL    
+		            UNION ALL
+		            SELECT 'LT' 
+		                        ,'Long Term' 
+		              FROM DUAL                
+		           ) T1
+		 LEFT OUTER JOIN 
+		 (
+		        <!--2) cd(채권)  실적(actual) 볼륨 구하기 쿼리(전년 +당년)  -->
+		        SELECT t1.DataType  as DataLv1<!-- Long Term /Normal구분-->  
+		                    <!--전년도 P01 ~ P12 볼륨  -->
+		                    , SUM( CASE WHEN T1.FY||T1.Period = #Lfy#||'P01' THEN NVL(T1.VOLUME,0) ELSE 0 END )    AS p_cd_ac_Vol01<!--전년P01볼륨-->
+							, SUM( CASE WHEN T1.FY||T1.Period = #Lfy#||'P02' THEN NVL(T1.VOLUME,0) ELSE 0 END )    AS p_cd_ac_Vol02<!--전년P02볼륨-->
+							, SUM( CASE WHEN T1.FY||T1.Period = #Lfy#||'P03' THEN NVL(T1.VOLUME,0) ELSE 0 END )    AS p_cd_ac_Vol03<!--전년P03볼륨-->
+							, SUM( CASE WHEN T1.FY||T1.Period = #Lfy#||'P04' THEN NVL(T1.VOLUME,0) ELSE 0 END )    AS p_cd_ac_Vol04<!--전년P04볼륨-->
+							, SUM( CASE WHEN T1.FY||T1.Period = #Lfy#||'P05' THEN NVL(T1.VOLUME,0) ELSE 0 END )    AS p_cd_ac_Vol05<!--전년P05볼륨-->
+							, SUM( CASE WHEN T1.FY||T1.Period = #Lfy#||'P06' THEN NVL(T1.VOLUME,0) ELSE 0 END )    AS p_cd_ac_Vol06<!--전년P06볼륨-->
+							, SUM( CASE WHEN T1.FY||T1.Period = #Lfy#||'P07' THEN NVL(T1.VOLUME,0) ELSE 0 END )    AS p_cd_ac_Vol07<!--전년P07볼륨-->
+							, SUM( CASE WHEN T1.FY||T1.Period = #Lfy#||'P08' THEN NVL(T1.VOLUME,0) ELSE 0 END )    AS p_cd_ac_Vol08<!--전년P08볼륨-->
+							, SUM( CASE WHEN T1.FY||T1.Period = #Lfy#||'P09' THEN NVL(T1.VOLUME,0) ELSE 0 END )    AS p_cd_ac_Vol09<!--전년P09볼륨-->
+							, SUM( CASE WHEN T1.FY||T1.Period = #Lfy#||'P10' THEN NVL(T1.VOLUME,0) ELSE 0 END )    AS p_cd_ac_Vol10<!--전년P10볼륨-->
+							, SUM( CASE WHEN T1.FY||T1.Period = #Lfy#||'P11' THEN NVL(T1.VOLUME,0) ELSE 0 END )    AS p_cd_ac_Vol11<!--전년P11볼륨-->
+							, SUM( CASE WHEN T1.FY||T1.Period = #Lfy#||'P12' THEN NVL(T1.VOLUME,0) ELSE 0 END )    AS p_cd_ac_Vol12<!--전년P12볼륨-->
+		                    <!-- 당년도 P01 ~ P12 볼륨 -->          
+		                    , SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P01' THEN NVL(T1.VOLUME,0) END )    AS N_cd_ac_Vol01<!--금년P01볼륨-->
+							, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P02' THEN NVL(T1.VOLUME,0) END )    AS N_cd_ac_Vol02<!--금년P02볼륨-->
+							, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P03' THEN NVL(T1.VOLUME,0) END )    AS N_cd_ac_Vol03<!--금년P03볼륨-->
+							, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P04' THEN NVL(T1.VOLUME,0) END )    AS N_cd_ac_Vol04<!--금년P04볼륨-->
+							, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P05' THEN NVL(T1.VOLUME,0) END )    AS N_cd_ac_Vol05<!--금년P05볼륨-->
+							, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P06' THEN NVL(T1.VOLUME,0) END )    AS N_cd_ac_Vol06<!--금년P06볼륨-->
+							, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P07' THEN NVL(T1.VOLUME,0) END )    AS N_cd_ac_Vol07<!--금년P07볼륨-->
+							, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P08' THEN NVL(T1.VOLUME,0) END )    AS N_cd_ac_Vol08<!--금년P08볼륨-->
+							, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P09' THEN NVL(T1.VOLUME,0) END )    AS N_cd_ac_Vol09<!--금년P09볼륨-->
+							, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P10' THEN NVL(T1.VOLUME,0) END )    AS N_cd_ac_Vol10<!--금년P10볼륨-->
+							, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P11' THEN NVL(T1.VOLUME,0) END )    AS N_cd_ac_Vol11<!--금년P11볼륨-->
+							, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P12' THEN NVL(T1.VOLUME,0) END )    AS N_cd_ac_Vol12<!--금년P12볼륨-->
+		        from eslt_CD_act T1 <!--월CD실적|도매장|ESLT-->
+		        <!-- inner join ESLT_CUSTOMER_MT t4 거래처정보|도매장|ESLT
+		          on t1.CustomerCd = t4.CustomerCd										정상 데이터 들어올때 다시 바꿔주기
+		        inner join ESLT_BRANCH_MT T5    지점정보|도매상|ESLT
+		          on t4.Branch = T5.Branch -->
+		        inner join ESLT_BRANCH_MT T5  <!--   지점정보|도매상|ESLT -->
+		          on t1.customercd = T5.Branch
+		        where t1.FY  BETWEEN  #Lfy#  AND #fy#
+				<isPropertyAvailable property="channel">
+					<isNotEmpty property="channel">
+		                 AND  t5.CHANNEL  =  #channel#			<!-- 검색조건 입력시 조건삽입 -->
+	                </isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="region">
+					<isNotEmpty property="region">
+		                 AND  T5.Region  =  #region#			<!-- 검색조건 입력시 조건삽입 -->
+	                </isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="branch">
+					<isNotEmpty property="branch">
+		                 AND  T5.Branch  =  #branch#			<!-- 검색조건 입력시 조건삽입 -->
+	                </isNotEmpty>
+				</isPropertyAvailable>
+		        group by  t1.DataType 
+		 ) T2
+		 ON     T1.DataLv1    = T2.DataLv1
+		 LEFT OUTER JOIN ( 
+		      <!-- 3) forecast 및 아웃룩실적구하기-->
+		      <!--cd(채권) Forecast   및 outlook 데이타 구하기 쿼리(당년)  -->
+		    SELECT 
+		                t1.DATATYPE   as DataLv1  <!--Long Ter-->
+		                <!--당년도 P01 ~ P12 Forecast 볼륨     -->
+		                , SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P01' THEN NVL(T1.ForVolume,0)  END )    AS N_cd_for_Vol01<!--금년P01 Forecast 볼륨-->
+						, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P02' THEN NVL(T1.ForVolume,0)  END )    AS N_cd_for_Vol02<!--금년P02 Forecast 볼륨-->
+						, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P03' THEN NVL(T1.ForVolume,0)  END )    AS N_cd_for_Vol03<!--금년P03 Forecast 볼륨-->
+						, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P04' THEN NVL(T1.ForVolume,0)  END )    AS N_cd_for_Vol04<!--금년P04 Forecast 볼륨-->
+						, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P05' THEN NVL(T1.ForVolume,0)  END )    AS N_cd_for_Vol05<!--금년P05 Forecast 볼륨-->
+						, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P06' THEN NVL(T1.ForVolume,0)  END )    AS N_cd_for_Vol06<!--금년P06 Forecast 볼륨-->
+						, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P07' THEN NVL(T1.ForVolume,0)  END )    AS N_cd_for_Vol07<!--금년P07 Forecast 볼륨-->
+						, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P08' THEN NVL(T1.ForVolume,0)  END )    AS N_cd_for_Vol08<!--금년P08 Forecast 볼륨-->
+						, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P09' THEN NVL(T1.ForVolume,0)  END )    AS N_cd_for_Vol09<!--금년P09 Forecast 볼륨-->
+						, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P10' THEN NVL(T1.ForVolume,0)  END )    AS N_cd_for_Vol10<!--금년P10 Forecast 볼륨-->
+						, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P11' THEN NVL(T1.ForVolume,0)  END )    AS N_cd_for_Vol11<!--금년P11 Forecast 볼륨-->
+						, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P12' THEN NVL(T1.ForVolume,0)  END )    AS N_cd_for_Vol12<!--금년P12 Forecast 볼륨-->
+		                  <!--당년도 P01 ~ P12 outlook 볼륨 -->    
+		                , SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P01' THEN NVL(T1.OutVolume,0)  END )    AS N_cd_out_Vol01<!--금년P01 outlook 볼륨-->
+						, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P02' THEN NVL(T1.OutVolume,0)  END )    AS N_cd_out_Vol02<!--금년P02 outlook 볼륨-->
+						, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P03' THEN NVL(T1.OutVolume,0)  END )    AS N_cd_out_Vol03<!--금년P03 outlook 볼륨-->
+						, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P04' THEN NVL(T1.OutVolume,0)  END )    AS N_cd_out_Vol04<!--금년P04 outlook 볼륨-->
+						, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P05' THEN NVL(T1.OutVolume,0)  END )    AS N_cd_out_Vol05<!--금년P05 outlook 볼륨-->
+						, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P06' THEN NVL(T1.OutVolume,0)  END )    AS N_cd_out_Vol06<!--금년P06 outlook 볼륨-->
+						, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P07' THEN NVL(T1.OutVolume,0)  END )    AS N_cd_out_Vol07<!--금년P07 outlook 볼륨-->
+						, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P08' THEN NVL(T1.OutVolume,0)  END )    AS N_cd_out_Vol08<!--금년P08 outlook 볼륨-->
+						, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P09' THEN NVL(T1.OutVolume,0)  END )    AS N_cd_out_Vol09<!--금년P09 outlook 볼륨-->
+						, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P10' THEN NVL(T1.OutVolume,0)  END )    AS N_cd_out_Vol10<!--금년P10 outlook 볼륨-->
+						, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P11' THEN NVL(T1.OutVolume,0)  END )    AS N_cd_out_Vol11<!--금년P11 outlook 볼륨-->
+						, SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P12' THEN NVL(T1.OutVolume,0)  END )    AS N_cd_out_Vol12<!--금년P12 outlook 볼륨-->
+		    from ESLT_cd_FC  T1 <!--월cd예측|지점|ESLT-->
+		    inner join ESLT_BRANCH_MT T5    <!-- 지점정보|도매상|ESLT-->
+		      on t1.Branch = T5.Branch
+		    where  
+			    t1.FY = #fy#
+				<isPropertyAvailable property="channel">
+					<isNotEmpty property="channel">
+		                 AND  t5.CHANNEL  =  #channel#			<!-- 검색조건 입력시 조건삽입 -->
+	                </isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="region">
+					<isNotEmpty property="region">
+		                 AND  T5.Region  =  #region#			<!-- 검색조건 입력시 조건삽입 -->
+	                </isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="branch">
+					<isNotEmpty property="branch">
+		                 AND  T5.Branch  =  #branch#			<!-- 검색조건 입력시 조건삽입 -->
+	                </isNotEmpty>
+				</isPropertyAvailable>
+		    group by t1.DATATYPE
+		 ) T3
+		 ON     T1.DataLv1    = T3.DataLv1
+		 CROSS JOIN 
+		 (
+		        <!--2) cd(채권)  실적(actual) 볼륨 구하기 쿼리(전년 +당년)  -->
+		        SELECT        <!-- 당년도 P01 ~ P12 볼륨 -->          
+		                    count( CASE WHEN T1.FY||T1.Period = #fy#||'P01' THEN NVL(T1.VOLUME,0) END )    AS C_N_cd_ac_Vol01<!--금년P01볼륨-->
+							, count( CASE WHEN T1.FY||T1.Period = #fy#||'P02' THEN NVL(T1.VOLUME,0) END )    AS C_N_cd_ac_Vol02<!--금년P02볼륨-->
+							, count( CASE WHEN T1.FY||T1.Period = #fy#||'P03' THEN NVL(T1.VOLUME,0) END )    AS C_N_cd_ac_Vol03<!--금년P03볼륨-->
+							, count( CASE WHEN T1.FY||T1.Period = #fy#||'P04' THEN NVL(T1.VOLUME,0) END )    AS C_N_cd_ac_Vol04<!--금년P04볼륨-->
+							, count( CASE WHEN T1.FY||T1.Period = #fy#||'P05' THEN NVL(T1.VOLUME,0) END )    AS C_N_cd_ac_Vol05<!--금년P05볼륨-->
+							, count( CASE WHEN T1.FY||T1.Period = #fy#||'P06' THEN NVL(T1.VOLUME,0) END )    AS C_N_cd_ac_Vol06<!--금년P06볼륨-->
+							, count( CASE WHEN T1.FY||T1.Period = #fy#||'P07' THEN NVL(T1.VOLUME,0) END )    AS C_N_cd_ac_Vol07<!--금년P07볼륨-->
+							, count( CASE WHEN T1.FY||T1.Period = #fy#||'P08' THEN NVL(T1.VOLUME,0) END )    AS C_N_cd_ac_Vol08<!--금년P08볼륨-->
+							, count( CASE WHEN T1.FY||T1.Period = #fy#||'P09' THEN NVL(T1.VOLUME,0) END )    AS C_N_cd_ac_Vol09<!--금년P09볼륨-->
+							, count( CASE WHEN T1.FY||T1.Period = #fy#||'P10' THEN NVL(T1.VOLUME,0) END )    AS C_N_cd_ac_Vol10<!--금년P10볼륨-->
+							, count( CASE WHEN T1.FY||T1.Period = #fy#||'P11' THEN NVL(T1.VOLUME,0) END )    AS C_N_cd_ac_Vol11<!--금년P11볼륨-->
+							, count( CASE WHEN T1.FY||T1.Period = #fy#||'P12' THEN NVL(T1.VOLUME,0) END )    AS C_N_cd_ac_Vol12<!--금년P12볼륨-->
+		        from eslt_CD_act T1 <!--월CD실적|도매장|ESLT-->
+		        <!-- inner join ESLT_CUSTOMER_MT t4 거래처정보|도매장|ESLT
+		          on t1.CustomerCd = t4.CustomerCd										정상 데이터 들어올때 다시 바꿔주기
+		        inner join ESLT_BRANCH_MT T5    지점정보|도매상|ESLT
+		          on t4.Branch = T5.Branch -->
+		        inner join ESLT_BRANCH_MT T5  <!--   지점정보|도매상|ESLT -->
+		          on t1.customercd = T5.Branch
+		        where t1.FY  BETWEEN  #Lfy#  AND #fy#
+				<isPropertyAvailable property="channel">
+					<isNotEmpty property="channel">
+		                 AND  t5.CHANNEL  =  #channel#			<!-- 검색조건 입력시 조건삽입 -->
+	                </isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="region">
+					<isNotEmpty property="region">
+		                 AND  T5.Region  =  #region#			<!-- 검색조건 입력시 조건삽입 -->
+	                </isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="branch">
+					<isNotEmpty property="branch">
+		                 AND  T5.Branch  =  #branch#			<!-- 검색조건 입력시 조건삽입 -->
+	                </isNotEmpty>
+				</isPropertyAvailable>
+		 ) T4
+		 ORDER BY T1.DataLv1 DESC
+	</select>
+	
+	<select id="ANL0200904S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		SELECT 
+			  <!--당년도 P01 ~ P12 Target (%)-->     
+			  NVL(SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P01'		THEN NVL(T1.Ratio,0) ELSE 0 END ), 0)      	AS N_ac_tg_Vol01   <!--금년P01 Target 볼륨--> 
+			  , NVL(SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P02'    THEN NVL(T1.Ratio,0) ELSE 0 END ), 0)      		AS N_ac_tg_Vol02   <!--금년P02 Target 볼륨--> 
+			  , NVL(SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P03'    THEN NVL(T1.Ratio,0) ELSE 0 END ), 0)      		AS N_ac_tg_Vol03   <!--금년P03 Target 볼륨--> 
+			  , NVL(SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P04'    THEN NVL(T1.Ratio,0) ELSE 0 END ), 0)      		AS N_ac_tg_Vol04   <!--금년P04 Target 볼륨--> 
+			  , NVL(SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P05'    THEN NVL(T1.Ratio,0) ELSE 0 END ), 0)      		AS N_ac_tg_Vol05   <!--금년P05 Target 볼륨--> 
+			  , NVL(SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P06'    THEN NVL(T1.Ratio,0) ELSE 0 END ), 0)      		AS N_ac_tg_Vol06   <!--금년P06 Target 볼륨--> 
+			  , NVL(SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P07'    THEN NVL(T1.Ratio,0) ELSE 0 END ), 0)      		AS N_ac_tg_Vol07   <!--금년P07 Target 볼륨--> 
+			  , NVL(SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P08'    THEN NVL(T1.Ratio,0) ELSE 0 END ), 0)      		AS N_ac_tg_Vol08   <!--금년P08 Target 볼륨--> 
+			  , NVL(SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P09'    THEN NVL(T1.Ratio,0) ELSE 0 END ), 0)      		AS N_ac_tg_Vol09   <!--금년P09 Target 볼륨--> 
+			  , NVL(SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P10'    THEN NVL(T1.Ratio,0) ELSE 0 END ), 0)      		AS N_ac_tg_Vol10   <!--금년P10 Target 볼륨--> 
+			  , NVL(SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P11'    THEN NVL(T1.Ratio,0) ELSE 0 END ), 0)      		AS N_ac_tg_Vol11   <!--금년P11 Target 볼륨-->
+			  , NVL(SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P12'    THEN NVL(T1.Ratio,0) ELSE 0 END ), 0)      		AS N_ac_tg_Vol12   <!--금년P12 Target 볼륨--> 
+			  <!--당년도 Quarter1 ~ Quarter4 Target  (%)-->         
+			  , NVL(SUM( CASE WHEN T1.FY||T1.Period = #fy#||'Q1'  	THEN NVL(T1.Ratio,0) ELSE 0 END ), 0)      			AS n_ac_tg_VolQ01   <!--당년Quarter1 Target (%)-->
+			  , NVL(SUM( CASE WHEN T1.FY||T1.Period = #fy#||'Q2'  	THEN NVL(T1.Ratio,0) ELSE 0 END ), 0)      			AS n_ac_tg_VolQ02   <!--당년Quarter2 Target (%)-->            
+			  , NVL(SUM( CASE WHEN T1.FY||T1.Period = #fy#||'Q3'  	THEN NVL(T1.Ratio,0) ELSE 0 END ), 0)      			AS n_ac_tg_VolQ03   <!--당년Quarter3 Target (%)-->
+			  , NVL(SUM( CASE WHEN T1.FY||T1.Period = #fy#||'Q4'  	THEN NVL(T1.Ratio,0) ELSE 0 END ), 0)      			AS n_ac_tg_VolQ04   <!--당년Quarter4 Target (%)-->   
+			  <!--당년도 H1 ~ H2 Target  (%)-->         
+			  , NVL(SUM( CASE WHEN T1.FY||T1.Period = #fy#||'H1'	THEN NVL(T1.Ratio,0) ELSE 0 END ), 0)	      		AS n_ac_tg_VolH01   <!--당년 HALF1 Target (%)-->
+			  , NVL(SUM( CASE WHEN T1.FY||T1.Period = #fy#||'H2' 	THEN NVL(T1.Ratio,0) ELSE 0 END ), 0)      			AS n_ac_tg_VolH02   <!--당년 HALF2 Target (%)-->            
+		from ESLT_CD_TG  T1 <!--월채권목표|지점|ESLT-->
+		where  t1.FY  =  #fy#
+		<!--IF 지점조건 입력시  THEN--> 
+		<isPropertyAvailable property="channel">
+				<isNotEmpty property="channel">
+					<isEmpty property="region">
+						and  t1.BranchType  = 'CHANNEL'
+						AND T1.BRANCH      = #channel#
+					</isEmpty>
+					<isNotEmpty property="region">
+						<isNotEmpty property="branch">
+							and  t1.BranchType  = 'BRANCH'
+							AND T1.BRANCH = #branch# 
+						</isNotEmpty>
+						<isEmpty property="branch">
+							and  t1.BranchType  = 'REGION'
+							AND T1.BRANCH      = #region#
+						</isEmpty>
+					</isNotEmpty>
+				</isNotEmpty>
+		</isPropertyAvailable>
+		<isPropertyAvailable property="allParam">
+			<!--ELSE-->   <!-- 조건이 없는경우--> 
+				AND T1.BranchType  = 'ALL'
+		</isPropertyAvailable>
+	</select>
+	
+	<select id="ANL0200905S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		SELECT   
+			NVL(t2.p_sh_ac_Vol01,0) AS  sh_ac_P01<!--전년P01볼륨-->
+	         ,NVL(t2.p_sh_ac_Vol02,0) AS  sh_ac_P02<!--전년P02볼륨-->
+	         ,NVL(t2.p_sh_ac_Vol03,0) AS  sh_ac_P03<!--전년P03볼륨-->
+	         ,NVL(t2.p_sh_ac_Vol04,0) AS  sh_ac_P04<!--전년P04볼륨-->
+	         ,NVL(t2.p_sh_ac_Vol05,0) AS  sh_ac_P05<!--전년P05볼륨-->
+	         ,NVL(t2.p_sh_ac_Vol06,0) AS  sh_ac_P06<!--전년P06볼륨-->
+	         ,NVL(t2.p_sh_ac_Vol07,0) AS  sh_ac_P07<!--전년P07볼륨-->
+	         ,NVL(t2.p_sh_ac_Vol08,0) AS  sh_ac_P08<!--전년P08볼륨-->
+	         ,NVL(t2.p_sh_ac_Vol09,0) AS  sh_ac_P09<!--전년P09볼륨-->
+	         ,NVL(t2.p_sh_ac_Vol10,0) AS  sh_ac_P10<!--전년P10볼륨-->
+	         ,NVL(t2.p_sh_ac_Vol11,0) AS  sh_ac_P11<!--전년P11볼륨-->
+	         ,NVL(t2.p_sh_ac_Vol12,0) AS  sh_ac_P12 <!--전년P12볼륨-->   
+	         <!--당년 SH  Forecast -->
+	         ,NVL(t3.n_sh_for_Vol01,0) AS  sh_for_P01<!--당년P01볼륨-->
+			,NVL(t3.n_sh_for_Vol02,0) AS  sh_for_P02<!--당년P02볼륨-->
+			,NVL(t3.n_sh_for_Vol03,0) AS  sh_for_P03<!--당년P03볼륨-->
+			,NVL(t3.n_sh_for_Vol04,0) AS  sh_for_P04<!--당년P04볼륨-->
+			,NVL(t3.n_sh_for_Vol05,0) AS  sh_for_P05<!--당년P05볼륨-->
+			,NVL(t3.n_sh_for_Vol06,0) AS  sh_for_P06<!--당년P06볼륨-->
+			,NVL(t3.n_sh_for_Vol07,0) AS  sh_for_P07<!--당년P07볼륨-->
+			,NVL(t3.n_sh_for_Vol08,0) AS  sh_for_P08<!--당년P08볼륨-->
+			,NVL(t3.n_sh_for_Vol09,0) AS  sh_for_P09<!--당년P09볼륨-->
+			,NVL(t3.n_sh_for_Vol10,0) AS  sh_for_P10<!--당년P10볼륨-->
+			,NVL(t3.n_sh_for_Vol11,0) AS  sh_for_P11<!--당년P11볼륨-->
+			,NVL(t3.n_sh_for_Vol12,0) AS  sh_for_P12 <!--당년P12볼륨-->
+			
+	        <!--당년  SH  Actual(Outlook) -->
+	        <!-- 당년실적이 있으면 실적으로 없으면 Outlook으로 보여줌-->
+	        ,CASE WHEN  t2.N_sh_ac_Vol01 IS NULL THEN NVL(t3.N_sh_out_Vol01,0) ELSE  NVL(t2.N_sh_ac_Vol01,0)  END  AS  sh_out_P01<!--당년P01볼륨-->
+	        ,CASE WHEN  t2.N_sh_ac_Vol02 IS NULL THEN NVL(t3.N_sh_out_Vol02,0) ELSE  NVL(t2.N_sh_ac_Vol02,0)  END  AS  sh_out_P02<!--당년P02볼륨-->
+	        ,CASE WHEN  t2.N_sh_ac_Vol03 IS NULL THEN NVL(t3.N_sh_out_Vol03,0) ELSE  NVL(t2.N_sh_ac_Vol03,0)  END  AS  sh_out_P03<!--당년P03볼륨-->
+	        ,CASE WHEN  t2.N_sh_ac_Vol04 IS NULL THEN NVL(t3.N_sh_out_Vol04,0) ELSE  NVL(t2.N_sh_ac_Vol04,0)  END  AS  sh_out_P04<!--당년P04볼륨-->
+	        ,CASE WHEN  t2.N_sh_ac_Vol05 IS NULL THEN NVL(t3.N_sh_out_Vol05,0) ELSE  NVL(t2.N_sh_ac_Vol05,0)  END  AS  sh_out_P05<!--당년P05볼륨-->
+	        ,CASE WHEN  t2.N_sh_ac_Vol06 IS NULL THEN NVL(t3.N_sh_out_Vol06,0) ELSE  NVL(t2.N_sh_ac_Vol06,0)  END  AS  sh_out_P06<!--당년P06볼륨-->
+	        ,CASE WHEN  t2.N_sh_ac_Vol07 IS NULL THEN NVL(t3.N_sh_out_Vol07,0) ELSE  NVL(t2.N_sh_ac_Vol07,0)  END  AS  sh_out_P07<!--당년P07볼륨-->
+	        ,CASE WHEN  t2.N_sh_ac_Vol08 IS NULL THEN NVL(t3.N_sh_out_Vol08,0) ELSE  NVL(t2.N_sh_ac_Vol08,0)  END  AS  sh_out_P08<!--당년P08볼륨-->
+	        ,CASE WHEN  t2.N_sh_ac_Vol09 IS NULL THEN NVL(t3.N_sh_out_Vol09,0) ELSE  NVL(t2.N_sh_ac_Vol09,0)  END  AS  sh_out_P09<!--당년P09볼륨-->
+	        ,CASE WHEN  t2.N_sh_ac_Vol10 IS NULL THEN NVL(t3.N_sh_out_Vol10,0) ELSE  NVL(t2.N_sh_ac_Vol10,0)  END  AS  sh_out_P10<!--당년P10볼륨-->
+	        ,CASE WHEN  t2.N_sh_ac_Vol11 IS NULL THEN NVL(t3.N_sh_out_Vol11,0) ELSE  NVL(t2.N_sh_ac_Vol11,0)  END  AS  sh_out_P11<!--당년P11볼륨-->
+	        ,CASE WHEN  t2.N_sh_ac_Vol12 IS NULL THEN NVL(t3.N_sh_out_Vol12,0) ELSE  NVL(t2.N_sh_ac_Vol12,0)  END  AS  sh_out_P12 <!--당년P12볼륨--> 
+	        
+	        <!--당년 SH Targer -->
+	        ,NVL(t4.n_sh_tg_Vol01,0) AS  sh_tg_P01<!--당년P01볼륨-->
+			,NVL(t4.n_sh_tg_Vol02,0) AS  sh_tg_P02<!--당년P02볼륨-->
+			,NVL(t4.n_sh_tg_Vol03,0) AS  sh_tg_P03<!--당년P03볼륨-->
+			,NVL(t4.n_sh_tg_Vol04,0) AS  sh_tg_P04<!--당년P04볼륨-->
+			,NVL(t4.n_sh_tg_Vol05,0) AS  sh_tg_P05<!--당년P05볼륨-->
+			,NVL(t4.n_sh_tg_Vol06,0) AS  sh_tg_P06<!--당년P06볼륨-->
+			,NVL(t4.n_sh_tg_Vol07,0) AS  sh_tg_P07<!--당년P07볼륨-->
+			,NVL(t4.n_sh_tg_Vol08,0) AS  sh_tg_P08<!--당년P08볼륨-->
+			,NVL(t4.n_sh_tg_Vol09,0) AS  sh_tg_P09<!--당년P09볼륨-->
+			,NVL(t4.n_sh_tg_Vol10,0) AS  sh_tg_P10<!--당년P10볼륨-->
+			,NVL(t4.n_sh_tg_Vol11,0) AS  sh_tg_P11<!--당년P11볼륨-->
+			,NVL(t4.n_sh_tg_Vol12,0) AS  sh_tg_P12 <!--당년P12볼륨--> 
+		FROM (
+		    SELECT   'SDX'                AS EsltProduct2
+		    FROM DUAL  
+		) T1
+		LEFT OUTER JOIN
+		(
+		    <!--2) shipMent  실적(actual) 볼륨 구하기 쿼리(전년 +당년)-->  
+		    SELECT  'SDX'   AS ESLTPRODUCT2
+		                <!--전년도 P01 ~ P12 볼륨--> 
+		                ,SUM( CASE WHEN T1.FY||T1.Period = #Lfy#||'P01'  THEN NVL(T1.VOLUME,0) ELSE NULL END ) AS p_sh_ac_Vol01 <!--전년P01볼륨-->
+						,SUM( CASE WHEN T1.FY||T1.Period = #Lfy#||'P02'  THEN NVL(T1.VOLUME,0) ELSE NULL END ) AS p_sh_ac_Vol02 <!--전년P02볼륨-->
+						,SUM( CASE WHEN T1.FY||T1.Period = #Lfy#||'P03'  THEN NVL(T1.VOLUME,0) ELSE NULL END ) AS p_sh_ac_Vol03 <!--전년P03볼륨-->
+						,SUM( CASE WHEN T1.FY||T1.Period = #Lfy#||'P04'  THEN NVL(T1.VOLUME,0) ELSE NULL END ) AS p_sh_ac_Vol04 <!--전년P04볼륨-->
+						,SUM( CASE WHEN T1.FY||T1.Period = #Lfy#||'P05'  THEN NVL(T1.VOLUME,0) ELSE NULL END ) AS p_sh_ac_Vol05 <!--전년P05볼륨-->
+						,SUM( CASE WHEN T1.FY||T1.Period = #Lfy#||'P06'  THEN NVL(T1.VOLUME,0) ELSE NULL END ) AS p_sh_ac_Vol06 <!--전년P06볼륨-->
+						,SUM( CASE WHEN T1.FY||T1.Period = #Lfy#||'P07'  THEN NVL(T1.VOLUME,0) ELSE NULL END ) AS p_sh_ac_Vol07 <!--전년P07볼륨-->
+						,SUM( CASE WHEN T1.FY||T1.Period = #Lfy#||'P08'  THEN NVL(T1.VOLUME,0) ELSE NULL END ) AS p_sh_ac_Vol08 <!--전년P08볼륨-->
+						,SUM( CASE WHEN T1.FY||T1.Period = #Lfy#||'P09'  THEN NVL(T1.VOLUME,0) ELSE NULL END ) AS p_sh_ac_Vol09 <!--전년P09볼륨-->
+						,SUM( CASE WHEN T1.FY||T1.Period = #Lfy#||'P10'  THEN NVL(T1.VOLUME,0) ELSE NULL END ) AS p_sh_ac_Vol10  <!--전년P10볼륨-->
+						,SUM( CASE WHEN T1.FY||T1.Period = #Lfy#||'P11'  THEN NVL(T1.VOLUME,0) ELSE NULL END ) AS p_sh_ac_Vol11  <!--전년P11볼륨-->
+						,SUM( CASE WHEN T1.FY||T1.Period = #Lfy#||'P12'  THEN NVL(T1.VOLUME,0) ELSE NULL END ) AS p_sh_ac_Vol12  <!--전년P12볼륨-->     
+						<!--당년도 P01 ~ P12볼륨-->        
+						,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P01'  THEN NVL(T1.VOLUME,0) ELSE NULL END )  AS N_sh_ac_Vol01   <!--금년P01볼륨-->
+						,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P02'  THEN NVL(T1.VOLUME,0) ELSE NULL END )  AS N_sh_ac_Vol02   <!--금년P02볼륨-->
+						,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P03'  THEN NVL(T1.VOLUME,0) ELSE NULL END )  AS N_sh_ac_Vol03   <!--금년P03볼륨-->
+						,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P04'  THEN NVL(T1.VOLUME,0) ELSE NULL END )  AS N_sh_ac_Vol04   <!--금년P04볼륨-->
+						,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P05'  THEN NVL(T1.VOLUME,0) ELSE NULL END )  AS N_sh_ac_Vol05   <!--금년P05볼륨-->
+						,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P06'  THEN NVL(T1.VOLUME,0) ELSE NULL END )  AS N_sh_ac_Vol06   <!--금년P06볼륨-->
+						,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P07'  THEN NVL(T1.VOLUME,0) ELSE NULL END )  AS N_sh_ac_Vol07   <!--금년P07볼륨-->
+						,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P08'  THEN NVL(T1.VOLUME,0) ELSE NULL END )  AS N_sh_ac_Vol08   <!--금년P08볼륨-->
+						,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P09'  THEN NVL(T1.VOLUME,0) ELSE NULL END )  AS N_sh_ac_Vol09   <!--금년P09볼륨-->
+						,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P10'  THEN NVL(T1.VOLUME,0) ELSE NULL END )  AS N_sh_ac_Vol10   <!--금년P10볼륨--> 
+						,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P11'  THEN NVL(T1.VOLUME,0) ELSE NULL END )  AS N_sh_ac_Vol11   <!--금년P11볼륨--> 
+						,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P12'  THEN NVL(T1.VOLUME,0) ELSE NULL END )  AS N_sh_ac_Vol12   <!--금년P12볼륨-->                                 
+		    from eslt_SH_act T1 <!--월SH실적|도매장|ESLT-->
+		    inner join eslt_product_mt t2<!--품목속성정보|eslt-->
+		      on     t1.ProductL7 = t2.ProductL7
+		      AND  T2.ESLTPRODUCT2 ='SDX'
+		    inner join ESLT_CUSTOMER_MT t4 <!-- 거래처정보|도매장|ESLT-->
+		      on t1.CustomerCd = t4.CustomerCd
+		    inner join ESLT_BRANCH_MT T5    <!-- 지점정보|도매상|ESLT-->
+		      on t4.Branch = T5.Branch
+		    where
+			     t1.FY between #Lfy# and #fy# 
+				<isPropertyAvailable property="channel">
+					<isNotEmpty property="channel">
+		                 AND  t5.CHANNEL  =  #channel#			<!-- 검색조건 입력시 조건삽입 -->
+	                </isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="region">
+					<isNotEmpty property="region">
+		                 AND  T5.Region  =  #region#			<!-- 검색조건 입력시 조건삽입 -->
+	                </isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="branch">
+					<isNotEmpty property="branch">
+		                 AND  T5.Branch  =  #branch#			<!-- 검색조건 입력시 조건삽입 -->
+	                </isNotEmpty>
+				</isPropertyAvailable>
+		) T2
+		ON     T1.ESLTPRODUCT2    = T2.ESLTPRODUCT2
+		LEFT OUTER  JOIN
+		(
+		<!-- 3) shipMent Forecast   및 outlook 데이타 구하기 쿼리(당년)  -->
+		SELECT  
+			'SDX'   AS ESLTPRODUCT2
+			<!--당년도 P01 ~ P12 Forecast 볼륨    -->
+            ,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P01'     THEN NVL(T1.ForVolume,0) ELSE NULL END )      AS N_sh_for_Vol01   <!--금년P01 Forecast 볼륨--> 
+            ,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P02'     THEN NVL(T1.ForVolume,0) ELSE NULL END )      AS N_sh_for_Vol02   <!--금년P02 Forecast 볼륨--> 
+            ,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P03'     THEN NVL(T1.ForVolume,0) ELSE NULL END )      AS N_sh_for_Vol03   <!--금년P03 Forecast 볼륨--> 
+            ,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P04'     THEN NVL(T1.ForVolume,0) ELSE NULL END )      AS N_sh_for_Vol04   <!--금년P04 Forecast 볼륨--> 
+            ,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P05'     THEN NVL(T1.ForVolume,0) ELSE NULL END )      AS N_sh_for_Vol05   <!--금년P05 Forecast 볼륨--> 
+            ,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P06'     THEN NVL(T1.ForVolume,0) ELSE NULL END )      AS N_sh_for_Vol06   <!--금년P06 Forecast 볼륨--> 
+            ,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P07'     THEN NVL(T1.ForVolume,0) ELSE NULL END )      AS N_sh_for_Vol07   <!--금년P07 Forecast 볼륨--> 
+            ,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P08'     THEN NVL(T1.ForVolume,0) ELSE NULL END )      AS N_sh_for_Vol08   <!--금년P08 Forecast 볼륨--> 
+            ,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P09'     THEN NVL(T1.ForVolume,0) ELSE NULL END )      AS N_sh_for_Vol09   <!--금년P09 Forecast 볼륨--> 
+            ,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P10'     THEN NVL(T1.ForVolume,0) ELSE NULL END )      AS N_sh_for_Vol10   <!--금년P10 Forecast 볼륨--> 
+            ,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P11'     THEN NVL(T1.ForVolume,0) ELSE NULL END )      AS N_sh_for_Vol11   <!--금년P11 Forecast 볼륨--> 
+            ,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P12'     THEN NVL(T1.ForVolume,0) ELSE NULL END )      AS N_sh_for_Vol12   <!--금년P12 Forecast 볼륨-->   
+            <!-- 당년도 P01 ~ P12 outlook 볼륨-->     
+            ,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P01'     THEN NVL(T1.OutVolume,0) ELSE NULL END )     AS N_sh_out_Vol01   <!--금년P01 outlook 볼륨--> 
+            ,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P02'     THEN NVL(T1.OutVolume,0) ELSE NULL END )     AS N_sh_out_Vol02   <!--금년P02 outlook 볼륨 -->
+            ,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P03'     THEN NVL(T1.OutVolume,0) ELSE NULL END )     AS N_sh_out_Vol03   <!--금년P03 outlook 볼륨-->
+            ,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P04'     THEN NVL(T1.OutVolume,0) ELSE NULL END )     AS N_sh_out_Vol04   <!--금년P04 outlook 볼륨-->
+            ,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P05'     THEN NVL(T1.OutVolume,0) ELSE NULL END )     AS N_sh_out_Vol05   <!--금년P05 outlook 볼륨-->
+            ,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P06'     THEN NVL(T1.OutVolume,0) ELSE NULL END )     AS N_sh_out_Vol06   <!--금년P06 outlook 볼륨-->
+            ,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P07'     THEN NVL(T1.OutVolume,0) ELSE NULL END )     AS N_sh_out_Vol07   <!--금년P07 outlook 볼륨-->
+            ,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P08'     THEN NVL(T1.OutVolume,0) ELSE NULL END )     AS N_sh_out_Vol08   <!--금년P08 outlook 볼륨-->
+            ,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P09'     THEN NVL(T1.OutVolume,0) ELSE NULL END )     AS N_sh_out_Vol09   <!--금년P09 outlook 볼륨-->
+            ,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P10'     THEN NVL(T1.OutVolume,0) ELSE NULL END )     AS N_sh_out_Vol10   <!--금년P10 outlook 볼륨 -->
+            ,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P11'     THEN NVL(T1.OutVolume,0) ELSE NULL END )     AS N_sh_out_Vol11   <!--금년P11 outlook 볼륨-->
+            ,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P12'     THEN NVL(T1.OutVolume,0) ELSE NULL END )     AS N_sh_out_Vol12   <!--금년P12 outlook 볼륨-->             
+		from ESLT_SH_FC  T1 <!--월SH예측|지점|ESLT-->
+		inner join ESLT_BRANCH_MT T5    <!-- 지점정보|도매상|ESLT-->
+		  on t1.Branch            = T5.Branch
+		 inner join (select distinct esltProduct, ProductL2, ProductL3, ESLTPRODUCT2 from eslt_product_mt) t3<!--품목속성정보|eslt-->
+		 on    t1.esltProduct        = t3.esltProduct
+		 and  t1.ProductL2          = t3.ProductL2
+		 and  t1.ProductL3          = t3.ProductL3
+		 and  t3.ESLTPRODUCT2 ='SDX'
+		 where
+			    t1.FY = #fy#
+				<isPropertyAvailable property="channel">
+					<isNotEmpty property="channel">
+		                 AND  t5.CHANNEL  =  #channel#			<!-- 검색조건 입력시 조건삽입 -->
+	                </isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="region">
+					<isNotEmpty property="region">
+		                 AND  T5.Region  =  #region#			<!-- 검색조건 입력시 조건삽입 -->
+	                </isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="branch">
+					<isNotEmpty property="branch">
+		                 AND  T5.Branch  =  #branch#			<!-- 검색조건 입력시 조건삽입 -->
+	                </isNotEmpty>
+				</isPropertyAvailable>
+		) T3
+		ON     T1.ESLTPRODUCT2    = T3.ESLTPRODUCT2
+		LEFT OUTER JOIN
+		(
+		    <!--4) shipMent Target 데이타 구하기 쿼리(당년)  -->   
+		    SELECT  'SDX'   AS ESLTPRODUCT2
+		               <!--당년도 P01 ~ P12 Target 볼륨-->   
+		                ,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P01'     THEN NVL(T1.Volume,0) ELSE 0 END )      AS N_sh_tg_Vol01   <!--금년P01 Target 볼륨 -->
+		                ,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P02'     THEN NVL(T1.Volume,0) ELSE 0 END )      AS N_sh_tg_Vol02   <!--금년P02 Target 볼륨-->
+		                ,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P03'     THEN NVL(T1.Volume,0) ELSE 0 END )      AS N_sh_tg_Vol03   <!--금년P03 Target 볼륨-->
+		                ,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P04'     THEN NVL(T1.Volume,0) ELSE 0 END )      AS N_sh_tg_Vol04   <!--금년P04 Target 볼륨-->
+		                ,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P05'     THEN NVL(T1.Volume,0) ELSE 0 END )      AS N_sh_tg_Vol05   <!--금년P05 Target 볼륨-->
+		                ,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P06'     THEN NVL(T1.Volume,0) ELSE 0 END )      AS N_sh_tg_Vol06   <!--금년P06 Target 볼륨-->
+		                ,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P07'     THEN NVL(T1.Volume,0) ELSE 0 END )      AS N_sh_tg_Vol07   <!--금년P07 Target 볼륨-->
+		                ,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P08'     THEN NVL(T1.Volume,0) ELSE 0 END )      AS N_sh_tg_Vol08   <!--금년P08 Target 볼륨-->
+		                ,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P09'     THEN NVL(T1.Volume,0) ELSE 0 END )      AS N_sh_tg_Vol09   <!--금년P09 Target 볼륨-->
+		                ,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P10'      THEN NVL(T1.Volume,0) ELSE 0 END )     AS N_sh_tg_Vol10   <!--금년P10 Target 볼륨-->
+		                ,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P11'      THEN NVL(T1.Volume,0) ELSE 0 END )     AS N_sh_tg_Vol11   <!--금년P11 Target 볼륨-->
+		                ,SUM( CASE WHEN T1.FY||T1.Period = #fy#||'P12'      THEN NVL(T1.Volume,0) ELSE 0 END )     AS N_sh_tg_Vol12   <!--금년P12 Target 볼륨-->                      
+		    from ESLT_SH_TG  T1 <!--월SH목표|지점|ESLT-->
+		        inner join eslt_product_mt t2<!--품목속성정보|eslt-->
+		          on t1.ProductL7 = t2.ProductL7
+		        AND  T2.ESLTPRODUCT2 ='SDX'
+		    inner join ESLT_BRANCH_MT T5    <!-- 지점정보|도매상|ESLT-->
+		      on t1.Branch = T5.Branch
+		    where  
+			    t1.FY = #fy#
+				<isPropertyAvailable property="channel">
+					<isNotEmpty property="channel">
+		                 AND  t5.CHANNEL  =  #channel#			<!-- 검색조건 입력시 조건삽입 -->
+	                </isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="region">
+					<isNotEmpty property="region">
+		                 AND  T5.Region  =  #region#			<!-- 검색조건 입력시 조건삽입 -->
+	                </isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="branch">
+					<isNotEmpty property="branch">
+		                 AND  T5.Branch  =  #branch#			<!-- 검색조건 입력시 조건삽입 -->
+	                </isNotEmpty>
+				</isPropertyAvailable>
+		) T4
+		ON     T1.ESLTPRODUCT2    = T4.ESLTPRODUCT2
+	</select>
+	
+	<!-- 조건: 권역 조회 -->
+    <select id="ANL0200906S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+        SELECT  t1.region AS "regionCode"    
+               ,t1.region AS "regionName"   
+          FROM ESLT_TEAM_MT  t1
+         WHERE t1.useYn   = 'Y'
+			<isPropertyAvailable property="channel">
+				<isNotEmpty prepend="and" property="channel">
+					t1.channel = #channel#
+				</isNotEmpty>
+			</isPropertyAvailable>
+      GROUP BY t1.region
+      ORDER BY max(t1.dispSeq)
+    </select>
+	
+	<!-- 조건: 팀 조회 -->
+    <select id="ANL0200907S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+        SELECT t1.BRANCH AS "teamCode"    
+               ,t1.BRANCH  AS "teamName"   
+          FROM ESLT_BRANCH_MT  t1
+         WHERE t1. UseYn   = 'Y'
+         	<isPropertyAvailable property="channel">
+				<isNotEmpty prepend="and" property="channel">
+					t1. Channel = #channel#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="region">
+				<isNotEmpty prepend="and" property="region">
+					t1. Region  = #region#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="empid">
+				<isNotEmpty prepend="and" property="empid">
+					( t1.empId  = #empid# OR t1.empId1 = #empid# )
+				</isNotEmpty>
+			</isPropertyAvailable>
+      ORDER BY t1. dispSeq
+    </select>
+    
+    <!-- 조건: 권역 조회 -->
+    <select id="ANL0200908S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+        SELECT  t1.region AS "regionCode"    
+               ,t1.region AS "regionName"   
+          FROM ESLT_BRANCH_MT  t1
+         WHERE t1.useYn   = 'Y'
+			<isPropertyAvailable property="channel">
+				<isNotEmpty prepend="and" property="channel">
+					t1.channel = #channel#
+				</isNotEmpty>
+			</isPropertyAvailable>
+      GROUP BY t1.region
+      ORDER BY max(t1.dispSeq)
+    </select>
+</sqlMap>

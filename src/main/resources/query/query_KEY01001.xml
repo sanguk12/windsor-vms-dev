@@ -1,0 +1,458 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="KEY01001">
+	
+	<!-- 업소목록 조회 -->
+	<select id="KEY0100101S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			venueCD as "venueCD"
+			, venueNm as "venueNm"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','VENUEGRADCD',venueGradCD,null) as "venueGradCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SUBSEGMENTCD',subSegmentCD,null) as "subSegmentCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD2',addrTpCD2,null) as "addrTpCD2Name"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ACTIVEYN',activeYN,null) as "activeYNName"
+		from (
+			select
+				a.venueCD
+				, a.venueNm
+				, a.venueGradCD
+				, a.subSegmentCD
+				, a.addrTpCD2
+				, a.activeYN
+			from GVEN01MT a
+			inner join GEMP01MT b
+				on a.territoryCD = b.territoryCD
+			where
+				b.empID = #empID#
+			<isPropertyAvailable property="venueGradCD">
+				<isNotEmpty prepend="and" property="venueGradCD">
+					a.venueGradCD = #venueGradCD#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="addrTpCD1">
+				<isNotEmpty prepend="and" property="addrTpCD1">
+					a.addrTpCD1 = #addrTpCD1#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="addrTpCD2">
+				<isNotEmpty prepend="and" property="addrTpCD2">
+					a.addrTpCD2 = #addrTpCD2#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="subSegmentCD">
+				<isNotEmpty prepend="and" property="subSegmentCD">
+					a.subSegmentCD = #subSegmentCD#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="venueCD">
+				<isNotEmpty prepend="and" property="venueCD">
+					upper(a.venueCD) = upper(#venueCD#)
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="activeYN" >
+				<isNotEmpty prepend="and" property="activeYN">
+					a.activeYN = #activeYN#
+				</isNotEmpty>
+			</isPropertyAvailable>
+		) t
+		order by venueCD
+	</select>
+	
+	<!-- 키맨내역 조회 -->
+	<select id="KEY0100102S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select distinct
+			keymanID as "keymanID"
+			, keymanNm as "keymanNm"
+			, keymanTypeCD as "keymanTypeCD"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','KEYMANTYPECD',keymanTypeCD,null) as "keymanTypeCDName"
+			, regIDNo as "regIDNo"
+			, addr as "addr"
+			, phoneNo as "phoneNo"
+			, bankCD as "bankCD"
+			, accountNo as "accountNo"
+			, holderNm as "holderNm"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ACTIVEYN',activeYN,null) as "activeYNName"
+			, activeYN as "activeYN"
+			, pKeymanYN as "pKeymanYN"
+		from (
+			select 
+			    a.keymanID
+			    , a.keymanNm
+			    , a.keymanTypeCD
+			    , SCP.DEC_B64('DAMO','SCP','AES_256.SCPS',a.regIDNo) AS regIDNo 
+			    , a.addr
+			    , a.phoneNo
+			    , a.bankCD
+			    , a.accountNo
+			    , a.holderNm
+			    , a.activeYN
+			    , a.pKeymanYN
+			from GKEY01MT a inner join
+			GKEY02MT b on a.keymanID = b.keymanID
+			where 
+				a.venueCD = #venueCD#
+				and b.mobileRegYN is null
+		) t
+		order by keymanID
+	</select>
+	
+	<!-- 키맨신청내역 조회 -->
+	<select id="KEY0100103S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			requestDate as "requestDate"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','REQUESTTPCD',requestTpCD,null) as "requestTpCDName"
+			, keymanID as "keymanID"
+			, keymanNm as "keymanNm"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','KEYMANTYPECD',keymanTypeCD,null) as "keymanTypeCDName"
+			, keymanTypeCD as "keymanTypeCD"
+			, regIDNo as "regIDNo"
+			, addr as "addr"
+			, phoneNo as "phoneNo"
+			, bankCD as "bankCD"
+			, accountNo as "accountNo"
+			, holderNm as "holderNm"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','REQUESTSTATECD',requestStateCD,null) as "requestStateCDName"
+			, requestSeq as "requestSeq"
+			, pKeymanYN as "pKeymanYN"
+		from (
+			select 
+				a.requestDate
+				, a.requestTpCD
+			    , a.keymanID
+			    , a.keymanNm
+			    , a.keymanTypeCD
+			    , SCP.DEC_B64('DAMO','SCP','AES_256.SCPS',a.regIDNo) AS regIDNo 
+			    , a.addr
+			    , a.phoneNo
+			    , a.bankCD
+			    , a.accountNo
+			    , a.holderNm
+			    , a.requestStateCD
+			    , a.requestSeq
+			    , a.pKeymanYN
+			from GKEY02MT a
+			where 
+				a.venueCD = #venueCD#
+			and a.requestDate between #requestDateFrom# and #requestDateTo#	
+			and a.mobileRegYN is NULL
+		) t
+		order by 
+			requestDate,
+			requestTpCD,
+			keymanID
+	</select>
+	
+	<!-- 키맨신청내역 상세조회 -->
+	<select id="KEY0100104S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			venueCD as "venueCD"
+			, venueNm as "venueNm"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','REQUESTTPCD',requestTpCD,null) as "requestTpCDName"
+			, keymanID as "keymanID"
+			, keymanNm as "keymanNm"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','KEYMANTYPECD',keymanTypeCD,null) as "keymanTypeCDName"
+			, regIDNo as "regIDNo"
+			, birthDate as "birthDate"
+			, dutyCD as "dutyCD"
+			, addr as "addr"
+			, phoneNo as "phoneNo"
+			, bankCD as "bankCD"
+			, accountNo as "accountNo"
+			, holderNm as "holderNm"
+			, PkeymanYN as "PkeymanYN"
+			, requestDate as "requestDate"
+			, note as "note"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','REQUESTSTATECD',requestStateCD,null) as "requestStateCDName"
+			, accreErrCommt as "accreErrCommt"
+			, accreDate as "accreDate"
+			, requestTpCD as "requestTpCD"
+			, keymanTypeCD as "keymanTypeCD"
+			, requestStateCD as "requestStateCD"
+			, requestSeq as "requestSeq"
+			, contractYN as "contractYN"
+		from (
+			select 
+				a.venueCD
+				, b.venueNm
+				, a.requestTpCD
+			    , a.keymanID
+			    , a.keymanNm
+			    , a.keymanTypeCD
+			    , SCP.DEC_B64('DAMO','SCP','AES_256.SCPS',a.regIDNo) AS regIDNo 
+			    , a.birthDate
+			    , a.dutyCD
+			    , a.addr
+			    , a.phoneNo
+			    , a.bankCD
+			    , a.accountNo
+			    , a.holderNm
+			    , a.PkeymanYN
+				, a.requestDate
+				, a.note
+			    , a.requestStateCD
+			    , a.accreErrCommt
+			    , a.accreDate
+			    , a.requestSeq
+			    , c.contractYN
+			from GKEY02MT a
+				inner join GVEN01MT b
+					on a.venueCD = b.venueCD
+				left outer join PMOB001DT c
+                	on c.keymanID = a.keymanID	
+			where 
+				a.keymanID = #keymanID#
+			and a.requestDate = #requestDate#
+			and a.requestSeq = #requestSeq#
+		) t
+	</select>
+	
+	<!-- 승인상태조회 -->
+	<select id="KEY0100105S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			apprGrpNm as "apprGrpNm"
+			, empID as "empID"
+			, (select empNm from GEMP01MT where empID = t.empID) as "empNm"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','APPRSTATECD',apprStateCD,null) as "apprStateCDName"
+			, to_char(apprDate, 'yyyy.mm.dd hh24:mi') as "apprDate"
+			, commt as "commt"
+		from GKEY03MT t
+		where
+			keymanID = #keymanID#
+		and requestDate = #requestDate#
+		and requestSeq = #requestSeq#
+		order by levelNo
+	</select>
+	
+	<!-- requestSeq채번 -->
+	<select id="KEY0100106S" parameterClass="com.kia.key.model.GKEY01MT" resultClass="java.lang.String">   
+		select 
+    		NVL(MAX(to_number(t1.requestSeq))+1,1) as requestSeq
+	  	from 
+  			GKEY03MT t1
+        where 
+	  		keymanID = #keymanID#
+			and requestDate = #requestDate#
+	</select>
+	
+	<!-- 키맨신청내역 상세조회 -->
+	<select id="KEY0100107S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			venueCD as "venueCD"
+			, venueNm as "venueNm"
+			, keymanID as "keymanID"
+			, keymanNm as "keymanNm"
+			, keymanTypeCD as "keymanTypeCD"
+			, regIDNo as "regIDNo"
+			, birthDate as "birthDate"
+			, dutyCD as "dutyCD"
+			, addr as "addr"
+			, phoneNo as "phoneNo"
+			, bankCD as "bankCD"
+			, accountNo as "accountNo"
+			, holderNm as "holderNm"
+			, PkeymanYN as "PkeymanYN"
+			, activeYN as "activeYN"
+			, note as "note"
+			, contractYN as "contractYN"
+		from (
+			select 
+				a.venueCD
+				, b.venueNm
+			    , a.keymanID
+			    , a.keymanNm
+			    , a.keymanTypeCD
+			    , SCP.DEC_B64('DAMO','SCP','AES_256.SCPS',a.regIDNo) AS regIDNo
+			    , a.birthDate
+			    , a.dutyCD
+			    , a.addr
+			    , a.phoneNo
+			    , a.bankCD
+			    , a.accountNo
+			    , a.holderNm
+			    , a.PkeymanYN
+			    , a.activeYN
+			    , a.note
+			    , c.contractYN
+			from GKEY01MT a
+			inner join GVEN01MT b
+				on a.venueCD = b.venueCD
+			left outer join PMOB001DT c
+                on c.keymanID = a.keymanID		
+			where 
+				a.keymanID = #keymanID#
+		) t
+		order by keymanID
+	</select>
+	
+	<!-- 키맨등록요청 -->
+	<insert id="KEY0100101I" parameterClass="com.kia.key.model.GKEY01MT">
+		insert into GKEY02MT (
+			keymanID
+			, requestDate
+			, requestSeq
+			, requestTpCD
+			, empID
+			, venueCD
+			, keymanNm
+			, keymanTypeCD
+			, regIDNo
+			, birthDate
+			, addr
+			, phoneNo
+			, bankCD
+			, accountNo
+			, holderNm
+			, dutyCD
+			, note
+			, PkeymanYN
+			, requestStateCD
+			, lapprLevelNo
+			, regID
+			, regDate
+			, LICENCECHKYN
+		)
+		values(
+			#keymanID#
+			, #requestDate#
+			, #requestSeq#
+			, #requestTpCD#
+			, #empID#
+			, #venueCD#
+			, #keymanNm#
+			, #keymanTypeCD#
+			, SCP.ENC_B64('DAMO','SCP','AES_256.SCPS',#regIDNo#)
+			, #birthDate#
+			, #addr#
+			, #phoneNo#
+			, #bankCD#
+			, #accountNo#
+			, #holderNm#
+			, #dutyCD#
+			, #note#
+			, #PkeymanYN#
+			, #requestStateCD#
+			, (select
+					max(lv) as lv
+				from (
+					select
+						level as lv
+						, apprGrpNm
+						, empID
+					from GAPP01DT t
+					where
+						apprTpID = #apprTpID#
+					connect by prior papprGrpID = apprGrpID and apprTpID = #apprTpID#
+					start with apprGrpID = (
+						select
+							apprGrpID
+						from GAPP01DT
+						Where
+							empID = #empID#
+							and apprTpID = #apprTpID#
+					) and apprTpID = #apprTpID#
+				)
+			)
+			, #userID#
+			, sysdate
+			, #licenceChkYn# 
+		)
+	</insert>
+	
+	<!-- 키맨요청정보 수정 -->
+	<update id="KEY0100101U" parameterClass="com.kia.key.model.GKEY01MT">
+		update GKEY02MT
+		set
+			keymanNm = #keymanNm#
+			, keymanTypeCD = #keymanTypeCD#
+			, regIDNo = SCP.ENC_B64('DAMO','SCP','AES_256.SCPS',#regIDNo#)
+			, birthDate = #birthDate#
+			, addr = #addr#
+			, phoneNo = #phoneNo#
+			, bankCD = #bankCD#
+			, accountNo = #accountNo#
+			, holderNm = #holderNm#
+			, dutyCD = #dutyCD#
+			, note = #note#
+			, PkeymanYN = #PkeymanYN#
+			, requestStateCD = #requestStateCD#
+			, chgID = #userID#
+			, chgDate = chgDate
+		where
+			keymanID = #keymanID#
+			and requestDate = #requestDate#
+			and requestSeq = #requestSeq#
+	</update>
+	
+	<!-- 키맨등록요청 승인정보 -->
+	<insert id="KEY0100102I" parameterClass="com.kia.key.model.GKEY01MT">
+		insert into GKEY03MT (
+			keymanID
+			, requestDate
+			, requestSeq
+			, levelNo
+			, apprGrpNm
+			, empID
+			, apprStateCD
+			, apprDate
+			, regID
+			, regDate
+		)
+		select
+			#keymanID#
+<!-- 			, to_char(SYSDATE,'YYYYMMDD') -->
+			, #requestDate#
+			, #requestSeq#
+			, lv
+			, apprGrpNm
+			, empID
+			, (
+				case when lv=1 then '50'
+				when lv=2 then '20'
+				end
+			) as apprStateCD
+			, (
+				case when lv=1 then sysdate
+				end
+			) as apprDate
+			, #userID#
+			, sysdate
+		from (
+			select
+				level as lv
+				, apprGrpNm
+				, empID
+			from GAPP01DT t
+			where
+				apprTpID = #apprTpID#
+			connect by prior papprGrpID = apprGrpID and apprTpID = #apprTpID#
+			start with apprGrpID = (
+				select
+					apprGrpID
+				from GAPP01DT
+				Where
+					empID = #empID#
+					and apprTpID = #apprTpID#
+			) and apprTpID = #apprTpID#
+		)
+	</insert>
+	
+	<!-- 키맨신청정보 삭제 -->
+	<delete id="KEY0100101D" parameterClass="com.kia.key.model.GKEY01MT">
+		delete from GKEY02MT
+		where
+			keymanID = #keymanID#
+		and requestDate = #requestDate#
+		and requestSeq = #requestSeq#
+	</delete>
+	
+	<!-- 키맨신청승인정보 삭제 -->
+	<delete id="KEY0100102D" parameterClass="com.kia.key.model.GKEY01MT">
+		delete from GKEY03MT
+		where
+			keymanID = #keymanID#
+		and requestDate = #requestDate#
+		and requestSeq = #requestSeq#
+	</delete>
+	
+</sqlMap>

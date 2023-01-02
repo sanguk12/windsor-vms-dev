@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="ANL05001">	
+
+	<!-- Paging 구현쿼리 Header 조각 -->
+    <sql id="ANL05001.paging.header">
+        <isPropertyAvailable property="pageNum">
+        select p.* from (
+            select
+    	        count(*) over() as "totalCount",
+    	</isPropertyAvailable>
+    	<isNotPropertyAvailable property="pageNum">
+    		select
+    	</isNotPropertyAvailable>
+    </sql>
+    
+    <!-- Paging 구현쿼리 Header 조각 -->
+    <sql id="ANL05001.paging.footer">
+        <isPropertyAvailable property="pageNum">
+        ) p
+		where
+			p.pageNum = #pageNum#
+		</isPropertyAvailable>
+    </sql>
+    
+ <!--    select t1.venueCD,t3.venuenm,t1.chgdate,t1.chgid,t1.territorycd,t2.codename
+		from
+		gad01mt t1
+		inner join f_code t2
+		on t1.territoryCD=t2.comcode
+		inner join GVEN01MT t3
+		on t1.venuecd=t3.venuecd
+		; -->
+    
+	<!-- 업소정보이관 조회 -->
+	<select id="ANL0500101S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		<include refid="ANL05001.paging.header"/>		
+		rank() over(
+				order by
+					t1.venueCD
+			) as "rowNum"
+			, floor((rank() over(
+				order by
+					 t1.venueCD
+			)-1)/#displayNum#+1) as pageNum,
+			t1.venueCD as "venueCD",
+            t3.venueNm as "venueNm",
+            t1.chgDate as "chgDate",            
+            t1.chgID as "chgID",            
+            t1.regID as "regID",
+            (select empnm from gemp01mt where empid=t1.regid) as "regNm",                        
+			t1.territoryCD as "territoryCD",
+			t2.codeName as "territoryCDName"
+		from gad01mt t1
+			inner join f_code t2
+				on t1.territoryCD=t2.comcode
+			inner join GVEN01MT t3
+				on t1.venueCD=t3.venueCD
+			inner join GEMP01MT t4
+				on t1.officeCD=t4.officeCD
+				and t1.territoryCD=t4.territoryCD				
+		where 1=1
+			<isPropertyAvailable property="venueCD">
+				<isNotEmpty prepend="and" property="venueCD">
+					t1.venueCD = #venueCD#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="venueNm">
+				<isNotEmpty prepend="and" property="venueNm">
+					t3.venueNm = #venueNm#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="territoryCD" >
+				<isNotEmpty prepend="and" property="territoryCD">
+					t1.territoryCD = #territoryCD#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="territoryCDName">
+				<isNotEmpty prepend="and" property="territoryCDName">
+					t2.codename = #territoryCDName#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<!-- <isPropertyAvailable property="empID_Old" >
+				<isNotEmpty prepend="and" property="empID_Old">
+					t1.regID = #empID_Old#
+				</isNotEmpty>
+			</isPropertyAvailable> -->
+			<!-- group by t1.regid, t4.empnm -->	
+			<include refid="ANL05001.paging.footer"/>			
+	</select>
+	<!-- 
+	<select id="ANL0500102S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		SELECT
+			count(*) as "totalCount"
+		FROM GAD01MT A
+		INNER JOIN GVEN01MT B
+			ON a.venuecd = b.venuecd
+		LEFT OUTER JOIN GCHA01DT C
+			ON A.venuecd = c.venuecd
+		LEFT OUTER JOIN gad07mt D
+		    ON A.adsupportid = D.adsupportid
+		WHERE 
+			1=1		
+		AND	A.regID = #empID_Old#
+		<isPropertyAvailable property="empID_Old">
+			<isNotEmpty prepend="and" property="empID_Old">
+				A.regID = #empID_Old#
+			</isNotEmpty>
+		</isPropertyAvailable>
+		<isPropertyAvailable property="venueCD">
+			<isNotEmpty prepend="and" property="venueCD">
+				A.venueCD = #venueCD#
+			</isNotEmpty>
+		</isPropertyAvailable>			
+		
+	</select>
+ 	 -->
+	<update id="ANL0500103U" parameterClass="com.kia.anl.model.VENUE_INFO_LOG">	
+		update gad01mt set
+	 		regID = (select empid
+	 			 from
+	 			 gemp01mt where	 		
+					empnm = #empNm#			 
+	 			 and territoryCD is not null)
+	 		,chgdate=sysDate	 
+	 		 	where
+	 				venueCD = #venueCD#					  
+	 			  and adsupportid > 'AD2020000001'
+	</update>
+	
+	<update id="ANL0500104U" parameterClass="com.kia.anl.model.VENUE_INFO_LOG">
+		update gad02mt set 
+			regID = (select empid 
+				from 
+				gemp01mt where
+					empnm = #empNm#
+				and territoryCD is not null)
+			,chgdate=sysDate 
+				where			
+					venueCD = #venueCD#				 
+				and adsupportid > 'AD2020000001'	
+	</update>
+	<update id="ANL0500105U" parameterClass="com.kia.anl.model.VENUE_INFO_LOG">
+		update grlt01mt set
+			 empid = (select empid
+			 	 from 
+			 	 gemp01mt where		 
+			 	 	empnm = #empNm#			 					 
+			 	 and territoryCD is not null)
+			 	,chgdate=sysDate 
+			 	 where			 	 
+			 	 	venueCD = #venueCD#			 	 	
+			 	 and eventYM > '202012'
+	</update>
+	<update id="ANL0500106U" parameterClass="com.kia.anl.model.VENUE_INFO_LOG"> 
+		update grlt02mt set
+			 empid = (select empid
+			 	 from
+			 	 gemp01mt where			 	  
+			 	 	empnm = #empNm#			 	 	 
+			 	 	and territoryCD is not null)
+			 	 ,chgdate=sysDate 
+			 	 	where			 	  
+			 	 		venueCD = #venueCD#			 	 	 
+			 	 	and eventYM > '202012'	
+	</update>	
+	
+	<update id="ANL0500107U" parameterClass="com.kia.anl.model.VENUE_INFO_LOG">
+		update gpln01mt set 
+			empid = (select empid 
+				from gemp01mt where
+					empnm = #empNm# 
+					and territoryCD is not null) 
+				,chgdate=sysDate
+					where 
+						venueCD = #venueCD#						 
+					and eventYM > '202012'
+	</update>
+	<update id="ANL0500108U" parameterClass="com.kia.anl.model.VENUE_INFO_LOG">	
+		update gpln02mt set 
+			empid = (select empid 
+			from gemp01mt where
+				empnm = #empNm#			
+			and territoryCD is not null)
+			,chgdate=sysDate 
+			where			
+				venueCD = #venueCD#				 
+			and eventYM > '202012'
+	</update>	
+	 
+</sqlMap>

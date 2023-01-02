@@ -1,0 +1,1366 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="PLN02002">
+	
+	<!-- Plan승인 리스트 조회 -->
+	<select id="PLN0200201S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			rowNumber as "rowNum"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ACTIVITYCD',activityCD,null) as "activityCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','RAGESPHERECD',rageSphereCD,null) as "rageSphereCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','OFFICECD',officeCD,null) as "officeCDName"
+			<isPropertyAvailable property="grpID">
+				<isNotEmpty property="grpID">
+			, (case when (select dkmdtpcd from GEMP01MT where empID=t2.empID) != 'DK' then '' else (select empNm from GEMP01MT where empID=t2.empID) end) as "empNm"
+				</isNotEmpty>
+				<isEmpty property="grpID">
+			, (select empNm from GEMP01MT where empID=t2.empID) as "empNm"
+				</isEmpty>
+			</isPropertyAvailable>
+			, venueCD as "venueCD"
+			, venueNm as "venueNm"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','VENUEGRADCD',venueGradCD,null) as "venueGradCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SEGMENTCD',segmentCD,null) as "segmentCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SUBSEGMENTCD',subSegmentCD,null) as "subSegmentCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD1',addrTpCD1,null) as "addrTpCD1Name"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD2',addrTpCD2,null) as "addrTpCD2Name"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','KINDTPCD5',kindTpCD5,null) as "kindTpCD5Name"
+			, prdNm as "prdNm"
+			, factoryPrice as "factoryPrice"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','QTYUNITCD',qtyUnitCD,null) as "qtyUnitCDName"
+			, planQty as "planQty"
+			, planUnitAmt as "planUnitAmt"
+			, guidAmt as "guidAmt"
+			, payAmt as "payAmt"
+			, gsvRate as "gsvRate"
+			, commt as "commt"
+			, apprCommt as "apprCommt"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','APPRSTATECD',apprStateCD_emp,null) as "apprStateCDName_emp"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','APPRSTATECD',apprStateCD,null) as "apprStateCDName"
+			, apprStateCD as "apprStateCD"
+			, apprStateCD_emp as "apprStateCD_emp"
+			, lapprLevelNo as "lapprLevelNo"
+			, levelNo as "levelNo"
+			, lastApprYN as "lastApprYN"
+			, prdCD as "prdCD"
+		from (
+			select
+				t.*
+				, rank() over(order by rageSphereCD, officeCD, empID, venueCD, prdCD) as rowNumber
+				, floor((rank() over(order by rageSphereCD, officeCD, empID, venueCD, prdCD)-1)/#displayNum#+1) as pageNum
+			from (
+				select
+					activityCD
+					, c.rageSphereCD
+					, c.officeCD
+					, b.empID
+					, a.venueCD
+					, venueNm
+					, venueGradCD
+					, segmentCD
+					, subSegmentCD
+					, addrTpCD1
+					, addrTpCD2
+					, kindTpCD5
+					, prdNm
+					, e.factoryPrice
+					, f.qtyUnitCD
+					, planQty
+					, planUnitAmt
+					, guidAmt
+					, payAmt
+					, gsvRate
+					, e.commt
+					, a.commt as apprCommt
+					, e.apprStateCD
+					, a.apprStateCD as apprStateCD_emp
+					, e.lapprLevelNo
+					, a.levelNo
+					, (
+						case when e.lapprLevelNo = a.levelNo then 'Y'
+						else 'N'
+						end
+					) as lastApprYN
+					, e.prdCD
+				from GPLN04MT a
+				inner join GPLN02MT b
+					on a.eventYM = b.eventYM
+					and a.venueCD = b.venueCD
+				inner join GEMP01MT c
+					on b.empID = c.empID
+				inner join GVEN01MT d
+					on a.venueCD = d.venueCD
+				inner join GPLN02DT e
+					on a.eventYM = e.eventYM
+					and a.venueCD = e.venueCD	
+					and a.prdCD = e.prdCD
+				inner join GPRD01MT f
+					on a.prdCD = f.prdCD		
+				where
+					a.eventYM = #eventYM#
+					and a.empID = #empID#
+					and a.apprStateCD in (
+						select comCode
+						from F_CODE
+						where
+							codediv='APPRSTATECD'
+							and activeFlg = 'U'
+							and useYN = 'Y'
+							and attrib02 = 'MNG'
+					)
+					<isPropertyAvailable property="activityCD">
+						<isNotEmpty prepend="and" property="activityCD">
+							activityCD = #activityCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+					<isPropertyAvailable property="venueGradCD">
+						<isNotEmpty prepend="and" property="venueGradCD">
+							venueGradCD = #venueGradCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+					<isPropertyAvailable property="segmentCD">
+						<isNotEmpty prepend="and" property="segmentCD">
+							segmentCD = #segmentCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+					<isPropertyAvailable property="subSegmentCD">
+						<isNotEmpty prepend="and" property="subSegmentCD">
+							subSegmentCD = #subSegmentCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+					<isPropertyAvailable property="overGuidAmt">
+						<isNotEmpty prepend="and" property="overGuidAmt">
+							<isEqual property="overGuidAmt" compareValue="Y">
+								planUnitAmt > guidAmt
+							</isEqual>
+						</isNotEmpty>
+					</isPropertyAvailable>
+					<isPropertyAvailable property="rageSphereCD">
+						<isNotEmpty prepend="and" property="rageSphereCD">
+							c.rageSphereCD = #rageSphereCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+					<isPropertyAvailable property="officeCD">
+						<isNotEmpty prepend="and" property="officeCD">
+							c.officeCD = #officeCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+					<isPropertyAvailable property="kindTpCD5">
+						<isNotEmpty prepend="and" property="kindTpCD5">
+							f.kindTpCD5 = #kindTpCD5#
+						</isNotEmpty>
+					</isPropertyAvailable>
+					<isPropertyAvailable property="apprStateCD">
+						<isNotEmpty prepend="and" property="apprStateCD">
+							a.apprStateCD = #apprStateCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+					<isPropertyAvailable property="dkmdTpCD">
+						<isNotEmpty prepend="and" property="dkmdTpCD">
+							b.dkmdTpCD = #dkmdTpCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+			) t
+		) t2
+		where 1=1
+			<isPropertyAvailable property="pageNum">
+				<isNotEmpty prepend="and" property="pageNum">
+					pageNum = #pageNum#
+				</isNotEmpty>
+			</isPropertyAvailable>
+	</select>
+	
+	<select id="PLN0200206S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			count(*) as "totalCount"
+		from (
+			select
+				activityCD
+				, c.rageSphereCD
+				, c.officeCD
+				, b.empID
+				, a.venueCD
+				, venueNm
+				, venueGradCD
+				, segmentCD
+				, subSegmentCD
+				, addrTpCD1
+				, addrTpCD2
+				, kindTpCD5
+				, prdNm
+				, e.factoryPrice
+				, f.qtyUnitCD
+				, planQty
+				, planUnitAmt
+				, guidAmt
+				, payAmt
+				, gsvRate
+				, e.commt
+				, a.commt as apprCommt
+				, e.apprStateCD
+				, a.apprStateCD as apprStateCD_emp
+				, e.lapprLevelNo
+				, a.levelNo
+				, (
+					case when e.lapprLevelNo = a.levelNo then 'Y'
+					else 'N'
+					end
+				) as lastApprYN
+				, e.prdCD
+			from GPLN04MT a
+			inner join GPLN02MT b
+				on a.eventYM = b.eventYM
+				and a.venueCD = b.venueCD
+			inner join GEMP01MT c
+				on b.empID = c.empID
+			inner join GVEN01MT d
+				on a.venueCD = d.venueCD
+			inner join GPLN02DT e
+				on a.eventYM = e.eventYM
+				and a.venueCD = e.venueCD	
+				and a.prdCD = e.prdCD
+			inner join GPRD01MT f
+				on a.prdCD = f.prdCD		
+			where
+				a.eventYM = #eventYM#
+				and a.empID = #empID#
+				and a.apprStateCD in (
+					select comCode
+					from F_CODE
+					where
+						codediv='APPRSTATECD'
+						and activeFlg = 'U'
+						and useYN = 'Y'
+						and attrib02 = 'MNG'
+				)
+				<isPropertyAvailable property="activityCD">
+					<isNotEmpty prepend="and" property="activityCD">
+						activityCD = #activityCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="venueGradCD">
+					<isNotEmpty prepend="and" property="venueGradCD">
+						venueGradCD = #venueGradCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="segmentCD">
+					<isNotEmpty prepend="and" property="segmentCD">
+						segmentCD = #segmentCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="subSegmentCD">
+					<isNotEmpty prepend="and" property="subSegmentCD">
+						subSegmentCD = #subSegmentCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="overGuidAmt">
+					<isNotEmpty prepend="and" property="overGuidAmt">
+						<isEqual property="overGuidAmt" compareValue="Y">
+							planUnitAmt > guidAmt
+						</isEqual>
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="rageSphereCD">
+					<isNotEmpty prepend="and" property="rageSphereCD">
+						c.rageSphereCD = #rageSphereCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="officeCD">
+					<isNotEmpty prepend="and" property="officeCD">
+						c.officeCD = #officeCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="kindTpCD5">
+					<isNotEmpty prepend="and" property="kindTpCD5">
+						f.kindTpCD5 = #kindTpCD5#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="apprStateCD">
+					<isNotEmpty prepend="and" property="apprStateCD">
+						a.apprStateCD = #apprStateCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="dkmdTpCD">
+					<isNotEmpty prepend="and" property="dkmdTpCD">
+						b.dkmdTpCD = #dkmdTpCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+		) t
+	</select>
+	
+	<!-- 상위승인자 정보 -->
+	<select id="PLN0200202S" parameterClass="com.kia.pln.model.GPLN02MT" resultClass="java.util.LinkedHashMap">
+		select
+			levelNo as "levelNo"
+			, a.empID as "empID"
+			, empNm as "empNm"
+			, emailAddr as "emailAddr"
+		from GPLN04MT a
+		inner join GEMP01MT b
+			on a.empID = b.empID
+		where
+			a.eventYM = #eventYM#
+			and a.venueCD = #venueCD#
+			and a.levelNo = #levelNo#+1
+			and a.prdCD = #prdCD#
+	</select>
+	
+	<!-- plan정보 승인상태 갱신 -->
+	<update id="PLN0200201U" parameterClass="com.kia.pln.model.GPLN02MT">
+		update GPLN02DT
+		set
+			apprStateCD = #apprStateCD#
+			, chgID = #userID#
+			, chgDate = sysdate
+		where
+			eventYM = #eventYM#
+			and venueCD = #venueCD#
+			and prdCD = #prdCD#
+	</update>
+	
+	<!-- plan승인정보 승인처리 -->
+	<update id="PLN0200202U" parameterClass="com.kia.pln.model.GPLN02MT">
+		update GPLN04MT
+		set
+			apprStateCD = '50'
+			, commt = #apprCommt#
+			, apprDate = sysdate
+			, chgID = #userID#
+			, chgDate = sysdate
+		where
+			eventYM = #eventYM#
+			and venueCD = #venueCD#
+			and levelNo = #levelNo#
+			and prdCD = #prdCD#
+	</update>
+	
+	<!-- plan승인정보 상위자 승인요청처리 -->
+	<update id="PLN0200203U" parameterClass="com.kia.pln.model.GPLN02MT">
+		update GPLN04MT
+		set
+			apprStateCD = '20'
+			, chgID = #userID#
+			, chgDate = sysdate
+		where
+			eventYM = #eventYM#
+			and venueCD = #venueCD#
+			and levelNo = #levelNo#+1
+			and prdCD = #prdCD#
+	</update>
+	
+	<!-- 최종승인시 메일보낼 하위승인자들 정보(자신제외) -->
+	<select id="PLN0200203S" parameterClass="com.kia.pln.model.GPLN02MT" resultClass="java.util.LinkedHashMap">
+		select
+			empID as "empID"
+			, max(empNm) as "empNm"
+			, max(emailAddr) as "emailAddr"
+		from (
+			select
+				b.empID
+				, empNm
+				, emailAddr
+			from GPLN02MT a
+			inner join GPLN04MT b
+				on a.eventYM = b.eventYM
+				and a.venueCD = b.venueCD
+			inner join GEMP01MT c
+				on b.empID = c.empID
+			where
+				a.eventYM = #eventYM#
+				and a.venueCD in
+	    		<iterate property="venueCDs" open="(" close=")" conjunction=",">
+					#venueCDs[]#
+		     	</iterate>
+				and b.empID != #empID#
+				and b.prdCD in
+	    		<iterate property="prdCDs" open="(" close=")" conjunction=",">
+					#prdCDs[]#
+		     	</iterate>
+		)
+		group by empID
+	</select>
+	
+	<!-- 반려시 메일보낼 하위승인자들 정보(상태가 비어있거나, 승인요청인 사람 제외) -->
+	<select id="PLN0200204S" parameterClass="com.kia.pln.model.GPLN02MT" resultClass="java.util.LinkedHashMap">
+		select
+			empID as "empID"
+			, max(empNm) as "empNm"
+			, max(emailAddr) as "emailAddr"
+		from (
+			select
+				b.empID
+				, empNm
+				, emailAddr
+				, b.apprStateCD
+			from GPLN02MT a
+			inner join GPLN04MT b
+				on a.eventYM = b.eventYM
+				and a.venueCD = b.venueCD
+			inner join GEMP01MT c
+				on b.empID = c.empID
+			where
+				a.eventYM = #eventYM#
+				and a.venueCD in
+				<iterate property="venueCDs" open="(" close=")" conjunction=",">
+					#venueCDs[]#
+		     	</iterate>
+				and (b.apprStateCD is not null and b.apprStateCD != '20')
+				and b.prdCD in
+	    		<iterate property="prdCDs" open="(" close=")" conjunction=",">
+					#prdCDs[]#
+		     	</iterate>
+		)
+		group by empID
+	</select>
+	
+	<!-- plan승인정보 하위자 반려처리 -->
+	<update id="PLN0200204U" parameterClass="com.kia.pln.model.GPLN02MT">
+		update GPLN04MT
+		set
+			apprStateCD = #apprStateCD#
+			, apprDate = sysdate
+			, commt = #apprCommt#
+			, chgID = #userID#
+			, chgDate = sysdate
+		where
+			eventYM = #eventYM#
+			and venueCD = #venueCD#
+			and empID = #empID#
+			and prdCD = #prdCD#
+	</update>
+
+	<update id="PLN0200205U" parameterClass="com.kia.pln.model.GPLN02MT">
+		merge into GPLN02DT t1
+		using
+		(
+			select                                                                                                                                      
+				 #eventYM# as eventYM
+				, x1.venueCD
+		        , prdCD
+			from GMIL01MT x1
+		    inner join GMIL01DT x2
+		    on x1.mileageID = x2.mileageID
+			where
+				venuecd = #venueCD#
+			and prdCD = #prdCD#
+			and #eventYM# between contractDateFrom and contractDateTo
+			and mileageStateCd = '50'
+			group by x1.venueCD, prdCD
+		) t2
+		on
+		(
+			t1.eventYM = t2.eventYM
+			and t1.venueCD = t2.venueCD
+      		and t1.prdCD = t2.prdCD
+		)
+		when matched then
+			update
+			set
+				t1.mileageYN = 'Y'
+	</update>	
+	<!-- Plan승인 엑셀 조회 -->
+	<select id="PLN0200205S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			getLangDesc(#companyID#,#languageCD#,'F_CODE','ACTIVITYCD',activityCD,null) as "activityCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','RAGESPHERECD',rageSphereCD,null) as "rageSphereCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','OFFICECD',officeCD,null) as "officeCDName"
+			<isPropertyAvailable property="grpID">
+				<isNotEmpty property="grpID">
+			, (case when (select dkmdtpcd from GEMP01MT where empID=t.empID) != 'DK' then '' else (select empNm from GEMP01MT where empID=t.empID) end) as "empNm"
+				</isNotEmpty>
+				<isEmpty property="grpID">
+			, (select empNm from GEMP01MT where empID=t.empID) as "empNm"
+				</isEmpty>
+			</isPropertyAvailable>
+			, venueCD as "venueCD"
+			, venueNm as "venueNm"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','VENUEGRADCD',venueGradCD,null) as "venueGradCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SEGMENTCD',segmentCD,null) as "segmentCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SUBSEGMENTCD',subSegmentCD,null) as "subSegmentCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD1',addrTpCD1,null) as "addrTpCD1Name"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD2',addrTpCD2,null) as "addrTpCD2Name"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','KINDTPCD5',kindTpCD5,null) as "kindTpCD5Name"
+			, prdNm as "prdNm"
+			, factoryPrice as "factoryPrice"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','QTYUNITCD',qtyUnitCD,null) as "qtyUnitCDName"
+			, planQty as "planQty"
+			, planUnitAmt as "planUnitAmt"
+			, guidAmt as "guidAmt"
+			, payAmt as "payAmt"
+			, gsvRate as "gsvRate"
+			, commt as "commt"
+			, apprCommt as "apprCommt"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','APPRSTATECD',apprStateCD_emp,null) as "apprStateCDName_emp"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','APPRSTATECD',apprStateCD,null) as "apprStateCDName"
+			, apprStateCD as "apprStateCD"
+			, apprStateCD_emp as "apprStateCD_emp"
+			, lapprLevelNo as "lapprLevelNo"
+			, levelNo as "levelNo"
+			, lastApprYN as "lastApprYN"
+			, prdCD as "prdCD"
+		from (
+			select
+				activityCD
+				, c.rageSphereCD
+				, c.officeCD
+				, b.empID
+				, a.venueCD
+				, venueNm
+				, venueGradCD
+				, segmentCD
+				, subSegmentCD
+				, addrTpCD1
+				, addrTpCD2
+				, kindTpCD5
+				, prdNm
+				, e.factoryPrice
+				, f.qtyUnitCD
+				, planQty
+				, planUnitAmt
+				, guidAmt
+				, payAmt
+				, gsvRate
+				, e.commt
+				, a.commt as apprCommt
+				, e.apprStateCD
+				, a.apprStateCD as apprStateCD_emp
+				, e.lapprLevelNo
+				, a.levelNo
+				, (
+					case when e.lapprLevelNo = a.levelNo then 'Y'
+					else 'N'
+					end
+				) as lastApprYN
+				, e.prdCD
+			from GPLN04MT a
+			inner join GPLN02MT b
+				on a.eventYM = b.eventYM
+				and a.venueCD = b.venueCD
+			inner join GEMP01MT c
+				on b.empID = c.empID
+			inner join GVEN01MT d
+				on a.venueCD = d.venueCD
+			inner join GPLN02DT e
+				on a.eventYM = e.eventYM
+				and a.venueCD = e.venueCD	
+				and a.prdCD = e.prdCD
+			inner join GPRD01MT f
+				on a.prdCD = f.prdCD		
+			where
+				a.eventYM = #eventYM#
+				and a.empID = #empID#
+				and a.apprStateCD in (
+					select comCode
+					from F_CODE
+					where
+						codediv='APPRSTATECD'
+						and activeFlg = 'U'
+						and useYN = 'Y'
+						and attrib02 = 'MNG'
+				)
+				<isPropertyAvailable property="activityCD">
+					<isNotEmpty prepend="and" property="activityCD">
+						activityCD = #activityCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="venueGradCD">
+					<isNotEmpty prepend="and" property="venueGradCD">
+						venueGradCD = #venueGradCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="segmentCD">
+					<isNotEmpty prepend="and" property="segmentCD">
+						segmentCD = #segmentCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="subSegmentCD">
+					<isNotEmpty prepend="and" property="subSegmentCD">
+						subSegmentCD = #subSegmentCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="overGuidAmt">
+					<isNotEmpty prepend="and" property="overGuidAmt">
+						<isEqual property="overGuidAmt" compareValue="Y">
+							planUnitAmt > guidAmt
+						</isEqual>
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="rageSphereCD">
+					<isNotEmpty prepend="and" property="rageSphereCD">
+						c.rageSphereCD = #rageSphereCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="officeCD">
+					<isNotEmpty prepend="and" property="officeCD">
+						c.officeCD = #officeCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="kindTpCD5">
+					<isNotEmpty prepend="and" property="kindTpCD5">
+						f.kindTpCD5 = #kindTpCD5#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="apprStateCD">
+					<isNotEmpty prepend="and" property="apprStateCD">
+						a.apprStateCD = #apprStateCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="dkmdTpCD">
+					<isNotEmpty prepend="and" property="dkmdTpCD">
+						b.dkmdTpCD = #dkmdTpCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+		) t
+		order by 
+			rageSphereCD, 
+			officeCD, 
+			empID, 
+			venueCD, 
+			prdCD
+	</select>
+
+	<select id="PLN0200207S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+		<!-- 
+			DECODE(apprStateCDName,'','',getLangDesc(#companyID#,#languageCD#,'F_CODE','RAGESPHERECD',rageSphereCD,null)) as "rageSphereCDName"
+			,DECODE(apprStateCDName,'','',getLangDesc(#companyID#,#languageCD#,'F_CODE','OFFICECD',officeCD,null)) as "officeCDName"
+		 -->
+		 	DECODE(rageSphereCD,'9999','미지정권역',x1.codename) as "rageSphereCDName"
+			,DECODE(officeCD,'9999','미지정지점',x2.codename) as "officeCDName"
+			,type as "type"
+			,apprStateCDName as "apprStateCDName"
+			,tpayAmt * GETTAXBASE() as "tpayAmt"
+			,planTQty as "planTQty"
+			,avgUnitAmt as "avgUnitAmt"
+			,gsvRate as "gsvRate"
+			,apprStateCD as "apprStateCD"
+			,monthSeq as "monthSeq"
+		from
+		(
+		select
+			nvl(rageSphereCD, '9999') as rageSphereCD
+            , nvl(officeCD, '9999') as officeCD
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','KINDTPCD5',kindTpCD5,null) as type
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','APPRSTATECD',apprStateCD,null) as apprStateCDName
+			, sum(payAmt) as tpayAmt
+			, sum(planQty) as planTQty
+	        , (       case 
+	                    when sum(planQty)=0 then 0       
+	                    else round(sum(payAmt) / sum(planQty))       
+	                end      ) as avgUnitAmt
+	        , (		case 
+	                    when sum(planQty_factoryPrice)=0 then 0       
+	                    else 
+	        ((sum(payAmt)*(1+0.0352)) / sum(planQty_factoryPrice)) * 100 end) as gsvRate
+			, apprStateCD as apprStateCD
+			, kindTpCD5 as kindTpCD5
+			, '1' as orderBySeq
+			, '1' as monthSeq
+		from (
+				select
+					c.rageSphereCD
+					, c.officeCD
+					, kindTpCD5
+					, planQty
+					, payAmt
+					, e.apprStateCD
+					, e.prdCD
+					, e.planQty*e.factoryPrice as planQty_factoryPrice
+				from GPLN04MT a
+				inner join GPLN02MT b
+					on a.eventYM = b.eventYM
+					and a.venueCD = b.venueCD
+				inner join GEMP01MT c
+					on b.empID = c.empID
+				inner join GVEN01MT d
+					on a.venueCD = d.venueCD
+				inner join GPLN02DT e
+					on a.eventYM = e.eventYM
+					and a.venueCD = e.venueCD	
+					and a.prdCD = e.prdCD
+				inner join GPRD01MT f
+					on a.prdCD = f.prdCD		
+				where
+					a.eventYM = #eventYM#
+					and a.empID = #empID#
+					and a.apprStateCD in (
+						select comCode
+						from F_CODE
+						where
+							codediv='APPRSTATECD'
+							and activeFlg = 'U'
+							and useYN = 'Y'
+							and attrib02 = 'MNG'
+					)
+				union all
+				select
+					c.rageSphereCD,
+					c.officeCD,
+					f.kindTpCD5  ,
+					planQty      ,
+	                payAmt      ,
+	                b.apprStateCD      ,
+	                e.prdCD,
+	                e.planQty*e.factoryPrice as planQty_factoryPrice
+	            from
+	                GPLN03MT a     
+	            inner join
+	                GPLN01MT b      
+	                    on a.eventYM = b.eventYM      
+	                    and a.venueCD = b.venueCD     
+	            inner join
+	                GEMP01MT c      
+	                    on b.empID = c.empID     
+	            inner join
+	                GVEN01MT d      
+	                    on a.venueCD = d.venueCD     
+	            inner join
+	                GPLN01DT e      
+	                    on b.eventYM = e.eventYM      
+	                    and b.venueCD = e.venueCD
+	            inner join
+	                GPRD01MT f     
+	                    on e.prdCD = f.prdCD
+	            where
+	                a.eventYM =  #eventYM#
+	                and a.empID =  #empID#
+	                and a.apprStateCD in (
+	                    select
+	                        comCode       
+	                    from
+	                        F_CODE       
+	                    where
+	                        codediv='APPRSTATECD'        
+	                        and activeFlg = 'U'        
+	                        and useYN = 'Y'        
+	                        and attrib02 = 'MNG'      
+	                ) 
+			) t
+			group by rageSphereCD, officeCD, kindTpCD5, apprStateCD
+		union all
+		select
+			nvl(rageSphereCD, '9999') as rageSphereCD
+            , nvl(officeCD, '9999') as officeCD
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','OFFICECD',officeCD,null)||'지점 합계'
+	        , '' as apprStateCDName
+			, sum(payAmt) as tpayAmt
+			, sum(planQty) as planTQty
+	        , (       case 
+	                    when sum(planQty)=0 then 0       
+	                    else round(sum(payAmt) / sum(planQty))       
+	                end      ) as avgUnitAmt
+	        , (		case 
+	                    when sum(planQty_factoryPrice)=0 then 0       
+	                    else 
+	        ((sum(payAmt)*(1+0.0352)) / sum(planQty_factoryPrice)) * 100 end) as gsvRate
+			, '' as apprStateCD
+			, '' as kindTpCD5
+			, '2' as orderBySeq
+			, '1' as monthSeq
+		from (
+				select
+					c.rageSphereCD
+					, c.officeCD
+					, kindTpCD5
+					, planQty
+					, payAmt
+					, e.apprStateCD
+					, e.prdCD
+					, e.planQty*e.factoryPrice as planQty_factoryPrice
+				from GPLN04MT a
+				inner join GPLN02MT b
+					on a.eventYM = b.eventYM
+					and a.venueCD = b.venueCD
+				inner join GEMP01MT c
+					on b.empID = c.empID
+				inner join GVEN01MT d
+					on a.venueCD = d.venueCD
+				inner join GPLN02DT e
+					on a.eventYM = e.eventYM
+					and a.venueCD = e.venueCD	
+					and a.prdCD = e.prdCD
+				inner join GPRD01MT f
+					on a.prdCD = f.prdCD		
+				where
+					a.eventYM = #eventYM#
+					and a.empID = #empID#
+					and a.apprStateCD in (
+						select comCode
+						from F_CODE
+						where
+							codediv='APPRSTATECD'
+							and activeFlg = 'U'
+							and useYN = 'Y'
+							and attrib02 = 'MNG'
+					)
+				union all
+				select
+					c.rageSphereCD,
+					c.officeCD,
+					f.kindTpCD5,
+					planQty      ,
+	                payAmt      ,
+	                b.apprStateCD       ,
+	                e.prdCD,
+	                e.planQty*e.factoryPrice as planQty_factoryPrice  
+	            from
+	                GPLN03MT a     
+	            inner join
+	                GPLN01MT b      
+	                    on a.eventYM = b.eventYM      
+	                    and a.venueCD = b.venueCD     
+	            inner join
+	                GEMP01MT c      
+	                    on b.empID = c.empID     
+	            inner join
+	                GVEN01MT d      
+	                    on a.venueCD = d.venueCD     
+	            inner join
+	                GPLN01DT e      
+	                    on b.eventYM = e.eventYM      
+	                    and b.venueCD = e.venueCD
+	            inner join
+	                GPRD01MT f     
+	                    on e.prdCD = f.prdCD
+	            where
+	                a.eventYM =  #eventYM# 
+	                and a.empID =  #empID# 
+	                and a.apprStateCD in (
+	                    select
+	                        comCode       
+	                    from
+	                        F_CODE       
+	                    where
+	                        codediv='APPRSTATECD'        
+	                        and activeFlg = 'U'        
+	                        and useYN = 'Y'        
+	                        and attrib02 = 'MNG'      
+	                ) 
+			) t
+			group by rageSphereCD, officeCD
+		union all
+		select
+			nvl(rageSphereCD, '9999') as rageSphereCD
+            , nvl(officeCD, '9999') as officeCD
+			, DECODE(officeCD,null,'미지정',getLangDesc(#companyID#,#languageCD#,'F_CODE','OFFICECD',officeCD,null))||'지점 '||substr(max(eventYM),1,4)||'년'||substr(max(eventYM),5,2)||'월(전월) 승인합계'
+	        , '' as "apprStateCDName"
+			, sum(payAmt) as tpayAmt
+			, sum(planQty) as planTQty
+	        , (       case 
+	                    when sum(planQty)=0 then 0       
+	                    else round(sum(payAmt) / sum(planQty))       
+	                end      ) as avgUnitAmt
+	        , (		case 
+	                    when sum(planQty_factoryPrice)=0 then 0       
+	                    else 
+	        ((sum(payAmt)*(1+0.0352)) / sum(planQty_factoryPrice)) * 100 end) as gsvRate
+			, '' as apprStateCD
+			, '' as kindTpCD5
+			, '3' as orderBySeq
+			, '2' as monthSeq
+		from (
+				select
+					c.rageSphereCD
+					, c.officeCD
+					, kindTpCD5
+					, planQty
+					, payAmt
+					, e.apprStateCD
+					, e.prdCD
+					, e.planQty*e.factoryPrice as planQty_factoryPrice
+					, a.eventYM
+				from GPLN04MT a
+				inner join GPLN02MT b
+					on a.eventYM = b.eventYM
+					and a.venueCD = b.venueCD
+				inner join GEMP01MT c
+					on b.empID = c.empID
+				inner join GVEN01MT d
+					on a.venueCD = d.venueCD
+				inner join GPLN02DT e
+					on a.eventYM = e.eventYM
+					and a.venueCD = e.venueCD	
+					and a.prdCD = e.prdCD
+				inner join GPRD01MT f
+					on a.prdCD = f.prdCD		
+				where
+					a.eventYM = #eventYMBefore#
+					and a.empID = #empID#
+					and a.apprStateCD in (
+						select comCode
+						from F_CODE
+						where
+							codediv='APPRSTATECD'
+							and activeFlg = 'U'
+							and useYN = 'Y'
+							and attrib02 = 'MNG'
+					)
+				and        a.apprStateCD =  '50'
+				union all
+				select
+					c.rageSphereCD,
+					c.officeCD,
+					f.kindTpCD5,
+					planQty      ,
+	                payAmt      ,
+	                b.apprStateCD   ,
+	                a.eventYM	,
+	                e.planQty*e.factoryPrice as planQty_factoryPrice
+	                ,a.eventYM
+	            from
+	                GPLN03MT a     
+	            inner join
+	                GPLN01MT b      
+	                    on a.eventYM = b.eventYM      
+	                    and a.venueCD = b.venueCD     
+	            inner join
+	                GEMP01MT c      
+	                    on b.empID = c.empID     
+	            inner join
+	                GVEN01MT d      
+	                    on a.venueCD = d.venueCD     
+	            inner join
+	                GPLN01DT e      
+	                    on b.eventYM = e.eventYM      
+	                    and b.venueCD = e.venueCD
+	            inner join
+	                GPRD01MT f     
+	                    on e.prdCD = f.prdCD
+	            where
+	                a.eventYM =  #eventYMBefore#
+	                and a.empID =  #empID#
+	                and a.apprStateCD in (
+	                    select
+	                        comCode       
+	                    from
+	                        F_CODE       
+	                    where
+	                        codediv='APPRSTATECD'        
+	                        and activeFlg = 'U'        
+	                        and useYN = 'Y'        
+	                        and attrib02 = 'MNG'      
+	                )                                                                                                                                                  
+	                and        a.apprStateCD =  '50'
+			) t
+			group by rageSphereCD, officeCD
+			union all
+			select
+			nvl(rageSphereCD, '9999') as rageSphereCD
+            ,'' as officeCD
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','RAGESPHERECD',rageSphereCD,null)||'합계'
+	        , '' as apprStateCDName
+			, sum(payAmt) as tpayAmt
+			, sum(planQty) as planTQty
+	        , (       case 
+	                    when sum(planQty)=0 then 0       
+	                    else round(sum(payAmt) / sum(planQty))       
+	                end      ) as avgUnitAmt
+	        , (		case 
+	                    when sum(planQty_factoryPrice)=0 then 0       
+	                    else 
+	        ((sum(payAmt)*(1+0.0352)) / sum(planQty_factoryPrice)) * 100 end) as gsvRate
+			, '' as apprStateCD
+			, '' as kindTpCD5
+			, '2' as orderBySeq
+			, '1' as monthSeq
+		from (
+				select
+					c.rageSphereCD
+					, c.officeCD
+					, kindTpCD5
+					, planQty
+					, payAmt
+					, e.apprStateCD
+					, e.prdCD
+					, e.planQty*e.factoryPrice as planQty_factoryPrice
+				from GPLN04MT a
+				inner join GPLN02MT b
+					on a.eventYM = b.eventYM
+					and a.venueCD = b.venueCD
+				inner join GEMP01MT c
+					on b.empID = c.empID
+				inner join GVEN01MT d
+					on a.venueCD = d.venueCD
+				inner join GPLN02DT e
+					on a.eventYM = e.eventYM
+					and a.venueCD = e.venueCD	
+					and a.prdCD = e.prdCD
+				inner join GPRD01MT f
+					on a.prdCD = f.prdCD		
+				where
+					a.eventYM = #eventYM#
+					and a.empID = #empID#
+					and a.apprStateCD in (
+						select comCode
+						from F_CODE
+						where
+							codediv='APPRSTATECD'
+							and activeFlg = 'U'
+							and useYN = 'Y'
+							and attrib02 = 'MNG'
+					)
+				union all
+				select
+					c.rageSphereCD,
+					c.officeCD,
+					f.kindTpCD5,
+					planQty      ,
+	                payAmt      ,
+	                b.apprStateCD       ,
+	                e.prdCD,
+	                e.planQty*e.factoryPrice as planQty_factoryPrice  
+	            from
+	                GPLN03MT a     
+	            inner join
+	                GPLN01MT b      
+	                    on a.eventYM = b.eventYM      
+	                    and a.venueCD = b.venueCD     
+	            inner join
+	                GEMP01MT c      
+	                    on b.empID = c.empID     
+	            inner join
+	                GVEN01MT d      
+	                    on a.venueCD = d.venueCD     
+	            inner join
+	                GPLN01DT e      
+	                    on b.eventYM = e.eventYM      
+	                    and b.venueCD = e.venueCD
+	            inner join
+	                GPRD01MT f     
+	                    on e.prdCD = f.prdCD
+	            where
+	                a.eventYM =  #eventYM# 
+	                and a.empID =  #empID# 
+	                and a.apprStateCD in (
+	                    select
+	                        comCode       
+	                    from
+	                        F_CODE       
+	                    where
+	                        codediv='APPRSTATECD'        
+	                        and activeFlg = 'U'        
+	                        and useYN = 'Y'        
+	                        and attrib02 = 'MNG'      
+	                ) 
+			) t
+			group by rageSphereCD
+		union all
+		select
+			nvl(rageSphereCD, '9999') as rageSphereCD
+            , '' as officeCD
+			,  DECODE(rageSphereCD,null,'미지정 권역',getLangDesc(#companyID#,#languageCD#,'F_CODE','RAGESPHERECD',rageSphereCD,null))||' '||substr(max(eventYM),1,4)||'년'||substr(max(eventYM),5,2)||'월(전월) 승인합계'
+	        , '' as "apprStateCDName"
+			, sum(payAmt) as tpayAmt
+			, sum(planQty) as planTQty
+	        , (       case 
+	                    when sum(planQty)=0 then 0       
+	                    else round(sum(payAmt) / sum(planQty))       
+	                end      ) as avgUnitAmt
+	        , (		case 
+	                    when sum(planQty_factoryPrice)=0 then 0       
+	                    else 
+	        ((sum(payAmt)*(1+0.0352)) / sum(planQty_factoryPrice)) * 100 end) as gsvRate
+			, '' as apprStateCD
+			, '' as kindTpCD5
+			, '3' as orderBySeq
+			, '2' as monthSeq
+		from (
+				select
+					c.rageSphereCD
+					, c.officeCD
+					, kindTpCD5
+					, planQty
+					, payAmt
+					, e.apprStateCD
+					, e.prdCD
+					, e.planQty*e.factoryPrice as planQty_factoryPrice
+					, a.eventYM
+				from GPLN04MT a
+				inner join GPLN02MT b
+					on a.eventYM = b.eventYM
+					and a.venueCD = b.venueCD
+				inner join GEMP01MT c
+					on b.empID = c.empID
+				inner join GVEN01MT d
+					on a.venueCD = d.venueCD
+				inner join GPLN02DT e
+					on a.eventYM = e.eventYM
+					and a.venueCD = e.venueCD	
+					and a.prdCD = e.prdCD
+				inner join GPRD01MT f
+					on a.prdCD = f.prdCD		
+				where
+					a.eventYM = #eventYMBefore#
+					and a.empID = #empID#
+					and a.apprStateCD in (
+						select comCode
+						from F_CODE
+						where
+							codediv='APPRSTATECD'
+							and activeFlg = 'U'
+							and useYN = 'Y'
+							and attrib02 = 'MNG'
+					)
+				and        a.apprStateCD =  '50'
+				union all
+				select
+					c.rageSphereCD,
+					c.officeCD,
+					f.kindTpCD5,
+					planQty      ,
+	                payAmt      ,
+	                b.apprStateCD   ,
+	                a.eventYM	,
+	                e.planQty*e.factoryPrice as planQty_factoryPrice
+	                ,a.eventYM
+	            from
+	                GPLN03MT a     
+	            inner join
+	                GPLN01MT b      
+	                    on a.eventYM = b.eventYM      
+	                    and a.venueCD = b.venueCD     
+	            inner join
+	                GEMP01MT c      
+	                    on b.empID = c.empID     
+	            inner join
+	                GVEN01MT d      
+	                    on a.venueCD = d.venueCD     
+	            inner join
+	                GPLN01DT e      
+	                    on b.eventYM = e.eventYM      
+	                    and b.venueCD = e.venueCD
+	            inner join
+	                GPRD01MT f     
+	                    on e.prdCD = f.prdCD
+	            where
+	                a.eventYM =  #eventYMBefore#
+	                and a.empID =  #empID#
+	                and a.apprStateCD in (
+	                    select
+	                        comCode       
+	                    from
+	                        F_CODE       
+	                    where
+	                        codediv='APPRSTATECD'        
+	                        and activeFlg = 'U'        
+	                        and useYN = 'Y'        
+	                        and attrib02 = 'MNG'      
+	                )                                                                                                                                                  
+	                and        a.apprStateCD =  '50'
+			) t
+			group by rageSphereCD
+			union all
+			select
+			'' as rageSphereCD
+			, '' as officeCD
+			, '총합계'
+	        , '' as apprStateCDName
+			, sum(payAmt) as tpayAmt
+			, sum(planQty) as planTQty
+	        , (       case 
+	                    when sum(planQty)=0 then 0       
+	                    else round(sum(payAmt) / sum(planQty))       
+	                end      ) as avgUnitAmt
+	        , (		case 
+	                    when sum(planQty_factoryPrice)=0 then 0       
+	                    else 
+	        ((sum(payAmt)*(1+0.0352)) / sum(planQty_factoryPrice)) * 100 end) as gsvRate
+			, '' as apprStateCD
+			, '' as kindTpCD5
+			, '2' as orderBySeq
+			, '1' as monthSeq
+		from (
+				select
+					c.rageSphereCD
+					, c.officeCD
+					, kindTpCD5
+					, planQty
+					, payAmt
+					, e.apprStateCD
+					, e.prdCD
+					, e.planQty*e.factoryPrice as planQty_factoryPrice
+				from GPLN04MT a
+				inner join GPLN02MT b
+					on a.eventYM = b.eventYM
+					and a.venueCD = b.venueCD
+				inner join GEMP01MT c
+					on b.empID = c.empID
+				inner join GVEN01MT d
+					on a.venueCD = d.venueCD
+				inner join GPLN02DT e
+					on a.eventYM = e.eventYM
+					and a.venueCD = e.venueCD	
+					and a.prdCD = e.prdCD
+				inner join GPRD01MT f
+					on a.prdCD = f.prdCD		
+				where
+					a.eventYM = #eventYM#
+					and a.empID = #empID#
+					and a.apprStateCD in (
+						select comCode
+						from F_CODE
+						where
+							codediv='APPRSTATECD'
+							and activeFlg = 'U'
+							and useYN = 'Y'
+							and attrib02 = 'MNG'
+					)
+				union all
+				select
+					c.rageSphereCD,
+					c.officeCD,
+					f.kindTpCD5,
+					planQty      ,
+	                payAmt      ,
+	                b.apprStateCD       ,
+	                e.prdCD,
+	                e.planQty*e.factoryPrice as planQty_factoryPrice  
+	            from
+	                GPLN03MT a     
+	            inner join
+	                GPLN01MT b      
+	                    on a.eventYM = b.eventYM      
+	                    and a.venueCD = b.venueCD     
+	            inner join
+	                GEMP01MT c      
+	                    on b.empID = c.empID     
+	            inner join
+	                GVEN01MT d      
+	                    on a.venueCD = d.venueCD     
+	            inner join
+	                GPLN01DT e      
+	                    on b.eventYM = e.eventYM      
+	                    and b.venueCD = e.venueCD
+	            inner join
+	                GPRD01MT f     
+	                    on e.prdCD = f.prdCD
+	            where
+	                a.eventYM =  #eventYM# 
+	                and a.empID =  #empID# 
+	                and a.apprStateCD in (
+	                    select
+	                        comCode       
+	                    from
+	                        F_CODE       
+	                    where
+	                        codediv='APPRSTATECD'        
+	                        and activeFlg = 'U'        
+	                        and useYN = 'Y'        
+	                        and attrib02 = 'MNG'      
+	                ) 
+			) t
+		union all
+		select
+			'' as rageSphereCD
+			, '' as officeCD
+			, substr(max(eventYM),1,4)||'년'||substr(max(eventYM),5,2)||'월(전월) 총 승인합계'
+	        , '' as "apprStateCDName"
+			, sum(payAmt) as tpayAmt
+			, sum(planQty) as planTQty
+	        , (       case 
+	                    when sum(planQty)=0 then 0       
+	                    else round(sum(payAmt) / sum(planQty))       
+	                end      ) as avgUnitAmt
+	        , (		case 
+	                    when sum(planQty_factoryPrice)=0 then 0       
+	                    else 
+	        ((sum(payAmt)*(1+0.0352)) / sum(planQty_factoryPrice)) * 100 end) as gsvRate
+			, '' as apprStateCD
+			, '' as kindTpCD5
+			, '3' as orderBySeq
+			, '2' as monthSeq
+		from (
+				select
+					c.rageSphereCD
+					, c.officeCD
+					, kindTpCD5
+					, planQty
+					, payAmt
+					, e.apprStateCD
+					, e.prdCD
+					, e.planQty*e.factoryPrice as planQty_factoryPrice
+					, a.eventYM
+				from GPLN04MT a
+				inner join GPLN02MT b
+					on a.eventYM = b.eventYM
+					and a.venueCD = b.venueCD
+				inner join GEMP01MT c
+					on b.empID = c.empID
+				inner join GVEN01MT d
+					on a.venueCD = d.venueCD
+				inner join GPLN02DT e
+					on a.eventYM = e.eventYM
+					and a.venueCD = e.venueCD	
+					and a.prdCD = e.prdCD
+				inner join GPRD01MT f
+					on a.prdCD = f.prdCD		
+				where
+					a.eventYM = #eventYMBefore#
+					and a.empID = #empID#
+					and a.apprStateCD in (
+						select comCode
+						from F_CODE
+						where
+							codediv='APPRSTATECD'
+							and activeFlg = 'U'
+							and useYN = 'Y'
+							and attrib02 = 'MNG'
+					)
+				and        a.apprStateCD =  '50'
+				union all
+				select
+					c.rageSphereCD,
+					c.officeCD,
+					f.kindTpCD5,
+					planQty      ,
+	                payAmt      ,
+	                b.apprStateCD   ,
+	                a.eventYM	,
+	                e.planQty*e.factoryPrice as planQty_factoryPrice
+	                ,a.eventYM
+	            from
+	                GPLN03MT a     
+	            inner join
+	                GPLN01MT b      
+	                    on a.eventYM = b.eventYM      
+	                    and a.venueCD = b.venueCD     
+	            inner join
+	                GEMP01MT c      
+	                    on b.empID = c.empID     
+	            inner join
+	                GVEN01MT d      
+	                    on a.venueCD = d.venueCD     
+	            inner join
+	                GPLN01DT e      
+	                    on b.eventYM = e.eventYM      
+	                    and b.venueCD = e.venueCD
+	            inner join
+	                GPRD01MT f     
+	                    on e.prdCD = f.prdCD
+	            where
+	                a.eventYM =  #eventYMBefore#
+	                and a.empID =  #empID#
+	                and a.apprStateCD in (
+	                    select
+	                        comCode       
+	                    from
+	                        F_CODE       
+	                    where
+	                        codediv='APPRSTATECD'        
+	                        and activeFlg = 'U'        
+	                        and useYN = 'Y'        
+	                        and attrib02 = 'MNG'      
+	                )                                                                                                                                                  
+	                and        a.apprStateCD =  '50'
+			) t
+		) x
+        left outer join f_code x1
+        on x.rageSphereCD = x1.comcode
+        and x1.codediv = 'RAGESPHERECD'
+        left outer join f_code x2
+        on x.officeCD = x2.comcode
+        and x2.codediv = 'OFFICECD'
+        order by monthSeq, rageSphereCD, officeCD, orderBySeq, kindTpCD5, apprStateCD
+	</select>
+</sqlMap>

@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="PAY04005">
+
+	<!-- Paging 구현쿼리 Header 조각 -->
+    <sql id="PAY04005.paging.header">
+        <isPropertyAvailable property="pageNum">
+        select p.* from (
+            select
+    	        count(*) over() as "totalCount",
+    	</isPropertyAvailable>
+    	<isNotPropertyAvailable property="pageNum">
+    		select
+    	</isNotPropertyAvailable>
+    </sql>
+    
+    <!-- Paging 구현쿼리 Header 조각 -->
+    <sql id="PAY04005.paging.footer">
+        <isPropertyAvailable property="pageNum">
+        ) p
+		where
+			p.pageNum = #pageNum#
+		</isPropertyAvailable>
+    </sql>
+	
+	<!-- 지급처리 리스트 조회 -->
+	<select id="PAY0400501S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		<include refid="PAY04005.paging.header"/>
+			rank() over(order by dkmdTpCD, rageSphereCD, officeCD, teamCD, empID, venueCD, prdCD) as "rowNum"
+			, floor((rank() over(order by dkmdTpCD, rageSphereCD, officeCD, teamCD, empID, venueCD, prdCD)-1)/#displayNum#+1) as pageNum
+			, dkmdTpCD as "dkmdTpCD"
+			, teamCD as "teamCD"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ACTIVITYCD',activityCD,null) as "activityCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','RAGESPHERECD',rageSphereCD,null) as "rageSphereCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','OFFICECD',officeCD,null) as "officeCDName"
+			<isPropertyAvailable property="grpID">
+				<isNotEmpty property="grpID">
+			, (case when (select dkmdtpcd from GEMP01MT where empID=t.empID) != 'DK' then '' else (select empNm from GEMP01MT where empID=t.empID) end) as "empNm"
+				</isNotEmpty>
+				<isEmpty property="grpID">
+			, (select empNm from GEMP01MT where empID=t.empID) as "empNm"
+				</isEmpty>
+			</isPropertyAvailable>
+			, venueCD as "venueCD"
+			, venueNm as "venueNm"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','VENUEGRADCD',venueGradCD,null) as "venueGradCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SEGMENTCD',segmentCD,null) as "segmentCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SUBSEGMENTCD',subSegmentCD,null) as "subSegmentCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD1',addrTpCD1,null) as "addrTpCD1Name"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD2',addrTpCD2,null) as "addrTpCD2Name"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','KINDTPCD5',kindTpCD5,null) as "kindTpCD5Name"
+			, prdNm as "prdNm"
+			, payAmt as "payAmt"
+			, keymanNm as "keymanName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','BANKCD',bankCD,null) as "bankCDName"
+			, accountNo as "accountNo"
+			, payApprDate as "payApprDate"
+			, payCommt as "payCommt"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','PAYSTATECD',payStateCD,null) as "payStateCDName"
+			, payStateCD as "payStateCD"
+			, prdCD as "prdCD"
+			, keymanID as "keymanID"
+			, bankCD as "bankCD"
+			, holderNm as "holderNm"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','KEYCHKYN',GETKEYMANCHK(#eventYM#,venueCD, prdCD) ,null) as "keyChkYN"
+			, GETKEYMANCHK(#eventYM#,venueCD, prdCD) as "keyChkYNCD"
+		from (
+			select
+				a.dkmdTpCD
+				, a.teamCD
+				, a.activityCD
+				, a.rageSphereCD
+				, a.officeCD
+				, a.empID
+				, a.venueCD
+				, B.venueNm
+				, b.venueGradCD
+				, b.segmentCD
+				, b.subSegmentCD
+				, b.addrTpCD1
+				, b.addrTpCD2
+				, d.kindTpCD5
+				, d.prdNm
+				, c.payAmt
+				, e.keymanNm
+				, c.keymanID
+				, c.bankCD
+				, c.accountNo
+				, c.payApprDate
+				, c.payCommt
+				, c.payStateCD
+				, c.prdCD
+				, c.holderNm
+				, c.keyChkYN
+			from GRLT02MT a
+			inner join GVEN01MT b
+				on a.venueCD = b.venueCD
+			inner join GRLT02DT c
+				on a.eventYM = c.eventYM
+				and a.venueCD = c.venueCD	
+			inner join GPRD01MT	d
+				on c.prdCD = d.prdCD
+			left outer join GKEY01MT e
+				on c.keymanID = e.keymanID		
+			where
+				a.eventYM = #eventYM#
+			and a.programCD = 'G1'
+			and a.activityCD != '20'
+			<isPropertyAvailable property="dkmdTpCD">
+				<isNotEmpty prepend="and" property="dkmdTpCD">
+					a.dkmdTpCD = #dkmdTpCD#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="rageSphereCD">
+				<isNotEmpty prepend="and" property="rageSphereCD">
+					a.rageSphereCD = #rageSphereCD#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="officeCD">
+				<isNotEmpty prepend="and" property="officeCD">
+					a.officeCD = #officeCD#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="payStateCD">
+				<isNotEmpty prepend="and" property="payStateCD">
+					c.payStateCD = #payStateCD#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="keyChkYN">
+					<isNotEmpty prepend="and" property="keyChkYN">
+						c.keyChkYN = #keyChkYN#
+					</isNotEmpty>
+				</isPropertyAvailable>
+		) t
+		order by 
+			rageSphereCD, officeCD, empID, venueCD, prdCD
+		<include refid="PAY04005.paging.footer"/>
+	</select>
+	
+	<!-- 지급 승인 -->
+	<update id="PAY0400501U" parameterClass="com.kia.rlt.model.GRLT02MT">
+		update GRLT02DT
+		set
+			payStateCD = #payStateCD#
+			, payCommt = #payCommt#
+			, payApprDate = to_char(sysdate, 'YYYYMMDD')
+			, chgID = #userID#
+			, chgDate = sysdate
+		where
+			eventYM = #eventYM#
+		and venueCD = #venueCD#
+		and prdCD = #prdCD#
+	</update>
+	
+	<!-- 지급 반려 -->
+	<update id="PAY0400502U" parameterClass="com.kia.rlt.model.GRLT02MT">
+		update GRLT02DT
+		set
+			payStateCD = #payStateCD#
+			, payCommt = #payCommt#
+			, chgID = #userID#
+			, chgDate = sysdate
+		where
+			eventYM = #eventYM#
+		and venueCD = #venueCD#
+		and prdCD = #prdCD#
+	</update>
+
+	<!-- 20161018 반려시 메일보낼 하위승인자들 정보(상태가 비어있거나, 승인요청인 사람 제외) -->
+	<!-- 검증완료시 메일대상자(자신제외, apprTpID가 plan/result승인라인과 검증라인 합집합)
+	-->
+	<select id="PAY0400503S" parameterClass="com.kia.rlt.model.GRLT02MT" resultClass="java.util.LinkedHashMap">
+		select
+			empID as "empID"
+			, max(empNm) as "empNm"
+			, max(emailAddr) as "emailAddr"
+		from (
+			select
+				b.empID
+				, c.empNm
+				, c.emailAddr
+			from GRLT02DT a
+			inner join GRLT08MT b
+				on a.eventYM = b.eventYM
+				and a.venueCD = b.venueCD
+				and a.prdCD = b.prdCD
+			inner join GEMP01MT c
+				on b.empID = c.empID
+			where
+				a.eventYM = #eventYM#
+			and a.venueCD in
+			<iterate property="venueCDs" open="(" close=")" conjunction=",">
+				#venueCDs[]#
+			</iterate>
+			and b.apprTpID in (
+				#apprTpID#, #apprTpID_bef#
+			)
+			<!-- and (b.apprStateCD is not null and b.apprStateCD != '20') -->
+			<isPropertyAvailable property="empID">
+				<isNotEmpty prepend="and" property="empID">
+					b.empID != #empID#
+				</isNotEmpty>
+			</isPropertyAvailable>
+		)
+		group by empID
+	</select>
+</sqlMap>

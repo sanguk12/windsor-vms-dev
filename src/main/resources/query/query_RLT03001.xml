@@ -1,0 +1,853 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="RLT03001">
+	
+	<!-- Paging 구현쿼리 Header 조각 -->
+    <sql id="RLT03001.paging.header">
+        <isPropertyAvailable property="pageNum">
+        select p.* from (
+            select
+    	        count(*) over() as "totalCount",
+    	</isPropertyAvailable>
+    	<isNotPropertyAvailable property="pageNum">
+    		select
+    	</isNotPropertyAvailable>
+    </sql>
+    
+    <!-- Paging 구현쿼리 Header 조각 -->
+    <sql id="RLT03001.paging.footer">
+        <isPropertyAvailable property="pageNum">
+        ) p
+		where
+			p.pageNum = #pageNum#
+		</isPropertyAvailable>
+    </sql>
+	
+	<!-- 행사년월 차수등록 리스트 조회 -->
+	<select id="RLT0300101S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			eventYM as "eventYM"
+			, diffNo as "diffNo"
+			, applyDateFrom as "applyDateFrom"
+			, applyDateTo as "applyDateTo"
+		from (
+			select
+				eventYM
+				, diffNo
+				, applyDateFrom
+				, applyDateTo
+			from GRLT05MT
+			where
+				eventYM = #eventYM#
+		)
+		order by diffNo
+	</select>
+	
+	<!-- 저장시 실적반영기간 중복체크 -->
+	<select id="RLT0300102S" parameterClass="com.kia.rlt.model.GRLT05MT" resultClass="java.lang.Integer">
+		select
+			count(*)
+		from GRLT05MT
+		where
+			eventYM = #eventYM#
+			and (
+				#applyDateFrom# between applyDateFrom and applyDateTo
+				or #applyDateTo# between applyDateFrom and applyDateTo
+			)
+			<isPropertyAvailable property="diffNo">
+				<isNotEmpty property="diffNo">
+				and diffNo != #diffNo#
+				</isNotEmpty>
+			</isPropertyAvailable>
+	</select>
+	
+	<!-- 행사년월 차수등록 등록 -->
+	<insert id="RLT0300101I" parameterClass="com.kia.rlt.model.GRLT05MT">
+		insert into GRLT05MT (
+			eventYM
+			, diffNo
+			, applyDateFrom
+			, applyDateTo
+			, regID
+			, regDate
+		)
+		select
+			#eventYM#
+			, (select nvl(max(diffNo),0) from GRLT05MT where eventYM=#eventYM#)+1
+			, #applyDateFrom#
+			, #applyDateTo#
+			, #userID#
+			, sysdate
+		from dual
+	</insert>
+	
+	<!-- 행사년월 차수등록 수정 -->
+	<update id="RLT0300101U" parameterClass="com.kia.rlt.model.GRLT05MT">
+		update GRLT05MT
+		set
+			applyDateFrom = #applyDateFrom#
+			, applyDateTo = #applyDateTo#
+			, chgID = #userID#
+			, chgDate = sysdate
+		where
+			eventYM = #eventYM#
+			and diffNo = #diffNo#
+	</update>
+	
+	<!-- 행사년월 차수등록 상세 조회 -->
+	<select id="RLT0300103S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			eventYM as "eventYM"
+			, diffNo as "diffNo"
+			, applyDateFrom as "applyDateFrom"
+			, applyDateTo as "applyDateTo"
+		from (
+			select
+				eventYM
+				, diffNo
+				, applyDateFrom
+				, applyDateTo
+			from GRLT05MT
+			where
+				eventYM = #eventYM#
+				and diffNo = #diffNo#
+		)
+	</select>
+	
+	<!-- 삭제시 result 데이터 존재체크 -->
+	<select id="RLT0300104S" parameterClass="com.kia.rlt.model.GRLT05MT" resultClass="java.lang.Integer">
+		select
+			count(*)
+		from GRLT01MT
+		where
+			eventYM = #eventYM#
+			and diffNo = #diffNo#
+	</select>
+	
+	<!-- 행사년월 차수등록 삭제 -->
+	<delete id="RLT0300101D" parameterClass="com.kia.rlt.model.GRLT05MT">
+		delete from GRLT05MT
+		where
+			eventYM = #eventYM#
+			and diffNo = #diffNo#
+	</delete>
+	
+	<!-- 행사년월 차수등록 콤보 조회 -->
+	<select id="RLT0300105S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			diffNo
+			, (diffNo||'차 : '||applyDateFrom||' ~ '||applyDateTo) as diffNoName
+		from (
+			select
+				eventYM
+				, diffNo
+				, to_char(to_date(applyDateFrom, 'yyyymmdd'), 'yyyy.mm.dd') as applyDateFrom
+				, to_char(to_date(applyDateTo, 'yyyymmdd'), 'yyyy.mm.dd') as applyDateTo
+			from GRLT05MT
+			where
+				eventYM = #eventYM#
+		)
+		order by diffNo
+	</select>
+
+	<!-- G2 실적정보 생성조회 -->
+	<select id="RLT0300106S" parameterClass="com.kia.rlt.model.GRLT01MT" resultClass="java.util.LinkedHashMap">
+		select
+			a.venueCD as "venueCD"
+			, (
+				case when d.eventYM is null then 'I'
+				else 'U'
+				end
+			) as "activeFlg"
+			, d.apprStateCD as "apprStateCD"
+		from GPLN01MT a
+		inner join GVEN01MT b
+			on a.venueCD = b.venueCD
+		inner join GEMP01MT c
+			on a.empID = c.empID
+		left outer join GRLT01MT d
+			on a.eventYM = d.eventYM
+			and a.venueCD = d.venueCD
+			and diffNo = #diffNo#
+		where
+			a.eventYM = #eventYM#
+			<!-- 
+			and b.incntTpCD = #incntTpCD#
+			 -->
+			and a.apprStateCD = '50'
+			and a.programCD = 'G2'
+	</select>
+	
+	<!-- G2 실적정보 생성 업소단위 등록 -->
+	<insert id="RLT0300102I" parameterClass="com.kia.rlt.model.GRLT01MT">
+		insert into GRLT01MT (
+			eventYM
+			, venueCD
+			, diffNo
+			, dkmdTpCD
+			, empID
+			, rageSphereCD
+			, officeCD
+			, teamCD
+			, territoryCD
+			, programCD
+			, activityCD
+			, apprStateCD
+			, applyDateFrom
+			, applyDateTo
+			, regID
+			, regDate
+		)
+		select
+			eventYM
+			, venueCD
+			, diffNo
+			, (select dkmdTpCD from GEMP01MT where workStatCD='01' and territoryCD=t.territoryCD) as dkmdTpCD
+			, (select empID from GEMP01MT where workStatCD='01' and territoryCD=t.territoryCD) as empID
+			, (select rageSphereCD from GEMP01MT where workStatCD='01' and territoryCD=t.territoryCD) as rageSphereCD
+			, (select officeCD from GEMP01MT where workStatCD='01' and territoryCD=t.territoryCD) as officeCD
+			, (select teamCD from GEMP01MT where workStatCD='01' and territoryCD=t.territoryCD) as teamCD
+			, t.territoryCD
+			, programCD
+			, activityCD
+			, apprStateCD
+			, applyDateFrom
+			, applyDateTo
+			, #userID#
+			, sysdate
+		from (
+			select
+				a.eventYM
+				, a.venueCD
+				, (select territoryCD from GVEN01MT where venueCD=a.venueCD) as territoryCD
+				, #diffNo# as diffNo
+				, a.programCD
+				, a.activityCD
+				, '10' as apprStateCD
+				, (select applyDateFrom from GRLT05MT where eventYM=a.eventYM and diffNo=#diffNo#) as applyDateFrom
+				, (select applyDateTo from GRLT05MT where eventYM=a.eventYM and diffNo=#diffNo#) as applyDateTo
+			from GPLN01MT a
+			where
+				a.eventYM = #eventYM#
+				and a.venueCD = #venueCD#
+		) t
+	</insert>
+	
+	<!-- G2 실적정보 생성 업소단위 제품 등록 -->
+	<insert id="RLT0300103I" parameterClass="com.kia.rlt.model.GRLT01MT">
+		insert into GRLT01DT (
+			eventYM
+			, venueCD
+			, diffNo
+			, prdCD
+			, factoryPrice
+			, sdxYN
+			, rfidQty
+			, resultQty
+			, resultUnitAmt
+			, payAmt
+			, regID
+			, regDate
+		)
+		select
+			eventYM
+			, venueCD
+			, diffNo
+			, prdCD
+			, factoryPrice
+			, sdxYN
+			, rfidQty as rfidQty
+			, planQty as resultQty
+			, planUnitAmt
+			, planUnitAmt * planQty as payAmt
+			, #userID#
+			, sysdate
+		from (
+			select
+				eventYM
+				, venueCD
+				, diffNo
+				, prdCD
+				, factoryPrice
+				, sdxYN
+				, (
+					case when
+						prdCD='000053' or prdCD='000054' or prdCD='000055' or
+						prdCD='000056' or prdCD='000057' or prdCD='000045'
+					then 0
+					else rfidQty
+					end
+				) as rfidQty
+				, (
+					case when
+						prdCD='000053' or prdCD='000054' or prdCD='000055' or
+						prdCD='000056' or prdCD='000057' or prdCD='000045'
+					then 0
+					else planUnitAmt
+					end
+				) as planUnitAmt
+			from (
+				select
+					a.eventYM
+					, a.venueCD
+					, #diffNo# as diffNo
+					, d.prdCD
+					, d.factoryPrice
+					, d.sdxYN
+					, nvl((
+						select
+							sum(rfidQty)
+						from GRLT10IF
+						where
+							rfidDate between (
+								select applyDateFrom from GRLT05MT where eventYM = a.eventYM and diffNo = #diffNo#
+							)
+							and (
+								select applyDateTo from GRLT05MT where eventYM = a.eventYM and diffNo = #diffNo#
+							)
+							and venueCD = a.venueCD
+							and angelPrd16CD = e.angelPrd16CD
+							and angelprdMlCD = e.angelprdMlCD
+							and getLangDesc(#companyID#,#languageCD#,'F_CODE','RFIDUSEYN','01',null) = 'Y'
+					),0) as rfidQty
+					, nvl(d.planUnitAmt,0) as planUnitAmt
+				from GPLN01MT a
+				inner join GVEN01MT b
+					on a.venueCD = b.venueCD
+				inner join GEMP01MT c
+					on a.empID = c.empID
+				inner join GPLN01DT d
+					on a.eventYM = d.eventYM
+					and a.venueCD = d.venueCD
+				inner join GPRD01MT e
+					on d.prdCD = e.prdCD
+				where
+					a.eventYM = #eventYM#
+					and a.venueCD = #venueCD#
+			)
+		)
+	</insert>
+	
+	<!-- G2 실적정보 생성 업소단위 키맨 등록 -->
+	<insert id="RLT0300104I" parameterClass="com.kia.rlt.model.GRLT01MT">
+		insert into GRLT06MT (
+			eventYM
+			, venueCD
+			, diffNo
+			, keymanID
+			, bankCD
+			, accountNo
+			, holderNm
+			, payAmt
+			, regID
+			, regDate
+		)
+		select
+			#eventYM#
+			, a.venueCD
+			, #diffNo# as diffNo
+			, a.keymanID
+			, b.bankCD
+			, b.accountNo
+			, b.holderNm
+			, 0
+			, #userID#
+			, sysdate
+		from GPLN01MT a
+		left outer join GKEY01MT b
+			on a.keymanID = b.keymanID
+<!-- 			and b.activeYN = 'Y' -->
+		where
+			a.eventYM = #eventYM#
+			and a.venueCD = #venueCD#
+	</insert>
+	
+	<!-- 실적정보 생성시 실적내용 조회 -->
+	<select id="RLT0300107S" parameterClass="com.kia.rlt.model.GRLT01MT" resultClass="java.util.LinkedHashMap">
+		<![CDATA[
+		select
+			resultQty as "resultTQty"
+			, targetRate as "targetRate"
+			, guidPayRate as "guidPayRate"
+			, payRate as "payRate"
+			, excPayTpCD as "excPayTpCD"
+			, tpayAmt as "tpayAmt"
+			, resultTpCD as "resultTpCD"
+			, (
+				case
+					when factoryAmt = 0 then 0
+					else round((tpayAmt * (1+0.0352) / factoryAmt)*100)
+				end
+			) as "gsvRate"
+		from (
+			select
+				resultQty
+				, targetRate
+				, guidPayRate
+				, payRate
+				, (
+					case
+						when targetRate <= 120 then ''
+						when targetRate > 120 then 'YPAY'
+					end
+				) as excPayTpCD
+				, resultAmt as tpayAmt
+				, '10' as resultTpCD
+				, factoryAmt
+			from (
+				select
+					resultQty
+					, targetRate
+					, 100 as guidPayRate
+					, 100 as payRate
+					, resultAmt
+					, factoryAmt
+				from (
+					select
+						max(nvl(planTQty,0)) as planTQty
+						, sum(nvl(resultQty,0)) as resultQty
+						, sum(nvl(resultAmt,0)) as resultAmt
+						, to_number(
+							case
+								when max(nvl(planTQty,0)) = 0 then 0
+								else round(sum(nvl(resultQty,0)) / max(nvl(planTQty,0)) * 100)
+							end
+						) as targetRate
+						, sum(nvl(factoryAmt,0)) as factoryAmt
+					from (
+						select
+							a.prdCD
+							, b.planTQty
+							, a.resultQty
+							, a.resultUnitAmt
+							, a.resultQty * a.resultUnitAmt as resultAmt
+							, a.resultQty * a.factoryPrice as factoryAmt
+						from GRLT01DT a
+						inner join GPLN01MT b
+							on a.eventYM = b.eventYM
+							and a.venueCD = b.venueCD
+						inner join GPRD01MT c
+							on a.prdCD = c.prdCD
+						where
+							a.eventYM = #eventYM#
+							and a.venueCD = #venueCD#
+							and diffNo = #diffNo#
+					)
+				) x
+			)
+		)
+		]]>
+	</select>
+	
+	<!-- G2 키맨 지급액 수정 -->
+	<update id="RLT0300103U" parameterClass="com.kia.rlt.model.GRLT01MT">
+		update GRLT06MT
+		set
+			payAmt = #tpayAmt#
+		where
+			eventYM = #eventYM#
+			and venueCD = #venueCD#
+			and diffNo = #diffNo#
+	</update>
+	
+	<!-- G2 실적정보 리스트 조회 -->
+	<select id="RLT0300108S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			*
+		from (
+			select
+				rank() over(order by empID, venueCD) as "rowNum"
+				, floor((rank() over(order by empID, venueCD)-1)/#displayNum#+1) as pageNum
+				, getLangDesc(#companyID#,#languageCD#,'F_CODE','PROGRAMCD',programCD,null) as "programCDName"
+				, getLangDesc(#companyID#,#languageCD#,'F_CODE','ACTIVITYCD',activityCD,null) as "activityCDName"
+				, getLangDesc(#companyID#,#languageCD#,'F_CODE','RAGESPHERECD',rageSphereCD,null) as "rageSphereCDName"
+				, getLangDesc(#companyID#,#languageCD#,'F_CODE','OFFICECD',officeCD,null) as "officeCDName"
+				<isPropertyAvailable property="grpID">
+					<isNotEmpty property="grpID">
+				, (case when (select dkmdtpcd from GEMP01MT where empID=t.empID) != 'DK' then '' else (select empNm from GEMP01MT where empID=t.empID) end) as "empNm"
+					</isNotEmpty>
+					<isEmpty property="grpID">
+				, (select empNm from GEMP01MT where empID=t.empID) as "empNm"
+					</isEmpty>
+				</isPropertyAvailable>
+				, venueCD as "venueCD"
+				, venueNm as "venueNm"
+				, getLangDesc(#companyID#,#languageCD#,'F_CODE','VENUEGRADCD',venueGradCD,null) as "venueGradCDName"
+				, getLangDesc(#companyID#,#languageCD#,'F_CODE','SEGMENTCD',segmentCD,null) as "segmentCDName"
+				, getLangDesc(#companyID#,#languageCD#,'F_CODE','SUBSEGMENTCD',subSegmentCD,null) as "subSegmentCDName"
+				, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD1',addrTpCD1,null) as "addrTpCD1Name"
+				, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD2',addrTpCD2,null) as "addrTpCD2Name"
+				, tpayAmt as "tpayAmt"
+				, resultTQty as "resultTQty"
+				, avgUnitAmt as "avgUnitAmt"
+				, getLangDesc(#companyID#,#languageCD#,'F_CODE','RESULTTPCD',resultTpCD,null) as "resultTpCDName"
+				, targetRate as "targetRate"
+				, payRate as "payRate"
+				, getLangDesc(#companyID#,#languageCD#,'F_CODE','EXCPAYTPCD',excPayTpCD,null) as "excPayTpCDName"
+				, gsvRate as "gsvRate"
+				, commt as "commt"
+				, (select keymanNm from GKEY01MT where keymanID=t.keymanID) as "keymanNm"
+				, getLangDesc(#companyID#,#languageCD#,'F_CODE','BANKCD',bankCD,null) as "bankCDName"
+				, accountNo as "accountNo"
+				, getLangDesc(#companyID#,#languageCD#,'F_CODE','USETYPE3CD',confirmYN,null) as "confirmYNName"
+				, confirmYN as "confirmYN"
+				, guidPayRate as "guidPayRate"
+				, excPayTpCD as "excPayTpCD"
+				, payStateCD as "payStateCD"
+			from (
+				select
+					programCD
+					, activityCD
+					, b.rageSphereCD
+					, b.officeCD
+					, a.empID
+					, a.venueCD
+					, venueNm
+					, venueGradCD
+					, segmentCD
+					, subSegmentCD
+					, addrTpCD1
+					, addrTpCD2
+					, tpayAmt
+					, resultTQty
+					, (
+						case when resultTQty=0 then 0
+						else round(tpayAmt / resultTQty)
+						end
+					) as avgUnitAmt
+					, resultTpCD
+					, targetRate
+					, payRate
+					, guidPayRate
+					, excPayTpCD
+					, gsvRate
+					, commt
+					, d.keymanID
+					, d.bankCD
+					, d.accountNo
+					, (
+						case when apprStateCD='50' then 'Y'
+						when apprStateCD='10' then 'N'
+						end
+					) as confirmYN
+					, a.payStateCD
+				from GRLT01MT a
+				inner join GEMP01MT b
+					on a.empID = b.empID
+				inner join GVEN01MT c
+					on a.venueCD = c.venueCD
+				inner join GRLT06MT d
+					on a.eventYM = d.eventYM
+					and a.venueCD = d.venueCD
+					and a.diffNo = d.diffNo
+				where
+					a.eventYM = #eventYM#
+					and a.diffNo = #diffNo#
+					and a.programCD = 'G2'
+					<isPropertyAvailable property="venueGradCD">
+						<isNotEmpty prepend="and" property="venueGradCD">
+							venueGradCD = #venueGradCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+					<isPropertyAvailable property="segmentCD">
+						<isNotEmpty prepend="and" property="segmentCD">
+							segmentCD = #segmentCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+					<isPropertyAvailable property="subSegmentCD">
+						<isNotEmpty prepend="and" property="subSegmentCD">
+							subSegmentCD = #subSegmentCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+					<isPropertyAvailable property="addrTpCD1">
+						<isNotEmpty prepend="and" property="addrTpCD1">
+							addrTpCD1 = #addrTpCD1#
+						</isNotEmpty>
+					</isPropertyAvailable>
+					<isPropertyAvailable property="addrTpCD2">
+						<isNotEmpty prepend="and" property="addrTpCD2">
+							addrTpCD2 = #addrTpCD2#
+						</isNotEmpty>
+					</isPropertyAvailable>
+			) t
+			where 1=1
+			<isPropertyAvailable property="confirmYN">
+				<isNotEmpty prepend="and" property="confirmYN">
+					confirmYN = #confirmYN#
+				</isNotEmpty>
+			</isPropertyAvailable>
+		) t2
+		where 1=1
+		<isPropertyAvailable property="pageNum">
+			<isNotEmpty prepend="and" property="pageNum">
+				pageNum = #pageNum#
+			</isNotEmpty>
+		</isPropertyAvailable>
+	</select>
+	
+	<select id="RLT0300110S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			count(*) as "totalCount"
+		from (
+			select
+				t.*
+				, floor((rank() over(order by empID, venueCD)-1)/#displayNum#+1) as pageNum
+			from (
+				select
+					programCD
+					, activityCD
+					, b.rageSphereCD
+					, b.officeCD
+					, a.empID
+					, a.venueCD
+					, venueNm
+					, venueGradCD
+					, segmentCD
+					, subSegmentCD
+					, addrTpCD1
+					, addrTpCD2
+					, tpayAmt
+					, resultTQty
+					, (
+						case when resultTQty=0 then 0
+						else round(tpayAmt / resultTQty)
+						end
+					) as avgUnitAmt
+					, resultTpCD
+					, targetRate
+					, payRate
+					, guidPayRate
+					, excPayTpCD
+					, gsvRate
+					, commt
+					, d.keymanID
+					, d.bankCD
+					, d.accountNo
+					, (
+						case when apprStateCD='50' then 'Y'
+						when apprStateCD='10' then 'N'
+						end
+					) as confirmYN
+					, a.payStateCD
+				from GRLT01MT a
+				inner join GEMP01MT b
+					on a.empID = b.empID
+				inner join GVEN01MT c
+					on a.venueCD = c.venueCD
+				inner join GRLT06MT d
+					on a.eventYM = d.eventYM
+					and a.venueCD = d.venueCD
+					and a.diffNo = d.diffNo
+				where
+					a.eventYM = #eventYM#
+					and a.diffNo = #diffNo#
+					and a.programCD = 'G2'
+					<isPropertyAvailable property="venueGradCD">
+						<isNotEmpty prepend="and" property="venueGradCD">
+							venueGradCD = #venueGradCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+					<isPropertyAvailable property="segmentCD">
+						<isNotEmpty prepend="and" property="segmentCD">
+							segmentCD = #segmentCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+					<isPropertyAvailable property="subSegmentCD">
+						<isNotEmpty prepend="and" property="subSegmentCD">
+							subSegmentCD = #subSegmentCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+					<isPropertyAvailable property="addrTpCD1">
+						<isNotEmpty prepend="and" property="addrTpCD1">
+							addrTpCD1 = #addrTpCD1#
+						</isNotEmpty>
+					</isPropertyAvailable>
+					<isPropertyAvailable property="addrTpCD2">
+						<isNotEmpty prepend="and" property="addrTpCD2">
+							addrTpCD2 = #addrTpCD2#
+						</isNotEmpty>
+					</isPropertyAvailable>
+			) t
+		) t2
+		where 1=1
+		<isPropertyAvailable property="confirmYN">
+			<isNotEmpty prepend="and" property="confirmYN">
+				confirmYN = #confirmYN#
+			</isNotEmpty>
+		</isPropertyAvailable>
+	</select>
+	
+	<!-- Result 확정, 확정취소 -->
+	<update id="RLT0300102U" parameterClass="com.kia.rlt.model.GRLT01MT">
+		update GRLT01MT
+		set
+			apprStateCD = #apprStateCD#
+			, verifyStateCD = #verifyStateCD#
+			, payStateCD = #payStateCD#
+			, chgID = #userID#
+			, chgDate = sysdate
+		where
+			eventYM = #eventYM#
+			and venueCD = #venueCD#
+			and diffNo = #diffNo#
+	</update>
+	
+	<!-- G2 실적정보 엑셀 조회 -->
+	<select id="RLT0300109S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			getLangDesc(#companyID#,#languageCD#,'F_CODE','PROGRAMCD',programCD,null) as "programCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ACTIVITYCD',activityCD,null) as "activityCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','RAGESPHERECD',rageSphereCD,null) as "rageSphereCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','OFFICECD',officeCD,null) as "officeCDName"
+			<isPropertyAvailable property="grpID">
+				<isNotEmpty property="grpID">
+			, (case when (select dkmdtpcd from GEMP01MT where empID=t.empID) != 'DK' then '' else (select empNm from GEMP01MT where empID=t.empID) end) as "empNm"
+				</isNotEmpty>
+				<isEmpty property="grpID">
+			, (select empNm from GEMP01MT where empID=t.empID) as "empNm"
+				</isEmpty>
+			</isPropertyAvailable>
+			, venueCD as "venueCD"
+			, venueNm as "venueNm"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','VENUEGRADCD',venueGradCD,null) as "venueGradCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SEGMENTCD',segmentCD,null) as "segmentCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SUBSEGMENTCD',subSegmentCD,null) as "subSegmentCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD1',addrTpCD1,null) as "addrTpCD1Name"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD2',addrTpCD2,null) as "addrTpCD2Name"
+			, tpayAmt as "tpayAmt"
+			, resultTQty as "resultTQty"
+			, avgUnitAmt as "avgUnitAmt"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','RESULTTPCD',resultTpCD,null) as "resultTpCDName"
+			, targetRate as "targetRate"
+			, payRate as "payRate"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','EXCPAYTPCD',excPayTpCD,null) as "excPayTpCDName"
+			, gsvRate as "gsvRate"
+			, commt as "commt"
+			, (select keymanNm from GKEY01MT where keymanID=t.keymanID) as "keymanNm"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','BANKCD',bankCD,null) as "bankCDName"
+			, accountNo as "accountNo"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','USETYPE3CD',confirmYN,null) as "confirmYNName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','KINDTPCD5',kindTpCD5,null) as "kindTpCD5Name"
+			, prdNm as "prdNm"
+			, factoryPrice as "factoryPrice"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','QTYUNITCD',qtyUnitCD,null) as "qtyUnitCDName"
+			, planQty as "planQty"
+			, resultQty as "resultQty"
+			, resultUnitAmt as "resultUnitAmt"
+			, payAmt as "payAmt"
+		from (
+			select
+				programCD
+				, activityCD
+				, b.rageSphereCD
+				, b.officeCD
+				, a.empID
+				, a.venueCD
+				, venueNm
+				, venueGradCD
+				, segmentCD
+				, subSegmentCD
+				, addrTpCD1
+				, addrTpCD2
+				, tpayAmt
+				, resultTQty
+				, (
+					case when resultTQty=0 then 0
+					else round(tpayAmt / resultTQty)
+					end
+				) as avgUnitAmt
+				, resultTpCD
+				, targetRate
+				, payRate
+				, guidPayRate
+				, excPayTpCD
+				, gsvRate
+				, commt
+				, d.keymanID
+				, d.bankCD
+				, d.accountNo
+				, (
+					case when apprStateCD='50' then 'Y'
+					when apprStateCD='10' then 'N'
+					end
+				) as confirmYN
+				, f.kindTpCD5
+				, f.prdNm
+				, e.factoryPrice
+				, f.qtyUnitCD
+				, (select planQty from GPLN01DT where eventYM=e.eventYM and venueCD=e.venueCD and prdCD=e.prdCD) as planQty
+				, e.resultQty
+				, e.resultUnitAmt
+				, e.payAmt
+			from GRLT01MT a
+			inner join GEMP01MT b
+				on a.empID = b.empID
+			inner join GVEN01MT c
+				on a.venueCD = c.venueCD
+			inner join GRLT06MT d
+				on a.eventYM = d.eventYM
+				and a.venueCD = d.venueCD
+				and a.diffNo = d.diffNo
+			inner join GRLT01DT e
+				on a.eventYM = e.eventYM
+				and a.venueCD = e.venueCD
+				and a.diffNo = e.diffNo
+			inner join GPRD01MT f
+				on e.prdCD = f.prdCD
+			where
+				a.eventYM = #eventYM#
+				and a.diffNo = #diffNo#
+				and a.programCD = 'G2'
+				<isPropertyAvailable property="venueGradCD">
+					<isNotEmpty prepend="and" property="venueGradCD">
+						venueGradCD = #venueGradCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="segmentCD">
+					<isNotEmpty prepend="and" property="segmentCD">
+						segmentCD = #segmentCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="subSegmentCD">
+					<isNotEmpty prepend="and" property="subSegmentCD">
+						subSegmentCD = #subSegmentCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="addrTpCD1">
+					<isNotEmpty prepend="and" property="addrTpCD1">
+						addrTpCD1 = #addrTpCD1#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="addrTpCD2">
+					<isNotEmpty prepend="and" property="addrTpCD2">
+						addrTpCD2 = #addrTpCD2#
+					</isNotEmpty>
+				</isPropertyAvailable>
+		) t
+		where 1=1
+		<isPropertyAvailable property="confirmYN">
+			<isNotEmpty prepend="and" property="confirmYN">
+				confirmYN = #confirmYN#
+			</isNotEmpty>
+		</isPropertyAvailable>
+	</select>
+
+	<!-- 행사년월 차수등록 콤보 조회 (기간별로도 조회되게)-->
+	<select id="RLT0300111S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			   eventYM||diffNo as diffNo
+			, (diffNo||'차 : '||applyDateFrom||' ~ '||applyDateTo) as diffNoName
+		from (
+			select
+				eventYM
+				, diffNo
+				, to_char(to_date(applyDateFrom, 'yyyymmdd'), 'yyyy.mm.dd') as applyDateFrom
+				, to_char(to_date(applyDateTo, 'yyyymmdd'), 'yyyy.mm.dd') as applyDateTo
+			from GRLT05MT
+			where
+				eventYM between #eventFromYM# and #eventToYM#
+		)
+		order by eventYM, diffNo
+	</select>
+</sqlMap>

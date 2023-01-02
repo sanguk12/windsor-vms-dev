@@ -1,0 +1,663 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="PAY03002">
+	
+	<!-- 검증 리스트 조회 -->
+	<select id="PAY0300201S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			t2.*
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ACTIVITYCD',activityCD,null) as "activityCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','RAGESPHERECD',rageSphereCD,null) as "rageSphereCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','OFFICECD',officeCD,null) as "officeCDName"
+			, (select empNm from GEMP01MT where empID=t2.empID) as "empNm"
+			, venueCD as "venueCD"
+			, venueNm as "venueNm"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','VENUEGRADCD',venueGradCD,null) as "venueGradCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SEGMENTCD',segmentCD,null) as "segmentCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SUBSEGMENTCD',subSegmentCD,null) as "subSegmentCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD1',addrTpCD1,null) as "addrTpCD1Name"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD2',addrTpCD2,null) as "addrTpCD2Name"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','KINDTPCD5',kindTpCD5,null) as "kindTpCD5Name"
+			, prdNm as "prdNm"
+			, nvl(eu,'0') as "eu"
+			, nvl(factoryPrice,'0') as "factoryPrice"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','QTYUNITCD',qtyUnitCD,null) as "qtyUnitCDName"
+			, nvl(planQty,'0') as "planQty"
+			, nvl(planUnitAmt,'0') as "planUnitAmt"
+			, nvl(rfidQty,'0') as "rfidQty"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','RESULTTPCD',resultTpCD,null) as "resultTpCDName"
+			, nvl(resultQty,'0') as "resultQty"
+			, nvl(resultUnitAmt,'0') as "resultUnitAmt"
+			, nvl(guidAmt,'0') as "guidAmt"
+			, nvl(payAmt,'0') as "payAmt"
+			, nvl(targetQty,'0') as "targetQty"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SDXTPCD',sdxTpCD,null) as "sdxTpCDName"
+			, nvl(targetRate,'0') as "targetRate"
+			, nvl(gsvRate,'0') as "gsvRate"
+			, commt as "commt"
+			, verifyErrCommt as "verifyErrCommt"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','VERIFYSTATECD',verifyStateCD,null) as "verifyStateCDName"
+			, verifyStateCD as "verifyStateCD"
+			, prdCD as "prdCD"
+			, activityCD as "activityCD"
+			, venueGradCD as "venueGradCD"
+			, segmentCD as "segmentCD"
+			, subSegmentCD as "subSegmentCD"
+			, addrTpCD1 as "addrTpCD1"
+			, addrTpCD2 as "addrTpCD2"
+			, kindTpCD5 as "kindTpCD5"
+			, qtyUnitCD as "qtyUnitCD"
+			, resultTpCD as "resultTpCD"
+			, sdxTpCD as "sdxTpCD"
+			, sdxYN as "sdxYN"
+			, supportID as "supportID"
+		from (
+			select
+				t.*
+				, rank() over(order by dkmdTpCD, rageSphereCD, officeCD, teamCD, empID, venueCD, prdCD) as "rowNum"
+				, floor((rank() over(order by dkmdTpCD, rageSphereCD, officeCD, teamCD, empID, venueCD, prdCD)-1)/#displayNum#+1) as pageNum
+			from (
+				select
+					t3.*
+				from (
+					select
+						a.dkmdTpCD
+						, a.teamCD
+						, a.activityCD
+						, a.rageSphereCD
+						, a.officeCD
+						, a.empID
+						, a.venueCD
+						, b.venueNm
+						, b.venueGradCD
+						, b.segmentCD
+						, b.subSegmentCD
+						, b.addrTpCD1
+						, b.addrTpCD2
+						, d.kindTpCD5
+						, c.prdCD
+						, d.prdNm
+						, d.eu
+						, c.factoryPrice
+						, d.qtyUnitCD
+						, e.planQty
+						, e.planUnitAmt
+						, c.rfidQty
+						, c.resultTpCD
+						, c.resultQty
+						, c.resultUnitAmt
+						, c.guidAmt
+						, c.payAmt
+						, c.targetQty
+						, c.sdxTpCD
+						, c.targetRate
+						, c.gsvRate
+						, c.commt
+						, c.verifyErrCommt
+						, c.verifyStateCD
+						, c.sdxYN
+						, (select supportID from GPLN02MT where eventYM = a.eventYM and venueCD = a.venueCD) as supportID
+						, (
+							select max(apprDate)
+							from GRLT08MT
+							where
+								eventYM = c.eventYM
+								and venueCD = c.venueCD
+								and prdCD = c.prdCD
+						) as lastApprDate
+					from GRLT02MT a
+					inner join GVEN01MT b
+						on a.venueCD = b.venueCD
+					inner join GRLT02DT c
+						on a.eventYM = c.eventYM
+						and a.venueCD = c.venueCD
+					inner join GPRD01MT	d
+						on c.prdCD = d.prdCD
+					inner join GPLN02DT e
+						on c.eventYM = e.eventYM
+						and c.venueCD = e.venueCD
+						and c.prdCD = e.prdCD				
+					where
+						a.eventYM = #eventYM#
+					and a.programCD = 'G1'
+					and c.verifyStateCD in (
+						select comCode
+						from F_CODE
+						where
+							codediv='VERIFYSTATECD'
+							and activeFlg = 'U'
+							and useYN = 'Y'
+							and attrib03 = 'VELEX'
+					)
+					<isPropertyAvailable property="dkmdTpCD">
+						<isNotEmpty prepend="and" property="dkmdTpCD">
+							a.dkmdTpCD = #dkmdTpCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+					<isPropertyAvailable property="activityCD">
+						<isNotEmpty prepend="and" property="activityCD">
+							a.activityCD = #activityCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+					<isPropertyAvailable property="rageSphereCD">
+						<isNotEmpty prepend="and" property="rageSphereCD">
+							a.rageSphereCD = #rageSphereCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+					<isPropertyAvailable property="officeCD">
+						<isNotEmpty prepend="and" property="officeCD">
+							a.officeCD = #officeCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+					<isPropertyAvailable property="resultTpCD">
+						<isNotEmpty prepend="and" property="resultTpCD">
+							c.resultTpCD = #resultTpCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+					<isPropertyAvailable property="verifyStateCD">
+						<isNotEmpty prepend="and" property="verifyStateCD">
+							c.verifyStateCD = #verifyStateCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+				) t3
+				where 1=1
+					<isNotEmpty property="lastApprDateStartDate">
+						<isNotEmpty property="lastApprDateEndDate">
+							and lastApprDate between #lastApprDateStartDate# and #lastApprDateEndDate#
+						</isNotEmpty>
+					</isNotEmpty>
+			) t
+		) t2
+		where 1=1
+			<isPropertyAvailable property="pageNum">
+				<isNotEmpty prepend="and" property="pageNum">
+					pageNum = #pageNum#
+				</isNotEmpty>
+			</isPropertyAvailable>
+	</select>
+	
+	<select id="PAY0300204S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			count(*) as "totalCount"
+		from (
+			select
+				t3.*
+			from (
+				select
+					a.dkmdTpCD
+					, a.teamCD
+					, a.activityCD
+					, a.rageSphereCD
+					, a.officeCD
+					, a.empID
+					, a.venueCD
+					, b.venueNm
+					, b.venueGradCD
+					, b.segmentCD
+					, b.subSegmentCD
+					, b.addrTpCD1
+					, b.addrTpCD2
+					, d.kindTpCD5
+					, c.prdCD
+					, d.prdNm
+					, d.eu
+					, c.factoryPrice
+					, d.qtyUnitCD
+					, e.planQty
+					, e.planUnitAmt
+					, c.rfidQty
+					, c.resultTpCD
+					, c.resultQty
+					, c.resultUnitAmt
+					, c.guidAmt
+					, c.payAmt
+					, c.targetQty
+					, c.sdxTpCD
+					, c.targetRate
+					, c.gsvRate
+					, c.commt
+					, c.verifyErrCommt
+					, c.verifyStateCD
+					, c.sdxYN
+					, (select supportID from GPLN02MT where eventYM = a.eventYM and venueCD = a.venueCD) as supportID
+					, (
+						select max(apprDate)
+						from GRLT08MT
+						where
+							eventYM = c.eventYM
+							and venueCD = c.venueCD
+							and prdCD = c.prdCD
+					) as lastApprDate
+				from GRLT02MT a
+				inner join GVEN01MT b
+					on a.venueCD = b.venueCD
+				inner join GRLT02DT c
+					on a.eventYM = c.eventYM
+					and a.venueCD = c.venueCD
+				inner join GPRD01MT	d
+					on c.prdCD = d.prdCD
+				inner join GPLN02DT e
+					on c.eventYM = e.eventYM
+					and c.venueCD = e.venueCD
+					and c.prdCD = e.prdCD				
+				where
+					a.eventYM = #eventYM#
+				and a.programCD = 'G1'
+				and c.verifyStateCD in (
+					select comCode
+					from F_CODE
+					where
+						codediv='VERIFYSTATECD'
+						and activeFlg = 'U'
+						and useYN = 'Y'
+						and attrib03 = 'VELEX'
+				)
+				<isPropertyAvailable property="dkmdTpCD">
+					<isNotEmpty prepend="and" property="dkmdTpCD">
+						a.dkmdTpCD = #dkmdTpCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="activityCD">
+					<isNotEmpty prepend="and" property="activityCD">
+						a.activityCD = #activityCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="rageSphereCD">
+					<isNotEmpty prepend="and" property="rageSphereCD">
+						a.rageSphereCD = #rageSphereCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="officeCD">
+					<isNotEmpty prepend="and" property="officeCD">
+						a.officeCD = #officeCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="resultTpCD">
+					<isNotEmpty prepend="and" property="resultTpCD">
+						c.resultTpCD = #resultTpCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="verifyStateCD">
+					<isNotEmpty prepend="and" property="verifyStateCD">
+						c.verifyStateCD = #verifyStateCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+			) t3
+			where 1=1
+				<isNotEmpty property="lastApprDateStartDate">
+					<isNotEmpty property="lastApprDateEndDate">
+						and lastApprDate between #lastApprDateStartDate# and #lastApprDateEndDate#
+					</isNotEmpty>
+				</isNotEmpty>
+		) t
+	</select>
+	
+	<!-- 검증완료시 메일대상자(자신제외, apprTpID가 plan/result승인라인과 검증라인 합집합)
+	2014.08.04. taejoon.jang, VALEX담당자는 EMPID가 없어 자신제외 쿼리 없음
+	-->
+	<select id="PAY0300202S" parameterClass="com.kia.rlt.model.GRLT02MT" resultClass="java.util.LinkedHashMap">
+		select
+			empID as "empID"
+			, max(empNm) as "empNm"
+			, max(emailAddr) as "emailAddr"
+		from (
+			select
+				b.empID
+				, c.empNm
+				, c.emailAddr
+			from GRLT02DT a
+			inner join GRLT08MT b
+				on a.eventYM = b.eventYM
+				and a.venueCD = b.venueCD
+				and a.prdCD = b.prdCD
+			inner join GEMP01MT c
+				on b.empID = c.empID
+			where
+				a.eventYM = #eventYM#
+			and a.venueCD in
+			<iterate property="venueCDs" open="(" close=")" conjunction=",">
+				#venueCDs[]#
+			</iterate>
+			and b.apprTpID in (
+				#apprTpID#, #apprTpID_bef#
+			)
+			<!--2014.08.04. taejoon.jang
+ 			and b.empID != #empID# -->
+		)
+		group by empID
+	</select>
+	
+	<!-- 검증완료시 검증상태 갱신 -->
+	<update id="PAY0300201U" parameterClass="com.kia.rlt.model.GRLT02MT">
+		update GRLT02DT
+		set
+			verifyStateCD = #verifyStateCD#
+			, verifyErrCommt = #verifyErrCommt#
+			, payStateCD = #payStateCD#
+			, chgID = #userID#
+			, chgDate = sysdate
+		where
+			eventYM = #eventYM#
+			and venueCD = #venueCD#
+			and prdCD = #prdCD#
+	</update>
+	
+	<!-- 검증완료시 선지원차감내역 갱신 -->
+	<update id="PAY0300202U" parameterClass="com.kia.rlt.model.GRLT02MT">
+		update GSUP01MT
+		set
+			subtractAmt = nvl(subtractAmt,0) + #payAmt#
+			, chgID = #userID#
+			, chgDate = sysdate
+		where
+			supportID = #supportID#
+	</update>
+	
+	<!-- 검증 엑셀 조회 -->
+	<select id="PAY0300203S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			getLangDesc(#companyID#,#languageCD#,'F_CODE','ACTIVITYCD',activityCD,null) as "activityCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','RAGESPHERECD',rageSphereCD,null) as "rageSphereCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','OFFICECD',officeCD,null) as "officeCDName"
+			, (select empNm from GEMP01MT where empID=t.empID) as "empNm"
+			, venueCD as "venueCD"
+			, venueNm as "venueNm"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','VENUEGRADCD',venueGradCD,null) as "venueGradCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SEGMENTCD',segmentCD,null) as "segmentCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SUBSEGMENTCD',subSegmentCD,null) as "subSegmentCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD1',addrTpCD1,null) as "addrTpCD1Name"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD2',addrTpCD2,null) as "addrTpCD2Name"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','KINDTPCD5',kindTpCD5,null) as "kindTpCD5Name"
+			, prdNm as "prdNm"
+			, nvl(eu,'0') as "eu"
+			, nvl(factoryPrice,'0') as "factoryPrice"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','QTYUNITCD',qtyUnitCD,null) as "qtyUnitCDName"
+			, nvl(planQty,'0') as "planQty"
+			, nvl(planUnitAmt,'0') as "planUnitAmt"
+			, nvl(rfidQty,'0') as "rfidQty"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','RESULTTPCD',resultTpCD,null) as "resultTpCDName"
+			, nvl(resultQty,'0') as "resultQty"
+			, nvl(resultUnitAmt,'0') as "resultUnitAmt"
+			, nvl(guidAmt,'0') as "guidAmt"
+			, nvl(payAmt,'0') as "payAmt"
+			, nvl(targetQty,'0') as "targetQty"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SDXTPCD',sdxTpCD,null) as "sdxTpCDName"
+			, nvl(targetRate,'0') as "targetRate"
+			, nvl(gsvRate,'0') as "gsvRate"
+			, commt as "commt"
+			, verifyErrCommt as "verifyErrCommt"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','VERIFYSTATECD',verifyStateCD,null) as "verifyStateCDName"
+			, verifyStateCD as "verifyStateCD"
+			, prdCD as "prdCD"
+			, activityCD as "activityCD"
+			, venueGradCD as "venueGradCD"
+			, segmentCD as "segmentCD"
+			, subSegmentCD as "subSegmentCD"
+			, addrTpCD1 as "addrTpCD1"
+			, addrTpCD2 as "addrTpCD2"
+			, kindTpCD5 as "kindTpCD5"
+			, qtyUnitCD as "qtyUnitCD"
+			, resultTpCD as "resultTpCD"
+			, sdxTpCD as "sdxTpCD"
+		from (
+			select
+				t3.*
+			from (
+				select
+					a.dkmdTpCD
+					, a.teamCD
+					, a.activityCD
+					, a.rageSphereCD
+					, a.officeCD
+					, a.empID
+					, a.venueCD
+					, b.venueNm
+					, b.venueGradCD
+					, b.segmentCD
+					, b.subSegmentCD
+					, b.addrTpCD1
+					, b.addrTpCD2
+					, d.kindTpCD5
+					, c.prdCD
+					, d.prdNm
+					, d.eu
+					, c.factoryPrice
+					, d.qtyUnitCD
+					, e.planQty
+					, e.planUnitAmt
+					, c.rfidQty
+					, c.resultTpCD
+					, c.resultQty
+					, c.resultUnitAmt
+					, c.guidAmt
+					, c.payAmt
+					, c.targetQty
+					, c.sdxTpCD
+					, c.targetRate
+					, c.gsvRate
+					, c.commt
+					, c.verifyErrCommt
+					, c.verifyStateCD
+					, (
+						select max(apprDate)
+						from GRLT08MT
+						where
+							eventYM = c.eventYM
+							and venueCD = c.venueCD
+							and prdCD = c.prdCD
+					) as lastApprDate
+				from GRLT02MT a
+				inner join GVEN01MT b
+					on a.venueCD = b.venueCD
+				inner join GRLT02DT c
+					on a.eventYM = c.eventYM
+					and a.venueCD = c.venueCD
+				inner join GPRD01MT	d
+					on c.prdCD = d.prdCD
+				inner join GPLN02DT e
+					on c.eventYM = e.eventYM
+					and c.venueCD = e.venueCD
+					and c.prdCD = e.prdCD				
+				where
+					a.eventYM = #eventYM#
+				and a.programCD = 'G1'
+				and c.verifyStateCD in (
+					select comCode
+					from F_CODE
+					where
+						codediv='VERIFYSTATECD'
+						and activeFlg = 'U'
+						and useYN = 'Y'
+						and attrib03 = 'VELEX'
+				)
+				<isPropertyAvailable property="dkmdTpCD">
+					<isNotEmpty prepend="and" property="dkmdTpCD">
+						a.dkmdTpCD = #dkmdTpCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="activityCD">
+					<isNotEmpty prepend="and" property="activityCD">
+						a.activityCD = #activityCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="rageSphereCD">
+					<isNotEmpty prepend="and" property="rageSphereCD">
+						a.rageSphereCD = #rageSphereCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="officeCD">
+					<isNotEmpty prepend="and" property="officeCD">
+						a.officeCD = #officeCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="resultTpCD">
+					<isNotEmpty prepend="and" property="resultTpCD">
+						c.resultTpCD = #resultTpCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="verifyStateCD">
+					<isNotEmpty prepend="and" property="verifyStateCD">
+						c.verifyStateCD = #verifyStateCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+			) t3
+			where 1=1
+				<isNotEmpty property="lastApprDateStartDate">
+					<isNotEmpty property="lastApprDateEndDate">
+						and lastApprDate between #lastApprDateStartDate# and #lastApprDateEndDate#
+					</isNotEmpty>
+				</isNotEmpty>
+		) t
+		order by
+			dkmdTpCD,
+			rageSphereCD, 
+			officeCD, 
+			teamCD,
+			empID, 
+			venueCD, 
+			prdCD
+	</select>
+	
+	<!-- 검증 리스트 조회 -->
+	<select id="PAY0300205S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			t2.*
+			, eventYM as "eventYM"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ACTIVITYCD',activityCD,null) as "activityCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','RAGESPHERECD',rageSphereCD,null) as "rageSphereCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','OFFICECD',officeCD,null) as "officeCDName"
+			, (select empNm from GEMP01MT where empID=t2.empID) as "empNm"
+			, venueCD as "venueCD"
+			, venueNm as "venueNm"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','VENUEGRADCD',venueGradCD,null) as "venueGradCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SEGMENTCD',segmentCD,null) as "segmentCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SUBSEGMENTCD',subSegmentCD,null) as "subSegmentCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD1',addrTpCD1,null) as "addrTpCD1Name"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD2',addrTpCD2,null) as "addrTpCD2Name"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','KINDTPCD5',kindTpCD5,null) as "kindTpCD5Name"
+			, prdNm as "prdNm"
+			, nvl(eu,'0') as "eu"
+			, nvl(factoryPrice,'0') as "factoryPrice"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','QTYUNITCD',qtyUnitCD,null) as "qtyUnitCDName"
+			, nvl(planQty,'0') as "planQty"
+			, nvl(planUnitAmt,'0') as "planUnitAmt"
+			, nvl(rfidQty,'0') as "rfidQty"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','RESULTTPCD',resultTpCD,null) as "resultTpCDName"
+			, nvl(resultQty,'0') as "resultQty"
+			, nvl(resultUnitAmt,'0') as "resultUnitAmt"
+			, nvl(guidAmt,'0') as "guidAmt"
+			, nvl(payAmt,'0') as "payAmt"
+			, nvl(targetQty,'0') as "targetQty"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SDXTPCD',sdxTpCD,null) as "sdxTpCDName"
+			, nvl(targetRate,'0') as "targetRate"
+			, nvl(gsvRate,'0') as "gsvRate"
+			, commt as "commt"
+			, verifyErrCommt as "verifyErrCommt"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','VERIFYSTATECD',verifyStateCD,null) as "verifyStateCDName"
+			, verifyStateCD as "verifyStateCD"
+			, prdCD as "prdCD"
+			, activityCD as "activityCD"
+			, venueGradCD as "venueGradCD"
+			, segmentCD as "segmentCD"
+			, subSegmentCD as "subSegmentCD"
+			, addrTpCD1 as "addrTpCD1"
+			, addrTpCD2 as "addrTpCD2"
+			, kindTpCD5 as "kindTpCD5"
+			, qtyUnitCD as "qtyUnitCD"
+			, resultTpCD as "resultTpCD"
+			, sdxTpCD as "sdxTpCD"
+			, sdxYN as "sdxYN"
+			, supportID as "supportID"
+		from (
+			select
+				t.*
+				, rank() over(order by dkmdTpCD, rageSphereCD, officeCD, teamCD, empID, venueCD, prdCD) as "rowNum"
+				, floor((rank() over(order by dkmdTpCD, rageSphereCD, officeCD, teamCD, empID, venueCD, prdCD)-1)/#displayNum#+1) as pageNum
+			from (
+				select
+					t3.*
+				from (
+					select a.eventYM,
+						a.dkmdTpCD
+						, a.teamCD
+						, a.activityCD
+						, a.rageSphereCD
+						, a.officeCD
+						, a.empID
+						, a.venueCD
+						, b.venueNm
+						, b.venueGradCD
+						, b.segmentCD
+						, b.subSegmentCD
+						, b.addrTpCD1
+						, b.addrTpCD2
+						, d.kindTpCD5
+						, c.prdCD
+						, d.prdNm
+						, d.eu
+						, c.factoryPrice
+						, d.qtyUnitCD
+						, e.planQty
+						, e.planUnitAmt
+						, c.rfidQty
+						, c.resultTpCD
+						, c.resultQty
+						, c.resultUnitAmt
+						, c.guidAmt
+						, c.payAmt
+						, c.targetQty
+						, c.sdxTpCD
+						, c.targetRate
+						, c.gsvRate
+						, c.commt
+						, c.verifyErrCommt
+						, c.verifyStateCD
+						, c.sdxYN
+						, (select supportID from GPLN02MT where eventYM = a.eventYM and venueCD = a.venueCD) as supportID
+						, (
+							select max(apprDate)
+							from GRLT08MT
+							where
+								eventYM = c.eventYM
+								and venueCD = c.venueCD
+								and prdCD = c.prdCD
+						) as lastApprDate
+					from GRLT02MT a
+					inner join GVEN01MT b
+						on a.venueCD = b.venueCD
+					inner join GRLT02DT c
+						on a.eventYM = c.eventYM
+						and a.venueCD = c.venueCD
+					inner join GPRD01MT	d
+						on c.prdCD = d.prdCD
+					inner join GPLN02DT e
+						on c.eventYM = e.eventYM
+						and c.venueCD = e.venueCD
+						and c.prdCD = e.prdCD				
+					where a.programCD = 'G1'
+					and c.verifyStateCD in (
+						select comCode
+						from F_CODE
+						where
+							codediv='VERIFYSTATECD'
+							and activeFlg = 'U'
+							and useYN = 'Y'
+							and attrib03 = 'VELEX'
+					)
+					and   c.resultunitamt*c.resultqty !=c.payamt
+					and   c.payamt !=0
+					and   c.resultqty !=0 and  nvl(c.paystatecd,' ') !='70'
+				) t3
+				where 1=1
+			) t
+		) t2
+		where 1=1
+			<isPropertyAvailable property="pageNum">
+				<isNotEmpty prepend="and" property="pageNum">
+					pageNum = #pageNum#
+				</isNotEmpty>
+			</isPropertyAvailable>
+		order by eventYM,venueNm 		
+	</select>
+</sqlMap>

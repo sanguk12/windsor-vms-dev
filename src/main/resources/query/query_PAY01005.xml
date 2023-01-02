@@ -1,0 +1,302 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="PAY01005">
+	
+	<!-- 검증오류수정 조회 -->
+	<select id="PAY0100501S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			 mileageID as "mileageID"
+			, venueCD as "venueCD"
+			, venueNm as "venueNm"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','VENUEGRADCD',venueGradCD,null) as "venueGradCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SEGMENTCD',segmentCD,null) as "segmentCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SUBSEGMENTCD',subSegmentCD,null) as "subSegmentCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD1',addrTpCD1,null) as "addrTpCD1Name"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD2',addrTpCD2,null) as "addrTpCD2Name"
+			, contractDateFrom as "contractDateFrom"
+			, contractDateTo as "contractDateTo"
+			, to_char(to_date(contractDateFrom, 'yyyymm'), 'yyyy.mm')||'~'||to_char(to_date(contractDateTo, 'yyyymm'), 'yyyy.mm') as "contractDate"
+			, contractMonthCt as "contractMonthCt"
+			, apAmt as "apAmt"
+			, targetRate as "targetRate"
+			, msTargetRate as "msTargetRate"
+			, tcontractQty as "tcontractQty"
+			, gsvAmt as "gsvAmt"
+			, gsvRate as "gsvRate"
+			, contractAmt as "contractAmt"
+			, contractTaxAmt as "contractTaxAmt"
+			, addContractAmt as "addContractAmt"
+			, addContractTaxAmt as "addContractTaxAmt"
+			<!-- 약정금액추가 2016.10.10 -->
+			, stipulationAmt as "stipulationAmt"
+			, keymanAmt as "keymanAmt"
+			, payRequestDate as "payRequestDate"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','MILEAGESTATECD',mileageStateCD,null) as "mileageStateCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','MILEAGEPAYTPCD',mileagePayTPCD,null) as "mileagePayTPCDName"
+			, transferDate as "transferDate"
+			, commt as "commt"
+			, mileageStateCD as "mileageStateCD"
+			, mileagePayTPCD as "mileagePayTPCD"
+			, verifyErrCommt as "verifyErrCommt"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','VERIFYSTATECD',verifyStateCD,null) as "verifyStateCDName"
+			, verifyStateCD as "verifyStateCD"
+		from 
+		(
+			select
+				a.mileageID
+				, a.venueCD
+				, b.venueNm
+				, b.venueGradCD
+				, b.segmentCD
+				, b.subSegmentCD
+				, b.addrTpCD1
+				, b.addrTpCD2
+				, a.contractDateFrom
+				, a.contractDateTo
+				, a.contractMonthCt
+				, a.apAmt
+				, a.targetRate
+				, a.msTargetRate
+				, a.tcontractQty
+				, a.gsvAmt
+				, a.gsvRate
+				, a.contractAmt
+				, a.contractTaxAmt
+				, a.addContractAmt
+				, a.addContractTaxAmt
+				, a.stipulationAmt
+				, (select sum(payAmt) from GMIL03MT where mileageID=a.mileageID and payTpCD='ORG') as keymanAmt
+				, a.payRequestDate
+				, a.mileageStateCD
+				, a.mileagePayTPCD
+				, a.transferDate
+				, a.commt
+				, verifyErrCommt
+				, verifyStateCD
+				, (
+					select max(apprDate)
+					from GMIL05MT
+					where
+						mileageID  = a.mileageID
+					and apprTpID = #apprTpID#
+				) as lastApprDate
+			from GMIL02MT a
+			inner join GVEN01MT b
+				on a.venueCD = b.venueCD
+			where
+				<![CDATA[
+				a.contractDateTo >= #contractDateFrom#
+				and a.contractDateFrom <= #contractDateTo#
+				]]>
+				and a.empID = #empID#
+				<isPropertyAvailable property="payRequestDate">
+					<isNotEmpty prepend="and" property="payRequestDate">
+						payRequestDate = #payRequestDate#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="mileageStateCD">
+					<isNotEmpty prepend="and" property="mileageStateCD">
+						mileageStateCD = #mileageStateCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="periodLongTerm">
+					<isNotEmpty prepend="and" property="periodLongTerm">
+						a.contractMonthCt <![CDATA[>=]]> #periodLongTerm#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="periodShortTerm">
+					<isNotEmpty prepend="and" property="periodShortTerm">
+						a.contractMonthCt <![CDATA[<]]> #periodShortTerm#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="venue_S">
+					<isNotEmpty prepend="and" property="venue_S">
+						b.venueCD = #venueCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="rageSphereCD_S">
+					<isNotEmpty prepend="and" property="rageSphereCD_S">
+						a.rageSphereCD = #rageSphereCD_S#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="officeCD_S">
+					<isNotEmpty prepend="and" property="officeCD_S">
+						a.officeCD = #officeCD_S#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="verifyStateCD">
+					<isNotEmpty prepend="and" property="verifyStateCD">
+						verifyStateCD = #verifyStateCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="venueGradCD">
+					<isNotEmpty prepend="and" property="venueGradCD">
+						venueGradCD = #venueGradCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="addrTpCD1">
+					<isNotEmpty prepend="and" property="addrTpCD1">
+						addrTpCD1 = #addrTpCD1#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="addrTpCD2">
+					<isNotEmpty prepend="and" property="addrTpCD2">
+						addrTpCD2 = #addrTpCD2#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="mileagePayTPCD">
+					<isNotEmpty prepend="and" property="mileagePayTPCD">
+						mileagePayTPCD = #mileagePayTPCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isNotEmpty property="lastApprDateStartDate">
+					<isNotEmpty property="lastApprDateEndDate">
+						and lastApprDate between #lastApprDateStartDate# and #lastApprDateEndDate#
+					</isNotEmpty>
+				</isNotEmpty>
+		) t2
+		order by venueCD desc
+	</select>
+	
+	<!-- 검증오류수정 상세 조회 -->
+	<select id="PAY0100502S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			mileageID as "mileageID"
+			, venueCD as "venueCD"
+			, venueNm as "venueNm"
+			, contractDateFrom as "contractDateFrom"
+			, contractDateTo as "contractDateTo"
+			, to_char(to_date(contractDateFrom, 'yyyymm'), 'yyyy.mm')||'~'||to_char(to_date(contractDateTo, 'yyyymm'), 'yyyy.mm') as "contractDate"
+			, contractMonthCt as "contractMonthCt"
+			, apAmt as "apAmt"
+			, targetRate as "targetRate"
+			, msTargetRate as "msTargetRate"
+			, tcontractQty as "tcontractQty"
+			, gsvAmt as "gsvAmt"
+			, gsvRate as "gsvRate"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','VERIFYSTATECD',verifyStateCD,null) as "verifyStateCDName"
+			, verifyStateCD as "verifyStateCD"
+			, contractAmt as "contractAmt"
+			, contractTaxAmt as "contractTaxAmt"
+			, addContractAmt as "addContractAmt"
+			, addContractTaxAmt as "addContractTaxAmt"
+			<!-- 약정금액추가 2016.10.10 -->
+			, stipulationAmt as "stipulationAmt"
+			, payRequestDate as "payRequestDate"
+			, mileageStateCD as "mileageStateCD"
+			, mileagePayTPCD as "mileagePayTPCD"
+			, keymanAmt as "keymanAmt"
+			, commt as "commt"
+			, verifyErrCommt as "verifyErrCommt"
+		from (
+			select
+				a.mileageID
+				, a.venueCD
+				, b.venueNm
+				, a.contractDateFrom
+				, a.contractDateTo
+				, a.contractMonthCt
+				, a.apAmt
+				, a.targetRate
+				, a.msTargetRate
+				, a.tcontractQty
+				, a.gsvAmt
+				, a.gsvRate
+				, a.verifyStateCD
+				, a.contractAmt
+				, a.contractTaxAmt
+				, a.addContractAmt
+				, a.addContractTaxAmt
+				, a.stipulationAmt
+				, a.payRequestDate
+				, a.mileageStateCD
+				, a.mileagePayTPCD
+				, (select sum(payAmt) from GMIL03MT where mileageID=a.mileageID and payTpCD='ORG') as keymanAmt
+				, a.commt
+				, a.verifyErrCommt
+			from GMIL02MT a
+			inner join GVEN01MT b
+				on a.venueCD = b.venueCD
+			where
+				a.mileageID = #mileageID#
+		)
+	</select>
+	
+	<!-- 검증오류수정 제품 리스트 조회 -->
+	<select id="PAY0100503S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			eventYM as "eventYM"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','KINDTPCD5',kindTpCD5,null) as "kindTpCD5Name"
+			, prdNm as "prdNm"
+			, factoryPrice as "factoryPrice"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','QTYUNITCD',qtyUnitCD,null) as "qtyUnitCDName"
+			, contractQty as "contractQty"
+			, plnEnterQty as "plnEnterQty"
+			, plnEnterUnitAmt as "plnEnterUnitAmt"
+			, plnAddEnterUnitAmt as "plnAddEnterUnitAmt"
+			, rltEnterQty as "rltEnterQty"
+			, rltEnterUnitAmt as "rltEnterUnitAmt"
+			, addEnterUnitAmt as "addEnterUnitAmt"
+			, payAmt as "payAmt"
+			, addPayAmt as "addPayAmt"
+			, prdCD as "prdCD"
+			, eu as "eu"
+		from (
+			select
+				a.eventYM
+				, b.kindTpCD5
+				, b.prdNm
+				, a.factoryPrice
+				, b.qtyUnitCD
+				, a.contractQty
+				, a.plnEnterQty
+				, a.plnEnterUnitAmt
+				, a.plnAddEnterUnitAmt
+				, a.rltEnterQty
+				, a.rltEnterUnitAmt
+				, a.addEnterUnitAmt
+				, a.PayAmt
+				, a.addPayAmt
+				, b.prdCD
+				, b.eu
+			from GMIL02DT a
+			inner join GPRD01MT b
+				on a.prdCD = b.prdCD
+			where
+				a.mileageID = #mileageID#
+		) t
+	</select>
+	
+	<!-- 검증오류수정 업소단위 수정 -->
+	<update id="PAY0100501U" parameterClass="com.kia.mil.model.GMIL01MT">
+		update GMIL02MT
+		set
+			contractAmt = #contractAmt#
+			, contractTaxAmt = #contractTaxAmt#
+			, addContractAmt = #addContractAmt#
+			, addContractTaxAmt = #addContractTaxAmt#
+			, mileagePayTPCD = #mileagePayTPCD#
+			, commt = #commt#
+			, chgID = #userID#
+			, chgDate = sysdate
+		where
+			mileageID = #mileageID#
+	</update>
+	<update id="PAY0100502U" parameterClass="com.kia.mil.model.GMIL01MT">
+		update GMIL02MT
+		set
+			contractAmt = #contractAmt#
+			, contractTaxAmt = #contractTaxAmt#
+			, addContractAmt = #addContractAmt#
+			, addContractTaxAmt = #addContractTaxAmt#
+			, mileagePayTPCD = #mileagePayTPCD#
+			, commt = #commt#
+			, chgID = #userID#
+			, chgDate = sysdate
+			, verifyStateCD = '10'
+		where
+			mileageID = #mileageID#
+	</update>
+	
+</sqlMap>

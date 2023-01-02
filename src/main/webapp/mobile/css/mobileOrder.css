@@ -1,0 +1,64 @@
+@charset "utf-8";
+/* CSS Document */
+
+table {
+	width: 100%;
+	border-spacing: 0;
+    color: black;
+    background: #fff;
+    border: 1px solid #b4b4b4;
+    font: bold 17px helvetica;
+    margin-top:10px;
+    -webkit-border-radius: 8px;
+}
+     
+table tr td {
+    color: #666;
+    border-bottom: 1px solid #b4b4b4;
+    border-right: 1px solid #b4b4b4;
+    padding: 5px 5px 5px 5px;
+    background-image: -webkit-linear-gradient(top, #fdfdfd, #eee);
+}
+
+.inputText-readonly	{ 
+	font-family:"맑은 고딕",gulim,dotum,arial; 
+	color:#666666; 
+	text-decoration:none; 
+	background-color: #ececec; 
+	border: 0;
+	vertical-align:middle;
+	width: 100%;
+}
+
+.ordSub-tBox	{ 
+	font-family:"맑은 고딕",gulim,dotum,arial; 
+	color:#666666; 
+	text-decoration:none; 
+	background-color: #ececec; 
+	border: 0;
+	vertical-align:middle;
+	width: 100%;
+}
+
+.myFont_one {
+	font-size: 10px;
+	font-weight: 100%;
+	font-family:"맑은 고딕";
+	text-align:left;
+	width: 50%;
+}
+
+.st4-tBox	 { 
+	font-family:"맑은 고딕",gulim,dotum,arial; 
+	color:#666666; 
+	text-decoration:none; 
+	border: 1;
+	vertical-align:middle;
+	width: 100%;
+}
+
+.st4_td {
+	border:0; 
+	text-align: right; 
+	font-size: 12px;
+}

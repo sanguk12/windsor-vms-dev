@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="AD03001">
+    
+	<!-- M&E RawData 조화-->
+	<select id="AD0300101S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+	    select
+	    	rowNum as "rowNum" 
+		  , a.commt as "commt"
+		  , a.yyyy as "yyyy"
+		  , a.activeyn as "activeYN"
+		  , a.regDate as "regDate"
+		  , a.chgDate as "chgDate"
+		  ,	a.seq as "seq"
+		from gme01mt a
+		where 1=1
+		order by a.seq desc
+    </select>
+
+    <!-- M&E RawData 상세 조화-->
+	<select id="AD0300102S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">   
+		select 
+    		A.prdcd as "prdCD"
+    	  , b.prdnm as "prdNM"
+		  <!-- , getLangDesc(#companyID#,#languageCD#,'F_CODE','QTYUNITCD', a.qtyunitcd, null)     as "qtyUnitName" -->
+    	  , getLangDesc(#companyID#,#languageCD#,'F_CODE','SDXYN',  a.sdxyn, null)     as "sdxYN"
+    	  , a.efp as "efp"
+    	  , a.duty as "duty"
+    	  , a.cogs as "cogs"
+		  <!-- , a.qtyunitcd as "qtyUnitCD" -->
+    	  , a.eu as "eu"
+		from gme01dt A
+		inner join gprd01mt B
+			on a.prdcd = b.prdcd
+		where 
+			1=1
+		and a.seq = #seq#
+	</select>
+	
+	<!-- M&E RawData 제품 등록 -->
+	<insert id="AD0300101I" parameterClass="com.kia.ad.model.GME01DT">
+		merge into GME01DT t1
+		using dual
+		on (
+			seq = #seq#
+			and PRDCD = #prdCD#
+		)
+		when not matched then
+			insert (
+				SEQ
+				, PRDCD
+				<!-- , QTYUNITCD -->
+				, SDXYN
+				, EFP
+				, DUTY
+				, COGS
+				, ACTIVEYN
+				, regID
+				, regDate
+				, EU
+			)
+			values (
+				#seq#
+				, #prdCD#
+				<!-- , #qtyUnitCD# -->
+				, #sdxYN#
+				, #efp#
+				, #duty#
+				, #cogs#
+				, 'Y'
+				, #userID#
+				, sysdate
+				, #eu#
+			)
+		when matched then
+			update
+			set
+				<!--  QTYUNITCD = #qtyUnitCD# -->
+				 SDXYN = #sdxYN#
+				, EFP = #efp#
+				, DUTY = #duty#
+				, COGS = #cogs#
+				, ACTIVEYN = #activeYN#
+				, CHGID = #userID#
+				, CHGDATE = sysdate
+				, EU = #eu#
+	</insert>
+    
+	<!-- 입력용 엑셀다운로드 시 제품목록  -->
+    <select id="AD0300103S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">   
+    	SELECT 
+			prdcd as "prdCD"
+		  , prdnm as "prdNM"
+		  , (select A.codename from f_code A where codeDiv = 'QTYUNITCD' and comcode = t1.qtyunitcd ) as "qtyUnitCD"
+		  , sdxyn as "sdxYN"
+		  , eu as "eu"
+		FROM gprd01mt T1
+		WHERE KINDTPCD4 ='10'
+	</select>
+	
+	<!--사용처리 -->
+	<update id="AD0300101U" parameterClass="com.kia.ad.model.GME01MT">
+		update GME01MT
+		set
+			activeYN = 'Y'
+			, chgID = #userID#
+			, chgDate = sysdate
+		where
+			seq = #seq#
+	</update>
+	
+	<!--미사용처리 -->
+	<update id="AD0300102U" parameterClass="com.kia.ad.model.GME01MT">
+		update GME01MT
+		set
+			activeYN = 'N'
+			, chgID = #userID#
+			, chgDate = sysdate
+		where
+			seq = #seq#
+	</update>
+	
+	<!--제품 상세 사용처리 -->
+	<update id="AD0300103U" parameterClass="com.kia.ad.model.GME01MT">
+		update GME01DT
+		set
+			activeYN = 'Y'
+			, chgID = #userID#
+			, chgDate = sysdate
+		where
+			seq = #seq#
+	</update>
+	
+	
+	<!--제품 상세 미사용처리 -->
+	<update id="AD0300104U" parameterClass="com.kia.ad.model.GME01MT">
+		update GME01DT
+		set
+			activeYN = 'N'
+			, chgID = #userID#
+			, chgDate = sysdate
+		where
+			seq = #seq#
+	</update>
+	
+	<!-- seq 존재 여부 조회 -->
+    <select id="AD0300104S" parameterClass="com.kia.ad.model.GME01MT" resultClass="java.lang.Integer">   
+    	select
+		    count(seq) as "cntSeq"
+		from
+			GME01MT
+		where
+			seq = #seq#
+	</select>
+	
+	 <!-- M&E RawData 삭제 -->
+	<delete id="AD0300101D" parameterClass="com.kia.ad.model.GME01MT">
+		delete from GME01MT
+		where
+			seq = #seq#
+	</delete>
+	
+	<!-- M&E RawData 제품 리스트 삭제 -->
+	<delete id="AD0300102D" parameterClass="com.kia.ad.model.GME01MT">
+		delete from GME01DT
+		where
+			seq = #seq#
+	</delete>
+	
+   <!-- M&E RawData maxSeq 구하기 GME01MT -->
+    <select id="AD0300105S" parameterClass="com.kia.ad.model.GME01MT" resultClass="java.lang.Integer">
+		select
+		    NVL(MAX(seq),0) as "maxSeq"
+		from
+			GME01MT
+		where
+			1=1
+	</select>
+	    
+    <!-- M&E RawData commt 수정 -->
+    <update id="AD0300105U" parameterClass="com.kia.ad.model.GME01MT">
+        update GME01MT
+        set
+        	commt = #commt#,
+        	yyyy = #yyyy#,
+        	chgID = #userID#, 
+        	chgDate = SYSDATE
+        where
+        	seq = #seq#
+    </update>   
+	    
+	    
+    <!-- M&E RawData 수정일 -->
+    <update id="AD0300106U" parameterClass="com.kia.ad.model.GME01DT">
+        update GME01MT
+        set
+        	chgID = #userID#, 
+        	chgDate = SYSDATE
+        where
+        	seq = #seq#
+    </update>
+
+	
+	<!--M&E RawData 신규 등록-->
+	<insert id="AD0300102I" parameterClass="com.kia.ad.model.GME01MT">    
+        insert into GME01MT (
+        	 seq
+        	, commt
+        	, yyyy
+        	, activeYN
+        	, regID
+        	, regDate
+        ) values (
+        	#seq# 
+          , #commt#
+          , #yyyy#
+          , #activeYN# 
+          , #userID#
+          , SYSDATE
+        )
+    </insert>
+    
+    	 <!-- excel upload시 코드찾기 -->
+	<select id="AD0300106S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			NVL(comCode, '')as "comCode"
+		from F_CODE
+		where
+			useYN = 'Y'
+			and activeFlg = 'U'
+			and codeDiv = #codeDiv#
+			and codeName = #codeName#
+			<isPropertyAvailable property="attrib02" >
+				<isNotEmpty prepend="and" property="attrib02">
+					attrib02 = #attrib02#
+				</isNotEmpty>
+			</isPropertyAvailable>
+	</select>
+    
+</sqlMap>

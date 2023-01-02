@@ -1,0 +1,1011 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="MDM08001">
+	
+	<!-- 임시코드(tmpVenueCD) -->
+	<select id="MDM0800100S" parameterClass="com.kia.mdm.model.GVEN02MT" resultClass="java.util.LinkedHashMap">
+        SELECT 
+        	SUBSTR('0000000' || VENSEQ.nextval,-7) as "tmpVenueCD" 
+		FROM dual
+	</select>
+	
+	<!--임시업소[신규] 조회 -->
+	<select id="MDM0800101S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		SELECT
+			rowNumber as "rowNum"
+			, sellingAreaID as "sellingAreaID"
+			, customerID as "customerID"
+			, refNo as "refNo"
+			, venueCD as "venueCD"
+			, country as "country"
+			, territoryCD as "territoryCD"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','TERRITORYCD',territoryCD,null) as "territoryCDNm"
+			, rageSphereCD as "rageSphereCD"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','RAGESPHERECD',rageSphereCD,null) as "rageSphereCDNm"
+			, teamCD as "teamCD"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','TEAMCD',teamCD,null) as "teamCDNm"
+			, repNm as "repNm"
+			, repNm_KR as "repNm_KR"
+			, customerNm as "customerNm"
+			, sellingAreaNm as "sellingAreaNm"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','LEGALCD',legalCD,null) as "legalCDNm"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','VENUEDIVCD',venueDivCD,null) as "venueDivCDNm"
+			, channelCD as "channelCD"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','CHANNELCD',channelCD,null) as "channelCDNm"
+			, subChannelCD as "subChannelCD"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SUBCHANNELCD',subChannelCD,null) as "subChannelCDNm"
+			, segmentCD as "segmentCD"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SEGMENTCD',segmentCD,null) as "segmentCDNm"
+			, subSegmentCD as "subSegmentCD"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SUBSEGMENTCD',subSegmentCD,null) as "subSegmentCDNm"
+			, reserveSegmentCD as "reserveSegmentCD"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','RESERVESEGMENTCD',reserveSegmentCD,null) as "reserveSegmentCDNm"
+			, kegYN as "kegYN"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ACTIVEYN',kegYN,null) as "kegYNNm"
+			, ageingCD as "ageingCD"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','AGEINGCD',ageingCD,null) as "ageingCDNm"
+			, siteCD as "siteCD"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SITECD',siteCD,null) as "siteCDNm"
+			, venueGradCD as "venueGradCD"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','VENUEGRADCD',venueGradCD,null) as "venueGradCDNm"
+			, addrTpCD1 as "addrTpCD1"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD1',addrTpCD1,null) as "addrTpCD1Nm"
+			, addrTpCD2 as "addrTpCD2"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD2',addrTpCD2,null) as "addrTpCD2Nm"
+			, addrTpCD3 as "addrTpCD3"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD3',addrTpCD3,null) as "addrTpCD3Nm"
+			, addrTpCD4 as "addrTpCD4"
+			, oldAddr2 as "oldAddr2"
+			, newAddr1 as "newAddr1"
+			, postCD as "postCD"
+			, phoneNo as "phoneNo"
+			, fascia as "fascia"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','FASCIACD',fascia,null) as "fasciaNm"
+			, legacyFrontOfficeAccountNo as "legacyFrontOfficeAccountNo"
+			, legacyBackOfficeAccountNo as "legacyBackOfficeAccountNo"
+			, ws1SapCD as "ws1SapCD"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','WSSAPCD',t.ws1SapCD,null) as "ws1SapCDNm"
+			, ws2SapCD as "ws2SapCD"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','WSSAPCD',t.ws2SapCD,null) as "ws2SapCDNm"
+			, ws3SapCD as "ws3SapCD"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','WSSAPCD',t.ws3SapCD,null) as "ws3SapCDNm"
+			, ws4SapCD as "ws4SapCD"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','WSSAPCD',t.ws4SapCD,null) as "ws4SapCDNm"
+			, license as "license"
+			, activeYN as "activeYN"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ACTIVEYN',activeYN,null) as "activeYNNm"
+			, TO_CHAR(TO_DATE(createDate , 'YYYYMMDD'), 'YYYY.MM.DD')as "createDate"
+			, TO_CHAR(TO_DATE(sellingAreaCreatedDate , 'YYYYMMDD'), 'YYYY.MM.DD')as "sellingAreaCreatedDate"
+			, TO_CHAR(TO_DATE(lastModifiedDate , 'YYYYMMDD'), 'YYYY.MM.DD') as "lastModifiedDate"
+			, TO_CHAR(TO_DATE(sellingAreaLastModifiedDate, 'YYYY.MM.DD'), 'YYYY.MM.DD') as "sellingAreaLastModifiedDate"
+			, lastModifiedBy as "lastModifiedBy"
+		FROM (
+			SELECT
+				rank() over(order by sellingAreaID, customerID, refNo, venueCD) as rowNumber
+				, floor((rank() over(order by sellingAreaID, customerID, refNo, venueCD)-1)/#displayNum#+1) as pageNum
+				, sellingAreaID
+				, customerID
+				, refNo
+				, venueCD
+				, country
+				, territoryCD
+				, rageSphereCD
+				, teamCD
+				, repNm
+				, repNm_KR
+				, customerNm  
+				, sellingAreaNm
+				, venueDivCD
+				, channelCD
+				, subChannelCD
+				, segmentCD
+				, subSegmentCD
+				, reserveSegmentCD
+				, kegYN
+				, ageingCD
+				, siteCD
+				, venueGradCD
+				, addrTpCD1
+				, addrTpCD2
+				, addrTpCD3
+				, addrTpCD4
+				, oldAddr2
+				, postCD
+				, phoneNo
+				, fascia
+				, legacyFrontOfficeAccountNo
+				, legacyBackOfficeAccountNo
+				, license
+				, activeYN
+				, createDate
+				, sellingAreaCreatedDate
+				, lastModifiedDate
+				, sellingAreaLastModifiedDate
+				, lastModifiedBy             
+				, ws1SapCD             
+				, ws2SapCD             
+				, ws3SapCD             
+				, ws4SapCD             
+				, newAddr1
+				, legalCD
+			FROM gven02mt
+			WHERE 
+				1=1
+			<isPropertyAvailable property="regDate" >
+				<isNotEmpty prepend="and" property="regDate">
+					(to_char(regDate, 'YYYYMMDD') = #regDate# 
+						or to_char(chgDate, 'YYYYMMDD') = #regDate#)
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="venueCD" >
+				<isNotEmpty prepend="and" property="venueCD">
+					upper(venueCD) = upper(#venueCD#)
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="venueNm" >
+				<isNotEmpty prepend="and" property="venueNm">
+					upper(customerNm) like '%'||upper(#venueNm#)||'%'
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="venueGradCD" >
+				<isNotEmpty prepend="and" property="venueGradCD">
+					venueGradCD = #venueGradCD#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="activeYN" >
+				<isNotEmpty prepend="and" property="activeYN">
+					activeYN = #activeYN#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="territoryCD" >
+				<isNotEmpty prepend="and" property="territoryCD">
+					territoryCD = #territoryCD#
+				</isNotEmpty>
+			</isPropertyAvailable>
+		) t
+		WHERE 
+			1=1
+		<isPropertyAvailable property="pageNum">
+			AND pageNum = #pageNum#
+		</isPropertyAvailable>
+	</select>
+	
+	<!-- 임시업소[신규] 상세조회 -->
+	<select id="MDM0800102S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		SELECT
+	  			  venueCD		as "venueCD"
+	  			, venueNm		as "venueNm"
+	  			, ageingCD		as "agingCD"
+	  			, dkmdTpCD		as "dkmdTpCD"
+				, territoryCD   as  "territoryCD "
+				, getLangDesc(#companyID#,#languageCD#,'F_CODE','TERRITORYCD',territoryCD,null) as "territoryCDName"
+				, reserveSegmentCD as "reserveSegmentCD"
+				, venueGradCD  as "venueGradCD"
+				, activeYN as "activeYN"
+				, kegYN 		as "kegYN"
+				, newAddr1 || ' ' ||  newAddr2	as "newAddr"
+				, addrTpCD1 	as "addrTpCD1"
+				, addrTpCD2		as "addrTpCD2"
+				, addrTpCD3		as "addrTpCD3"
+				, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD1',addrTpCD1,null) as "addrTpCD1"
+				, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD2',addrTpCD2,null) as "addrTpCD2"
+				, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD3',addrTpCD3,null) as "addrTpCD3"
+				, locationCD	as "locationCD"
+				, fascia		as "fasciaCD"
+				, channelCD		as "channelCD"
+				, subChannelCD  as "subChannelCD"
+				, siteCD		as "siteCD"
+				, segmentCD		as "segmentCD"
+				, subSegmentCD  as "subSegmentCD"
+				, phoneNo 		as "phoneNo"
+				, incntTpCD		as "incntTpCD"
+				, legalCD		as "legalCD"
+				, mdDupYN		as "mdDupYN"  
+				, ws1CD			as "ws1CD"
+				, ws1SapCD		as "ws1SapCD"
+				, getLangDesc(#companyID#,#languageCD#,'F_CODE','WSSAPCD',ws1SapCD,null) as "ws1SapCD"
+				, ws2CD			as "ws2CD"
+				, ws2SapCD		as "ws2SapCD"
+				, getLangDesc(#companyID#,#languageCD#,'F_CODE','WSSAPCD',ws2SapCD,null) as "ws2SapCD"
+				, ws3CD			as "ws3CD"   
+				, ws3SapCD      as "ws3SapCD"
+				, getLangDesc(#companyID#,#languageCD#,'F_CODE','WSSAPCD',ws3SapCD,null) as "ws3SapCD"
+				, ws4CD			as "ws4CD"   
+				, ws4SapCD      as "ws4SapCD"
+				, getLangDesc(#companyID#,#languageCD#,'F_CODE','WSSAPCD',ws4SapCD,null) as "ws4SapCD"
+				, postCD as "postCD"	
+				, sellingAreaID		as "sellingAreaID"
+				, refNo				as "refNo"	
+				, customerID		as "customerID"
+				, customerNm		as "customerNm"
+				, country			as "country"
+				, rageSphereCD	    as "rageSphereCD"
+				, teamCD			as "teamCD"	
+				, repNm             as "repNm"
+				, repNm_KR			as "repNm_KR"
+				, sellingAreaNm     as "sellingAreaNm"
+				, legacyFrontOfficeAccountNo   as "legacyFrontOfficeAccountNo"
+				, legacyBackOfficeAccountNo    as "legacyBackOfficeAccountNo"
+				, license					as "license"
+				, createDate   as "createDate" 
+				, sellingAreaCreatedDate   as "sellingAreaCreatedDate"
+				, lastModifiedDate    as  "lastModifiedDate"
+				, sellingAreaLastModifiedDate   as   "sellingAreaLastModifiedDate"
+				, lastModifiedBy	as "lastModifiedBy"
+				, mdVenueCD	as "mdVenueCD"
+				, oldAddr1	as "oldAddr1"
+				, newAddr1	as "newAddr1"
+				, oldAddr2	as "oldAddr2"
+				, newAddr2	as "newAddr2"
+
+		FROM (
+			SELECT 
+				 venueNm
+				, ageingCD
+				, venueCD
+				, dkmdTpCD
+				, territoryCD
+				, reserveSegmentCD
+				, venuegradcd
+				, activeYN  
+				, kegyn
+				, addrTpCD1
+				, addrTpCD2
+				, addrTpCD3
+				, addrTpCD4
+				, locationcd
+				, fascia	
+				, channelCD
+				, subChannelCD
+				, siteCD
+				, segmentCD
+				, subSegmentCD
+				, phoneNo
+				, incntTpCD
+				, venueDivCD
+				, mdDupYN
+				, ws1CD
+				, ws1SapCD
+				, ws2CD
+				, ws2SapCD
+				, ws3CD
+				, ws3SapCD
+				, ws4CD
+				, ws4SapCD
+				, note1
+				, note2
+				, note3
+				, note4
+				, sellingAreaID	
+				, refNo
+				, customerID
+				, customerNm
+				, country
+				, rageSphereCD
+				, teamCD
+				, postCD
+				, repNm
+				, repNm_KR
+				, sellingAreaNm
+				, legacyFrontOfficeAccountNo
+				, legacyBackOfficeAccountNo
+				, license
+				, createDate
+				, sellingAreaCreatedDate
+				, lastModifiedDate
+				, sellingAreaLastModifiedDate
+				, lastModifiedBy
+				, legalCD
+				, mdVenueCD
+				, oldAddr1
+				, newAddr1
+				, oldAddr2
+				, newAddr2
+			FROM GVEN02MT 
+			WHERE
+			  venueCD = #venueCD#
+		) t
+	</select>
+	
+	<!-- 임시업소[신규] totalCount-->
+	<select id="MDM0800103S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			count(*) as "totalCount"
+		from GVEN02MT
+		where 1=1
+			<isPropertyAvailable property="regDate" >
+				<isNotEmpty prepend="and" property="regDate">
+					(to_char(regDate, 'YYYYMMDD') = #regDate# 
+						or to_char(chgDate, 'YYYYMMDD') = #regDate#)
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="venueCD" >
+				<isNotEmpty prepend="and" property="venueCD">
+					upper(venueCD) = upper(#venueCD#)
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="venueNm" >
+				<isNotEmpty prepend="and" property="venueNm">
+					upper(customerNm) like '%'||upper(#venueNm#)||'%'
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="venueGradCD" >
+				<isNotEmpty prepend="and" property="venueGradCD">
+					venueGradCD = #venueGradCD#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="activeYN" >
+				<isNotEmpty prepend="and" property="activeYN">
+					activeYN = #activeYN#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="territoryCD" >
+				<isNotEmpty prepend="and" property="territoryCD">
+					territoryCD = #territoryCD#
+				</isNotEmpty>
+			</isPropertyAvailable>
+	</select>
+	
+	<!-- 임시업소[신규] totalCount-->
+	<select id="MDM0800109S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			 sellingAreaID as "sellingAreaID"
+			, customerID as "customerID"
+			, refNo as "refNo"
+			, venueCD as "venueCD"
+			, country as "country"
+			, territoryCD as "territoryCD"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','TERRITORYCD',territoryCD,null) as "territoryCDNm"
+			, rageSphereCD as "rageSphereCD"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','RAGESPHERECD',rageSphereCD,null) as "rageSphereCDNm"
+			, teamCD as "teamCD"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','TEAMCD',teamCD,null) as "teamCDNm"
+			, repNm as "repNm"
+			, repNm_KR as "repNm_KR"
+			, customerNm as "customerNm"
+			, sellingAreaNm as "sellingAreaNm"
+			, venueDivCD as "venueDivCD"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','VENUEDIVCD',venueDivCD,null) as "venueDivCDNm"
+			, channelCD as "channelCD"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','CHANNELCD',channelCD,null) as "channelCDNm"
+			, subChannelCD as "subChannelCD"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SUBCHANNELCD',subChannelCD,null) as "subChannelCDNm"
+			, segmentCD as "segmentCD"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SEGMENTCD',segmentCD,null) as "segmentCDNm"
+			, subSegmentCD as "subSegmentCD"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SUBSEGMENTCD',subSegmentCD,null) as "subSegmentCDNm"
+			, reserveSegmentCD as "reserveSegmentCD"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','RESERVESEGMENTCD',reserveSegmentCD,null) as "reserveSegmentCDNm"
+			, kegYN as "kegYN"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ACTIVEYN',kegYN,null) as "kegYNNm"
+			, ageingCD as "ageingCD"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','AGEINGCD',ageingCD,null) as "ageingCDNm"
+			, siteCD as "siteCD"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SITECD',siteCD,null) as "siteCDNm"
+			, venueGradCD as "venueGradCD"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','VENUEGRADCD',venueGradCD,null) as "venueGradCDNm"
+			, addrTpCD1 as "addrTpCD1"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD1',addrTpCD1,null) as "addrTpCD1Nm"
+			, addrTpCD2 as "addrTpCD2"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD2',addrTpCD2,null) as "addrTpCD2Nm"
+			, addrTpCD3 as "addrTpCD3"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD3',addrTpCD3,null) as "addrTpCD3Nm"
+			, addrTpCD4 as "addrTpCD4"
+			, oldAddr2 as "oldAddr2"
+			, postCD as "postCD"
+			, phoneNo as "phoneNo"
+			, fascia as "fascia"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','FASCIACD',fascia,null) as "fasciaNm"
+			, legacyFrontOfficeAccountNo as "legacyFrontOfficeAccountNo"
+			, legacyBackOfficeAccountNo as "legacyBackOfficeAccountNo"
+			, ws1SapCD as "ws1SapCD"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','WSSAPCD',t.ws1SapCD,null) as "ws1SapCD"
+			, ws2SapCD as "ws2SapCD"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','WSSAPCD',t.ws2SapCD,null) as "ws2SapCD"
+			, ws3SapCD as "ws3SapCD"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','WSSAPCD',t.ws3SapCD,null) as "ws3SapCD"
+			, ws4SapCD as "ws4SapCD"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','WSSAPCD',t.ws4SapCD,null) as "ws4SapCD"
+			, license as "license"
+			, activeYN as "activeYN"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ACTIVEYN',activeYN,null) as "activeYNNm"
+			, TO_CHAR(TO_DATE(createDate , 'YYYYMMDD'), 'YYYY.MM.DD')as "createDate"
+			, TO_CHAR(TO_DATE(sellingAreaCreatedDate , 'YYYYMMDD'), 'YYYY.MM.DD')as "sellingAreaCreatedDate"
+			, TO_CHAR(TO_DATE(lastModifiedDate , 'YYYYMMDD'), 'YYYY.MM.DD') as "lastModifiedDate"
+			, TO_CHAR(TO_DATE(sellingAreaLastModifiedDate, 'YYYY.MM.DD'), 'YYYY.MM.DD') as "sellingAreaLastModifiedDate"
+			, lastModifiedBy as "lastModifiedBy"
+		from (
+			select
+				  sellingAreaID
+				, customerID
+				, refNo
+				, venueCD
+				, country
+				, territoryCD
+				, rageSphereCD
+				, teamCD
+				, repNm
+				, repNm_KR
+				, nvl(customerNm, venueNm) as customerNm 
+				, nvl(sellingAreaNm, venueNm) as sellingAreaNm
+				, venueDivCD
+				, channelCD
+				, subChannelCD
+				, segmentCD
+				, subSegmentCD
+				, reserveSegmentCD
+				, kegYN
+				, ageingCD
+				, siteCD
+				, venueGradCD
+				, addrTpCD1
+				, addrTpCD2
+				, addrTpCD3
+				, addrTpCD4
+				, oldAddr2
+				, postCD
+				, phoneNo
+				, fascia
+				, legacyFrontOfficeAccountNo
+				, legacyBackOfficeAccountNo
+				, license
+				, activeYN
+				, createDate
+				, sellingAreaCreatedDate
+				, lastModifiedDate
+				, sellingAreaLastModifiedDate
+				, lastModifiedBy             
+				, ws1SapCD             
+				, ws2SapCD             
+				, ws3SapCD             
+				, ws4SapCD             
+			from GVEN02MT
+			where 1=1
+				<isPropertyAvailable property="regDate" >
+					<isNotEmpty prepend="and" property="regDate">
+						(to_char(regDate, 'YYYYMMDD') = #regDate# 
+							or to_char(chgDate, 'YYYYMMDD') = #regDate#)
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="venueCD" >
+					<isNotEmpty prepend="and" property="venueCD">
+						upper(venueCD) = upper(#venueCD#)
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="venueNm" >
+					<isNotEmpty prepend="and" property="venueNm">
+						upper(customerNm) like '%'||upper(#venueNm#)||'%'
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="venueGradCD" >
+					<isNotEmpty prepend="and" property="venueGradCD">
+						venueGradCD = #venueGradCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="activeYN" >
+					<isNotEmpty prepend="and" property="activeYN">
+						activeYN = #activeYN#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="territoryCD" >
+					<isNotEmpty prepend="and" property="territoryCD">
+						territoryCD = #territoryCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				order by sellingAreaID, customerID, refNo, venueCD
+		) t
+	</select>
+	
+	<!-- 임시업소[신규] 등록 -->
+	<insert id="MDM0800101I" parameterClass="com.kia.mdm.model.GVEN02MT">
+		merge into GVEN02MT t1
+		using dual
+		on (
+			venueCD = #venueCD#
+		)
+		when not matched then
+				insert  (
+						 sellingAreaID
+						, customerID
+						, refNo
+						, venueCD
+						, venueNm
+						, country
+						, territoryCD
+						, rageSphereCD
+						, teamCD
+						, repNm
+						, repNm_KR
+						, customerNm
+						, sellingAreaNm
+						, venueDivCD
+						, channelCD
+						, subChannelCD
+						, segmentCD
+						, subSegmentCD
+						, reserveSegmentCD
+						, ws1CD
+						, ws1SapCD
+						, ws2CD
+						, ws2SapCD
+						, ws3CD
+						, ws3SapCD
+						, ws4CD
+						, ws4SapCD
+						, kegYN
+						, ageingCD
+						, siteCD
+						, venueGradCD
+						, addrTpCD1
+						, addrTpCD2
+						, addrTpCD3
+						, addrTpCD4
+						, oldAddr2
+						, postCD
+						, phoneNo
+						, fascia
+						, legacyFrontOfficeAccountNo
+						, legacyBackOfficeAccountNo
+						, license
+						, activeYN
+						, createDate
+						, sellingAreaCreatedDate
+						, lastModifiedDate
+						, sellingAreaLastModifiedDate
+						, lastModifiedBy
+						, mdVenueCD
+						, legalCD
+						, regID
+						, regDate
+		)
+		values (
+						 #sellingAreaID#
+						, #customerID#
+						, #refNo#
+						, #venueCD#
+						, #customerNm#
+						, #country#
+						, #territoryCD#
+						, #rageSphereCD#
+						, #teamCD#
+						, #repNm#
+						, #repNm_KR#
+						, #customerNm#
+						, #sellingAreaNm#
+						, #venueDivCD#
+						, #channelCD#
+						, #subChannelCD#
+						, #segmentCD#
+						, #subSegmentCD#
+						, #reserveSegmentCD#
+						, #ws1CD#   
+						, #ws1SapCD#
+						, #ws2CD#   
+						, #ws2SapCD#
+						, #ws3CD#   
+						, #ws3SapCD#
+						, #ws4CD#   
+						, #ws4SapCD#
+						, #kegYN#
+						, #ageingCD#
+						, #siteCD#
+						, #venueGradCD#
+						, #addrTpCD1#
+						, #addrTpCD2#
+						, #addrTpCD3#
+						, #oldAddr2#
+						, #newAddr1#
+						, #postCD#
+						, #phoneNo#
+						, #fascia#
+						, #legacyFrontOfficeAccountNo#
+						, #legacyBackOfficeAccountNo#
+						, #license#
+						, #activeYN#
+						, #createDate#
+						, #sellingAreaCreatedDate#
+						, #lastModifiedDate#
+						, #sellingAreaLastModifiedDate#
+						, #lastModifiedBy#
+						, #mdVenueCD#
+						, #legalCD#
+						, #userID#
+						, sysdate
+		)
+		when matched then
+			update  set
+				 sellingAreaID  	= #sellingAreaID#
+				, customerID		= #customerID#
+				, venueNm 			= #customerNm#
+				, refNo             = #refNo#
+				, country           = #country#
+				, territoryCD       = #territoryCD#
+				, rageSphereCD      = #rageSphereCD#
+				, teamCD            = #teamCD#
+				, repNm             = #repNm#
+				, repNm_KR          = #repNm_KR#
+				, customerNm        = #customerNm#
+				, sellingAreaNm     = #sellingAreaNm#
+				, venueDivCD        = #venueDivCD#
+				, channelCD         = #channelCD#
+				, subChannelCD      = #subChannelCD#
+				, segmentCD         = #segmentCD#
+				, subSegmentCD      = #subSegmentCD#
+				, reserveSegmentCD  = #reserveSegmentCD#
+				, ws1CD  			= #ws1CD#
+				, ws1SapCD  		= #ws1SapCD#
+				, ws2CD  			= #ws2CD#
+				, ws2SapCD  		= #ws2SapCD#
+				, ws3CD  			= #ws3CD#
+				, ws3SapCD  		= #ws3SapCD#
+				, ws4CD  			= #ws4CD#
+				, ws4SapCD  		= #ws4SapCD#
+				, kegYN             = #kegYN#
+				, ageingCD          = #ageingCD#
+				, siteCD            = #siteCD#
+				, venueGradCD       = #venueGradCD#
+				, addrTpCD1         = #addrTpCD1#
+				, addrTpCD2         = #addrTpCD2#
+				, addrTpCD3         = #addrTpCD3#
+				, oldAddr2          = #oldAddr2#
+				, newAddr1         = #newAddr1#
+				, postCD            = #postCD#
+				, phoneNo           = #phoneNo#
+				, fascia            = #fascia#
+				, legacyFrontOfficeAccountNo  = #legacyFrontOfficeAccountNo#
+				, legacyBackOfficeAccountNo	  = #legacyBackOfficeAccountNo#	
+				, license			= #license#
+				, activeYN			= #activeYN#
+				, createDate		= #createDate#
+				, sellingAreaCreatedDate  = #sellingAreaCreatedDate#
+				, lastModifiedDate		  = #lastModifiedDate#
+				, sellingAreaLastModifiedDate  = #sellingAreaLastModifiedDate#
+				, lastModifiedBy    = #lastModifiedBy#
+				, mdVenueCD         = #mdVenueCD#
+				, legalCD           = #legalCD#
+				, chgID           	= #userID#  
+				, chgDate           = sysdate
+	</insert>
+	
+	<insert id="MDM0800102I" parameterClass="com.kia.mdm.model.GVEN02MT">
+		merge into GVEN01MT t1
+		using (
+		   select
+		      venueCD       
+		    , venueNm     
+		    , dkmdTpCD    
+            , territoryCD 
+            , venueGradCD 
+            , channelCD   
+            , subChannelCD
+            , segmentCD   
+            , subSegmentCD
+            , addrTpCD1   
+            , addrTpCD2   
+            , addrTpCD3   
+            , addrTpCD4   
+            , ws1CD       
+            , ws1SapCD    
+            , note1       
+            , note2       
+            , note3       
+            , note4       
+            , activeYN    
+		    , incntTpCD
+		    , customerNm
+		  from GVEN02MT
+		  where 
+		  	1=1
+		  <isPropertyAvailable property="regDate" >
+		  	<isNotEmpty prepend="and" property="regDate">
+				(to_char(regDate, 'YYYYMMDD') = #regDate# 
+					or to_char(chgDate, 'YYYYMMDD') = #regDate#)
+		  	</isNotEmpty>
+		  </isPropertyAvailable>
+		  <isPropertyAvailable property="venueCD" >
+		  	<isNotEmpty prepend="and" property="venueCD">
+		  		upper(venueCD) = upper(#venueCD#)
+		  	</isNotEmpty>
+		  </isPropertyAvailable>
+		  <isPropertyAvailable property="venueNm" >
+		  	<isNotEmpty prepend="and" property="venueNm">
+		  		upper(customerNm) like '%'||upper(#venueNm#)||'%'
+		  	</isNotEmpty>
+		  </isPropertyAvailable>
+		  <isPropertyAvailable property="venueGradCD" >
+		  	<isNotEmpty prepend="and" property="venueGradCD">
+		  		venueGradCD = #venueGradCD#
+		  	</isNotEmpty>
+		  </isPropertyAvailable>
+		  <isPropertyAvailable property="activeYN" >
+		  	<isNotEmpty prepend="and" property="activeYN">
+		  		activeYN = #activeYN#
+		  	</isNotEmpty>
+		  </isPropertyAvailable>
+		  <isPropertyAvailable property="territoryCD" >
+		  	<isNotEmpty prepend="and" property="territoryCD">
+		  		territoryCD = #territoryCD#
+		  	</isNotEmpty>
+		  </isPropertyAvailable>
+		) t2
+		on (
+			t1.venueCD = t2.venueCD
+		)
+		when not matched then
+			insert (
+				venueCD
+				, venueNm
+				, dkmdTpCD
+				, territoryCD
+				, venueGradCD
+				, channelCD
+				, subChannelCD
+				, segmentCD
+				, subSegmentCD
+				, addrTpCD1
+				, addrTpCD2
+				, addrTpCD3
+				, addrTpCD4
+				, wsCD
+				, wsSapCD
+				, note1
+				, note2
+				, note3
+				, note4
+				, activeYN
+				, regID
+				, regDate
+				, incntTpCD
+<!-- 				, venueDivCD -->
+			)
+			values (
+			
+				t2.venueCD
+				, t2.customerNm
+				, t2.dkmdTpCD
+				, t2.territoryCD
+				, t2.venueGradCD
+				, t2.channelCD
+				, t2.subChannelCD
+				, t2.segmentCD
+				, t2.subSegmentCD
+				, t2.addrTpCD1
+				, t2.addrTpCD2
+				, t2.addrTpCD3
+				, t2.addrTpCD4
+				, t2.ws1CD
+				, t2.ws1SapCD
+				, t2.note1
+				, t2.note2
+				, t2.note3
+				, t2.note4
+				, t2.activeYN
+				, #userID#
+				, sysdate
+				, t2.incntTpCD
+<!-- 				, t2.venueDivCD -->
+			)
+		when matched then
+			UPDATE 
+			SET
+				t1.venueNm = t2.customerNm
+				, t1.dkmdTpCD = t2.dkmdTpCD
+				, t1.territoryCD = t2.territoryCD
+				, t1.venueGradCD = t2.venueGradCD
+				, t1.channelCD = t2.channelCD
+				, t1.subChannelCD = t2.subChannelCD
+				, t1.segmentCD = t2.segmentCD
+				, t1.subSegmentCD = t2.subSegmentCD
+				, t1.addrTpCD1 = t2.addrTpCD1
+				, t1.addrTpCD2 = t2.addrTpCD2
+				, t1.addrTpCD3 = t2.addrTpCD3
+				, t1.addrTpCD4 = t2.addrTpCD4
+				, t1.wsCD =t2.ws1CD
+				, t1.wsSapCD = t2.ws1SapCD
+				, t1.note1 = t2.note1
+				, t1.note2 = t2.note2
+				, t1.note3 = t2.note3
+				, t1.note4 = t2.note4
+				, t1.activeYN = t2.activeYN
+				, t1.chgID = #userID#
+				, t1.chgDate = sysdate
+				, t1.incntTpCD = t2.incntTpCD
+<!-- 				, t1.venueDivCD = t2.venueDivCD -->
+	</insert>
+	
+	<!-- 임시업소[신규] 수정 -->
+	<update id="MDM0800101U" parameterClass="com.kia.mdm.model.GVEN02MT">
+		update GVEN02MT
+		set
+		   dkmdTpCD        = #dkmdTpCD#          
+		  , territoryCD     = #territoryCD#       
+		  , venueGradCD     = #venueGradCD#       
+		  , channelCD       = #channelCD#         
+		  , subChannelCD    = #subChannelCD#      
+		  , segmentCD       = #segmentCD#         
+		  , subSegmentCD    = #subSegmentCD#      
+		  , addrTpCD1       = #addrTpCD1#         
+		  , addrTpCD2       = #addrTpCD2#         
+		  , addrTpCD3       = #addrTpCD3#         
+		  , ws1CD           = #ws1CD#             
+		  , ws1SapCD        = #ws1SapCD#          
+		  , note1           = #note1#             
+		  , note2           = #note2#             
+		  , note3           = #note3#             
+		  , note4           = #note4#             
+		  , incntTpCD       = #incntTpCD#         
+		  , activeYN        = #activeYN#          
+		  , chgID           = #userID#             
+		  , chgDate         = sysdate          
+		  , addrTpCD4       = #addrTpCD4#         
+		  , venueDivCD      = #venueDivCD#        
+		  , newAddr1        = #newAddr1#          
+		  , oldAddr1        = #oldAddr1#
+		  , newAddr2        = #newAddr2#          
+		  , oldAddr2        = #oldAddr2#                  
+		  , fascia          = #fascia#            
+		  , mdDupYN         = #mdDupYN#           
+		  , siteCD          = #siteCD#            
+		  , ageingCD        = #ageingCD#          
+		  , kegYN           = #kegYN#             
+		  , locationCD      = #locationCD#        
+		  , reserveSegmentCD= #reserveSegmentCD#  
+		  , reason1CD       = #reason1CD#         
+		  , ws2CD           = #ws2CD#             
+		  , ws2SapCD        = #ws2SapCD#          
+		  , ws3CD           = #ws3CD#             
+		  , ws3SapCD        = #ws3SapCD#          
+		  , ws4CD           = #ws4CD#             
+		  , ws4SapCD		= #ws4SapCD#
+		  , phoneNo			= #phoneNo# 	
+		  , sellingAreaID   = #sellingAreaID#   
+		  , refNo           = #refNo#                                  
+		  , customerID		= #customerID#
+		  , customerNm		= #customerNm#
+		  , country			= #country#
+		  , rageSphereCD	= #rageSphereCD#
+		  , teamCD			= #teamCD#
+		  , repNm			= #repNm#
+		  , repNm_KR		= #repNm_KR#
+		  , sellingAreaNm	= #sellingAreaNm#
+		  , postCD			= #postCD#
+		  , legacyFrontOfficeAccountNo	=#legacyFrontOfficeAccountNo#
+		  , legacyBackOfficeAccountNo	=#legacyBackOfficeAccountNo#
+		  , license			=#license#
+		  , createDate		=#createDate#
+		  , sellingAreaCreatedDate		=#sellingAreaCreatedDate#
+		  , lastModifiedDate				=#lastModifiedDate#
+		  , sellingAreaLastModifiedDate	=#sellingAreaLastModifiedDate#
+		  , lastModifiedBy	=#lastModifiedBy#		
+		  , mdVenueCD	= #mdVenueCD#		
+		  , legalCD 	= #legalCD#		
+		  , chgID           = #userID#
+		  , chgDate           = sysdate
+		where
+			venueCD = #venueCD#
+	</update>
+	
+	<update id="MDM0800102U" parameterClass="com.kia.mdm.model.GVEN02MT">
+		update GVEN02MT
+		set
+			  chgID 	= #userID#
+			, chgDate   = sysdate
+			, activeYN  = 'N'
+		where
+			venueCD = #venueCD#
+	</update>
+	
+	<!-- 임시업소[신규] excel upload시 이름으로 코드찾기 -->
+	<select id="MDM0800104S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			comCode as "code"
+		  , codeName as "codeName"
+		  , attrib02 as "attrib02"
+		from F_CODE
+		where
+			useYN = 'Y'
+			and activeFlg = 'U'
+			and codeDiv = #codeDiv#
+			<isPropertyAvailable property="comCode" >
+				<isNotEmpty prepend="and" property="comCode">
+					comCode = #comCode#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="codeName" >
+				<isNotEmpty prepend="and" property="codeName">
+					codeName = #codeName#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="attrib01" >
+				<isNotEmpty prepend="and" property="attrib01">
+					attrib01 = #attrib01#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="attrib02" >
+				<isNotEmpty prepend="and" property="attrib02">
+					attrib02 = #attrib02#
+				</isNotEmpty>
+			</isPropertyAvailable>
+	</select>
+	
+	<!-- 임시업소[신규] 조회한 User의 dkmdTp 조회-->
+	<select id="MDM0800105S" parameterClass="com.kia.mdm.model.GVEN02MT" resultClass="java.util.LinkedHashMap">
+		 select 
+ 	  		dkmdtpcd as "dkmdTpCD"  
+ 	  	from gemp01mt 
+ 	  	where 
+ 	  		empid = #userID#
+	</select>
+	
+	<!-- 임시업소[신규] 조회한 User의 dkmdTp 조회-->
+	<select id="MDM0800106S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			comCode as "code"
+		from F_CODE
+		where
+			useYN = 'Y'
+			and activeFlg = 'U'
+			and codeDiv = #codeDiv#
+			and codeName like '%' || #codeName# || '%'
+	</select>
+	
+	<!-- 임시업소[신규] excel upload시 이름으로 코드찾기 -->
+	<select id="MDM0800107S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select 
+		    t1.addrTpCD1 as "addrTpCD1"
+          , t2.addrTpCD2 as "addrTpCD2"
+          , t3.addrTpCD3 as "addrTpCD3"
+		from
+			(select
+				comCode as addrTpCD1
+			from F_CODE
+			where
+				useYN = 'Y'
+				and activeFlg = 'U'
+				and codeDiv = 'ADDRTPCD1'
+				and attrib04 = #codeName1#) t1
+			,(select
+				comCode as addrTpCD2
+			from F_CODE
+			where
+				useYN = 'Y'
+				and activeFlg = 'U'
+				and codeDiv = 'ADDRTPCD2'
+				and attrib04 like '%'|| #codeName2# || '%') t2
+			, (select
+					comCode as addrTpCD3
+				from F_CODE
+				where
+					useYN = 'Y'
+					and activeFlg = 'U'
+					and codeDiv = 'ADDRTPCD3'
+					and attrib04 = #codeName3#) t3
+		
+	</select>
+	
+	<!-- 임시업소[신규] excel upload시 이름으로 코드찾기 -->
+	<select id="MDM0800108S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			comCode as "code"
+		,   codeName as "codeName"
+		,   attrib02 as "attrib02"
+		from F_CODE
+		where
+			useYN = 'Y'
+			and activeFlg = 'U'
+			and codeDiv = #codeDiv#
+			and	codeName = (case when INITCAP(#codeName#) = 'Active' then 'Y'
+						  			 when INITCAP(#codeName#) = 'Inactive' then 'N'
+						  			 when #codeName# = 'Y' then 'Y'
+						  			 when #codeName# = 'N' then 'N'
+						  			 when #codeName# = '케그' then 'Y'
+					 			end)
+			<isPropertyAvailable property="attrib02" >
+				<isNotEmpty prepend="and" property="attrib02">
+					attrib02 = #attrib02#
+				</isNotEmpty>
+			</isPropertyAvailable>
+	</select>
+	
+</sqlMap>

@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="ANL04001">	
+
+	<!-- Paging 구현쿼리 Header 조각 -->
+    <sql id="ANL04001.paging.header">
+        <isPropertyAvailable property="pageNum">
+        select p.* from (
+            select
+    	        count(*) over() as "totalCount",
+    	</isPropertyAvailable>
+    	<isNotPropertyAvailable property="pageNum">
+    		select
+    	</isNotPropertyAvailable>
+    </sql>
+    
+    <!-- Paging 구현쿼리 Header 조각 -->
+    <sql id="ANL04001.paging.footer">
+        <isPropertyAvailable property="pageNum">
+        ) p
+		where
+			p.pageNum = #pageNum#
+		</isPropertyAvailable>
+    </sql>
+    
+	<!-- Plan내역 리스트 조회 -->
+	<select id="ANL0400101S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		<include refid="ANL04001.paging.header"/>
+		rank() over(
+				order by
+					t2.venueCD
+			) as "rowNum"
+			, floor((rank() over(
+				order by
+					 t2.venueCD
+			)-1)/#displayNum#+1) as pageNum,
+			 t4.keymanNm as "keymanNm",
+			 SCP.DEC_B64('DAMO','SCP','AES_256.SCPS',t4.regIDNo) AS "regIDNo",
+			 substr(t1.transferDate,1,6) AS "transferDate",
+			 sum(t2.totalAmt) AS "totalAmt",
+			 sum(t2.incomeTax) AS "incomeTax",
+			 sum(t2.residentTax) AS "residentTax",
+			 sum(t2.withholdingTax) AS "withholdingTax",
+			 t3.payAmt AS "payAmt"
+	    from grlt01mt t1
+			inner join grlt01dt t2
+		  		on t1.eventym = t2.eventym
+		 		and t1.venuecd = t2.venuecd
+  		inner join grlt06mt t3
+		  		on t1.eventym = t3.eventym
+		 		and t1.venuecd = t3.venuecd
+ 		inner join gkey01mt t4
+		  		on t3.keymanid = t4.keymanid
+	   where 
+             t2.totalamt is not null 
+         	and t1.paystatecd='60'
+         	and substr(t1.transferdate,1,6) = #eventYM#
+         		<isPropertyAvailable property="programCD">
+					<isNotEmpty prepend="and" property="programCD">
+						 t1.programCD= #programCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="rageSphereCD">
+					<isNotEmpty prepend="and" property="rageSphereCD">
+						t1.rageSphereCD = #rageSphereCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="officeCD">
+					<isNotEmpty prepend="and" property="officeCD">
+						t1.officeCD = #officeCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="rageSphereCD_S">
+					<isNotEmpty prepend="and" property="rageSphereCD_S">
+						t1.rageSphereCD = #rageSphereCD_S#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="officeCD_S">
+					<isNotEmpty prepend="and" property="officeCD_S">
+						t1.officeCD = #officeCD_S#
+					</isNotEmpty>
+				</isPropertyAvailable>
+			<isPropertyAvailable property="dkmdTpCD">
+					<isNotEmpty prepend="and" property="dkmdTpCD">
+						t1.dkmdTpCD = #dkmdTpCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="activityCD">
+					<isNotEmpty prepend="and" property="activityCD">
+						t1.activityCD = #activityCD#
+					 </isNotEmpty>
+				</isPropertyAvailable>
+			group by t2.eventym, t2.venuecd, t4.keymannm, t4.regidno, t1.transferdate, t3.payAmt
+			<include refid="PAY04001.paging.footer"/>
+	</select>
+	
+	<select id="ANL0400102S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+   	        count(*) over() as "totalCount",
+			t4.keymanNm as "keymanNm",
+			 SCP.DEC_B64('DAMO','SCP','AES_256.SCPS',t4.regIDNo) AS "regIDNo",
+			 substr(t1.transferDate,1,6) AS "transferDate",
+			 sum(t2.totalAmt) AS "totalAmt",
+			 sum(t2.incomeTax) AS "incomeTax",
+			 sum(t2.residentTax) AS "residentTax",
+			 sum(t2.withholdingTax) AS "withholdingTax",
+			 t3.payAmt AS "payAmt"
+	    from grlt01mt t1
+			inner join grlt01dt t2
+		  		on t1.eventym = t2.eventym
+		 		and t1.venuecd = t2.venuecd
+  		inner join grlt06mt t3
+		  		on t1.eventym = t3.eventym
+		 		and t1.venuecd = t3.venuecd
+ 		inner join gkey01mt t4
+		  		on t3.keymanid = t4.keymanid
+	   where 
+             t2.totalamt is not null 
+         	and t1.paystatecd='60'
+         	and substr(t1.transferdate,1,6) = #eventYM#
+         		<isPropertyAvailable property="programCD">
+					<isNotEmpty prepend="and" property="programCD">
+						 t1.programCD= #programCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="rageSphereCD">
+					<isNotEmpty prepend="and" property="rageSphereCD">
+						t1.rageSphereCD = #rageSphereCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="officeCD">
+					<isNotEmpty prepend="and" property="officeCD">
+						t1.officeCD = #officeCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="rageSphereCD_S">
+					<isNotEmpty prepend="and" property="rageSphereCD_S">
+						t1.rageSphereCD = #rageSphereCD_S#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="officeCD_S">
+					<isNotEmpty prepend="and" property="officeCD_S">
+						t1.officeCD = #officeCD_S#
+					</isNotEmpty>
+				</isPropertyAvailable>
+			<isPropertyAvailable property="dkmdTpCD">
+					<isNotEmpty prepend="and" property="dkmdTpCD">
+						t1.dkmdTpCD = #dkmdTpCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="activityCD">
+					<isNotEmpty prepend="and" property="activityCD">
+						t1.activityCD = #activityCD#
+					 </isNotEmpty>
+				</isPropertyAvailable>
+			group by t2.eventym, t2.venuecd, t4.keymannm, t4.regidno, t1.transferdate, t3.payAmt
+		
+	</select>
+	
+</sqlMap>

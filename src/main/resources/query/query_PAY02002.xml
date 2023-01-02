@@ -1,0 +1,656 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="PAY02002">
+	
+	<!-- 검증오류승인 리스트 조회 -->
+	<select id="PAY0200201S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			rowNumber as "rowNum"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ACTIVITYCD',activityCD,null) as "activityCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','RAGESPHERECD',rageSphereCD,null) as "rageSphereCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','OFFICECD',officeCD,null) as "officeCDName"
+			, (select empNm from GEMP01MT where empID=t2.empID) as "empNm"
+			, venueCD as "venueCD"
+			, venueNm as "venueNm"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','VENUEGRADCD',venueGradCD,null) as "venueGradCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SEGMENTCD',segmentCD,null) as "segmentCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SUBSEGMENTCD',subSegmentCD,null) as "subSegmentCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD1',addrTpCD1,null) as "addrTpCD1Name"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD2',addrTpCD2,null) as "addrTpCD2Name"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','KINDTPCD5',kindTpCD5,null) as "kindTpCD5Name"
+			, prdNm as "prdNm"
+			, nvl(eu,'0') as "eu"
+			, nvl(factoryPrice,'0') as "factoryPrice"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','QTYUNITCD',qtyUnitCD,null) as "qtyUnitCDName"
+			, nvl(planQty,'0') as "planQty"
+			, nvl(planUnitAmt,'0') as "planUnitAmt"
+			, nvl(rfidQty,'0') as "rfidQty"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','RESULTTPCD',resultTpCD,null) as "resultTpCDName"
+			, nvl(resultQty,'0') as "resultQty"
+			, nvl(resultUnitAmt,'0') as "resultUnitAmt"
+			, nvl(guidAmt,'0') as "guidAmt"
+			, nvl(payAmt,'0') as "payAmt"
+			, nvl(targetQty,'0') as "targetQty"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SDXTPCD',sdxTpCD,null) as "sdxTpCDName"
+			, nvl(targetRate,'0') as "targetRate"
+			, nvl(gsvRate,'0') as "gsvRate"
+			, commt as "commt"
+			, apprCommt as "apprCommt"
+			, verifyErrCommt as "verifyErrCommt"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','APPRSTATECD',apprStateCD_emp,null) as "apprStateCDName_emp"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','VERIFYSTATECD',verifyStateCD,null) as "verifyStateCDName"
+			, verifyStateCD as "verifyStateCD"
+			, apprStateCD_emp as "apprStateCD_emp"
+			, lapprLevelNo as "lapprLevelNo"
+			, levelNo as "levelNo"
+			, lastApprYN as "lastApprYN"
+			, prdCD as "prdCD"
+			, sdxTpCD as "sdxTpCD"
+			, sdxYN as "sdxYN"
+		from (
+			select
+				t.*
+				, rank() over(order by rageSphereCD, officeCD, empID, venueCD, prdCD) as rowNumber
+				, floor((rank() over(order by rageSphereCD, officeCD, empID, venueCD, prdCD)-1)/#displayNum#+1) as pageNum
+			from (
+				select
+					b.activityCD
+					, c.rageSphereCD
+					, c.officeCD
+					, b.empID
+					, a.venueCD
+					, d.venueNm
+					, d.venueGradCD
+					, d.segmentCD
+					, d.subSegmentCD
+					, d.addrTpCD1
+					, d.addrTpCD2
+					, f.kindTpCD5
+					, e.prdCD
+					, f.prdNm
+					, f.eu
+					, e.factoryPrice
+					, f.qtyUnitCD
+					, g.planQty
+					, g.planUnitAmt
+					, e.rfidQty
+					, e.resultTpCD
+					, e.resultQty
+					, e.resultUnitAmt
+					, e.guidAmt
+					, e.payAmt
+					, e.targetQty
+					, e.sdxTpCD
+					, e.targetRate
+					, e.gsvRate
+					, e.commt
+					, a.commt as apprCommt
+					, e.verifyErrCommt
+					, e.verifyStateCD
+					, a.apprStateCD as apprStateCD_emp
+					, e.lapprLevelNo
+					, a.levelNo
+					, (
+						case when e.lapprLevelNo = a.levelNo then 'Y'
+						else 'N'
+						end
+					) as lastApprYN
+					, e.sdxYN
+				from GRLT08MT a
+					inner join GRLT02MT b
+						on a.eventYM = b.eventYM
+						and a.venueCD = b.venueCD
+					inner join GEMP01MT c
+						on b.empID = c.empID
+					inner join GVEN01MT d
+						on a.venueCD = d.venueCD
+					inner join GRLT02DT e
+						on a.eventYM = e.eventYM
+						and a.venueCD = e.venueCD	
+						and a.prdCD = e.prdCD
+					inner join GPRD01MT f
+						on a.prdCD = f.prdCD
+					inner join GPLN02DT g
+						on a.eventYM = g.eventYM
+						and a.venueCD = g.venueCD
+						and a.prdCD = g.prdCD	
+				where
+					a.eventYM = #eventYM#
+					and a.empID = #empID#
+					and a.apprTpID = #apprTpID#
+					and b.programCD = 'G1'
+					and a.apprStateCD in (
+						select comCode
+						from F_CODE
+						where
+							codediv='APPRSTATECD'
+							and activeFlg = 'U'
+							and useYN = 'Y'
+							and attrib02 = 'MNG'
+					)
+					<isPropertyAvailable property="activityCD">
+						<isNotEmpty prepend="and" property="activityCD">
+							activityCD = #activityCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+					<isPropertyAvailable property="venueGradCD">
+						<isNotEmpty prepend="and" property="venueGradCD">
+							venueGradCD = #venueGradCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+					<isPropertyAvailable property="segmentCD">
+						<isNotEmpty prepend="and" property="segmentCD">
+							segmentCD = #segmentCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+					<isPropertyAvailable property="subSegmentCD">
+						<isNotEmpty prepend="and" property="subSegmentCD">
+							subSegmentCD = #subSegmentCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+					<isPropertyAvailable property="overGuidAmt">
+						<isNotEmpty prepend="and" property="overGuidAmt">
+							<isEqual property="overGuidAmt" compareValue="Y">
+								e.resultUnitAmt > guidAmt
+							</isEqual>
+						</isNotEmpty>
+					</isPropertyAvailable>
+					<isPropertyAvailable property="rageSphereCD">
+						<isNotEmpty prepend="and" property="rageSphereCD">
+							c.rageSphereCD = #rageSphereCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+					<isPropertyAvailable property="officeCD">
+						<isNotEmpty prepend="and" property="officeCD">
+							c.officeCD = #officeCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+					<isPropertyAvailable property="kindTpCD5">
+						<isNotEmpty prepend="and" property="kindTpCD5">
+							f.kindTpCD5 = #kindTpCD5#
+						</isNotEmpty>
+					</isPropertyAvailable>
+					<isPropertyAvailable property="apprStateCD">
+						<isNotEmpty prepend="and" property="apprStateCD">
+							a.apprStateCD = #apprStateCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+					<isPropertyAvailable property="sdxTpCD">
+						<isNotEmpty prepend="and" property="sdxTpCD">
+							e.sdxTpCD = #sdxTpCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+			) t
+		) t2
+		where 1=1
+			<isPropertyAvailable property="pageNum">
+				<isNotEmpty prepend="and" property="pageNum">
+					pageNum = #pageNum#
+				</isNotEmpty>
+			</isPropertyAvailable>
+	</select>
+	
+	<select id="PAY0200206S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			count(*) as "totalCount"
+		from (
+			select
+				b.activityCD
+				, c.rageSphereCD
+				, c.officeCD
+				, b.empID
+				, a.venueCD
+				, d.venueNm
+				, d.venueGradCD
+				, d.segmentCD
+				, d.subSegmentCD
+				, d.addrTpCD1
+				, d.addrTpCD2
+				, f.kindTpCD5
+				, e.prdCD
+				, f.prdNm
+				, f.eu
+				, e.factoryPrice
+				, f.qtyUnitCD
+				, g.planQty
+				, g.planUnitAmt
+				, e.rfidQty
+				, e.resultTpCD
+				, e.resultQty
+				, e.resultUnitAmt
+				, e.guidAmt
+				, e.payAmt
+				, e.targetQty
+				, e.sdxTpCD
+				, e.targetRate
+				, e.gsvRate
+				, e.commt
+				, a.commt as apprCommt
+				, e.verifyErrCommt
+				, e.verifyStateCD
+				, a.apprStateCD as apprStateCD_emp
+				, e.lapprLevelNo
+				, a.levelNo
+				, (
+					case when e.lapprLevelNo = a.levelNo then 'Y'
+					else 'N'
+					end
+				) as lastApprYN
+				, e.sdxYN
+			from GRLT08MT a
+				inner join GRLT02MT b
+					on a.eventYM = b.eventYM
+					and a.venueCD = b.venueCD
+				inner join GEMP01MT c
+					on b.empID = c.empID
+				inner join GVEN01MT d
+					on a.venueCD = d.venueCD
+				inner join GRLT02DT e
+					on a.eventYM = e.eventYM
+					and a.venueCD = e.venueCD	
+					and a.prdCD = e.prdCD
+				inner join GPRD01MT f
+					on a.prdCD = f.prdCD
+				inner join GPLN02DT g
+					on a.eventYM = g.eventYM
+					and a.venueCD = g.venueCD
+					and a.prdCD = g.prdCD	
+			where
+				a.eventYM = #eventYM#
+				and a.empID = #empID#
+				and a.apprTpID = #apprTpID#
+				and b.programCD = 'G1'
+				and a.apprStateCD in (
+					select comCode
+					from F_CODE
+					where
+						codediv='APPRSTATECD'
+						and activeFlg = 'U'
+						and useYN = 'Y'
+						and attrib02 = 'MNG'
+				)
+				<isPropertyAvailable property="activityCD">
+					<isNotEmpty prepend="and" property="activityCD">
+						activityCD = #activityCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="venueGradCD">
+					<isNotEmpty prepend="and" property="venueGradCD">
+						venueGradCD = #venueGradCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="segmentCD">
+					<isNotEmpty prepend="and" property="segmentCD">
+						segmentCD = #segmentCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="subSegmentCD">
+					<isNotEmpty prepend="and" property="subSegmentCD">
+						subSegmentCD = #subSegmentCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="overGuidAmt">
+					<isNotEmpty prepend="and" property="overGuidAmt">
+						<isEqual property="overGuidAmt" compareValue="Y">
+							e.resultUnitAmt > guidAmt
+						</isEqual>
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="rageSphereCD">
+					<isNotEmpty prepend="and" property="rageSphereCD">
+						c.rageSphereCD = #rageSphereCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="officeCD">
+					<isNotEmpty prepend="and" property="officeCD">
+						c.officeCD = #officeCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="kindTpCD5">
+					<isNotEmpty prepend="and" property="kindTpCD5">
+						f.kindTpCD5 = #kindTpCD5#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="apprStateCD">
+					<isNotEmpty prepend="and" property="apprStateCD">
+						a.apprStateCD = #apprStateCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="sdxTpCD">
+					<isNotEmpty prepend="and" property="sdxTpCD">
+						e.sdxTpCD = #sdxTpCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+		) t
+	</select>
+	
+	<!-- 상위승인자 정보 -->
+	<select id="PAY0200202S" parameterClass="com.kia.rlt.model.GRLT02MT" resultClass="java.util.LinkedHashMap">
+		select
+			levelNo as "levelNo"
+			, a.empID as "empID"
+			, empNm as "empNm"
+			, emailAddr as "emailAddr"
+		from GRLT08MT a
+		inner join GEMP01MT b
+			on a.empID = b.empID
+		where
+			a.eventYM = #eventYM#
+			and a.venueCD = #venueCD#
+			and a.prdCD = #prdCD#
+			and a.apprTpID = #apprTpID#
+			and a.levelNo = #levelNo#+1
+	</select>
+	
+	<!-- 검증오류승인정보 검증상태 갱신 -->
+	<update id="PAY0200201U" parameterClass="com.kia.rlt.model.GRLT02MT">
+		update GRLT02DT
+		set
+			verifyStateCD = #verifyStateCD#
+			, chgID = #userID#
+			, chgDate = sysdate
+		where
+			eventYM = #eventYM#
+			and venueCD = #venueCD#
+			and prdCD = #prdCD#
+	</update>
+	
+	<!-- 검증오류승인정보 승인처리 -->
+	<update id="PAY0200202U" parameterClass="com.kia.rlt.model.GRLT02MT">
+		update GRLT08MT
+		set
+			apprStateCD = '50'
+			, commt = #apprCommt#
+			, apprDate = sysdate
+			, chgID = #userID#
+			, chgDate = sysdate
+		where
+			eventYM = #eventYM#
+			and venueCD = #venueCD#
+			and prdCD = #prdCD#
+			and apprTpID = #apprTpID#
+			and levelNo = #levelNo#
+	</update>
+	
+	<!-- 검증오류승인정보 상위자 승인요청처리 -->
+	<update id="PAY0200203U" parameterClass="com.kia.rlt.model.GRLT02MT">
+		update GRLT08MT
+		set
+			apprStateCD = '20'
+			, chgID = #userID#
+			, chgDate = sysdate
+		where
+			eventYM = #eventYM#
+			and venueCD = #venueCD#
+			and prdCD = #prdCD#
+			and apprTpID = #apprTpID#
+			and levelNo = #levelNo#+1
+	</update>
+	
+	<!-- 최종승인시 메일보낼 하위승인자들 정보(자신제외) -->
+	<select id="PAY0200203S" parameterClass="com.kia.rlt.model.GRLT02MT" resultClass="java.util.LinkedHashMap">
+		select
+			empID as "empID"
+			, max(empNm) as "empNm"
+			, max(emailAddr) as "emailAddr"
+		from (
+			select
+				b.empID
+				, empNm
+				, emailAddr
+			from GRLT02DT a
+			inner join GRLT08MT b
+				on a.eventYM = b.eventYM
+				and a.venueCD = b.venueCD
+				and a.prdCD = b.prdCD
+			inner join GEMP01MT c
+				on b.empID = c.empID
+			where
+				a.eventYM = #eventYM#
+			and a.venueCD in
+    		<iterate property="venueCDs" open="(" close=")" conjunction=",">
+				#venueCDs[]#
+	     	</iterate>
+	     	and b.prdCD in
+    		<iterate property="prdCDs" open="(" close=")" conjunction=",">
+				#prdCDs[]#
+	     	</iterate>
+	     	and b.apprTpID = #apprTpID#
+			and b.empID != #empID#
+		)
+		group by empID
+	</select>
+	
+	<!-- 반려시 메일보낼 하위승인자들 정보(상태가 비어있거나, 승인요청인 사람 제외) -->
+	<select id="PAY0200204S" parameterClass="com.kia.rlt.model.GRLT02MT" resultClass="java.util.LinkedHashMap">
+		select
+			empID as "empID"
+			, max(empNm) as "empNm"
+			, max(emailAddr) as "emailAddr"
+		from (
+			select
+				b.empID
+				, empNm
+				, emailAddr
+				, b.apprStateCD
+			from GRLT02DT a
+			inner join GRLT08MT b
+				on a.eventYM = b.eventYM
+				and a.venueCD = b.venueCD
+				and a.prdCD = b.prdCD
+			inner join GEMP01MT c
+				on b.empID = c.empID
+			where
+				a.eventYM = #eventYM#
+			and a.venueCD in
+			<iterate property="venueCDs" open="(" close=")" conjunction=",">
+				#venueCDs[]#
+	     	</iterate>
+	     	and a.prdCD = #prdCD#
+	     	and b.apprTpID = #apprTpID#
+			and (b.apprStateCD is not null and b.apprStateCD != '20')
+			and b.empID != #empID#
+		)
+		group by empID
+	</select>
+	
+	<!-- 검증오류승인정보 하위자 반려처리 -->
+	<update id="PAY0200204U" parameterClass="com.kia.rlt.model.GRLT02MT">
+		update GRLT08MT
+		set
+			apprStateCD = #apprStateCD#
+			, apprDate = sysdate
+			, commt = #apprCommt#
+			, chgID = #userID#
+			, chgDate = sysdate
+		where
+			eventYM = #eventYM#
+			and venueCD = #venueCD#
+			and prdCD = #prdCD#
+			and apprTpID = #apprTpID#
+			and empID = #empID#
+	</update>
+	
+	<!-- 검증오류승인 엑셀 조회 -->
+	<select id="PAY0200205S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			getLangDesc(#companyID#,#languageCD#,'F_CODE','ACTIVITYCD',activityCD,null) as "activityCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','RAGESPHERECD',rageSphereCD,null) as "rageSphereCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','OFFICECD',officeCD,null) as "officeCDName"
+			, (select empNm from GEMP01MT where empID=t.empID) as "empNm"
+			, venueCD as "venueCD"
+			, venueNm as "venueNm"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','VENUEGRADCD',venueGradCD,null) as "venueGradCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SEGMENTCD',segmentCD,null) as "segmentCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SUBSEGMENTCD',subSegmentCD,null) as "subSegmentCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD1',addrTpCD1,null) as "addrTpCD1Name"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD2',addrTpCD2,null) as "addrTpCD2Name"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','KINDTPCD5',kindTpCD5,null) as "kindTpCD5Name"
+			, prdNm as "prdNm"
+			, nvl(eu,'0') as "eu"
+			, nvl(factoryPrice,'0') as "factoryPrice"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','QTYUNITCD',qtyUnitCD,null) as "qtyUnitCDName"
+			, nvl(planQty,'0') as "planQty"
+			, nvl(planUnitAmt,'0') as "planUnitAmt"
+			, nvl(rfidQty,'0') as "rfidQty"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','RESULTTPCD',resultTpCD,null) as "resultTpCDName"
+			, nvl(resultQty,'0') as "resultQty"
+			, nvl(resultUnitAmt,'0') as "resultUnitAmt"
+			, nvl(guidAmt,'0') as "guidAmt"
+			, nvl(payAmt,'0') as "payAmt"
+			, nvl(targetQty,'0') as "targetQty"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SDXTPCD',sdxTpCD,null) as "sdxTpCDName"
+			, nvl(targetRate,'0') as "targetRate"
+			, nvl(gsvRate,'0') as "gsvRate"
+			, commt as "commt"
+			, apprCommt as "apprCommt"
+			, verifyErrCommt as "verifyErrCommt"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','APPRSTATECD',apprStateCD_emp,null) as "apprStateCDName_emp"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','VERIFYSTATECD',verifyStateCD,null) as "verifyStateCDName"
+			, verifyStateCD as "verifyStateCD"
+			, apprStateCD_emp as "apprStateCD_emp"
+			, lapprLevelNo as "lapprLevelNo"
+			, levelNo as "levelNo"
+			, lastApprYN as "lastApprYN"
+			, prdCD as "prdCD"
+			, sdxTpCD as "sdxTpCD"
+			, sdxYN as "sdxYN"
+		from (
+			select
+				b.activityCD
+				, c.rageSphereCD
+				, c.officeCD
+				, b.empID
+				, a.venueCD
+				, d.venueNm
+				, d.venueGradCD
+				, d.segmentCD
+				, d.subSegmentCD
+				, d.addrTpCD1
+				, d.addrTpCD2
+				, f.kindTpCD5
+				, e.prdCD
+				, f.prdNm
+				, f.eu
+				, e.factoryPrice
+				, f.qtyUnitCD
+				, g.planQty
+				, g.planUnitAmt
+				, e.rfidQty
+				, e.resultTpCD
+				, e.resultQty
+				, e.resultUnitAmt
+				, e.guidAmt
+				, e.payAmt
+				, e.targetQty
+				, e.sdxTpCD
+				, e.targetRate
+				, e.gsvRate
+				, e.commt
+				, a.commt as apprCommt
+				, e.verifyErrCommt
+				, e.verifyStateCD
+				, a.apprStateCD as apprStateCD_emp
+				, e.lapprLevelNo
+				, a.levelNo
+				, (
+					case when e.lapprLevelNo = a.levelNo then 'Y'
+					else 'N'
+					end
+				) as lastApprYN
+				, e.sdxYN
+			from GRLT08MT a
+				inner join GRLT02MT b
+					on a.eventYM = b.eventYM
+					and a.venueCD = b.venueCD
+				inner join GEMP01MT c
+					on b.empID = c.empID
+				inner join GVEN01MT d
+					on a.venueCD = d.venueCD
+				inner join GRLT02DT e
+					on a.eventYM = e.eventYM
+					and a.venueCD = e.venueCD	
+					and a.prdCD = e.prdCD
+				inner join GPRD01MT f
+					on a.prdCD = f.prdCD
+				inner join GPLN02DT g
+					on a.eventYM = g.eventYM
+					and a.venueCD = g.venueCD
+					and a.prdCD = g.prdCD	
+			where
+				a.eventYM = #eventYM#
+				and a.empID = #empID#
+				and a.apprTpID = #apprTpID#
+				and b.programCD = 'G1'
+				and a.apprStateCD in (
+					select comCode
+					from F_CODE
+					where
+						codediv='APPRSTATECD'
+						and activeFlg = 'U'
+						and useYN = 'Y'
+						and attrib02 = 'MNG'
+				)
+				<isPropertyAvailable property="activityCD">
+					<isNotEmpty prepend="and" property="activityCD">
+						activityCD = #activityCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="venueGradCD">
+					<isNotEmpty prepend="and" property="venueGradCD">
+						venueGradCD = #venueGradCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="segmentCD">
+					<isNotEmpty prepend="and" property="segmentCD">
+						segmentCD = #segmentCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="subSegmentCD">
+					<isNotEmpty prepend="and" property="subSegmentCD">
+						subSegmentCD = #subSegmentCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="overGuidAmt">
+					<isNotEmpty prepend="and" property="overGuidAmt">
+						<isEqual property="overGuidAmt" compareValue="Y">
+							e.resultUnitAmt > guidAmt
+						</isEqual>
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="rageSphereCD">
+					<isNotEmpty prepend="and" property="rageSphereCD">
+						c.rageSphereCD = #rageSphereCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="officeCD">
+					<isNotEmpty prepend="and" property="officeCD">
+						c.officeCD = #officeCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="kindTpCD5">
+					<isNotEmpty prepend="and" property="kindTpCD5">
+						f.kindTpCD5 = #kindTpCD5#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="apprStateCD">
+					<isNotEmpty prepend="and" property="apprStateCD">
+						a.apprStateCD = #apprStateCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="sdxTpCD">
+					<isNotEmpty prepend="and" property="sdxTpCD">
+						e.sdxTpCD = #sdxTpCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+		) t
+		order by
+			rageSphereCD, 
+			officeCD, 
+			empID, 
+			venueCD, 
+			prdCD
+ 	</select>
+	
+</sqlMap>

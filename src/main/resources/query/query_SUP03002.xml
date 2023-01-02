@@ -1,0 +1,413 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="SUP03002">
+	
+	<!-- 선지원 현황 조회(제품별) -->
+	<select id="SUP0300201S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			supportID as "supportID"
+			, venueCD as "venueCD"
+			, venueNm as "venueNm"
+			, (
+				case when contractDateFrom is null then ''
+				else
+					to_char(to_date(contractDateFrom, 'yyyymmdd'), 'yyyy.mm.dd')||'~'||to_char(to_date(contractDateTo, 'yyyymmdd'), 'yyyy.mm.dd')
+				end
+			) as "contractDate"
+			, contractMonthCt as "contractMonthCt"
+			, apAmt as "apAmt"
+			, addAmt as "addAmt"
+			, msTargetRate as "msTargetRate"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','KINDTPCD5',kindTpCD5,null) as "kindTpCD5Name"
+			, prdNm as "prdNm"
+			, contractQty as "contractQty"
+			, enterQty as "enterQty"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','QTYUNITCD',qtyUnitCD,null) as "qtyUnitCDName"
+			, enterUnitAmt as "enterUnitAmt"
+			, payAmt as "payAmt"
+			, resultQty as "resultQty"
+			, payAmt_rlt as "payAmt_rlt"
+			, (
+				case when payAmt=0 then 0
+				else round(payAmt_rlt / payAmt * 100)
+				end
+			) as "rate"
+		from (
+			select
+				 t3.*
+				 , (
+					select attrib02
+					from F_CODE
+					where
+						useYN='Y'
+						and activeFlg='U'
+						and codediv='OFFICECD'
+						and comCode=t3.officeCD
+				 ) as rageSphereCD
+			from (
+				select
+					 t2.*
+					 , (
+						select attrib02
+						from F_CODE
+						where
+							useYN='Y'
+							and activeFlg='U'
+							and codediv='TEAMCD'
+							and comCode=t2.teamCD
+					 ) as officeCD
+				from (
+					select
+						 t1.*
+						 , (
+							select attrib02
+							from F_CODE
+							where
+								useYN='Y'
+								and activeFlg='U'
+								and codediv='TERRITORYCD'
+								and comCode=t1.territoryCD
+						 ) as teamCD
+					from (
+						select
+							supportID
+							, venueCD
+							, prdCD
+							, max(venueNm) as venueNm
+							, max(contractDateFrom) as contractDateFrom
+							, max(contractDateTo) as contractDateTo
+							, max(contractMonthCt) as contractMonthCt
+							, max(apAmt) as apAmt
+							, max(addAmt) as addAmt
+							, max(msTargetRate) as msTargetRate
+							, max(contractQty) as contractQty
+							, max(enterQty) as enterQty
+							, max(contractAmt) as contractAmt
+							, max(kindTpCD5) as kindTpCD5
+							, max(prdNm) as prdNm
+							, max(qtyUnitCD) as qtyUnitCD
+							, max(resultQty) as resultQty
+							, max(payAmt) as payAmt
+							, (
+								case when max(contractDateFrom) is null then min(resultUnitAmt)
+								else max(enterUnitAmt)
+								end
+							) as enterUnitAmt
+							, max(payAmt_rlt) as payAmt_rlt
+							<!-- 2015년 3월 20일 오류 쿼리 제거 이한준
+							, (
+								case when nvl(max(payAmt),0) > nvl(max(payAmt_rlt),0) then 'Y'
+								else 'N'
+								end
+							) as contractOverYN
+							-->
+							, (
+								select territoryCD from GVEN01MT where venueCD=t0.venueCD
+							) as territoryCD
+						from (
+							<!-- support -->
+							select
+								supportID
+								, venueCD
+								, prdCD
+								, venueNm
+								, contractDateFrom
+								, contractDateTo
+								, contractMonthCt
+								, apAmt
+								, addAmt
+								, msTargetRate
+								, contractQty
+								, enterQty
+								, enterUnitAmt
+								, contractAmt
+								, kindTpCD5
+								, prdNm
+								, qtyUnitCD
+								, resultQty
+								, payAmt
+								, resultUnitAmt
+								, payAmt_rlt
+							from (
+								select
+									a.supportID
+									, a.venueCD
+									, d.prdCD
+									, c.venueNm
+									, a.contractDateFrom
+									, a.contractDateTo
+									, a.contractMonthCt
+									, a.apAmt
+									, nvl(b.addAmt,0) as addAmt
+									, a.msTargetRate
+									, d.contractQty
+									, d.enterQty
+									, d.enterUnitAmt
+									, a.contractAmt
+									, e.kindTpCD5 as kindTpCD5
+									, e.prdNm as prdNm
+									, e.qtyUnitCD as qtyUnitCD
+									, 0 as resultQty
+									, d.payAmt as payAmt
+									, 0 as resultUnitAmt
+									, 0 as payAmt_rlt
+								from GSUP01MT a
+								left outer join GSUP02MT b
+									on a.supportID = b.supportID
+									and b.supportStateCD = '60'
+								inner join GVEN01MT c
+									on a.venueCD = c.venueCD
+								inner join GSUP01DT d
+									on a.supportID = d.supportID
+								inner join GPRD01MT e
+									on d.prdCD = e.prdCD
+								where
+									a.supportStateCD = '60'
+								<!-- 2015년 3월 20일 쿼리추가 이한준 -->
+									<![CDATA[
+									and a.contractDateTo >= #contractDateFrom#
+									and a.contractDateFrom <= #contractDateTo#
+									]]>
+									<isPropertyAvailable property="contractOverYN">
+										<isNotEmpty property="contractOverYN">
+										<isEqual prepend="and" property="contractOverYN" compareValue="Y">
+											<![CDATA[
+											nvl(a.contractAmt,0) > nvl(a.subtractAmt,0)
+											]]>
+										</isEqual>
+										<isEqual prepend="and" property="contractOverYN" compareValue="N">
+											<![CDATA[
+											nvl(a.contractAmt,0) <= nvl(a.subtractAmt,0)
+											]]>
+										</isEqual>
+										</isNotEmpty>
+									</isPropertyAvailable>	
+								<!-- -->								
+									<isPropertyAvailable property="dkmdTpCD">
+										<isNotEqual prepend="and" property="dkmdTpCD" compareValue="DK">
+											c.dkmdTpCD = #dkmdTpCD#
+										</isNotEqual>
+									</isPropertyAvailable>
+							) sup
+							union all
+							<!-- result -->
+							select
+								supportID
+								, venueCD
+								, prdCD
+								, venueNm
+								, contractDateFrom
+								, contractDateTo
+								, contractMonthCt
+								, apAmt
+								, 0 as addAmt
+								, msTargetRate
+								, 0 as contractQty
+								, 0 as enterQty
+								, 0 as enterUnitAmt
+								, contractAmt
+								, kindTpCD5
+								, prdNm
+								, qtyUnitCD
+								, resultQty
+								, 0 as payAmt
+								, resultUnitAmt
+								, payAmt as payAmt_rlt
+							from (
+								select
+									b1.supportID
+									, b1.venueCD
+									, e.venueNm
+									, b2.prdCD
+									, d.kindTpCD5
+									, d.prdNm
+									, d.qtyUnitCD
+									, c2.resultQty
+									, c2.resultUnitAmt
+									, c2.payAmt
+									, f.contractDateFrom
+									, f.contractDateTo
+									, f.contractMonthCt
+									, f.apAmt
+									, f.msTargetRate
+									, f.contractAmt
+								from GPLN01MT b1
+								inner join GPLN01DT b2
+									on b1.eventYM = b2.eventYM
+									and b1.venueCD = b2.venueCD
+								inner join GRLT01MT c1
+									on b1.eventYM = c1.eventYM
+									and b1.venueCD = c1.venueCD
+								inner join GRLT01DT c2
+									on c1.eventYM = c2.eventYM
+									and c1.venueCD = c2.venueCD
+									and c1.diffNo = c2.diffNo
+									and b2.prdCD = c2.prdCD
+								inner join GPRD01MT d
+									on b2.prdCD = d.prdCD
+								inner join GVEN01MT e
+									on b1.venueCD = e.venueCD
+								inner join GSUP01MT f
+									on b1.supportID = f.supportID
+								where
+									b1.apprStateCD = '50'
+									and c1.verifyStateCD = 'OK'
+									and f.supportStateCD = '60'
+								<!-- 2015년 3월 20일 쿼리추가 이한준 -->
+									<![CDATA[
+									and f.contractDateTo >= #contractDateFrom#
+									and f.contractDateFrom <= #contractDateTo#
+									]]>
+									<isPropertyAvailable property="contractOverYN">
+										<isNotEmpty property="contractOverYN">
+										<isEqual prepend="and" property="contractOverYN" compareValue="Y">
+											<![CDATA[
+											nvl(f.contractAmt,0) > nvl(f.subtractAmt,0)
+											]]>
+										</isEqual>
+										<isEqual prepend="and" property="contractOverYN" compareValue="N">
+											<![CDATA[
+											nvl(f.contractAmt,0) <= nvl(f.subtractAmt,0)
+											]]>
+										</isEqual>
+										</isNotEmpty>
+									</isPropertyAvailable>
+								<!--  -->																			
+									<isPropertyAvailable property="dkmdTpCD">
+										<isNotEqual prepend="and" property="dkmdTpCD" compareValue="DK">
+											e.dkmdTpCD = #dkmdTpCD#
+										</isNotEqual>
+									</isPropertyAvailable>
+								union all
+								select
+									b1.supportID
+									, b1.venueCD
+									, e.venueNm
+									, b2.prdCD
+									, d.kindTpCD5
+									, d.prdNm
+									, d.qtyUnitCD
+									, c2.resultQty
+									, c2.resultUnitAmt
+									, c2.payAmt
+									, f.contractDateFrom
+									, f.contractDateTo
+									, f.contractMonthCt
+									, f.apAmt
+									, f.msTargetRate
+									, f.contractAmt
+								from GPLN02MT b1
+								inner join GPLN02DT b2
+									on b1.eventYM = b2.eventYM
+									and b1.venueCD = b2.venueCD
+								inner join GRLT02MT c1
+									on b1.eventYM = c1.eventYM
+									and b1.venueCD = c1.venueCD
+								inner join GRLT02DT c2
+									on c1.eventYM = c2.eventYM
+									and c1.venueCD = c2.venueCD
+									and b2.prdCD = c2.prdCD
+								inner join GPRD01MT d
+									on b2.prdCD = d.prdCD
+								inner join GVEN01MT e
+									on b1.venueCD = e.venueCD
+								inner join GSUP01MT f
+									on b1.supportID = f.supportID
+								where
+									b2.apprStateCD = '50'
+									and c2.verifyStateCD = 'OK'
+									and f.supportStateCD = '60'
+								<!-- 2015년 3월 20일 쿼리추가 이한준 -->
+									<![CDATA[
+									and f.contractDateTo >= #contractDateFrom#
+									and f.contractDateFrom <= #contractDateTo#
+									]]>
+									<isPropertyAvailable property="contractOverYN">
+										<isNotEmpty property="contractOverYN">
+										<isEqual prepend="and" property="contractOverYN" compareValue="Y">
+											<![CDATA[
+											nvl(f.contractAmt,0) > nvl(f.subtractAmt,0)
+											]]>
+										</isEqual>
+										<isEqual prepend="and" property="contractOverYN" compareValue="N">
+											<![CDATA[
+											nvl(f.contractAmt,0) <= nvl(f.subtractAmt,0)
+											]]>
+										</isEqual>
+										</isNotEmpty>
+									</isPropertyAvailable>	
+								<!--  -->																	
+									<isPropertyAvailable property="dkmdTpCD">
+										<isNotEqual prepend="and" property="dkmdTpCD" compareValue="DK">
+											e.dkmdTpCD = #dkmdTpCD#
+										</isNotEqual>
+									</isPropertyAvailable>
+							) rlt
+						) t0
+						group by supportID, venueCD, prdCD
+						order by supportID, venueCD, prdCD
+					) t1
+				) t2
+			) t3
+		)
+		where 1=1
+		<!-- 2015년 3월 20일 오류쿼리 삭제 이한준
+			<isPropertyAvailable property="contractOverYN">
+				<isNotEmpty prepend="and" property="contractOverYN">
+					contractOverYN = #contractOverYN#
+				</isNotEmpty>
+			</isPropertyAvailable>
+		 -->
+			<isPropertyAvailable property="rageSphereCD">
+				<isNotEmpty prepend="and" property="rageSphereCD">
+					rageSphereCD = #rageSphereCD#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="officeCD">
+				<isNotEmpty prepend="and" property="officeCD">
+					officeCD = #officeCD#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="teamCD">
+				<isNotEmpty prepend="and" property="teamCD">
+					teamCD = #teamCD#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="territoryCD">
+				<isNotEmpty prepend="and" property="territoryCD">
+					territoryCD = #territoryCD#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="periodLongTerm">
+				<isNotEmpty prepend="and" property="periodLongTerm">
+					contractMonthCt <![CDATA[>=]]> #periodLongTerm#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="periodShortTerm">
+				<isNotEmpty prepend="and" property="periodShortTerm">
+					contractMonthCt <![CDATA[<]]> #periodShortTerm#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="venue_S">
+				<isNotEmpty prepend="and" property="venue_S">
+					venueCD = #venue_S#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="rageSphereCD_S">
+				<isNotEmpty prepend="and" property="rageSphereCD_S">
+					rageSphereCD = #rageSphereCD_S#
+				</isNotEmpty>
+			</isPropertyAvailable>
+			<isPropertyAvailable property="officeCD_S">
+				<isNotEmpty prepend="and" property="officeCD_S">
+					officeCD = #officeCD_S#
+				</isNotEmpty>
+			</isPropertyAvailable>
+		order by
+			supportID
+			, venueCD
+			, prdCD
+	</select>
+	
+</sqlMap>

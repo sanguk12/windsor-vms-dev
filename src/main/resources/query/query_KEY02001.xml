@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="KEY02001">
+	
+	<!-- 키맨승인 리스트 조회 -->
+	<select id="KEY0200101S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select	
+			requestDate as "requestDate"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','REQUESTTPCD',requestTpCD,null) as "requestTpCDName"
+			, venueNm as "venueNm"
+			, keymanID as "keymanID"
+			, keymanNm as "keymanNm"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','KEYMANTYPECD',keymanTypeCD,null) as "keymanTypeCDName"
+			<isPropertyAvailable property="grpID">
+				<isNotEmpty property="grpID">
+			, regIDNo as "regIDNo"
+				</isNotEmpty>
+				<isEmpty property="grpID">
+			, '' as "regIDNo"
+				</isEmpty>
+			</isPropertyAvailable>
+			, birthDate as "birthDate"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','DUTYCD',dutyCD,null) as "dutyCDName"
+			, dutyCD as "dutyCD"
+			, addr as "addr"
+			, phoneNo as "phoneNo"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','BANKCD',bankCD,null) as "bankCDName"
+			, accountNo as "accountNo"
+			, holderNm as "holderNm"
+			, PkeymanYN as "PkeymanYN"
+			, note as "note"
+			, apprCommt as "apprCommt"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','APPRSTATECD',apprStateCD,null) as "apprStateCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','REQUESTSTATECD',requestStateCD,null) as "requestStateCDName"
+			, apprStateCD as "apprStateCD"
+			, requestStateCD as "requestStateCD"
+			, lapprLevelNo as "lapprLevelNo"
+			, levelNo as "levelNo"
+			, lastApprYN as "lastApprYN"
+			, requestSeq as "requestSeq"
+			, venueCD as "venueCD"
+			, empId as "empId"
+			, empNm as "empNm"
+			, LicenceChkYn as "licenceChkYn"
+		from (
+			select
+				b.requestDate
+				, b.requestTpCD
+				, c.venueNm
+				, b.keymanID
+				, b.keymanNm
+				, b.keymanTypeCD
+				, SCP.DEC_B64('DAMO','SCP','AES_256.SCPS',b.regIDNo) AS regIDNo
+				, b.birthDate
+				, b.dutyCD
+				, b.addr
+				, b.phoneNo
+				, b.bankCD
+				, b.accountNo
+				, b.holderNm
+				, b.PkeymanYN
+				, b.note
+				, a.commt as apprCommt
+				, b.requestStateCD
+				, a.apprStateCD
+				, b.lapprLevelNo
+				, a.levelNo
+				, (
+					case when b.lapprLevelNo = a.levelNo then 'Y'
+					else 'N'
+					end
+				) as lastApprYN
+				, b.requestSeq
+				, b.venueCD
+				, b.empId
+				, d.empNm
+				, b.LicenceChkYn
+			from GKEY03MT a
+			inner join GKEY02MT b
+				on a.keymanID = b.keymanID
+				and a.requestDate = b.requestDate
+				and a.requestSeq = b.requestSeq
+			inner join GVEN01MT c
+				on b.venueCD = c.venueCD
+			left outer join GEMP01MT d
+				on b.empID = d.empID
+			where
+				b.requestDate between #requestDateFrom# and #requestDateTo#
+				and a.empID = #empID#
+				and a.apprStateCD in (
+					select comCode
+					from F_CODE
+					where
+						codediv='APPRSTATECD'
+						and activeFlg = 'U'
+						and useYN = 'Y'
+						and attrib02 = 'MNG'
+				)
+				<isPropertyAvailable property="apprStateCD">
+					<isNotEmpty prepend="and" property="apprStateCD">
+						a.apprStateCD = #apprStateCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+		) t
+	</select>
+	
+	<!-- 키맨신청정보 승인상태 갱신 -->
+	<update id="KEY0200101U" parameterClass="com.kia.key.model.GKEY01MT">
+		update GKEY02MT
+		set
+			requestStateCD = #requestStateCD#
+			, chgID = #userID#
+			, chgDate = sysdate
+		where
+			keymanID = #keymanID#
+			and requestDate = #requestDate#
+			and requestSeq = #requestSeq#
+	</update>
+	
+	<!-- 키맨신청승인정보 승인처리 -->
+	<update id="KEY0200102U" parameterClass="com.kia.key.model.GKEY01MT">
+		update GKEY03MT
+		set
+			apprStateCD = '50'
+			, commt = #apprCommt#
+			, apprDate = sysdate
+			, chgID = #userID#
+			, chgDate = sysdate
+		where
+			keymanID = #keymanID#
+			and requestDate = #requestDate#
+			and requestSeq = #requestSeq#
+			and levelNo = #levelNo#
+	</update>
+	
+	<!-- 키맨신청승인정보 상위자 승인요청처리 -->
+	<update id="KEY0200103U" parameterClass="com.kia.key.model.GKEY01MT">
+		update GKEY03MT
+		set
+			apprStateCD = '20'
+			, chgID = #userID#
+			, chgDate = sysdate
+		where
+			keymanID = #keymanID#
+			and requestDate = #requestDate#
+			and requestSeq = #requestSeq#
+			and levelNo = #levelNo#+1
+	</update>
+	
+	<!-- 키맨신청승인정보 하위자 반려처리 -->
+	<update id="KEY0200104U" parameterClass="com.kia.key.model.GKEY01MT">
+		update GKEY03MT
+		set
+			apprStateCD = '40'
+			, apprDate = sysdate
+			, commt = #apprCommt#
+			, chgID = #userID#
+			, chgDate = sysdate
+		where
+			keymanID = #keymanID#
+			and requestDate = #requestDate#
+			and requestSeq = #requestSeq#
+			and empID = #empID#
+	</update>
+	
+	<!-- 반려시 메일보낼 하위승인자들 정보 -->
+	<select id="KEY0200102S" parameterClass="com.kia.key.model.GKEY01MT" resultClass="java.util.LinkedHashMap">
+		select
+			empID as "empID"
+			, max(empNm) as "empNm"
+			, max(emailAddr) as "emailAddr"
+		from (
+			select
+				b.empID
+				, empNm
+				, emailAddr
+			from GKEY02MT a
+			inner join GKEY03MT b
+				on a.keymanID = b.keymanID
+				and a.requestDate = b.requestDate
+				and a.requestSeq = b.requestSeq
+			inner join GEMP01MT c
+				on b.empID = c.empID
+			where
+				a.keymanID = #keymanID#
+				and a.requestDate = #requestDate#
+				and a.requestSeq = #requestSeq#
+				and b.empID != #empID#
+		)
+		group by empID
+	</select>
+	
+	<select id="KEY0200111S" parameterClass="com.kia.key.model.GKEY01MT" resultClass="Integer">
+		select count(*) cnt
+		  from GKEY03MT a    
+         inner join GKEY02MT b     
+                 on a.keymanID    = b.keymanID     
+                and a.requestDate = b.requestDate     
+                and a.requestSeq  = b.requestSeq    
+         where b.keymanid = #keymanID#
+           and B.Regidno is null
+           and SUBSTR(b.PHONENO,0,2) = '01' 
+           and b.keymanTypeCD= '10'
+	</select>
+	
+	<select id="KEY0200112S" parameterClass="com.kia.key.model.GKEY01MT" resultClass="java.util.LinkedHashMap">
+	    select b.keymanID       ,
+               b.venueCD        ,
+               b.keymanNm       ,
+               b.keymanTypeCD   ,
+               b.birthDate      ,
+               b.addr           ,
+               b.phoneNo        ,
+               b.bankCD         ,
+               b.accountNo      ,
+               b.holderNm       ,
+               b.dutyCD         ,
+               b.note           ,
+               b.PkeymanYN      ,
+               b.email as emailAddr,
+               b.requestTpCD
+          from GKEY03MT a    
+         inner join GKEY02MT b     
+                 on a.keymanID    = b.keymanID     
+                and a.requestDate = b.requestDate     
+                and a.requestSeq  = b.requestSeq    
+         where rownum = 1  
+           and b.keymanid = #keymanID#
+           and B.Regidno is null
+           and SUBSTR(b.PHONENO,0,2) = '01' 
+           and b.keymanTypeCD= '10'
+    </select>
+	
+</sqlMap>

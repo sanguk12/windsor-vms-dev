@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="ANL02002">
+	
+	<!-- ************** -->
+	<!-- *** SELECT *** -->
+	<!-- ************** -->
+	
+	<!-- 조건: Data구분 조회 -->
+    <select id="ANL0200201S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+        select
+        	t1.comCode as "comCode", 
+            NVL(t2.pkDesc,t1.codeName) as "codeName"
+        from
+        	F_Code t1
+        	left outer join (
+        		select *
+        		from
+        			F_LangDescription
+        		where
+        		languageCD = #languageCD#
+        		and tableID = 'F_CODE'
+        		and pkID1 = #codeDiv#
+        		)  t2
+        	  on t1.codeDiv = t2.pkID1
+        	  and t1.comCode = t2.pkID2
+        where
+        	t1.codeDiv = #codeDiv#
+        and t1.comCode in ('5','6')
+        and t1.useYN = 'Y'
+        and t1.activeFlg = 'U'
+        order by
+            t1.seq, t1.comCode
+    </select>
+	
+	
+	<!-- ************** -->
+	<!-- *** DELETE *** -->
+	<!-- ************** -->
+	
+	<!-- Shipment Master업로드 : 팀정보 삭제 -->
+	<delete id="ANL0200201D" parameterClass="com.kia.anl.model.ESLT_TEAM_MT">
+	   delete
+	     from ESLT_TEAM_MT
+	    where
+	    	1=1
+	</delete>
+			
+	<!-- Shipment Master업로드 : 주소매핑조직정보 삭제 -->
+	<delete id="ANL0200202D" parameterClass="com.kia.anl.model.ESLT_AREA_MT">
+	   delete
+	     from ESLT_AREA_MT
+	    where
+	    	1=1
+	</delete>
+	
+	
+	<!-- ************** -->
+	<!-- *** INSERT *** -->
+	<!-- ************** -->
+	
+	<!-- Shipment Master업로드 : 지점정보 추가 -->
+	<insert id="ANL0200201I" parameterClass="com.kia.anl.model.ESLT_TEAM_MT">
+	    insert into ESLT_TEAM_MT (
+	    	team, region, channel, dispseq, empid, empid1, useyn,
+	    	regID, regDate, chgID, chgDate
+	    ) values (
+	    	UPPER(#team#), UPPER(#region#), UPPER(#channel#), UPPER(#dispseq#), UPPER(#empid#), UPPER(#empid1#), UPPER(#useyn#),
+	    	#userID#, sysdate, #userID#, sysdate
+	    )
+	</insert>
+	
+	<!-- Shipment Master업로드 : 거래처정보 추가 -->
+	<insert id="ANL0200202I" parameterClass="com.kia.anl.model.ESLT_AREA_MT">
+	    insert into ESLT_AREA_MT (
+	    	city, subCity1, subCity2, lpbTeam, gpbTeam,
+	    	regID, regDate, chgID, chgDate
+	    ) values (
+	    	UPPER(#city#), UPPER(#subCity1#), UPPER(#subCity2#), UPPER(#lpbTeam#), UPPER(#gpbTeam#),
+	    	#userID#, sysdate, #userID#, sysdate
+	    )
+	</insert>
+	
+	
+</sqlMap>

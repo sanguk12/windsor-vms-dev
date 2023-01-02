@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="SUP02002">
+	
+	<!-- 선지원 추가지급승인 리스트 조회 -->
+	<select id="SUP0200201S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			supportID as "supportID"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','RAGESPHERECD',rageSphereCD,null) as "rageSphereCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','OFFICECD',officeCD,null) as "officeCDName"
+			<isPropertyAvailable property="grpID">
+				<isNotEmpty property="grpID">
+			, (case when (select dkmdtpcd from GEMP01MT where empID=t.empID) != 'DK' then '' else empNm end) as "empNm"
+				</isNotEmpty>
+				<isEmpty property="grpID">
+			, empNm as "empNm"
+				</isEmpty>
+			</isPropertyAvailable>
+			, venueCD as "venueCD"
+			, venueNm as "venueNm"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','VENUEGRADCD',venueGradCD,null) as "venueGradCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SEGMENTCD',segmentCD,null) as "segmentCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SUBSEGMENTCD',subSegmentCD,null) as "subSegmentCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD1',addrTpCD1,null) as "addrTpCD1Name"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD2',addrTpCD2,null) as "addrTpCD2Name"
+			, contractDateFrom as "contractDateFrom"
+			, contractDateTo as "contractDateTo"
+			, contractMonthCt as "contractMonthCt"
+			, apAmt as "apAmt"
+			, msTargetRate as "msTargetRate"
+			, tcontractQty as "tcontractQty"
+			, gsvAmt as "gsvAmt"
+			, gsvRate as "gsvRate"
+			, stipulationAmt as "stipulationAmt"
+			, contractAmt as "contractAmt"
+			, contractTaxAmt as "contractTaxAmt"
+			, subtractAmt as "subtractAmt"
+			, targetRate as "targetRate"
+			, addAmt as "addAmt"
+			, addTaxAmt as "addTaxAmt"
+			, payRequestDate as "payRequestDate"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SUPPORTSTATECD',supportStateCD,null) as "supportStateCDName"
+			, transferDate as "transferDate"
+			, commt as "commt"
+			, supportStateCD as "supportStateCD"
+		from (
+			select
+				a.supportID
+				, d.rageSphereCD
+				, d.officeCD
+				, d.empNm
+				, a.venueCD
+				, b.venueNm
+				, b.venueGradCD
+				, b.segmentCD
+				, b.subSegmentCD
+				, b.addrTpCD1
+				, b.addrTpCD2
+				, a.contractDateFrom
+				, a.contractDateTo
+				, a.contractMonthCt
+				, a.apAmt
+				, a.msTargetRate
+				, a.tcontractQty
+				, a.gsvAmt
+				, a.gsvRate
+				, a.stipulationAmt
+				, a.contractAmt
+				, a.contractTaxAmt
+				, a.subtractAmt
+				, (
+					case when a.contractAmt = 0 then 0
+					else round((a.subtractAmt / a.contractAmt)*100)
+					end
+				) as targetRate
+				, c.addAmt
+				, c.addTaxAmt
+				, c.payRequestDate
+				, c.supportStateCD
+				, c.transferDate
+				, c.commt
+				, d.empID
+			from GSUP01MT a
+			inner join GVEN01MT b
+				on a.venueCD = b.venueCD
+			inner join GSUP02MT c
+				on a.supportID = c.supportID
+			inner join GEMP01MT d
+				on a.empID = d.empID
+			where
+				c.payRequestDate between #payRequestDateFrom# and #payRequestDateTo#
+				and a.supportStateCD in (
+					select comCode
+					from F_CODE
+					where
+						codediv='SUPPORTSTATECD'
+						and activeFlg = 'U'
+						and useYN = 'Y'
+						and attrib02 = 'MNG'
+				)
+				<isPropertyAvailable property="supportStateCD">
+					<isNotEmpty prepend="and" property="supportStateCD">
+						c.supportStateCD  = #supportStateCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="periodLongTerm">
+					<isNotEmpty prepend="and" property="periodLongTerm">
+						a.contractMonthCt <![CDATA[>=]]> #periodLongTerm#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="periodShortTerm">
+					<isNotEmpty prepend="and" property="periodShortTerm">
+						a.contractMonthCt <![CDATA[<]]> #periodShortTerm#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="venue_S">
+					<isNotEmpty prepend="and" property="venue_S">
+						b.venueCD = #venue_S#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="rageSphereCD_S">
+					<isNotEmpty prepend="and" property="rageSphereCD_S">
+						d.rageSphereCD = #rageSphereCD_S#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="officeCD_S">
+					<isNotEmpty prepend="and" property="officeCD_S">
+						d.officeCD = #officeCD_S#
+					</isNotEmpty>
+				</isPropertyAvailable>
+		) t
+		order by supportID
+	</select>
+	
+	<!-- 선지원 추가지급 승인 및 반려 -->
+	<update id="SUP0200201U" parameterClass="com.kia.sup.model.GSUP01MT">
+		update GSUP02MT
+		set
+			payApprDate = to_char(sysdate, 'yyyymmdd')
+			, supportStateCD = #supportStateCD#
+			, commt = #commt#
+			, chgID = #userID#
+			, chgDate = sysdate
+		where
+			supportID = #supportID#
+	</update>
+	
+</sqlMap>

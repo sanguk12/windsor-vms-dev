@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="PLN01004">
+	
+	<select id="PLN0100401S" resultClass="java.util.LinkedHashMap" parameterClass="java.util.Map">
+		select
+			getLangDesc(#companyID#,#languageCD#,'F_CODE','ACTIVITYCD',activityCD,null) as "activityCDName"
+			, venueCD as "venueCD"
+			, venueNm as "venueNm"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','VENUEGRADCD',venueGradCD,null) as "venueGradCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SUBSEGMENTCD',subSegmentCD,null) as "subSegmentCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD2',addrTpCD2,null) as "addrTpCD2Name"
+			, activityCD as "activityCD"
+			, apprStateCD as "apprStateCD"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','APPRSTATECD',apprStateCD,null) as "apprStateCDName"
+		from (
+			select
+				venueCD
+				, venueNm
+				, venueGradCD
+				, subSegmentCD
+				, addrTpCD2
+				, activityCD
+				, max(apprStateCD) as apprStateCD
+			from (
+				select
+					a.venueCD
+					, b.venueNm
+					, b.venueGradCD
+					, b.subSegmentCD
+					, b.addrTpCD2
+					, a.activityCD
+					, (
+						case when d.apprStateCD='20' or d.apprStateCD='30' or d.apprStateCD='50' then '50'
+						else '10'
+						end
+					) as apprStateCD
+				from GPLN02MT a
+				inner join GVEN01MT b
+					on a.venueCD = b.venueCD
+				inner join GEMP01MT c
+					on b.territoryCD = c.territoryCD
+				left outer join GPLN02DT d
+					on a.eventYM = d.eventYM
+					and a.venueCD = d.venueCD
+				where
+					a.eventYM = #eventYM#
+					and a.empID = #empID#
+					<!-- 2014.08.05, taejoon.jang, 업소만 검색
+					<isPropertyAvailable property="venueGradCD">
+						<isNotEmpty prepend="and" property="venueGradCD">
+							b.venueGradCD = #venueGradCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+					<isPropertyAvailable property="segmentCD">
+						<isNotEmpty prepend="and" property="segmentCD">
+							b.segmentCD = #segmentCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+					<isPropertyAvailable property="subSegmentCD">
+						<isNotEmpty prepend="and" property="subSegmentCD">
+							b.subSegmentCD = #subSegmentCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+					-->
+			)
+			group by
+	            venueCD
+	            , venueNm
+	            , venueGradCD
+	            , subSegmentCD
+	            , addrTpCD2
+	            , activityCD
+		) t
+		order by venueCD
+	</select>
+	
+	<!-- Plan정보 브랜드단위 등록 -->
+	<insert id="PLN0100401I" parameterClass="com.kia.pln.model.GPLN02MT">
+		insert into GPLN02MT (
+			eventYM
+			, venueCD
+			, dkmdTpCD
+			, empID
+			, rageSphereCD
+			, officeCD
+			, teamCD
+			, territoryCD
+			, programCD
+			, activityCD
+			, supportID
+			, regID
+			, regDate
+		)
+		select
+			#eventYM#
+			, #venueCD#
+			, dkmdTpCD
+			, #userID#
+			, rageSphereCD
+			, officeCD
+			, teamCD
+			, territoryCD
+			, #programCD#
+			, #activityCD#
+			, getSupportID(#venueCD#)
+			, #userID#
+			, sysdate
+		from GEMP01MT
+		where
+			empID = #empID#
+	</insert>
+	
+	<!-- Plan정보 브랜드단위 제품 등록 
+	<insert id="PLN0100402I" parameterClass="com.kia.pln.model.GPLN02MT">
+		insert into GPLN02DT (
+			eventYM
+			, venueCD
+			, prdCD
+			, factoryPrice
+			, sdxYN
+			, apprStateCD
+			, regID
+			, regDate
+		)
+		select
+			#eventYM#
+			, #venueCD#
+			, prdCD
+			, factoryPrice
+			, sdxYN
+			, '10'
+			, #userID#
+			, sysdate
+		from GPRD01MT
+		where
+			incntTpCD = #incntTpCD#
+			and activeYN = 'Y'
+	</insert>
+	-->
+	
+	<!-- Plan정보 브랜드단위 수정 -->
+	<update id="PLN0100401U" parameterClass="com.kia.pln.model.GPLN02MT">
+		update GPLN02MT
+		set
+			activityCD = #activityCD#
+			, chgID = #userID#
+			, chgDate = sysdate
+		where
+			eventYM = #eventYM#
+			and venueCD = #venueCD#
+	</update>
+	
+	<!-- Plan정보 브랜드단위 제품 삭제 -->
+	<delete id="PLN0100401D" parameterClass="com.kia.pln.model.GPLN02MT">
+		delete from GPLN02DT
+		where
+			eventYM = #eventYM#
+			and venueCD = #venueCD#
+	</delete>
+	
+	<!-- Plan정보 브랜드단위 삭제 -->
+	<delete id="PLN0100402D" parameterClass="com.kia.pln.model.GPLN02MT">
+		delete from GPLN02MT
+		where
+			eventYM = #eventYM#
+			and venueCD = #venueCD#
+	</delete>
+	
+	<!-- Plan정보 승인정보 삭제 -->
+	<delete id="PLN0100403D" parameterClass="com.kia.pln.model.GPLN02MT">
+		delete from GPLN04MT
+		where
+			eventYM = #eventYM#
+			and venueCD = #venueCD#
+	</delete>
+	
+	<!-- Plan정보 브랜드단위 복사 -->
+	<insert id="PLN0100403I" parameterClass="com.kia.pln.model.GPLN02MT">
+		insert into GPLN02MT (
+			eventYM
+			, venueCD
+			, dkmdTpCD
+			, empID
+			, rageSphereCD
+			, officeCD
+			, teamCD
+			, territoryCD
+			, programCD
+			, activityCD
+			, supportID
+			, regID
+			, regDate
+		)
+		select
+			eventYM
+			, venueCD
+			, dkmdTpCD
+			, empID
+			, rageSphereCD
+			, officeCD
+			, teamCD
+			, territoryCD
+			, (
+				case when supportID is null then programCD
+				else 'G1'
+				end
+			) as programCD
+			, (
+		<!-- 	case when supportID is null then activityCD -->
+		<!-- 	선지원 끝난 업소도 선지원으로 복사되어 default'10'으로 지정  20150916. ji hye--> 
+				case when supportID is null then '10'
+				else '20'
+				end
+			) as activityCD
+			, supportID
+			, #userID#
+			, sysdate
+		from (
+			select
+				#eventYM# as eventYM
+				, a.venueCD
+				, b.dkmdTpCD
+				, b.empID
+				, b.rageSphereCD
+				, b.officeCD
+				, b.teamCD
+				, b.territoryCD
+				, c.programCD
+				, c.activityCD
+				, getSupportID(a.venueCD) as supportID
+			from GVEN01MT a
+			inner join GEMP01MT b
+				on a.territoryCD = b.territoryCD
+			inner join GPLN02MT c
+				on a.venueCD = c.venueCD
+			where
+				a.activeYN = 'Y'
+			and b.empID = #empID#
+			and c.eventYM = to_char(add_months(to_date(#eventYM#,'yyyymm'), -1), 'yyyymm')
+			and a.incntTpCD = #incntTpCD#
+			and a.venueCD not in (
+				select venueCD
+				from GPLN02MT
+				where
+					eventYM = #eventYM#
+			)
+		) t
+	</insert>
+	
+	<!-- Plan정보 브랜드단위 제품 복사 
+	<insert id="PLN0100404I" parameterClass="com.kia.pln.model.GPLN02DT">
+		insert into GPLN02DT (
+			eventYM
+			, venueCD
+			, prdCD
+			, factoryPrice
+			, sdxYN
+			, apprStateCD
+			, regID
+			, regDate
+		)
+		select
+			#eventYM#
+			, venueCD
+			, t1.prdCD
+			, factoryPrice
+			, sdxYN
+			, apprStateCD
+			, #userID#
+			, sysdate
+		from GPRD01MT t1
+		, (
+			select distinct
+				a.venueCD
+				, c.prdCD
+				, c.apprStateCD
+			from GVEN01MT a
+			inner join GEMP01MT b
+				on a.territoryCD = b.territoryCD
+			inner join GPLN02DT c
+				on a.venueCD = c.venueCD
+			where
+				activeYN = 'Y'
+			and b.empID = #empID#
+			and c.eventYM = to_char(add_months(to_date(#eventYM#,'yyyymm'), -1), 'yyyymm')
+			and a.incntTpCD = #incntTpCD#
+			and a.venueCD not in (
+				select venueCD
+				from GPLN02DT
+				where
+					eventYM = #eventYM#
+			)
+		) t2
+		where
+			incntTpCD = #incntTpCD#
+		and activeYN = 'Y'
+		and t1.prdCD = t2.prdCD
+	</insert>
+	-->
+	
+</sqlMap>

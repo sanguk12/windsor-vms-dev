@@ -1,0 +1,510 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="PAY02003">
+	
+	<!-- 검증승인 리스트 조회 -->
+	<select id="PAY0200301S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			rowNumber as "rowNum"
+			, mileageID as "mileageID"
+			, venueCD as "venueCD"
+			, venueNm as "venueNm"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','RAGESPHERECD',rageSphereCD,null) as "rageSphereCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','OFFICECD',officeCD,null) as "officeCDName"
+			, (select empNm from GEMP01MT where empID=t2.empID) as "empNm"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','VENUEGRADCD',venueGradCD,null) as "venueGradCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SEGMENTCD',segmentCD,null) as "segmentCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SUBSEGMENTCD',subSegmentCD,null) as "subSegmentCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD1',addrTpCD1,null) as "addrTpCD1Name"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD2',addrTpCD2,null) as "addrTpCD2Name"
+			, contractDateFrom as "contractDateFrom"
+			, contractDateTo as "contractDateTo"
+			, contractMonthCt as "contractMonthCt"
+			, apAmt as "apAmt"
+			, targetRate as "targetRate"
+			, msTargetRate as "msTargetRate"
+			, tcontractQty as "tcontractQty"
+			, gsvAmt as "gsvAmt"
+			, gsvRate as "gsvRate"
+			, contractAmt as "contractAmt"
+			, contractTaxAmt as "contractTaxAmt"
+			, addContractAmt as "addContractAmt"
+			, addContractTaxAmt as "addContractTaxAmt"
+			<!-- 약정금액추가 2016.10.10 -->
+			, stipulationAmt as "stipulationAmt"
+			, keymanAmt as "keymanAmt"
+			, payRequestDate as "payRequestDate"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','MILEAGESTATECD',mileageStateCD,null) as "mileageStateCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','MILEAGEPAYTPCD',mileagePayTPCD,null) as "mileagePayTPCDName"
+			, transferDate as "transferDate"
+			, commt as "commt"
+			, apprCommt as "apprCommt"
+			, verifyErrCommt as "verifyErrCommt"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','APPRSTATECD',apprStateCD_emp,null) as "apprStateCDName_emp"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','VERIFYSTATECD',verifyStateCD,null) as "verifyStateCDName"
+			, verifyStateCD as "verifyStateCD"
+			, apprStateCD_emp as "apprStateCD_emp"
+			, lapprLevelNo as "lapprLevelNo"
+			, levelNo as "levelNo"
+			, lastApprYN as "lastApprYN"
+		from (
+			select
+				t.*
+				, rank() over(order by empID, venueCD) as rowNumber
+				, floor((rank() over(order by empID, venueCD)-1)/#displayNum#+1) as pageNum
+			from (
+				select
+					b.mileageID
+					, c.rageSphereCD
+					, c.officeCD
+					, b.venueCD
+					, d.venueNm
+					, d.venueGradCD
+					, d.segmentCD
+					, d.subSegmentCD
+					, d.addrTpCD1
+					, d.addrTpCD2
+					, b.contractDateFrom
+					, b.contractDateTo
+					, b.contractMonthCt
+					, b.apAmt
+					, b.targetRate
+					, b.msTargetRate
+					, b.tcontractQty
+					, b.gsvAmt
+					, b.gsvRate
+					, b.contractAmt
+					, b.contractTaxAmt
+					, b.addContractAmt
+					, b.addContractTaxAmt
+					, b.stipulationAmt
+					, (select sum(payAmt) from GMIL03MT where mileageID=a.mileageID and payTpCD='ORG') as keymanAmt
+					, b.payRequestDate
+					, b.mileageStateCD
+					, b.mileagePayTPCD
+					, b.transferDate
+					, b.commt
+					, a.commt as apprCommt
+					, b.verifyErrCommt
+					, b.verifyStateCD
+					, a.mileageStateCD as apprStateCD_emp
+					, b.lapprLevelNo
+					, a.levelNo
+					, (
+						case when b.lapprLevelNo = a.levelNo then 'Y'
+						else 'N'
+						end
+					) as lastApprYN
+					, b.empID
+				from GMIL05MT a
+				inner join GMIL02MT b
+					on a.mileageID = b.mileageID
+				inner join GEMP01MT c
+					on b.empID = c.empID
+				inner join GVEN01MT d
+					on b.venueCD = d.venueCD
+				where
+					a.empID = #empID#
+					<![CDATA[
+					and b.contractDateTo >= #contractDateFrom#
+					and b.contractDateFrom <= #contractDateTo#
+					]]>
+					and a.apprTpID = #apprTpID#
+					and a.mileageStateCD in (
+						select comCode
+						from F_CODE
+						where
+							codediv='APPRSTATECD'
+							and activeFlg = 'U'
+							and useYN = 'Y'
+							and attrib02 = 'MNG'
+					)
+					<isPropertyAvailable property="activityCD">
+						<isNotEmpty prepend="and" property="activityCD">
+							activityCD = #activityCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+					<isPropertyAvailable property="venueGradCD">
+						<isNotEmpty prepend="and" property="venueGradCD">
+							venueGradCD = #venueGradCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+					<isPropertyAvailable property="segmentCD">
+						<isNotEmpty prepend="and" property="segmentCD">
+							segmentCD = #segmentCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+					<isPropertyAvailable property="subSegmentCD">
+						<isNotEmpty prepend="and" property="subSegmentCD">
+							subSegmentCD = #subSegmentCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+					<isPropertyAvailable property="rageSphereCD">
+						<isNotEmpty prepend="and" property="rageSphereCD">
+							c.rageSphereCD = #rageSphereCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+					<isPropertyAvailable property="officeCD">
+						<isNotEmpty prepend="and" property="officeCD">
+							c.officeCD = #officeCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+					<isPropertyAvailable property="apprStateCD">
+						<isNotEmpty prepend="and" property="apprStateCD">
+							a.mileageStateCD = #apprStateCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+					<isPropertyAvailable property="mileagePayTPCD">
+						<isNotEmpty prepend="and" property="mileagePayTPCD">
+							mileagePayTPCD = #mileagePayTPCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+			) t
+			where 1=1
+		) t2
+		where 1=1
+			<isPropertyAvailable property="pageNum">
+				<isNotEmpty prepend="and" property="pageNum">
+					pageNum = #pageNum#
+				</isNotEmpty>
+			</isPropertyAvailable>
+	</select>
+	
+	<select id="PAY0200303S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			count(*) as "totalCount"
+		from (
+			select
+				b.mileageID
+				, c.rageSphereCD
+				, c.officeCD
+				, b.venueCD
+				, d.venueNm
+				, d.venueGradCD
+				, d.segmentCD
+				, d.subSegmentCD
+				, d.addrTpCD1
+				, d.addrTpCD2
+				, b.contractDateFrom
+				, b.contractDateTo
+				, b.contractMonthCt
+				, b.apAmt
+				, b.targetRate
+				, b.msTargetRate
+				, b.tcontractQty
+				, b.gsvAmt
+				, b.gsvRate
+				, b.contractAmt
+				, b.contractTaxAmt
+				, b.addContractAmt
+				, b.addContractTaxAmt
+				, b.stipulationAmt
+				, (select sum(payAmt) from GMIL03MT where mileageID=a.mileageID and payTpCD='ORG') as keymanAmt
+				, b.payRequestDate
+				, b.mileageStateCD
+				, b.mileagePayTPCD
+				, b.transferDate
+				, b.commt
+				, a.commt as apprCommt
+				, b.verifyErrCommt
+				, b.verifyStateCD
+				, a.mileageStateCD as apprStateCD_emp
+				, b.lapprLevelNo
+				, a.levelNo
+				, (
+					case when b.lapprLevelNo = a.levelNo then 'Y'
+					else 'N'
+					end
+				) as lastApprYN
+				, b.empID
+			from GMIL05MT a
+			inner join GMIL02MT b
+				on a.mileageID = b.mileageID
+			inner join GEMP01MT c
+				on b.empID = c.empID
+			inner join GVEN01MT d
+				on b.venueCD = d.venueCD
+			where
+				a.empID = #empID#
+				<![CDATA[
+				and b.contractDateTo >= #contractDateFrom#
+				and b.contractDateFrom <= #contractDateTo#
+				]]>
+				and a.apprTpID = #apprTpID#
+				and a.mileageStateCD in (
+					select comCode
+					from F_CODE
+					where
+						codediv='APPRSTATECD'
+						and activeFlg = 'U'
+						and useYN = 'Y'
+						and attrib02 = 'MNG'
+				)
+				<isPropertyAvailable property="activityCD">
+					<isNotEmpty prepend="and" property="activityCD">
+						activityCD = #activityCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="venueGradCD">
+					<isNotEmpty prepend="and" property="venueGradCD">
+						venueGradCD = #venueGradCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="segmentCD">
+					<isNotEmpty prepend="and" property="segmentCD">
+						segmentCD = #segmentCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="subSegmentCD">
+					<isNotEmpty prepend="and" property="subSegmentCD">
+						subSegmentCD = #subSegmentCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="rageSphereCD">
+					<isNotEmpty prepend="and" property="rageSphereCD">
+						c.rageSphereCD = #rageSphereCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="officeCD">
+					<isNotEmpty prepend="and" property="officeCD">
+						c.officeCD = #officeCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="apprStateCD">
+					<isNotEmpty prepend="and" property="apprStateCD">
+						a.mileageStateCD = #apprStateCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="mileagePayTPCD">
+					<isNotEmpty prepend="and" property="mileagePayTPCD">
+						mileagePayTPCD = #mileagePayTPCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+		) t
+	</select>
+	
+	<!-- Result정보 검증상태 갱신 -->
+	<update id="PAY0200301U" parameterClass="com.kia.mil.model.GMIL01MT">
+		update GMIL02MT
+		set
+			verifyStateCD = #verifyStateCD#
+			, chgID = #userID#
+			, chgDate = sysdate
+		where
+			mileageID = #mileageID#
+	</update>
+	
+	<!-- 검증승인 엑셀 조회 -->
+	<select id="PAY0200302S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			mileageID as "mileageID"
+			, venueCD as "venueCD"
+			, venueNm as "venueNm"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','RAGESPHERECD',rageSphereCD,null) as "rageSphereCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','OFFICECD',officeCD,null) as "officeCDName"
+			, (select empNm from GEMP01MT where empID=t2.empID) as "empNm"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','VENUEGRADCD',venueGradCD,null) as "venueGradCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SEGMENTCD',segmentCD,null) as "segmentCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','SUBSEGMENTCD',subSegmentCD,null) as "subSegmentCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD1',addrTpCD1,null) as "addrTpCD1Name"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD2',addrTpCD2,null) as "addrTpCD2Name"
+			, contractDateFrom as "contractDateFrom"
+			, contractDateTo as "contractDateTo"
+			, contractMonthCt as "contractMonthCt"
+			, apAmt as "apAmt"
+			, targetRate as "targetRate"
+			, msTargetRate as "msTargetRate"
+			, tcontractQty as "tcontractQty"
+			, gsvAmt as "gsvAmt"
+			, gsvRate as "gsvRate"
+			, contractAmt as "contractAmt"
+			, contractTaxAmt as "contractTaxAmt"
+			, addContractAmt as "addContractAmt"
+			, addContractTaxAmt as "addContractTaxAmt"
+			<!-- 약정금액추가 2016.10.10 -->
+			, stipulationAmt as "stipulationAmt"
+			, keymanAmt as "keymanAmt"
+			, payRequestDate as "payRequestDate"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','MILEAGESTATECD',mileageStateCD,null) as "mileageStateCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','MILEAGEPAYTPCD',mileagePayTPCD,null) as "mileagePayTPCDName"
+			, transferDate as "transferDate"
+			, commt as "commt"
+			, apprCommt as "apprCommt"
+			, verifyErrCommt as "verifyErrCommt"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','APPRSTATECD',apprStateCD_emp,null) as "apprStateCDName_emp"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','VERIFYSTATECD',verifyStateCD,null) as "verifyStateCDName"
+			, verifyStateCD as "verifyStateCD"
+			, apprStateCD_emp as "apprStateCD_emp"
+			, lapprLevelNo as "lapprLevelNo"
+			, levelNo as "levelNo"
+			, lastApprYN as "lastApprYN"
+			, eventYM as "eventYM"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','KINDTPCD5',kindTpCD5,null) as "kindTpCD5Name"
+			, prdNm as "prdNm"
+			, factoryPrice as "factoryPrice"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','QTYUNITCD',qtyUnitCD,null) as "qtyUnitCDName"
+			, contractQty as "contractQty"
+			, plnEnterQty as "plnEnterQty"
+			, plnEnterUnitAmt as "plnEnterUnitAmt"
+			, plnAddEnterUnitAmt as "plnAddEnterUnitAmt"
+			, rltEnterQty as "rltEnterQty"
+			, rltEnterUnitAmt as "rltEnterUnitAmt"
+			, payAmt as "payAmt"
+			, addEnterUnitAmt as "addEnterUnitAmt"
+			, addPayAmt as "addPayAmt"
+		from (
+			select
+				b.mileageID
+				, c.rageSphereCD
+				, c.officeCD
+				, b.venueCD
+				, d.venueNm
+				, d.venueGradCD
+				, d.segmentCD
+				, d.subSegmentCD
+				, d.addrTpCD1
+				, d.addrTpCD2
+				, b.contractDateFrom
+				, b.contractDateTo
+				, b.contractMonthCt
+				, b.apAmt
+				, b.targetRate
+				, b.msTargetRate
+				, b.tcontractQty
+				, b.gsvAmt
+				, b.gsvRate
+				, b.contractAmt
+				, b.contractTaxAmt
+				, b.addContractAmt
+				, b.addContractTaxAmt
+				, b.stipulationAmt
+				, (select sum(payAmt) from GMIL03MT where mileageID=a.mileageID and payTpCD='ORG') as keymanAmt
+				, b.payRequestDate
+				, b.mileageStateCD
+				, b.mileagePayTPCD
+				, b.transferDate
+				, b.commt
+				, a.commt as apprCommt
+				, b.verifyErrCommt
+				, b.verifyStateCD
+				, a.mileageStateCD as apprStateCD_emp
+				, b.lapprLevelNo
+				, a.levelNo
+				, (
+					case when b.lapprLevelNo = a.levelNo then 'Y'
+					else 'N'
+					end
+				) as lastApprYN
+				, b.empID
+				, e.eventYM
+				, f.kindTpCD5
+				, f.prdNm
+				, e.factoryPrice
+				, f.qtyUnitCD
+				, e.contractQty
+				, e.plnEnterQty
+				, e.plnEnterUnitAmt
+				, e.plnAddEnterUnitAmt
+				, e.rltEnterQty
+				, e.rltEnterUnitAmt
+				, e.payAmt
+				, e.addEnterUnitAmt
+				, e.addPayAmt
+				, e.prdCD
+			from GMIL05MT a
+			inner join GMIL02MT b
+				on a.mileageID = b.mileageID
+			inner join GEMP01MT c
+				on b.empID = c.empID
+			inner join GVEN01MT d
+				on b.venueCD = d.venueCD
+			inner join GMIL02DT e
+				on a.mileageID = e.mileageID
+			inner join GPRD01MT f
+				on e.prdCD = f.prdCD
+			where
+				a.empID = #empID#
+				<![CDATA[
+				and b.contractDateTo >= #contractDateFrom#
+				and b.contractDateFrom <= #contractDateTo#
+				]]>
+				and a.apprTpID = #apprTpID#
+				and a.mileageStateCD in (
+					select comCode
+					from F_CODE
+					where
+						codediv='APPRSTATECD'
+						and activeFlg = 'U'
+						and useYN = 'Y'
+						and attrib02 = 'MNG'
+				)
+				<isPropertyAvailable property="activityCD">
+					<isNotEmpty prepend="and" property="activityCD">
+						activityCD = #activityCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="venueGradCD">
+					<isNotEmpty prepend="and" property="venueGradCD">
+						venueGradCD = #venueGradCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="segmentCD">
+					<isNotEmpty prepend="and" property="segmentCD">
+						segmentCD = #segmentCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="subSegmentCD">
+					<isNotEmpty prepend="and" property="subSegmentCD">
+						subSegmentCD = #subSegmentCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="rageSphereCD">
+					<isNotEmpty prepend="and" property="rageSphereCD">
+						c.rageSphereCD = #rageSphereCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="officeCD">
+					<isNotEmpty prepend="and" property="officeCD">
+						c.officeCD = #officeCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="apprStateCD">
+					<isNotEmpty prepend="and" property="apprStateCD">
+						a.mileageStateCD = #apprStateCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+				<isPropertyAvailable property="mileagePayTPCD">
+					<isNotEmpty prepend="and" property="mileagePayTPCD">
+						mileagePayTPCD = #mileagePayTPCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+		) t2
+		order by empID, venueCD
+	</select>
+
+	<!-- 검증 반려 메일추가 본인제외-->
+	<select id="PAY0200304S" parameterClass="com.kia.mil.model.GMIL01MT" resultClass="java.util.LinkedHashMap">
+		select
+			empID as "empID"
+			, max(empNm) as "empNm"
+			, max(emailAddr) as "emailAddr"
+		from (
+			select
+				b.empID
+				, empNm
+				, emailAddr
+			from GMIL02MT a
+			inner join GMIL05MT b
+				on a.mileageID = b.mileageID
+				and b.apprTpID = #apprTpID#
+			inner join GEMP01MT c
+				on b.empID = c.empID
+			where
+				a.mileageID = #mileageID#
+				and b.apprTpID = #apprTpID#
+ 				and b.empID != #empID#
+		)
+		group by empID
+	</select>
+</sqlMap>

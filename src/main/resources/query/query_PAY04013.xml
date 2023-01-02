@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="PAY04013">
+	
+	<!-- 지급 승인 -->
+	<update id="PAY0401301U" parameterClass="com.kia.mil.model.GMIL01MT">
+		update GMIL02MT
+		set
+			payStateCD = #payStateCD#
+			, payCommt = #payCommt#
+			, payApprDate = to_char(sysdate, 'yyyymmdd')
+			, chgID = #userID#
+			, chgDate = sysdate
+		where
+			mileageID = #mileageID#
+	</update>
+	
+	<!-- 지급 반려 -->
+	<update id="PAY0401302U" parameterClass="com.kia.mil.model.GMIL01MT">
+		update GMIL02MT
+		set
+			payStateCD = #payStateCD#
+			, payCommt = #payCommt#
+			, chgID = #userID#
+			, chgDate = sysdate
+		where
+			mileageID = #mileageID#
+	</update>
+
+	<!-- 20161018 반려시 메일보낼 하위승인자들 정보(상태가 비어있거나, 승인요청인 사람 제외) -->
+	<!-- 검증완료시 메일대상자(자신제외, apprTpID가 plan/result승인라인과 검증라인 합집합)
+	-->
+	<select id="PAY0401303S" parameterClass="com.kia.mil.model.GMIL01MT" resultClass="java.util.LinkedHashMap">
+		select
+			empID as "empID"
+			, max(empNm) as "empNm"
+			, max(emailAddr) as "emailAddr"
+		from (
+			select
+				b.empID
+				, empNm
+				, emailAddr
+				, b.apprStateCD
+			from GMIL02MT a
+			inner join GMIL05MT b
+				on a.mileageID = b.mileageID
+			inner join GEMP01MT c
+				on b.empID = c.empID
+			where
+				a.diffNo = #mileageID#
+	     	and b.apprTpID in (
+				#apprTpID#, #apprTpID_bef#
+			)
+			<!-- and (b.apprStateCD is not null and b.apprStateCD != '20') -->
+			<isPropertyAvailable property="empID">
+				<isNotEmpty prepend="and" property="empID">
+					b.empID != #empID#
+				</isNotEmpty>
+			</isPropertyAvailable>
+		)
+		group by empID
+	</select>
+</sqlMap>

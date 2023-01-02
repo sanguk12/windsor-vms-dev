@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="MDM04003">
+    
+	<select id="MDM0400301S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+        select
+        	to_char(ifDate, 'yyyy.mm.dd hh24:mi') as "ifDate"
+        	, ifNm as "ifNm"
+        	, resultCD as "resultCD"
+        	, resultMsg as "resultMsg"
+        	, ifResultCD as "ifResultCD"
+        from GSYS10MT
+        where
+        	to_char(ifDate, 'yyyymmdd') between #startDate# and #endDate#
+        order by ifDate desc
+        		, ifNm
+    </select>
+    
+</sqlMap>

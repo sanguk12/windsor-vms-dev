@@ -1,0 +1,388 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="ANL02005">
+	
+	<!-- ************** -->
+	<!-- *** SELECT *** -->
+	<!-- ************** -->
+	
+	<!-- 조건: Data구분 조회 -->
+    <select id="ANL0200501S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+        select
+        	t1.comCode as "comCode" 
+            , NVL(t2.pkDesc,t1.codeName) as "codeName"
+        from
+        	F_Code t1
+        	left outer join (
+        		select *
+        		from
+        			F_LangDescription
+        		where
+        		languageCD = #languageCD#
+        		and tableID = 'F_CODE'
+        		and pkID1 = #codeDiv#
+        		)  t2
+        	  on t1.codeDiv = t2.pkID1
+        	  and t1.comCode = t2.pkID2
+        where
+        	t1.codeDiv = #codeDiv#
+        and t1.comCode in ('18', '19', '20')
+        and t1.useYN = 'Y'
+        and t1.activeFlg = 'U'
+        order by
+            t1.seq, t1.comCode
+    </select>
+	
+	<!-- 조건: 지점 조회 -->
+    <select id="ANL0200502S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+        select t1. Branch  AS "branchCd"
+       			, t1. Branch  AS "branchNm"
+		  from eslt_branch_mt t1
+		 where t1.useyn = 'Y' 
+		 	<isPropertyAvailable property="empID">
+				<isNotEmpty prepend="and" property="empID">
+					t1.empID = #empID#
+				</isNotEmpty>
+			</isPropertyAvailable>
+    </select>
+    
+    <!-- 조건: 쿼터 가능여부 조회 -->
+    <select id="ANL0200503S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+        select T1.COMCODE as "comCode"
+               , T1.CODENAME as "codeName"
+               , NVL(UPPER(T1.ATTRIB01),'N') AS "UesYn" <!-- 쿼터별 업로드 가능여부 Y  :가능  N 불가능 표시 --> 
+               , (case when NVL(UPPER(T1.ATTRIB01),'N')='Y' then '가능' else '불가능' end) AS "UesYnNm"  
+          from F_CODE T1
+         where T1.CODEDIV = 'ESLT_QUARTER'
+    </select>
+    
+    <!-- 월Shipment Forecast |지점 : 기존 데이터 여부 조회 -->
+    <select id="ANL0200504S" parameterClass="com.kia.anl.model.ESLT_SH_FC" resultClass="Integer">
+        select count(*)
+		  from ESLT_SH_FC
+		 where
+			fy = upper(#fy#)
+			and period = upper(#period#)
+			and branch = upper(#branch#)
+			and esltProduct = upper(#esltProduct#)
+			and productL2 = upper(#productL2#)
+			and productL3 = upper(#productL3#)
+    </select>
+    
+    <!-- 월DC Forecast |지점 : 기존 데이터 여부 조회 -->
+    <select id="ANL0200505S" parameterClass="com.kia.anl.model.ESLT_DC_FC" resultClass="Integer">
+        select count(*)
+		  from ESLT_DC_FC
+		 where
+			fy = upper(#fy#)
+			and period = upper(#period#)
+			and branch = upper(#branch#)
+			and dataType = upper(#dataType#)
+			and productL2 = upper(#productL2#)
+    </select>
+    
+    <!-- 월채권 Forecast |지점 : 기존 데이터 여부 조회 -->
+    <select id="ANL0200506S" parameterClass="com.kia.anl.model.ESLT_CD_FC" resultClass="Integer">
+        select count(*)
+		  from ESLT_CD_FC
+		 where
+			fy = upper(#fy#)
+			and period = upper(#period#)
+			and branch = upper(#branch#)
+			and dataType = upper(#dataType#)
+    </select>
+    
+    
+    <!-- 월 SH Target|지점 : 기존 데이터 여부 조회 -->
+    <select id="ANL0200507S" parameterClass="com.kia.anl.model.ESLT_SH_TG" resultClass="Integer">
+        select count(*)
+		  from ESLT_SH_TG
+		 where
+			fy = upper(#fy#)
+			and period = upper(#period#)
+			and branch = upper(#branch#)
+			and productL7 = upper(#productL7#)
+    </select>
+    
+    
+    <!-- 월 DC Target|지점 : 기존 데이터 여부 조회 -->
+    <select id="ANL0200508S" parameterClass="com.kia.anl.model.ESLT_DC_TG" resultClass="Integer">
+        select count(*)
+		  from ESLT_DC_TG
+		 where
+			fy = upper(#fy#)
+			and period = upper(#period#)
+			and branch = upper(#branch#)
+			and datatype = upper(#dataType#)
+			and productL2 = upper(#productL2#)
+    </select>
+    
+    
+    <!-- 월 DC Target|지점 : 기존 데이터 여부 조회 -->
+    <select id="ANL0200509S" parameterClass="com.kia.anl.model.ESLT_CD_TG" resultClass="Integer">
+        select count(*)
+		  from ESLT_CD_TG
+		 where
+			fy = upper(#fy#)
+			and period = upper(#period#)
+			and branch = upper(#branch#)
+    </select>
+    
+    
+    <!-- 월 NTS Target|지점 : 기존 데이터 여부 조회 -->
+    <select id="ANL0200510S" parameterClass="com.kia.anl.model.ESLT_NTS_TG" resultClass="Integer">
+        select count(*)
+		  from ESLT_NTS_TG
+		 where
+			fy = upper(#fy#)
+			and period = upper(#period#)
+			and team = upper(#team#)
+			and market = upper(#market#)
+			and company = upper(#company#)
+    </select>
+    
+    
+    <!-- 월 NOTEG Target|지점 : 기존 데이터 여부 조회 -->
+    <select id="ANL0200511S" parameterClass="com.kia.anl.model.ESLT_NOTEG_TG" resultClass="Integer">
+        select count(*)
+		  from ESLT_NOTEG_TG
+		 where
+			fy = upper(#fy#)
+			and period = upper(#period#)
+			and team = upper(#team#)
+			and market = upper(#market#)
+    </select>
+    
+    
+	<!-- ************** -->
+	<!-- *** UPDATE *** -->
+	<!-- ************** -->
+	
+	<!-- Shipment Forecast 업로드 : 월Shipment Forecast |지점 기존 데이터 수정 -->
+	<update id="ANL0200501U" parameterClass="com.kia.anl.model.ESLT_SH_FC">
+		update ESLT_SH_FC
+		set
+			forVolume = upper(#forVolume#)
+			, outVolume = upper(#outVolume#)
+			, chgId = #userID#
+			, chgDate = sysdate
+		where
+			fy = upper(#fy#)
+			and period = upper(#period#)
+			and branch = upper(#branch#)
+			and esltProduct = upper(#esltProduct#)
+			and productL2 = upper(#productL2#)
+			and productL3 = upper(#productL3#)
+	</update>
+	
+	<!-- Shipment Forecast 업로드 : 월Shipment Forecast |지점 기존 데이터 수정 -->
+	<update id="ANL0200502U" parameterClass="com.kia.anl.model.ESLT_DC_FC">
+		update ESLT_DC_FC
+		set
+			forVolume = upper(#forVolume#)
+			, outVolume = upper(#outVolume#)
+			, chgId = #userID#
+			, chgDate = sysdate
+		where
+			fy = upper(#fy#)
+			and period = upper(#period#)
+			and branch = upper(#branch#)
+			and dataType = upper(#dataType#)
+			and productL2 = upper(#productL2#)
+	</update>
+	
+	<!-- Shipment Forecast 업로드 : 월Shipment Forecast |지점 기존 데이터 수정 -->
+	<update id="ANL0200503U" parameterClass="com.kia.anl.model.ESLT_CD_FC">
+		update ESLT_CD_FC
+		set
+			forVolume = upper(#forVolume#)
+			, outVolume = upper(#outVolume#)
+			, chgId = #userID#
+			, chgDate = sysdate
+		where
+			fy = upper(#fy#)
+			and period = upper(#period#)
+			and branch = upper(#branch#)
+			and dataType = upper(#dataType#)
+	</update>
+	
+	
+	<!-- Shipment Target 업로드 : 월Shipment Target |지점 기존 데이터 수정 -->
+	<update id="ANL0200504U" parameterClass="com.kia.anl.model.ESLT_SH_TG">
+		update ESLT_SH_TG
+		set
+			volume = upper(#volume#)
+			, chgId = #userID#
+			, chgDate = sysdate
+		where
+			fy = upper(#fy#)
+			and period = upper(#period#)
+			and branch = upper(#branch#)
+			and productL7 = upper(#productL7#)
+	</update>
+	
+	
+	<!-- DC Target 업로드 : 월DC Target |지점 기존 데이터 수정 -->
+	<update id="ANL0200505U" parameterClass="com.kia.anl.model.ESLT_DC_TG">
+		update ESLT_DC_TG
+		set
+			volume = upper(#volume#)
+			, chgId = #userID#
+			, chgDate = sysdate
+		where
+			fy = upper(#fy#)
+			and period = upper(#period#)
+			and branch = upper(#branch#)
+			and dataType = upper(#dataType#)
+			and productL2 = upper(#productL2#)
+	</update>
+	
+	
+	<!-- CD Target 업로드 : 월CD Target |지점 기존 데이터 수정 -->
+	<update id="ANL0200506U" parameterClass="com.kia.anl.model.ESLT_CD_TG">
+		update ESLT_CD_TG
+		set
+			periodType = upper(#periodType#)
+			, branchType = upper(#branchType#)
+			, ratio = #ratio#
+			, chgId = #userID#
+			, chgDate = sysdate
+		where
+			fy = upper(#fy#)
+			and period = upper(#period#)
+			and branch = upper(#branch#)
+	</update>
+	
+	
+	<!-- NTS Target 업로드 : 월NTS Target |지점 기존 데이터 수정 -->
+	<update id="ANL0200507U" parameterClass="com.kia.anl.model.ESLT_NTS_TG">
+		update ESLT_NTS_TG
+		set
+			volume = upper(#volume#)
+			, chgId = #userID#
+			, chgDate = sysdate
+		where
+			fy = upper(#fy#)
+			and period = upper(#period#)
+			and team = upper(#team#)
+			and market = upper(#market#)
+			and company = upper(#company#)
+	</update>
+	
+	
+	<!-- NOTEG Target 업로드 : 월NOTEG Target |지점 기존 데이터 수정 -->
+	<update id="ANL0200508U" parameterClass="com.kia.anl.model.ESLT_NOTEG_TG">
+		update ESLT_NOTEG_TG
+		set
+			volume = upper(#volume#)
+			, amount = upper(#amount#)
+			, chgId = #userID#
+			, chgDate = sysdate
+		where
+			fy = upper(#fy#)
+			and period = upper(#period#)
+			and team = upper(#team#)
+			and market = upper(#market#)
+	</update>
+	
+	<!-- ************** -->
+	<!-- *** INSERT *** -->
+	<!-- ************** -->
+	
+	<!-- Shipment Forecast 업로드 : 월Shipment Forecast |지점 추가 -->
+	<insert id="ANL0200501I" parameterClass="com.kia.anl.model.ESLT_SH_FC">
+	    insert into ESLT_SH_FC (
+	    	fy, period, branch, esltProduct, productL2, productL3, forVolume, outVolume,
+	    	regID, regDate, chgID, chgDate
+	    ) values (
+	    	UPPER(#fy#), UPPER(#period#), UPPER(#branch#), UPPER(#esltProduct#), UPPER(#productL2#), UPPER(#productL3#), UPPER(#forVolume#), UPPER(#outVolume#),
+	    	#userID#, sysdate, #userID#, sysdate
+	    )
+	</insert>
+	
+	<!-- Shipment Forecast 업로드 : 월Shipment Forecast |지점 추가 -->
+	<insert id="ANL0200502I" parameterClass="com.kia.anl.model.ESLT_DC_FC">
+	    insert into ESLT_DC_FC (
+	    	fy, period, branch, dataType, productL2, forVolume, outVolume,
+	    	regID, regDate, chgID, chgDate
+	    ) values (
+	    	UPPER(#fy#), UPPER(#period#), UPPER(#branch#), UPPER(#dataType#), UPPER(#productL2#), UPPER(#forVolume#), UPPER(#outVolume#),
+	    	#userID#, sysdate, #userID#, sysdate
+	    )
+	</insert>
+	
+	<!-- Shipment Forecast 업로드 : 월Shipment Forecast |지점 추가 -->
+	<insert id="ANL0200503I" parameterClass="com.kia.anl.model.ESLT_CD_FC">
+	    insert into ESLT_CD_FC (
+	    	fy, period, branch, dataType, forVolume, outVolume,
+	    	regID, regDate, chgID, chgDate
+	    ) values (
+	    	UPPER(#fy#), UPPER(#period#), UPPER(#branch#), UPPER(#dataType#), UPPER(#forVolume#), UPPER(#outVolume#),
+	    	#userID#, sysdate, #userID#, sysdate
+	    )
+	</insert>
+	
+	
+	<!-- 목표자료 업로드 : 월Shiment목표|지점 추가 -->
+	<insert id="ANL0200504I" parameterClass="com.kia.anl.model.ESLT_SH_TG">
+	    insert into ESLT_SH_TG (
+	    	fy, period, branch, productL7, volume,
+	    	regID, regDate, chgID, chgDate
+	    ) values (
+	    	UPPER(#fy#), UPPER(#period#), UPPER(#branch#), UPPER(#productL7#), UPPER(#volume#),
+	    	#userID#, sysdate, #userID#, sysdate
+	    )
+	</insert>
+	
+	
+	<!-- 목표자료 업로드 : 월DC목표|지점 추가 -->
+	<insert id="ANL0200505I" parameterClass="com.kia.anl.model.ESLT_DC_TG">
+	    insert into ESLT_DC_TG (
+	    	fy, period, branch, datatype, productL2, volume,
+	    	regID, regDate, chgID, chgDate
+	    ) values (
+	    	UPPER(#fy#), UPPER(#period#), UPPER(#branch#), upper(#dataType#), UPPER(#productL2#), UPPER(#volume#),
+	    	#userID#, sysdate, #userID#, sysdate
+	    )
+	</insert>
+	
+	
+	<!-- 목표자료 업로드 : 월채권목표|지점 추가 -->
+	<insert id="ANL0200506I" parameterClass="com.kia.anl.model.ESLT_CD_TG">
+	    insert into ESLT_CD_TG (
+	    	fy, period, branch, periodType, branchType, ratio,
+	    	regID, regDate, chgID, chgDate
+	    ) values (
+	    	UPPER(#fy#), UPPER(#period#), UPPER(#branch#), upper(#periodType#), upper(#branchType#), UPPER(#ratio#),
+	    	#userID#, sysdate, #userID#, sysdate
+	    )
+	</insert>
+	
+	
+	<!-- 목표자료 업로드 : 월NTS목표|팀 추가 -->
+	<insert id="ANL0200507I" parameterClass="com.kia.anl.model.ESLT_NTS_TG">
+	    insert into ESLT_NTS_TG (
+	    	fy, period, team, market, segment, channel, company, volume
+	    	regID, regDate, chgID, chgDate
+	    ) values (
+	    	UPPER(#fy#), UPPER(#period#), UPPER(#market#), upper(#segment#), upper(#channel#), upper(#company#), upper(#volume#),
+	    	#userID#, sysdate, #userID#, sysdate
+	    )
+	</insert>
+	
+	
+	<!-- 목표자료 업로드 : 월NOTEG목표|팀 추가 -->
+	<insert id="ANL0200508I" parameterClass="com.kia.anl.model.ESLT_NOTEG_TG">
+	    insert into ESLT_NOTEG_TG (
+	    	fy, period, team, market, volume, amount, 
+	    	regID, regDate, chgID, chgDate 
+	    ) values (
+	    	UPPER(#fy#), UPPER(#period#), UPPER(#team#), UPPER(#market#), UPPER(#volume#), UPPER(#amount#),
+	    	#userID#, sysdate, #userID#, sysdate
+	    )
+	</insert>
+	
+	
+	
+</sqlMap>

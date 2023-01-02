@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="CVR01001">
+   
+	<!--보상률 조회-->
+	<select id="CVR0100101S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			fromrate as "fromRate",
+			torate as "toRate",
+			rate as "rate"
+		from
+			GCVR01MT 
+		where
+			1=1
+		order by fromrate desc
+	</select>
+
+		<!-- 제품가이드라인 삭제 -->
+	<insert id="CVR0100102D" parameterClass="com.kia.cvr.model.GCVR01MTs">
+		delete from GCVR01MT
+	</insert>
+	
+		<!-- 제품가이드라인 등록-->
+	<insert id="CVR0100103I" parameterClass="com.kia.cvr.model.GCVR01MT">    
+        insert into GCVR01MT (
+        	seq,
+        	fromRate, 
+        	toRate, 
+        	rate,
+        	regID,
+        	regDate
+        ) values (
+        	(select nvl(max(seq),0)+1 from GCVR01MT),
+        	#fromRate#, 
+        	#toRate#, 
+        	#rate#,
+        	#userID#,
+        	SYSDATE
+        )
+    </insert>
+
+	    <!-- 제품정보수정 -->
+    <update id="CVR0100104U" parameterClass="com.kia.cvr.model.GCVR01MT">
+        update GCVR01MT
+        set
+        	fromRate= #fromRate#,
+        	toRate = #toRate#,
+        	rate = #rate#,
+        where
+        	fromRate = #fromRate#
+    </update>
+
+</sqlMap>   

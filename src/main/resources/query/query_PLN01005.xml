@@ -1,0 +1,386 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="PLN01005">
+	
+	<!-- Plan작성 당월Plan브랜드 리스트 조회 -->
+	<select id="PLN0100501S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			getLangDesc(#companyID#,#languageCD#,'F_CODE','ACTIVITYCD',activityCD,null) as "activityCDName"
+			, venueCD as "venueCD"
+			, venueNm as "venueNm"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','VENUEGRADCD',venueGradCD,null) as "venueGradCDName"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','ADDRTPCD2',addrTpCD2,null) as "addrTpCD2Name"
+			, activityCD as "activityCD"
+			, apprStateCD as "apprStateCD"
+			, chgID as "chgID"
+		from (
+			select
+				venueCD
+				, venueNm
+				, venueGradCD
+				, addrTpCD2
+				, activityCD
+				, max(apprStateCD) as apprStateCD
+				, chgID
+			from (
+				select
+					a.venueCD
+					, b.venueNm
+					, b.venueGradCD
+					, b.addrTpCD2
+					, a.activityCD
+					, (
+						case when d.apprStateCD='20' or d.apprStateCD='30' or d.apprStateCD='50' then '50'
+						else '10'
+						end
+					) as apprStateCD,
+					a.chgID
+				from GPLN02MT a
+				inner join GVEN01MT b
+					on a.venueCD = b.venueCD
+				inner join GEMP01MT c
+					on b.territoryCD = c.territoryCD
+				left outer join GPLN02DT d
+					on a.venueCD = d.venueCD
+					and a.eventYM = d.eventYM
+				where
+					a.eventYM = #eventYM#
+					and a.empID = #empID#
+					<isPropertyAvailable property="activityCD">
+						<isNotEmpty prepend="and" property="activityCD">
+							a.activityCD = #activityCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+					<isPropertyAvailable property="venueGradCD">
+						<isNotEmpty prepend="and" property="venueGradCD">
+							b.venueGradCD = #venueGradCD#
+						</isNotEmpty>
+					</isPropertyAvailable>
+					<isPropertyAvailable property="addrTpCD1">
+						<isNotEmpty prepend="and" property="addrTpCD1">
+							b.addrTpCD1 = #addrTpCD1#
+						</isNotEmpty>
+					</isPropertyAvailable>
+					<isPropertyAvailable property="addrTpCD2">
+						<isNotEmpty prepend="and" property="addrTpCD2">
+							b.addrTpCD2 = #addrTpCD2#
+						</isNotEmpty>
+					</isPropertyAvailable>
+					<isPropertyAvailable property="venueCD">
+						<isNotEmpty prepend="and" property="venueCD">
+							upper(a.venueCD) = upper(#venueCD#)
+						</isNotEmpty>
+					</isPropertyAvailable>
+			)
+			group by
+				venueCD
+				, venueNm
+				, venueGradCD
+				, addrTpCD2
+				, activityCD
+				, chgID
+		) t
+<!-- 		2014.10.27. taejoon.jang, 상태때문에 새로운 등록을 할 수가 없어 다시 되돌림 -->
+<!-- 		where 1=1 -->
+<!-- 		and t.apprStateCD = #apprStateCD# -->
+		order by venueCD
+	</select>
+	
+	<!-- Plan작성 당월Plan브랜드제품 리스트 조회 -->
+	<select id="PLN0100502S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			getLangDesc(#companyID#,#languageCD#,'F_CODE','KINDTPCD5',kindTpCD5,null) as "kindTpCD5Name"
+			, prdNm as "prdNm"
+			, factoryPrice as "factoryPrice"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','QTYUNITCD',qtyUnitCD,null) as "qtyUnitCDName"
+			, planQty as "planQty"
+			, planUnitAmt as "planUnitAmt"
+			, guidAmt as "guidAmt"
+			, payAmt as "payAmt"
+			, gsvRate as "gsvRate"
+			, commt as "commt"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','APPRSTATECD',apprStateCD,null) as "apprStateCDName"
+			, kindTpCD5 as "kindTpCD5"
+			, prdCD as "prdCD"
+			, qtyUnitCD as "qtyUnitCD"
+			, apprStateCD as "apprStateCD"
+			, venueCD as "venueCD"
+		from (
+			select
+				a.venueCD
+				, b.kindTpCD5
+				, b.prdNm
+				, a.factoryPrice
+				, b.qtyUnitCD
+				, a.planQty
+				, a.planUnitAmt
+				, a.guidAmt
+				, a.payAmt
+				, a.gsvRate
+				, a.commt
+				, a.apprStateCD
+				, a.prdCD
+			from GPLN02DT a
+			inner join GPRD01MT b
+				on a.prdCD = b.prdCD
+			where
+				a.eventYM = #eventYM#
+				and a.venueCD = #venueCD#
+				<isPropertyAvailable property="apprStateCD">
+					<isNotEmpty prepend="and" property="apprStateCD">
+						a.apprStateCD = #apprStateCD#
+					</isNotEmpty>
+				</isPropertyAvailable>
+		) t
+		order by
+			venueCD,
+			prdCD
+	</select>
+	
+	<!-- Plan작성 수량입력시 가이드금액 조회 -->
+	<select id="PLN0100503S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			a.prdCD
+			, a.guidSeq
+			, a.overQty
+			, a.underQty
+			, a.guidAmt as "guidAmt"
+		from GPRD02MT a
+		where
+			a.prdCD = #prdCD#
+		<![CDATA[	
+		and a.overQty <= #planQty#
+		and a.underQty > #planQty#	
+		]]>
+	</select>
+	
+	<select id="PLN0100506S" parameterClass="com.kia.pln.model.GPLN02DT" resultClass="java.lang.Integer">
+		select
+			count(*)
+		from GPLN02DT
+		where
+			eventYM = #eventYM#
+			and venueCD = #venueCD#
+			and prdCD = #prdCD#
+	</select>
+	
+	<!-- Plan작성 브랜드단위 제품 등록 -->
+	<insert id="PLN0100501I" parameterClass="com.kia.pln.model.GPLN02DT">
+		insert into GPLN02DT (
+			eventYM
+			, venueCD
+			, prdCD
+			, factoryPrice
+			, sdxYN
+			, planQty
+			, planUnitAmt
+			, guidAmt
+			, payAmt
+			, gsvRate
+			, commt
+			, apprStateCD
+			, regID
+			, regDate
+		)
+		select
+			#eventYM#
+			, #venueCD#
+			, #prdCD#
+			, #factoryPrice#
+			, sdxYN
+			, #planQty#
+			, #planUnitAmt#
+			, #guidAmt#
+			, #payAmt#
+			, #gsvRate#
+			, #commt#
+			, #apprStateCD#
+			, #userID#
+			, sysdate
+		from GPRD01MT
+		where
+			activeYN = 'Y'
+			and prdCD = #prdCD#
+	</insert>
+	
+	<!-- Plan작성 브랜드단위 제품 수정 -->
+	<update id="PLN0100502U" parameterClass="com.kia.pln.model.GPLN02DT">
+		update GPLN02DT
+		set
+			planQty = #planQty#
+			, planUnitAmt = #planUnitAmt#
+			, guidAmt = #guidAmt#
+			, payAmt = #payAmt#
+			, gsvRate = #gsvRate#
+			, commt = #commt#
+			, apprStateCD = #apprStateCD#
+			, chgID = #userID#
+			, chgDate = sysdate
+		where
+			eventYM = #eventYM#
+			and venueCD = #venueCD#
+			and prdCD = #prdCD#
+	</update>
+	
+	<!-- Plan작성 브랜드단위 제품 삭제 -->
+	<delete id="PLN0100503D" parameterClass="com.kia.pln.model.GPLN02DT">
+		delete from GPLN02DT
+		where
+			eventYM = #eventYM#
+			and venueCD = #venueCD#
+			and prdCD = #prdCD#
+	</delete>
+	
+	<!-- plan복사 전월Plan제품 리스트 조회 -->
+	<select id="PLN0100504S" parameterClass="com.kia.pln.model.GPLN02DTs" resultClass="java.util.LinkedHashMap">
+		select
+			prdCD as "prdCD"
+			, factoryPrice as "factoryPrice"
+			, planQty as "planQty"
+			, planUnitAmt as "planUnitAmt"
+			, guidAmt as "guidAmt"
+			, payAmt as "payAmt"
+		from (
+			select
+				a.prdCD
+				, b.factoryPrice
+				, a.planQty
+				, a.planUnitAmt
+				, c.guidAmt
+				, a.payAmt
+			from GPLN02DT a
+			inner join GPRD01MT b
+				on a.prdCD = b.prdCD
+			inner join GPRD02MT c
+				on a.prdCD = c.prdCD
+				and a.planQty between c.overQty and c.underQty
+			where
+				eventYM = to_char(add_months(to_date(#eventYM#,'yyyymm'), -1), 'yyyymm')
+				and venueCD = #venueCD#
+		) t
+	</select>
+	
+	<!-- Plan작성 브랜드단위 제품 삭제 -->
+	<delete id="PLN0100504D" parameterClass="com.kia.pln.model.GPLN02DT">
+		delete from GPLN02DT
+		where
+			eventYM = #eventYM#
+			and venueCD = #venueCD#
+	</delete>
+	
+	<!-- Plan작성 브랜드단위 제품 복사 -->
+	<insert id="PLN0100505I" parameterClass="com.kia.pln.model.GPLN02DT">
+		insert into GPLN02DT (
+			eventYM
+			, venueCD
+			, prdCD
+			, factoryPrice
+			, sdxYN
+			, planQty
+			, planUnitAmt
+			, guidAmt
+			, payAmt
+			, gsvRate
+			, apprStateCD
+			, regID
+			, regDate
+		)
+		select
+            #eventYM#
+            , t2.venueCD
+            , t1.prdCD
+            , t1.factoryPrice
+            , t1.sdxYN
+            , t2.planQty
+            , t2.planUnitAmt
+            , t2.guidAmt
+            , t2.payAmt
+            , round(((t2.planUnitAmt*(1+0.0352)) / t1.factoryPrice) *100)
+            , '10'
+            , #userID#
+            , sysdate
+        from GPRD01MT t1
+        , (
+            select
+                a.venueCD
+                , a.prdCD
+                , a.planQty
+                , a.planUnitAmt
+                , nvl(b.guidAmt, 0) as guidAmt
+                , a.payAmt
+            from GPLN02DT a
+            left outer join GPRD02MT b
+                on a.prdCD = b.prdCD
+                <![CDATA[
+                and (a.planQty >= b.overQty and a.planQty < b.underQty)
+                ]]>
+            where
+                a.eventYM = to_char(add_months(to_date(#eventYM#,'yyyymm'), -1), 'yyyymm')
+                and a.venueCD = #venueCD#
+        ) t2
+        where
+            t1.activeYN = 'Y'
+            and t1.prdCD = t2.prdCD
+            and t1.prdCD not in (
+           		SELECT COMCODE 
+                FROM F_CODE        
+                WHERE CODEDIV = 'BRANDEXCEPTION'        
+                AND   USEYN = 'Y'
+            	)
+	</insert>
+	
+	<!-- plan작성 상태가 반려시 저장(상태를 등록으로) -->
+	<update id="PLN0100506U" parameterClass="com.kia.pln.model.GPLN02DT">
+		update GPLN02DT
+		set
+			planQty = #planQty#
+			, planUnitAmt = #planUnitAmt#
+			, guidAmt = #guidAmt#
+			, payAmt = #payAmt#
+			, gsvRate = #gsvRate#
+			, commt = #commt#
+			, chgID = #userID#
+			, chgDate = sysdate
+			, apprStateCD = '10'
+		where
+			eventYM = #eventYM#
+			and venueCD = #venueCD#
+			and prdCD = #prdCD#
+	</update>
+	
+	<!-- 반려된 것 데이터 삭제 -->
+	<delete id="PLN0100507D" parameterClass="com.kia.pln.model.GPLN02DT">
+		delete from GPLN04MT
+		where
+			eventYM = #eventYM#
+			and venueCD = #venueCD#
+			and prdCD = #prdCD#
+	</delete>
+	
+	<delete id="PLN0100508D" parameterClass="com.kia.pln.model.GPLN02DT">
+		delete from GPLN02DT
+		where
+			eventYM = #eventYM#
+			and venueCD = #venueCD#
+			and prdCD = #prdCD#
+	</delete>
+	
+	<!-- 승인상태조회 -->
+	<select id="PLN0100505S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			apprGrpNm as "apprGrpNm"
+			, empID as "empID"
+			, (select empNm from GEMP01MT where empID = t.empID) as "empNm"
+			, getLangDesc(#companyID#,#languageCD#,'F_CODE','APPRSTATECD',apprStateCD,null) as "apprStateCDName"
+			, to_char(apprDate, 'yyyy.mm.dd hh24:mi') as "apprDate"
+			, commt as "commt"
+		from GPLN04MT t
+		where
+			eventYM = #eventYM#
+			and venueCD = #venueCD#
+			and prdCD = #prdCD#
+		order by levelNo
+	</select>
+	
+</sqlMap>
