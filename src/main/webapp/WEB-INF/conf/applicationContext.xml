@@ -12,7 +12,7 @@
 	<!-- **********************************************************  -->
 	<!-- Applicaton Env Config Property                            	 -->
 	<!-- **********************************************************  -->
-	<util:properties id="system" location="classpath:/config/system-config.properties" />
+	<util:properties id="system" location="classpath:/config/system-config-${spring.profiles.active}.properties" />
 	
 	<!-- **********************************************************  -->
 	<!-- NuriAF SYSTEM Service                         			 -->

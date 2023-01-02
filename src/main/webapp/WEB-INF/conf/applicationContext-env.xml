@@ -17,7 +17,7 @@
 	<!-- **********************************************************  -->
 	<!-- Applicaton Env Config Property                            	 -->
 	<!-- **********************************************************  -->
-	<util:properties id="appenv" location="classpath:/config/appenv.properties" />
+	<util:properties id="appenv" location="classpath:/config/appenv-${spring.profiles.active}.properties" />
     
 	<!-- **********************************************************  -->
 	<!-- Default Configure                                       	 -->
