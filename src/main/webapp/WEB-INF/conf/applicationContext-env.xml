@@ -286,47 +286,87 @@
 	</aop:config>
 
 	<!-- Email -->	
-	<bean id="emailNotificationThrowsAdvice" class="kr.co.nis.waf.aop.EmailNotificationThrowsAdvice">
-		<property name="mailSender" ref="mailSender" />
-	</bean>
+<!--	<bean id="emailNotificationThrowsAdvice" class="kr.co.nis.waf.aop.EmailNotificationThrowsAdvice">-->
+<!--		<property name="mailSender" ref="mailSender" />-->
+<!--	</bean>-->
 	
 
 <!-- **********************************************************  -->
 <!-- Email Configuration                                         -->
 <!-- **********************************************************  -->
+	<!-- ExceptionMailSender-->
+<!--	<bean id="mailSender" class="kr.co.nis.waf.mail.ExceptionMailSender">-->
+<!--		<property name="sender">-->
+<!--			<ref bean="daumMailSender" />-->
+<!--		</property>-->
+<!--		<property name="to">-->
+<!--			<value>#{appenv['app.mail.address']}</value>-->
+<!--		</property>-->
+<!--		<property name="from">-->
+<!--			<value>#{appenv['app.mail.address']}</value>-->
+<!--		</property>-->
+<!--		<property name="messageSourceAccessor">-->
+<!--			<ref bean="messageSourceAccessor" />-->
+<!--		</property>-->
+<!--	</bean>-->
 
-	<bean id="mailSender" class="kr.co.nis.waf.mail.ExceptionMailSender">
-		<property name="sender">
-			<ref bean="sender" />
-		</property>
-		<property name="to">
-			<value>#{appenv['app.mail.address']}</value>
-		</property>
-		<property name="from">
-			<value>#{appenv['app.mail.address']}</value>
-		</property>
-		<property name="messageSourceAccessor">
-			<ref bean="messageSourceAccessor" />
-		</property>
-	</bean>
-
+	<!-- daum mail sender settings -->
 	<bean id="sender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
 		<property name="host">
-			<value>#{appenv['app.mail.host']}</value>
-		</property>
-		<!-- 
-		<property name="port" value="465" />
-		<property name="protocol" value="smtps" />
-		<property name="username" value="boys22@gmail.com" />
-		<property name="password" value="snsanf02"/>
+			<value>smtp.daum.net</value>
+		</property> <!-- 메일서버 호스트 -->
+		<property name="port" value="465"/> <!-- 메일서버 포트번호 -->
+		<property name="username">
+			<value>cs.windsor</value>
+		</property> <!-- 자신의 이메일 아이디 -->
+		<property name="password">
+			<value>wg221205</value>
+		</property> <!-- 자신의 비밀번호 -->
+		<!-- 보안연결 SSL과 관련된 설정 -->
 		<property name="javaMailProperties">
 			<props>
 				<prop key="mail.smtp.auth">true</prop>
 				<prop key="mail.smtp.starttls.enable">true</prop>
+				<prop key="mail.smtps.checkserveridentity">true</prop>
+				<prop key="mail.smtps.ssl.trust">*</prop>
+				<prop key="mail.debug">true</prop>
+				<prop key="mail.smtp.socketFactory.class">javax.net.ssl.SSLSocketFactory</prop>
 			</props>
 		</property>
-		 -->
 	</bean>
+
+<!--	<bean id="mailSender" class="kr.co.nis.waf.mail.ExceptionMailSender">-->
+<!--		<property name="sender">-->
+<!--			<ref bean="sender" />-->
+<!--		</property>-->
+<!--		<property name="to">-->
+<!--			<value>#{appenv['app.mail.address']}</value>-->
+<!--		</property>-->
+<!--		<property name="from">-->
+<!--			<value>#{appenv['app.mail.address']}</value>-->
+<!--		</property>-->
+<!--		<property name="messageSourceAccessor">-->
+<!--			<ref bean="messageSourceAccessor" />-->
+<!--		</property>-->
+<!--	</bean>-->
+
+<!--	<bean id="sender" class="org.springframework.mail.javamail.JavaMailSenderImpl">-->
+<!--		<property name="host">-->
+<!--			<value>#{appenv['app.mail.host']}</value>-->
+<!--		</property>-->
+<!--		&lt;!&ndash; -->
+<!--		<property name="port" value="465" />-->
+<!--		<property name="protocol" value="smtps" />-->
+<!--		<property name="username" value="boys22@gmail.com" />-->
+<!--		<property name="password" value="snsanf02"/>-->
+<!--		<property name="javaMailProperties">-->
+<!--			<props>-->
+<!--				<prop key="mail.smtp.auth">true</prop>-->
+<!--				<prop key="mail.smtp.starttls.enable">true</prop>-->
+<!--			</props>-->
+<!--		</property>-->
+<!--		 &ndash;&gt;-->
+<!--	</bean>-->
 	
 	<bean id="emailSender" class="kr.co.nis.waf.system.common.web.EmailSender">
 		<property name="sender">
