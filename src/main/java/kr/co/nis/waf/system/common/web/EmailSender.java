@@ -20,7 +20,10 @@ public class EmailSender extends AbstractMessageSender {
 	
 	@Value("#{appenv['app.mail.sender']}")
 	private String mail_sender;
-	
+
+	@Value("#{appenv['app.activeProfile']}")
+	private String activeProfile;
+
 	public void setMessageSourceAccessor(MessageSourceAccessor msAccessor) {
 		this.msAccessor = msAccessor;
 	}
@@ -28,9 +31,12 @@ public class EmailSender extends AbstractMessageSender {
 	public void sendMail(Map<String, String> map) {
 		
 		try {
+			if("local".contentEquals(activeProfile) || "dev".contentEquals(activeProfile)){
+				super.sender = super.daumSender;
+			}
 			MimeMessage msg = sender.createMimeMessage();
 			MimeMessageHelper helper = new MimeMessageHelper(msg, true, "utf-8");
-			
+
 			String[] to = map.get("to").toString().split(";");
 			helper.setTo(to);
 			//helper.setFrom(map.get("from").toString());
