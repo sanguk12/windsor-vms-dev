@@ -2094,10 +2094,10 @@
 				return;
 			}
 
-			if(maxRow_prd == 0) {
-				alert("<fmt:message key="info.nullData.save"/>");
-				return;
-			}
+			<%--if(maxRow_prd == 0) {--%>
+			<%--	alert("<fmt:message key="info.nullData.save"/>");--%>
+			<%--	return;--%>
+			<%--}--%>
 			if($("#endYearCD").val()=="" || $("#endMonthCD").val()=="") {
 				alert("<fmt:message key="AD01001B.msg5"/>");
 				return;
