@@ -13,13 +13,18 @@ public abstract class AbstractMessageSender
     protected String subject;
     protected String text;
     protected JavaMailSender sender;
-    
+    protected JavaMailSender daumSender;
+
     public void setFrom(final String from) {
         this.from = from;
     }
     
     public void setSender(final JavaMailSender sender) {
         this.sender = sender;
+    }
+
+    public void setDaumSender(final JavaMailSender sender) {
+        this.daumSender = sender;
     }
     
     public void setSubject(final String subject) {

@@ -49,7 +49,9 @@ public class GAD01MT extends CommonObject implements Model{
 	private String activeFlg = "";
 	private String expcCommt = "";
 	private String adChgFlg = "";
-	
+
+	private String newcontractYn = "";
+
 	//mail
 	private String emailAddr = "";
 	private String rageSphereCDName = "";
@@ -122,7 +124,7 @@ public class GAD01MT extends CommonObject implements Model{
 	private String[] adSeqs = null;
 	private String[] adContractDivCDs = null;
 	private String[] adChgFlgs = null;
-	
+
 	@Override
 	public void clean() throws Exception {
 		// TODO Auto-generated method stub
@@ -779,6 +781,13 @@ public class GAD01MT extends CommonObject implements Model{
 	public void setExpcCommt(String expcCommt) {
 		this.expcCommt = expcCommt;
 	}
+	public String getnewcontractYn() {
+		return newcontractYn;
+	}
+	public void setnewcontractYn(String newcontractYn) {
+		this.newcontractYn = newcontractYn;
+	}
+
 	public String getAdChgFlg() {
 		return adChgFlg;
 	}

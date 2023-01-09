@@ -20,7 +20,8 @@
 			            <%@include file="../sys3/cms/standardParam.jsp" %>
 						<%@include file="../sys3/cms/functionbar.jsp" %>
 						<%@include file="../sys3/cms/calendar.jsp" %>
-						<input type="hidden" id="appSrc" name="appSrc" value="${contextPath}/service/simpleCommand/?mnuGrpID=${params.mnuGrpID}&pgmID=${params.pgmID}&viewID=AD02001B" />
+						<input type="hidden" id="appSrc2" name="appSrc2" value="${contextPath}/service/simpleCommand/?mnuGrpID=${params.mnuGrpID}&pgmID=${params.pgmID}&viewID=AD02001B" />
+						<input type="hidden" id="appSrc" name="appSrc" value="${contextPath}/service/simpleCommand/?mnuGrpID=${params.mnuGrpID}&pgmID=${params.pgmID}&viewID=AD02001C" />
 					</td>
 				</tr>
 				<tr>
@@ -143,8 +144,10 @@
 				<tr>
 					<td height="1">
 						<input type="hidden" id="selectVenueCD" name="selectVenueCD" />
+						<input type="hidden" id="selectAdSupportID" name="selectAdSupportID" />
 					</td>
 				</tr>
+
 			</table>
 			</div>
 				${appletDiv}
@@ -207,7 +210,7 @@
 	 * Variable
 	 ****************************************/
 	 var grid_displayNum = "100"; 
-	 var myApprID = "000004";   //AD 승인라인
+	 var myApprID = "000004";   //AD 승인라인 simple ad
 	 var myADApprExID = "000006"; // AD Exception2
 	 var adHistoryCD = "10"; // AD History "등록"
 	 
@@ -448,7 +451,8 @@
 		, file2Cnt : _i++
 		, file3Cnt : _i++
 		, rowNum : _i++
-    };
+		, newcontractYn : _i++   //49
+	};
 	
 	//조회 기능
 	function PagingSearch() {
@@ -469,7 +473,7 @@
 	  			"resultCommt;apprCommt;apprStateName;adHistory;file1;"+ 
 	  			"file2;file3;apprStateCD;resultStateCD;adSupportID;"+
 				"lapprLevelNo;levelNo;lastApprYN;apprExpc;file1Cnt;"+
-				"file2Cnt;file3Cnt;rowNum;");
+				"file2Cnt;file3Cnt;rowNum;newcontractYn;");
 	  	table.setParameter("format",
 	  			"str;str;str;str;str;"+
 	  			"str;str;str;str;str;"+
@@ -480,7 +484,7 @@
 	  			"str;str;str;str;str;"+
 	  			"str;str;str;str;str;"+
 				"str;str;str;str;str;"+
-				"str;str;str;");
+				"str;str;str;str;");
 
 		table.setParameter("startDT", $("#yearFromCD_S").val() + $("#monthFromCD_S").val());
 		table.setParameter("endDT", $("#yearToCD_S").val() + $("#monthToCD_S").val());
@@ -562,7 +566,13 @@
 					, table.getData(_col.levelNo,i)
 					, table.getData(_col.lastApprYN,i)
 					, table.getData(_col.apprExpc,i)
-      			];
+					, table.getData(_col.file1Cnt,i)
+					, table.getData(_col.file2Cnt,i)
+					, table.getData(_col.file3Cnt,i)
+					, table.getData(_col.rowNum,i)
+					, table.getData(_col.newcontractYn,i)
+
+				];
       			
       			//승인라인 Exception(_col.apprExpc)에 따라 컬럼 색 적용
       			var apprExpc = table.getData(_col.apprExpc, i);
@@ -973,9 +983,17 @@
 		
 		//그리드 row 클릭
 	    grid.onRowDoubleClicked = function(event, row){
+			$("#selectAdSupportID").val(this.getCellText(_col.adSupportID, row));
+			$("#selectVenueCD").val(this.getCellText(_col.venueCD, row));
+
 			appletOpen();
-			$("#_detail")[0].contentWindow.$("#adSupportID").val(grid.getCellText(_col.adSupportID, row));
-			$("#_detail")[0].contentWindow.pageInit();
+			if (this.getCellText(_col.newcontractYn, row) == "Y") {
+				$("#_detail").attr("src", $("#appSrc").val());
+			} else {
+				$("#_detail").attr("src", $("#appSrc2").val());
+			}
+
+
 	    }
 		
 		

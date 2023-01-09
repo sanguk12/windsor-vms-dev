@@ -19,7 +19,8 @@
 			            <%@include file="../sys3/cms/standardParam.jsp" %>
 						<%@include file="../sys3/cms/functionbar.jsp" %>
 						<%@include file="../sys3/cms/calendar.jsp" %>
-						<input type="hidden" id="appSrc" name="appSrc" value="${contextPath}/service/simpleCommand/?mnuGrpID=${params.mnuGrpID}&pgmID=${params.pgmID}&viewID=AD01001B" />
+						<input type="hidden" id="appSrc2" name="appSrc2" value="${contextPath}/service/simpleCommand/?mnuGrpID=${params.mnuGrpID}&pgmID=${params.pgmID}&viewID=AD01001B" />
+						<input type="hidden" id="appSrc" name="appSrc" value="${contextPath}/service/simpleCommand/?mnuGrpID=${params.mnuGrpID}&pgmID=${params.pgmID}&viewID=AD01001F" />
 					</td>
 				</tr>
 				<tr>
@@ -393,8 +394,10 @@
 		, file2Cnt : _i++
 		, file3Cnt : _i++
 		, rowNum : _i++
+		, newcontractYn : _i++
     };
-	
+
+
 	//조회
 	function PagingSearch() {
 	
@@ -412,7 +415,7 @@
  	  			"amt2;requiredADCD3Name;amt3;apprStateName;expccommt;" +
  	  			"file1;file2;file3;apprStateCD;contractStateCD;"+
  	  			"payStateCD;adSupportID;apprExpc;file1Cnt;file2Cnt;"+
- 	  			"file3Cnt;rowNum;"
+ 	  			"file3Cnt;rowNum;newcontractYn;"
  	  			);
  	  	table.setParameter("format",
  	  			"str;str;str;str;str;"+
@@ -422,7 +425,7 @@
  	  			"str;str;str;str;str;"+
  	  			"str;str;str;str;str;"+
  	  			"str;str;str;str;str;"+
- 	  			"str;str;"
+ 	  			"str;str;str;"
  	  			);
 	  			
 		table.setParameter("startDT", $("#yearFromCD_S").val() + $("#monthFromCD_S").val());
@@ -435,12 +438,14 @@
 	  	table.setParameter("venueCD", $("#venueCD_S").val());
 	  	table.setParameter("apprStateCD", $("#apprStateCD_S").val());
 	  	table.setParameter("contractStateCD", $("#contractStateCD_S").val());
-	  	//Paging Parameter - START
+
+		//Paging Parameter - START
 	  	table.setParameter("pageNum", $("#grid_pageNum").val());
 		table.setParameter("displayNum", $("#grid_displayNum").val());
 		//Paging Parameter - END
 	  	table.request();
-	  	
+
+
       	createGrid();
       	
     	var rowCount = table.getCount();
@@ -456,7 +461,7 @@
       		    	file1 = "<a href=\"javascript:openFilePopUp('"+i+"','ADINPUT');\">"+table.getData(_col.file1,i)+"</a>";
       		    	file2 = "<a href=\"javascript:openFilePopUp('"+i+"','ADEVIDENCE');\">"+table.getData(_col.file2,i)+"</a>";
       		    	file3 = "<a href=\"javascript:openFilePopUp('"+i+"','ADCONFIRM');\">"+table.getData(_col.file3,i)+"</a>";
-      			
+
       			data[i] = [
  					  table.getData(_col.contractDivCD, i)
 					, table.getData(_col.venueCD, i)
@@ -491,6 +496,11 @@
 					, table.getData(_col.payStateCD, i)
 					, table.getData(_col.adSupportID, i)
 					, table.getData(_col.apprExpc, i)
+					, table.getData(_col.file1Cnt, i)
+					, table.getData(_col.file2Cnt, i)
+					, table.getData(_col.file3Cnt, i)
+					, table.getData(_col.rowNum, i)
+					, table.getData(_col.newcontractYn, i)
       			];
       			
 				//승인라인 Exception(_col.apprExpc)에 따라 컬럼 색 적용
@@ -541,8 +551,10 @@
 	//신규
 	function New() {
 		$("#selectAdSupportID").val('');
-    	
+		$("#selectVenueCD").val('');
+
 		appletOpen();
+		$("#_detail").attr("src", $("#appSrc").val());
 		$("#_detail")[0].contentWindow.$("#adSupportID").val('');
 		$("#_detail")[0].contentWindow.pageInit();
 	}
@@ -623,39 +635,41 @@
 	//그리드 생성
 	function createGrid() {
 		grid = new AW.Grid.Extended;
-	    grid.setId("grid");
-	    grid.setRowCount(0);
-	    grid.setStyle("width","100%");
-	    grid.setStyle("height","100%");
-	    grid.setSelectorVisible(false);
-	    grid.setSelectionMode("single-cell");
-	    grid.setHeaderText(columns);
-	    
-	    for (var i = 0; i < columns.length; i++) {
-	    	grid.getHeaderTemplate(i).setStyle("text-align", "center");
-	    }
-	    
-	    grid.setColumnCount(columns.length);
-	    grid.setCellFormat([
-	                          str, str, str, str, str
-	                        , str, str, num, str, num
-	                        , num, num, num, str, str
-	                        , str, str, str, str, str
-	                        , str, str, str, str, str
-	                        , html, html, html
-	                        ]);
-	    grid.setCellEditable(false); 
-	    
-		
+		grid.setId("grid");
+		grid.setRowCount(0);
+		grid.setStyle("width", "100%");
+		grid.setStyle("height", "100%");
+		grid.setSelectorVisible(false);
+		grid.setSelectionMode("single-cell");
+		grid.setHeaderText(columns);
+
+		for (var i = 0; i < columns.length; i++) {
+			grid.getHeaderTemplate(i).setStyle("text-align", "center");
+		}
+
+		grid.setColumnCount(columns.length);
+		grid.setCellFormat([
+			str, str, str, str, str
+			, str, str, num, str, num
+			, num, num, num, str, str
+			, str, str, str, str, str
+			, str, str, str, str, str
+			, html, html, html
+		]);
+		grid.setCellEditable(false);
+
+
+
 		//그리드 row 클릭
-	    grid.onRowDoubleClicked = function(event, row){
+		grid.onRowDoubleClicked = function (event, row) {
 			$("#selectAdSupportID").val(this.getCellText(_col.adSupportID, row));
-	    	
+			$("#selectVenueCD").val(this.getCellText(_col.venueCD, row));
 			appletOpen();
-			$("#_detail")[0].contentWindow.$("#adSupportID").val(grid.getCellText(_col.adSupportID, row));
-			$("#_detail")[0].contentWindow.pageInit();
-	    }
-		
-    }
-	
+			   if (this.getCellText(_col.newcontractYn, row) == "Y") {
+				$("#_detail").attr("src", $("#appSrc").val());
+			} else {
+				$("#_detail").attr("src", $("#appSrc2").val());
+			}
+		}
+	}
 </script>

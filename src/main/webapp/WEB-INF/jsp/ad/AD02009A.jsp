@@ -19,7 +19,8 @@
 			            <%@include file="../sys3/cms/standardParam.jsp" %>
 						<%@include file="../sys3/cms/functionbar.jsp" %>
 						<%@include file="../sys3/cms/calendar.jsp" %>
-						<input type="hidden" id="appSrc" name="appSrc" value="${contextPath}/service/simpleCommand/?mnuGrpID=${params.mnuGrpID}&pgmID=${params.pgmID}&viewID=AD02007B" />
+						<input type="hidden" id="appSrc" name="appSrc" value="${contextPath}/service/simpleCommand/?mnuGrpID=${params.mnuGrpID}&pgmID=${params.pgmID}&viewID=AD02007C" />
+						<input type="hidden" id="appSrc2" name="appSrc2" value="${contextPath}/service/simpleCommand/?mnuGrpID=${params.mnuGrpID}&pgmID=${params.pgmID}&viewID=AD02007B" />
 					</td>
 				</tr>
 				<tr>
@@ -156,6 +157,7 @@
 				<tr>
 					<td height="1">
 						<input type="hidden" id="selectVenueCD" name="selectVenueCD" />
+						<input type="hidden" id="selectAdSupportID" name="selectAdSupportID" />
 					</td>
 				</tr>
 			</table>
@@ -448,7 +450,8 @@
 		, file2Cnt : _i++
 		, file3Cnt : _i++
 		, rowNum : _i++
-    };
+		, newcontractYn : _i++
+	};
 	
 	//조회 기능
 	function PagingSearch() {
@@ -469,7 +472,7 @@
 	  			"file2;file3;apprStateCD;resultStateCD;adSupportID;"+
 	  			"lapprLevelNo;levelNo;lastApprYN;apprExpc;adSeq;"+
 	  			"adChgFlg;adContractDivCD;file1Cnt;file2Cnt;file3Cnt;"+
-	  			"rowNum;");
+	  			"rowNum;newcontractYn;");
 	  	table.setParameter("format",
 	  			"str;str;str;str;str;"+
 	  			"str;str;str;str;str;"+
@@ -480,7 +483,7 @@
 	  			"str;str;str;str;str;"+
 	  			"str;str;str;str;str;"+
 	  			"str;str;str;str;str;"+
-	  			"str;");
+	  			"str;str;");
 
 		table.setParameter("startDT", $("#yearFromCD_S").val() + $("#monthFromCD_S").val());
 		table.setParameter("endDT", $("#yearToCD_S").val() + $("#monthToCD_S").val());
@@ -564,7 +567,12 @@
 					, table.getData(_col.adSeq,i)
 					, table.getData(_col.adChgFlg,i)
 					, table.getData(_col.adContractDivCD,i)
-      			];
+					, table.getData(_col.file1Cnt,i)
+					, table.getData(_col.file2Cnt,i)
+					, table.getData(_col.file3Cnt,i)
+					, table.getData(_col.rowNum,i)
+					, table.getData(_col.newcontractYn,i)
+				];
       			
       			//필수광고물만 수정, 승인라인 Exception(_col.apprExpc)에 따라 컬럼 색 적용
       			var adChgFlg = table.getData(_col.adChgFlg,i)
@@ -992,9 +1000,14 @@
 	
 		//그리드 row 클릭
 	    grid.onRowDoubleClicked = function(event, row){
+			$("#selectAdSupportID").val(this.getCellText(_col.adSupportID, row));
+			$("#selectVenueCD").val(this.getCellText(_col.venueCD, row));
 			appletOpen();
-			$("#_detail")[0].contentWindow.$("#adSeq").val(grid.getCellText(_col.adSeq, row));
-			$("#_detail")[0].contentWindow.Search();
+			if (this.getCellText(_col.newcontractYn, row) == "Y") {
+				$("#_detail").attr("src", $("#appSrc").val());
+			} else {
+				$("#_detail").attr("src", $("#appSrc2").val());
+			}
 	    }
 		
     }

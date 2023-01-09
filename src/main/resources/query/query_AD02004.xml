@@ -11,7 +11,8 @@
 		, t.venuenm         as "venueNM"
 		, t.startdt         as "startDT"  
 		, t.enddt           as "endDT"  
-		, t.contractmonth   as "contractMonth"  
+		, t.contractmonth   as "contractMonth"
+		, t.newcontractYn   as "newcontractYn"
 		, trunc(t.apAmt/1000)    as "apAmt"
 		, trunc(decode(
 		 (
@@ -174,7 +175,8 @@
 				, D.requiredadcd2
 				, D.amt2
 				, D.requiredadcd3
-				, D.amt3		
+				, D.amt3
+		        , A.newcontractYn
 				FROM GAD01MT A
 			INNER JOIN GVEN01MT B
 				ON a.venuecd = b.venuecd

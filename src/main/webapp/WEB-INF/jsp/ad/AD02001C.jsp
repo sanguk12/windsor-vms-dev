@@ -191,7 +191,7 @@
 															<input type="text" id="POSM" name="POSM" />
 														</td>
 													</tr>
-			        						 		<tr>
+			        						 		<tr style="display:none;">
 			        						 			<td class="td-cond">
 															<fmt:message key="AD01001B.threePercentIncentive" />
 														</td>
@@ -200,7 +200,7 @@
 															<input  type="hidden" id="real_threePercentIncentive" />
  														</td>
 													</tr>
-			        						 		<tr>
+			        						 		<tr style="display:none;">
 			        						 			<td class="td-cond">
 															<fmt:message key="AD01001B.total" />
 														</td>
@@ -217,7 +217,7 @@
 															<textarea id="commt" name="commt" rows="5" style="width:100%;" maxlength="500" ></textarea>
 														</td>
 													</tr>
-													<tr>
+													<tr style="display:none;">
 			        						 			<td class="td-cond-required">
 															<fmt:message key="AD01001B.bu" />
 														</td>
@@ -248,9 +248,9 @@
 														<td  class="group-title" style="border:0" height="1">
 															<fmt:message key="AD01001B.prdList" />
 														</td>
-						            					<td style="text-align:right; border:0">
-						            					&nbsp;<span id="productCartPopup_btn"></span>
-													</td>
+<%--						            					<td style="text-align:right; border:0">--%>
+<%--						            					&nbsp;<span id="productCartPopup_btn"></span>--%>
+<%--													</td>--%>
 						           				 </tr>
 						            			<tr>
 													<td height = "*" colspan="2">
@@ -694,16 +694,16 @@
 			grid_prd.refresh();
 			
 			${initScript};
-
-			// iframe parent 의 선택된 행 정보 가져온다.
-			try{
-				$("#adSupportID").val(window.parent.$("#selectAdSupportID").val());
-				$("#venueCD").val(window.parent.$("#selectVenueCD").val());
-			}catch(e){}
-
-			pageInit();
+			
+			
 		}
+// iframe parent 의 선택된 행 정보 가져온다.
+		try{
+			$("#adSupportID").val(window.parent.$("#selectAdSupportID").val());
+			$("#venueCD").val(window.parent.$("#selectVenueCD").val());
+		}catch(e){}
 
+		pageInit();
 	});
 
 	var performance_btn = new AW.UI.Button;
@@ -955,17 +955,17 @@
 		GP2 = NSV2 + COGS2;
 		GP3 = GP2 - GP1;
 		
-		APContract1 = parseFloat($("#prevAPamt").val(), "10")*-1;
-		APContract2 = APContract * -1;
-		APContract3 = APContract2 - APContract1;
-		
-		APOthers1 = parseFloat($("#prevPosmAmt").val(), "10")*-1;
-		APOthers2 = POSM * -1;
-		APOthers3 = APOthers2 - APOthers1;
-		
-		caap1 = GP1 + APContract1 + APOthers1;
-		caap2 = GP2 + APContract2 + APOthers2;
-		caap3 = caap2 - caap1;
+		// APContract1 = parseFloat($("#prevAPamt").val(), "10")*-1;
+		// APContract2 = APContract * -1;
+		// APContract3 = APContract2 - APContract1;
+		//
+		// APOthers1 = parseFloat($("#prevPosmAmt").val(), "10")*-1;
+		// APOthers2 = POSM * -1;
+		// APOthers3 = APOthers2 - APOthers1;
+		//
+		// caap1 = GP1 + APContract1 + APOthers1;
+		// caap2 = GP2 + APContract2 + APOthers2;
+		// caap3 = caap2 - caap1;
 		
 		bestEstimationMonth1 = parseFloat($("#prevContractMonth").val(), "10") != 0 ? parseFloat($("#prevEuSum").val(), "10") / parseFloat($("#prevContractMonth").val(), "10") : 0;
 		bestEstimationMonth2 = contractMonth != 0 ? euSum/contractMonth : 0;

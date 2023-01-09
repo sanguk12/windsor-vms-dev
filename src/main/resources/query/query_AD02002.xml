@@ -14,6 +14,7 @@
 		 , t1.startdt          as "startDT"      
 	  	 , t1.enddt            as "endDT"        
 	  	 , t1.contractmonth    as "contractMonth"
+		 , t1.newcontractYn    as "newcontractYn"
 <!-- 	  	 요청사항에 의해 totalAmt 에서 apAmt로 변경 -->
 		 , trunc(t1.apAmt/1000)    as "apAmt" 					
 		 , trunc(
@@ -198,7 +199,8 @@
 				  , c.requiredadcd3
 				  , c.amt3
 				  , a.rageSphereCD                          
-				  , a.officeCD                                                   
+				  , a.officeCD
+		          , a.newcontractYn
 				FROM  gad01mt a
 		        inner join gven01mt b    
 		        	on a.venuecd = b.venuecd
