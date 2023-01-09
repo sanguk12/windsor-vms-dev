@@ -983,15 +983,10 @@
 		
 		//그리드 row 클릭
 	    grid.onRowDoubleClicked = function(event, row){
-			// appletOpen();
-			// $("#_detail")[0].contentWindow.$("#adSupportID").val(grid.getCellText(_col.adSupportID, row));
-			// $("#_detail")[0].contentWindow.pageInit();
-
 			$("#selectAdSupportID").val(this.getCellText(_col.adSupportID, row));
 			$("#selectVenueCD").val(this.getCellText(_col.venueCD, row));
 
 			appletOpen();
-			debugger;
 			if (this.getCellText(_col.newcontractYn, row) == "Y") {
 				$("#_detail").attr("src", $("#appSrc").val());
 			} else {

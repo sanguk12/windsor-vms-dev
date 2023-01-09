@@ -933,13 +933,9 @@
 
 		//그리드 row 클릭
 		grid.onRowDoubleClicked = function (event, row) {
-			// appletOpen();
-			// $("#_detail")[0].contentWindow.$("#adSeq").val(grid.getCellText(_col.adSeq, row));
-			// $("#_detail")[0].contentWindow.Search();
 			$("#selectAdSeq").val(this.getCellText(_col.adSeq, row));
 			$("#selectAdSupportID").val(this.getCellText(_col.adSupportID, row));
 			$("#selectVenueCD").val(this.getCellText(_col.venueCD, row));
-debugger;
 			appletOpen();
 			if (this.getCellText(_col.newcontractYn, row) == "Y") {
 				$("#_detail").attr("src", $("#appSrc").val());

@@ -819,7 +819,6 @@
 		}
 		
 		$("#selectAdSeq").val("");
-		debugger;
 		appletOpen();
 		if ($("#selectNewcontractYN").val() == "Y") {
 			$("#_detail").attr("src", $("#appSrc").val());
