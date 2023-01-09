@@ -11,7 +11,8 @@
 		, t.venuenm         as "venueNM"
 		, t.startdt         as "startDT"  
 		, t.enddt           as "endDT"  
-		, t.contractmonth   as "contractMonth"  
+		, t.contractmonth   as "contractMonth"
+		, t.newcontractYn   as "newcontractYn"
 		, trunc(t.apAmt/1000)    as "apAmt"	
 	    , trunc(decode(
 		 (
@@ -167,7 +168,8 @@
 	          	, A.apprexpc    
 	          	, A.adSupportID  
 	          	, A.regID
-	          	, A.expccommt	
+	          	, A.expccommt
+		        , A.newcontractYn
 	          	, D.bucd
 			  	, D.requiredadcd1
 				, D.amt1
@@ -939,7 +941,8 @@
 		, t.venuenm         as "venueNM"
 		, t.startdt         as "startDT"  
 		, t.enddt           as "endDT"  
-		, t.contractmonth   as "contractMonth"  
+		, t.contractmonth   as "contractMonth"
+		, t.newcontractYn   as "newcontractYn"
 		, trunc(t.apAmt/1000)    as "apAmt"	
 		, trunc(decode(
 		 (
@@ -1109,12 +1112,15 @@
 				, D.requiredadcd3
 				, D.amt3 
 	          	, A.adChgFlg
+		        , E.newcontractYn
 				FROM GAD04MT A
 			INNER JOIN GVEN01MT B
 				ON a.venuecd = b.venuecd
 			LEFT OUTER JOIN gad09mt D
 		        ON A.adsupportid = D.adsupportid
 		        AND A.adSeq = D.adSeq
+		    INNER JOIN GAD01MT E
+		        ON A.adsupportid = E.adsupportid
 			WHERE 
 				1=1
 			AND a.adSupportID = #adSupportID#

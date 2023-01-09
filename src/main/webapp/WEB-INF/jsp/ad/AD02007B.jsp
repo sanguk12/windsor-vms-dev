@@ -786,7 +786,13 @@
 				$(this).val( $(this).val().replace(/[^0-9]/gi,"") );
 				$(this).val(formatNum($(this).val()));
 			});
-			
+			// iframe parent 의 선택된 행 정보 가져온다.
+			try{
+				$("#adSupportID").val(window.parent.$("#selectAdSupportID").val());
+				$("#venueCD").val(window.parent.$("#selectVenueCD").val());
+			}catch(e){}
+
+			pageInit();
 		}
 });
 	

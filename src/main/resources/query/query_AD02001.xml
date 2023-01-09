@@ -14,7 +14,8 @@
 		 , t1.startdt          as "startDT"      
 	  	 , t1.enddt            as "endDT"        
 	  	 , t1.contractmonth    as "contractMonth"
-		 , trunc(t1.apAmt/1000)    as "apAmt"	
+		 , t1.newcontractYn    as "newcontractYn"
+		, trunc(t1.apAmt/1000)    as "apAmt"
 		 , trunc(decode(
 		 (
 		 	SELECT NVL(sum(a.prdQty*c.efp),0) as GSV
@@ -186,7 +187,8 @@
 					b.contractdivcd                         
 				  , a.venuecd                               
 				  , c.venuenm                               
-				  , e.chainCD                               
+				  , e.chainCD
+		          , b.newcontractYn
 				  , b.startdt                               
 				  , b.enddt                                 
 				  , b.contractmonth                         

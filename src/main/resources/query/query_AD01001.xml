@@ -16,10 +16,11 @@
  		, getLangDesc(#companyID#,#languageCD#,'F_CODE','CONTRACTDIVCD', t.contractdivcd, null) as "contractDivCD" 
 		, t.venuecd         as "venueCD"
 		, t.venuenm         as "venueNM"
+		, t.newcontractYn   as "newcontractYn"
 		, (select chainNm from gcha01mt where chainCD = t.chainCD)    as "chainName"
 		, t.startdt         as "startDT"  
 		, t.enddt           as "endDT"  
-		, t.contractmonth   as "contractMonth"  
+		, t.contractmonth   as "contractMonth"
 		, trunc(t.apAmt/1000)        as "apAmt"  	
 		, trunc(decode(
 		 (
@@ -180,7 +181,8 @@
 				SELECT 
 	  			  A.contractdivcd    
 			  	, A.venuecd         
-			  	, B.venuenm         
+			  	, B.venuenm
+		        , A.newcontractYn
 			  	, C.chainCD         
 			  	, A.startdt         
 			  	, A.enddt           
@@ -1415,7 +1417,7 @@
 		AND a.apprstatecd = '50'                  
 		AND a.paystatecd = '10'     
 	</select>
-	
+
 	<!--insert -->
 	<insert id="AD0100101I" parameterClass="com.kia.ad.model.GAD01MT">
 		insert into GAD01MT (
@@ -1446,8 +1448,8 @@
 			LAPPRLEVELNO,
 			APPREXPC,
 			seq,
-			expcCommt
-		)
+			expcCommt,
+		    NEWCONTRACTYN)
 		select
 			#adSupportID#
 			, #venueCD#
@@ -1477,7 +1479,8 @@
 			, #apprExpc#
 			, #seq#
 			, #expcCommt#
-		from GEMP01MT
+		    , 'Y'
+		      from GEMP01MT
 		where
 			empID = #empID#
 	</insert>

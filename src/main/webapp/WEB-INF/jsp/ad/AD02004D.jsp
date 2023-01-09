@@ -191,7 +191,7 @@
 															<input type="text" id="POSM" name="POSM" />
 														</td>
 													</tr>
-			        						 		<tr>
+			        						 		<tr style="display:none;">
 			        						 			<td class="td-cond">
 															<fmt:message key="AD01001B.threePercentIncentive" />
 														</td>
@@ -200,7 +200,7 @@
 															<input  type="hidden" id="real_threePercentIncentive" />
  														</td>
 													</tr>
-			        						 		<tr>
+			        						 		<tr style="display:none;">
 			        						 			<td class="td-cond">
 															<fmt:message key="AD01001B.total" />
 														</td>
@@ -217,7 +217,7 @@
 															<textarea id="commt" name="commt" rows="5" style="width:100%;" maxlength="500" ></textarea>
 														</td>
 													</tr>
-													<tr>
+													<tr style="display:none;">
 			        						 			<td class="td-cond-required">
 															<fmt:message key="AD01001B.bu" />
 														</td>
@@ -248,9 +248,9 @@
 														<td  class="group-title" style="border:0" height="1">
 															<fmt:message key="AD01001B.prdList" />
 														</td>
-						            					<td style="text-align:right; border:0">
-						            					&nbsp;<span id="productCartPopup_btn"></span>
-													</td>
+<%--						            					<td style="text-align:right; border:0">--%>
+<%--						            					&nbsp;<span id="productCartPopup_btn"></span>--%>
+<%--													</td>--%>
 						           				 </tr>
 						            			<tr>
 													<td height = "*" colspan="2">
@@ -258,25 +258,25 @@
 													</td>
 												</tr>	
 												<tr>
-								            		<td height="1" colspan="2">
-								            			<table border="0" cellspacing="0" cellpadding="0" width="380px">
-		                									<colgroup>
-					        									<col style="width:180px;"></col>
-					        									<col style="width:200px;"></col>
-					        									<col></col>
-					        								</colgroup>
-					        						 		<tbody>
-					        						 			<tr>
-					        						 				<td class="td-report" style="font-weight:bold; text-align:right;">
-																		<fmt:message key="AD01001B.total" />&nbsp;&nbsp;
-																	</td>
-																	<td class="td-report" style="font-weight:bold;text-align:right;">
-																		<span id="totalVol"></span>&nbsp;
-																	</td>
-																</tr>
-															</tbody>
-														</table>
-													</td>
+						            <td height="1" colspan="2">
+						            <table border="0" cellspacing="0" cellpadding="0" width="380px">
+                								<colgroup>
+			        								<col style="width:180px;"></col>
+			        								<col style="width:200px;"></col>
+			        								<col></col>
+			        						</colgroup>
+			        						 	<tbody>
+			        						 		<tr>
+			        						 			<td class="td-report" style="font-weight:bold; text-align:right;">
+															<fmt:message key="AD01001B.total" />&nbsp;&nbsp;
+														</td>
+														<td class="td-report" style="font-weight:bold;text-align:right;">
+															<span id="totalVol"></span>&nbsp;
+														</td>
+													</tr>
+													</tbody>
+												</table>
+												</td>
 												</tr>
 			        						 	</tbody>
 			        						</table>
@@ -637,17 +637,20 @@
 			<input type="hidden" id="apprExpc" name="apprExpc" />
 			<!-- Exception 사유 -->
 			<input type="hidden" id="expcCommt" name="expcCommt" />
-			<!-- M&E RawData 제품 Seq -->
-			<input type="hidden" id="seq" name="seq" />
+			<!-- 지급상태  -->
+			<input type="hidden" id="payStateCD" name="payStateCD" />
 			<!-- 계약상태  -->
 			<input type="hidden" id="contractStateCD" name="contractStateCD" />
+			<!-- M&E RawData 제품 Seq -->
+			<input type="hidden" id="seq" name="seq" />
+			<!-- AD수정목록  Seq -->
+			<input type="hidden" id="adSeq" name="adSeq" />
 			<!-- 체인 여부 -->
 			<input type="hidden" id="chainYN" name="chainYN" />
 			<!-- 체인 GSV -->
 			<input type="hidden" id="chainGSV" name="chainGSV" />
 			<!-- 체인 Result 여부 -->
 			<input type="hidden" id="rltGSV" name="rltGSV" />
-			
 		</form>
 	</body>
 </html>
@@ -667,6 +670,7 @@
     
     #grid_prd .aw-column-0 {width: 180px; text-align:left;}
     #grid_prd .aw-column-1 {width: 200px; text-align:right;}
+    #grid_prd .aw-column-2 {width: 50px; text-align:center;}
     
 	.aw-grid-cell {border-right: 1px solid threedlightshadow;}
 	.aw-grid-row {border-bottom: 1px solid threedlightshadow;}
@@ -681,6 +685,7 @@
 	 //var maxRow_inputFile = 0;
 	 //var maxRow_evidenceFile = 0;
 	 var maxRow_prd = 0;
+	 var adContractDivCD = "30"; //계약구분 : 해지
 	/****************************************
 	 * Function
 	 ****************************************/
@@ -694,6 +699,78 @@
 			grid_prd.refresh();
 			
 			${initScript};
+			
+			$("#startYearCD").change(function(){
+				if (validateStartDate()) {
+					calculateDate();
+					Search_prevYearInfo();
+	      			Search_venueInfo();
+	      			calculateAD();
+				}
+			});
+			
+			$("#startMonthCD").change(function(){
+				if (validateStartDate()) {
+					calculateDate();
+					Search_prevYearInfo();
+	      			Search_venueInfo();
+	      			calculateAD();
+				}
+			});
+			
+			$("#endYearCD").change(function(){
+				if (validateEndDate()) {
+					checkContractDate();
+					calculateDate();
+					Search_prevYearInfo();
+	      			Search_venueInfo();
+	      			//추후 수정가능
+	      			search_targetRate();
+	      			calculateAD();
+				}
+			});
+			
+			$("#endMonthCD").change(function(){
+				if (validateEndDate()) {
+					checkContractDate();
+					calculateDate();
+					Search_prevYearInfo();
+	      			Search_venueInfo();
+	      			//추후 수정가능
+	      			search_targetRate();
+	      			calculateAD();
+				}
+			});
+			
+			$("#venue_popup").click(function(){
+				openMyVenuePopup("closeMyVenuePopup");
+			});
+					
+			$("#APContract").keyup(function(){
+				calculateAD();
+			});
+			
+			$("#POSM").keyup(function(){
+				calculateAD();
+			});
+			
+			$("#APContract").focus(function(){
+				$(this).val(unformatNum($(this).val()));
+			});
+			
+			$("#APContract").blur(function(){
+				$(this).val( $(this).val().replace(/[^0-9]/gi,"") );
+				$(this).val(formatNum($(this).val()));
+			});
+			
+			$("#POSM").focus(function(){
+				$(this).val(unformatNum($(this).val()));
+			});
+			
+			$("#POSM").blur(function(){
+				$(this).val( $(this).val().replace(/[^0-9]/gi,"") );
+				$(this).val(formatNum($(this).val()));
+			});
 
 			// iframe parent 의 선택된 행 정보 가져온다.
 			try{
@@ -703,9 +780,8 @@
 
 			pageInit();
 		}
-
 	});
-
+	
 	var performance_btn = new AW.UI.Button;
 	performance_btn.setId("performance_btn");
 	//performance_btn.setControlText("<fmt:message key="button.keymanReg" />");
@@ -713,7 +789,7 @@
 	performance_btn.refresh();
 	
 	performance_btn.onControlClicked = function(event) {
- 		if($("#venueCD").val() != "") {
+ 		if ($("#venueCD").val() != "") {
  			var url = "${contextPath}/service/simpleCommand/?mnuGrpID=${params.mnuGrpID}&pgmID=${params.pgmID}&viewID=AD01001D"
  					+"&venueCD="+$("#venueCD").val()+"&venueNm="+$("#venueNm").val();
  			newWindow(url, "AD01001D",550,500,"yes");
@@ -731,11 +807,11 @@
       	var adSupportID = $("#adSupportID").val();
       	var fileDivCD = "ADINPUT";
 
- 		if($("#venue").val() != "") {
+ 		if ($("#venue").val() != "") {
 			var url = "${contextPath}/service/simpleCommand/?mnuGrpID=${params.mnuGrpID}&pgmID=${params.pgmID}&viewID=AD01001C"
 						+"&adSupportID="+adSupportID
 						+"&venueCD="+venueCD
-						+"&fileDivCD="+fileDivCD;
+						+"&fileDivCD="+fileDivCD
 			
 			newWindow(url, "AD01001C",600,350,"yes");
 		}
@@ -752,11 +828,11 @@
       	var adSupportID = $("#adSupportID").val();
       	var fileDivCD = "ADEVIDENCE";
 		
-		if($("#venue").val() != "") {
+		if ($("#venue").val() != "") {
 			var url = "${contextPath}/service/simpleCommand/?mnuGrpID=${params.mnuGrpID}&pgmID=${params.pgmID}&viewID=AD01001E"
 						+"&adSupportID="+adSupportID
 						+"&venueCD="+venueCD
-						+"&fileDivCD="+fileDivCD;
+						+"&fileDivCD="+fileDivCD
 			
 			newWindow(url, "AD01001E",600,350,"yes");
 		}
@@ -773,11 +849,11 @@
       	var adSupportID = $("#adSupportID").val();
       	var fileDivCD = "ADCONFIRM";
 		
-		if($("#venue").val() != "") {
+		if ($("#venue").val() != "") {
 			var url = "${contextPath}/service/simpleCommand/?mnuGrpID=${params.mnuGrpID}&pgmID=${params.pgmID}&viewID=AD01001C"
 						+"&adSupportID="+adSupportID
 						+"&venueCD="+venueCD
-						+"&fileDivCD="+fileDivCD;
+						+"&fileDivCD="+fileDivCD
 			
 			newWindow(url, "AD01001C",600,350,"yes");
 		}
@@ -800,35 +876,83 @@
  		}
 	}
 	
-	function pageInit() {
+	function closeMyVenuePopup(data) {
+		$("#venue").val(data.venueCD);
+		$("#venueCD").val(data.venueCD);
+        $("#venueNm").val(data.venueNm);
+        pageInit();
+        Search_prevYearInfo();
+        Search_venueInfo();
+	}
+	
+	function closeProductCartPopup(data) {
+    	var count = 0;
+
+    	//중복 체크
+    	for (var i = 0; i < maxRow_prd; i++) {
+    		if (grid_prd.getCellText(_col_prd.activeFlg,i) != "D") {
+   				if (grid_prd.getCellText(_col_prd.prdCD, i) == data.prdCD) {
+           			count++;
+           		}
+    		}
+    	}
+    	
+    	if (count == 0) {
+    		grid_prd.addRow(maxRow_prd++);
+            grid_prd.setCellText(data.prdNm, _col_prd.prdNm, maxRow_prd-1);
+            grid_prd.setCellText("0", _col_prd.prdQty, maxRow_prd-1);
+            grid_prd.setCellText(data.EFP, _col_prd.EFP, maxRow_prd-1);
+            grid_prd.setCellText(data.duty, _col_prd.duty, maxRow_prd-1);
+            grid_prd.setCellText(data.COGS, _col_prd.COGS, maxRow_prd-1);
+            grid_prd.setCellText(data.eu, _col_prd.eu, maxRow_prd-1);
+            grid_prd.setCellText(data.sdxYN, _col_prd.sdxYN, maxRow_prd-1);
+            grid_prd.setCellText(data.prdCD, _col_prd.prdCD, maxRow_prd-1);
+            grid_prd.setCellText(data.seq, _col_prd.seq, maxRow_prd-1);
+            grid_prd.setCellText("I", _col_prd.activeFlg, maxRow_prd-1);
+            grid_prd.refresh();
+    	}
+    	
+        $("#seq").val(data.seq);
+    	calculateAD();
+    }
+	
+	function removeRow(row) {
+		grid_prd.deleteRow(row);
+		grid_prd.setCellText("D",_col_prd.activeFlg,row);
+		calculateAD();
+    }
+	
+	function pageInit(){
 		$("#venue").attr("disabled", true);
 		$("#rageSphereCD").attr("disabled", true);
 		$("#officeCD").attr("disabled", true);
+		
 		$("#venue_popup").hide();
 		$("#performance_btn").show();
 		$("#inputFile_btn").show();
 		$("#evidenceFile_btn").show();
 		$("#confirmFile_btn").show();
 		$("#productCartPopup").show();
-		$("#startYearCD").attr("disabled", true);
-		$("#startMonthCD").attr("disabled", true);
-		$("#endYearCD").attr("disabled", true);
-		$("#endMonthCD").attr("disabled", true);
-		//$("#uploaderOverlay_inputFile").show();
-		//$("#uploadFilesLink_inputFile").show();
-		//$("#uploaderOverlay_evidenceFile").show();
-		//$("#uploadFilesLink_evidenceFile").show();
+		
+		$("#startYearCD").attr("disabled", false);
+		$("#startMonthCD").attr("disabled", false);
+		$("#endYearCD").attr("disabled", false);
+		$("#endMonthCD").attr("disabled", false);
+		
+		$("#endYearCD").val("${params.clientDate}".substring(0,4));
+		$("#endMonthCD").val("${params.clientDate}".substring(4,6));
+		
 		$("#APContract").attr("disabled", false);
 		$("#POSM").attr("disabled", false);
 		$("#commt").attr("disabled", false);
-		$("#buCD_S").attr("disabled", true);
-		$("[id^=requiredADCD]").attr("disabled", true);
-		$("[id^=amt]").attr("disabled", true);
+		$("#adSeq").val(parent.$("#selectAdSeq").val());
 		Search();
-		maxRow_prd = 0;
+		search_targetRate();
+		search_prevTargetRate();
+		chainTargetRate();
 	}
 	
-	function calculateAD() {
+	function calculateAD(){
 		var APContract = unformatNum($("#APContract").val()) == "" ? 0 : parseFloat(unformatNum($("#APContract").val()), "10");
 		var POSM = unformatNum($("#POSM").val()) == "" ? 0 : parseFloat(unformatNum($("#POSM").val()), "10");
 		var contractMonth = parseFloat($("#contractMonth").text().slice(0,-3), "10");
@@ -914,22 +1038,23 @@
 		var prevYearChgCost = 0;
 		var minVolYN = 0;
 		
-		for(var i=0;i<maxRow_prd;i++){
-			if(grid_prd.getCellText(_col_prd.activeFlg,i)!="D"){
+		for (var i = 0; i < maxRow_prd; i++){
+			if (grid_prd.getCellText(_col_prd.activeFlg,i) != "D") {
 				GSV2 += parseFloat(unformatNum(grid_prd.getCellText(_col_prd.prdQty, i )), "10")*(parseFloat(unformatNum(grid_prd.getCellText(_col_prd.EFP, i)), "10")*100000)/100000;
 				duty2 += parseFloat(unformatNum(grid_prd.getCellText(_col_prd.prdQty, i )), "10")*(parseFloat(unformatNum(grid_prd.getCellText(_col_prd.duty, i)), "10")*100000)/100000;
 				COGS2 += parseFloat(unformatNum(grid_prd.getCellText(_col_prd.prdQty, i )), "10")*(parseFloat(unformatNum(grid_prd.getCellText(_col_prd.COGS, i)), "10")*100000)/100000;
 				euSum += parseFloat(unformatNum(grid_prd.getCellText(_col_prd.prdQty, i )), "10")*(parseFloat(unformatNum(grid_prd.getCellText(_col_prd.eu, i)), "10")*100000)/100000;
-				if(grid_prd.getCellText(_col_prd.sdxYN, i) == 'Y'){
+				
+				if (grid_prd.getCellText(_col_prd.sdxYN, i) == 'Y') {
 					sdxPrdVol += parseFloat(unformatNum(grid_prd.getCellText(_col_prd.prdQty, i )), "10");
 				}
+				
 				totalVol += parseFloat(unformatNum(grid_prd.getCellText(_col_prd.prdQty, i )), "10");
 			}
 		}
+		
 		$("#real_threePercentIncentive").val(formatNum(Math.floor(GSV2*0.035)));
 		$("#real_total").val(formatNum(Math.floor((GSV2*0.035) + parseFloat(APContract*1000, "10") + parseFloat(POSM*1000, "10"))));
-		
-		
 		
 		GSV1 = parseFloat($("#prevEfpSum").val(), "10");
 		GSV2 = GSV2/1000;
@@ -955,17 +1080,17 @@
 		GP2 = NSV2 + COGS2;
 		GP3 = GP2 - GP1;
 		
-		APContract1 = parseFloat($("#prevAPamt").val(), "10")*-1;
-		APContract2 = APContract * -1;
-		APContract3 = APContract2 - APContract1;
-		
-		APOthers1 = parseFloat($("#prevPosmAmt").val(), "10")*-1;
-		APOthers2 = POSM * -1;
-		APOthers3 = APOthers2 - APOthers1;
-		
-		caap1 = GP1 + APContract1 + APOthers1;
-		caap2 = GP2 + APContract2 + APOthers2;
-		caap3 = caap2 - caap1;
+		// APContract1 = parseFloat($("#prevAPamt").val(), "10")*-1;
+		// APContract2 = APContract * -1;
+		// APContract3 = APContract2 - APContract1;
+		//
+		// APOthers1 = parseFloat($("#prevPosmAmt").val(), "10")*-1;
+		// APOthers2 = POSM * -1;
+		// APOthers3 = APOthers2 - APOthers1;
+		//
+		// caap1 = GP1 + APContract1 + APOthers1;
+		// caap2 = GP2 + APContract2 + APOthers2;
+		// caap3 = caap2 - caap1;
 		
 		bestEstimationMonth1 = parseFloat($("#prevContractMonth").val(), "10") != 0 ? parseFloat($("#prevEuSum").val(), "10") / parseFloat($("#prevContractMonth").val(), "10") : 0;
 		bestEstimationMonth2 = contractMonth != 0 ? euSum/contractMonth : 0;
@@ -1003,10 +1128,10 @@
 		minVolYN = bestEstimationMonth2;
 		
 		//(E열 * 입력수량) 전체합 * 0.035
-		// 소숫점 수정 --Start
 		$("#threePercentIncentive").text(formatNum(Math.floor(GSV2*0.035)));
 		$("#total").text(formatNum(Math.floor((GSV2*0.035) + parseFloat(APContract, "10") + parseFloat(POSM, "10"))));
 		$("#totalVol").text(formatNum(totalVol));
+		
 		$("#GSV1").text(formatNum(Math.floor(GSV1)));
 		$("#GSV2").text(formatNum(Math.floor(GSV2)));
 		$("#GSV3").text(formatNum(Math.floor(GSV3)));
@@ -1073,27 +1198,414 @@
 		$("#caapPerNSV3").text(formatNum(Math.floor(caapPerNSV3*10)/10)+"%");
 		$("#caapPerNSV4").text(formatNum(Math.floor(caapPerNSV4*10)/10)+"%");
 		
-		
 		$("#mThan36MContract").text(formatNum(mThan36MContract));
 		$("#adCostPerGSV").text(formatNum(Math.floor(adCostPerGSV*10)/10)+"%");
 		$("#prevYearChgCost").text(formatNum(Math.floor(prevYearChgCost*10)/10)+"%");
 		$("#minVolYN").text(formatNum(Math.floor(minVolYN*10)/10));
+		//$("#targetRate").text(isNumber(formatNum(Math.floor(GSV1*compareTargetRate)))? formatNum(Math.floor(GSV1*compareTargetRate)):"0");
+		var expcCommt = "";
 		
-		if(mThan36MContract > 36000) $("#td_mThan36MContract").attr('style',"background-color:#FF0000; text-align:right;");
+		//수정 해지 시 Excpetion 타지 않도록 수정
+//		if( $("#apprStateCD").val() == "10" || $("#apprStateCD").val() == "40"){
+// 			if(mThan36MContract > 36000 || adCostPerGSV > compareGSVRate){
+// 				$("#apprExpc").val('2');
+				
+// 				if(mThan36MContract > 36000){
+// 					expcCommt += "비용 초과";
+// 				}
+				
+// 				if(adCostPerGSV > compareGSVRate){
+// 					if(expcCommt == ""){
+// 						expcCommt += "AD Cost/GSV 초과";
+// 					}else {
+// 						expcCommt += ", AD Cost/GSV 초과";
+// 					}
+// 				}
+				
+// 				if($("#contractDivCD").val() != "10"){
+// 					if(GSV1*compareTargetRate > GSV2){
+// 						$("#perfDivCD").val("20");
+// 						$("#perfDivCDNm").text("미실적");
+// 						if(expcCommt == ""){
+// 							expcCommt += "미실적 업소";
+// 						}else {
+// 							expcCommt += ", 미실적 업소";
+// 						}
+// 					}else{
+// 						$("#perfDivCD").val("10");
+// 						$("#perfDivCDNm").text("실적");
+// 					}
+// 				}else{
+// 					$("#perfDivCD").val("");
+// 					$("#perfDivCDNm").text("");
+// 				}
+// 			}else{
+// 				if($("#contractDivCD").val() != "10"){
+// 					if(GSV1*compareTargetRate > GSV2){
+// 						$("#perfDivCD").val("20");
+// 						$("#perfDivCDNm").text("미실적");
+// 						if(expcCommt == ""){
+// 							expcCommt += "미실적 업소";
+// 						}else {
+// 							expcCommt += ", 미실적 업소";
+// 						}
+// 					}else{
+// 						$("#perfDivCD").val("10");
+// 						$("#perfDivCDNm").text("실적");
+// 					}
+// 				}else{
+// 					$("#perfDivCD").val("");
+// 					$("#perfDivCDNm").text("");
+// 				}
+				
+				//직전계약 달성률에 따른 승인라인 조건
+// 				if($("#prevTargetRate").val() < 90){
+// 					$("#apprExpc").val('2');
+// 					expcCommt += "직전계약 달성률 90% 미만";
+// 				}else if($("#prevTargetRate").val() >= 90 && $("#prevTargetRate").val() < 100){
+// 					$("#apprExpc").val('1');
+// 					expcCommt += "직전계약 달성률 90% 이상 100% 미만";
+// 				}else{
+					$("#apprExpc").val('0');
+					expcCommt += "No Exception";
+//				}
+				
+				//exception 1 사용안함
+// 				if(prevYearChgCost > compareChgCost || minVolYN < compareMinVol){
+// 					$("#apprExpc").val('1');
+				
+// 					if(prevYearChgCost > compareChgCost){
+// 						expcCommt += "전년 대비 Cost 초과";
+// 					}
+				
+// 					if(minVolYN < compareMinVol){
+// 						if(expcCommt == ""){
+// 							expcCommt += "최소 VOL 미충족";
+// 						}else {
+// 							expcCommt += ", 최소 VOL 미충족";
+// 						}
+// 					}
+// 				}else{
+// 					$("#apprExpc").val('0');
+// 					expcCommt += "No Exception";
+// 				}
+//			}
+			$("#expcCommt").val(expcCommt);
+//		}
+		
+		if (mThan36MContract > 36000) $("#td_mThan36MContract").attr('style',"background-color:#FF0000; text-align:right;");
 		else $("#td_mThan36MContract").attr('style',"background-color:#00FF00; text-align:right;");
 		
-		if(adCostPerGSV > compareGSVRate) $("#td_adCostPerGSV").attr('style',"background-color:#FF0000; text-align:right;");
+		if (adCostPerGSV > compareGSVRate) $("#td_adCostPerGSV").attr('style',"background-color:#FF0000; text-align:right;");
 		else $("#td_adCostPerGSV").attr('style',"background-color:#00FF00; text-align:right;");
-		
-		if(prevYearChgCost < compareChgCost) $("#td_prevYearChgCost").attr('style',"background-color:#00FF00; text-align:right;");
+			
+		if (prevYearChgCost < compareChgCost) $("#td_prevYearChgCost").attr('style',"background-color:#00FF00; text-align:right;");
 		//else $("#td_prevYearChgCost").attr('style',"background-color:#FF0000; text-align:right;");
-		
-		if(minVolYN > compareMinVol) $("#td_minVolYN").attr('style',"background-color:#00FF00; text-align:right;");
+			
+		if (minVolYN > compareMinVol) $("#td_minVolYN").attr('style',"background-color:#00FF00; text-align:right;");
 		//else $("#td_minVolYN").attr('style',"background-color:#FF0000; text-align:right;");
 		
 		grid_prd.refresh();
 	}
+	
+	//시작일자 유효성 check
+	function validateStartDate(){
+		var startDate = $("#startYearCD").val() + $("#startMonthCD").val(); 
+		var endDate = $("#endYearCD").val() + $("#endMonthCD").val(); 
+		var clientDate = "${params.clientDate}";
+		var flag = true;
+		
+		if ($("#endYearCD").val() != "" && $("#endMonthCD").val() != "") {
+			if (flag) {
+				if (startDate > endDate) {
+					alert("<fmt:message key="AD01001B.msg1"/>");
+					//$("#startYearCD").val("${params.clientDate}".substring(0,4));
+					//$("#startMonthCD").val("${params.clientDate}".substring(4,6)); 
+					flag = false;
+				}
+			}
+		}
+		//운영 반영시 추가
+		/* if(flag){
+			if(clientDate < startDate){
+				alert("<fmt:message key="AD01001B.msg4"/>");
+				$("#startYearCD").val("${params.clientDate}".substring(0,4));
+				$("#startMonthCD").val("${params.clientDate}".substring(4,6)); 
+				flag = false;
+			}
+		} */
+		
+		if (flag) {
+			if (checkCurrContractDt()){
+				alert("<fmt:message key="AD01001B.msg3"/>");
+				flag=false;
+			}
+		}
+		
+		calculateDate();
+		
+		return flag;
+	}
+	
+	//종료일자 유효성 check
+	function validateEndDate(){
+		var startDate = $("#startYearCD").val() + $("#startMonthCD").val(); 
+		var endDate = $("#endYearCD").val() + $("#endMonthCD").val(); 
+		var flag = true;
+		
+		if ($("#endYearCD").val() != "" && $("#endMonthCD").val() != "") {
+			if(startDate > endDate){
+				alert("<fmt:message key="AD01001B.msg1"/>");
+				$("#endYearCD").val(startDate.substring(0,4));
+				$("#endMonthCD").val(startDate.substring(4,6)); 
+				calculateDate();
+				flag = false;
+			}
+		}
+		if ($("#endYearCD").val() != "" && $("#endMonthCD").val() != "") {
+			if(flag){
+				if(checkCurrContractDt()){
+					alert("<fmt:message key="AD01001B.msg3"/>");
+					flag=false;
+				}
+			}
+		}
+		calculateDate();
+		
+		return flag;
+	}
 
+	//해당 날짜에 등록되어있는 계약건이 있는지 check
+	function checkCurrContractDt(){
+		var table = new AW.XML.Table;
+		//AD해지 계약Seq가 존재할 경우 gad04mt(임시) 조회/ 없을 경우 gad01mt(기존) 조회
+		var query = $("#adSeq").val().length > 0  ? "AD0200425S" : "AD0200410S";
+		table.setURL("${contextPath}/service/simpleAction/"+ query);
+		table.setAsync(false);
+	  	table.setRequestMethod("POST");
+	  	table.setParameter("outParamKey",
+	  			"adSupportId;");
+	  	table.setParameter("format",
+	  			"str;");
+	  	
+	  	table.setParameter("venueCD", $("#venueCD").val());
+	  	table.setParameter("adSupportID", $("#adSupportID").val());
+	  	table.setParameter("startDt", $("#startYearCD").val() + $("#startMonthCD").val());
+	  	if ($("#endYearCD").val() != "" && $("#endMonthCD").val() != "") {
+	  		table.setParameter("endDt", $("#endYearCD").val() + $("#endMonthCD").val());
+	  	}
+	  	table.request();
+      	
+      	var rowCount = table.getCount();
+      	if (rowCount > 0) {
+      		return true;
+      	} else {
+      		return false;
+      	}
+	}
+	
+// 	function setCurrContracDt(checkEl, selDt){
+// 		var table = new AW.XML.Table;
+// 		table.setURL("${contextPath}/service/simpleAction/AD0100140S");
+// 		table.setAsync(false);
+// 	  	table.setRequestMethod("POST");
+// 	  	table.setParameter("outParamKey",
+// 	  			"currContractEndDt;");
+// 	  	table.setParameter("format",
+// 	  			"str;");
+	  	
+// 	  	table.setParameter("venueCD", $("#venueCD").val());
+// 	  	table.setParameter("adSupportID", $("#adSupportID").val());
+// 	  	table.setParameter("selDt", selDt);
+// 	  	table.request();
+      	
+//       	var rowCount = table.getCount();
+//       	if (rowCount > 0) {
+//       		var currContractYear = parseInt(table.getData(0,0).substring(0,4),'10');
+//       		var currContractMonth = parseInt(table.getData(0,0).substring(4,6),'10');
+//       		if(checkEl == "startDt"){
+//       			if(currContractMonth == 12){
+//     	      		$("#startYearCD").val((currContractYear+1).toString());
+//     	      		$("#startMonthCD").val("01");
+//           		}else if(currContractMonth > 8){
+//           			$("#startYearCD").val(table.getData(0,0).substring(0,4));
+//           			$("#startMonthCD").val((currContractMonth+1).toString());
+//           		}else{
+//           			$("#startYearCD").val(table.getData(0,0).substring(0,4));
+//           			$("#startMonthCD").val("0" +(currContractMonth+1).toString());
+//           		}
+//       		}else{
+//       				if(currContractMonth == 12){
+//     	      			$("#endYearCD").val((currContractYear+1).toString());
+//     		      		$("#endMonthCD").val("01");
+//        		   		}else if(currContractMonth > 8){
+//        		   			$("#endYearCD").val(table.getData(0,0).substring(0,4));
+//        	   				$("#endMonthCD").val((currContractMonth+1).toString());
+//           			}else{
+//           				$("#endYearCD").val(table.getData(0,0).substring(0,4));
+//           				$("#endMonthCD").val("0" +(currContractMonth+1).toString());
+//           			}
+//       		}
+//       	}else{
+//       		if(checkEl == "startDt"){
+//     	      		$("#startYearCD").val("");
+//     	      		$("#startMonthCD").val("");
+//       		}else{
+//     	      		$("#endYearCD").val("");
+//     		      	$("#endMonthCD").val("");
+//       		}
+//       	}
+// 	}
+
+	//달성률 search
+	function search_targetRate(){
+		var table = new AW.XML.Table;
+		table.setURL("${contextPath}/service/simpleAction/AD0200411S");
+		table.setAsync(false);
+	  	table.setRequestMethod("POST");
+	  	table.setParameter("outParamKey",
+	  			"targetRate;");
+	  	table.setParameter("format",
+	  			"str;");
+	  	
+	  	table.setParameter("venueCD", $("#venueCD").val());
+	  	table.setParameter("adSupportID", $("#adSupportID").val());
+	  	table.setParameter("startDt", $("#startYearCD").val() + $("#startMonthCD").val());
+	  	table.setParameter("endDt", $("#endYearCD").val() + $("#endMonthCD").val());
+	  	table.setParameter("adSeq", $("#adSeq").val());
+	  	table.request();
+      	
+      	var rowCount = table.getCount();
+      	if (rowCount > 0) {
+			$("#targetRate").text(formatNum(table.getData(0,0)) + "%");
+      	} else {
+      		$("#targetRate").text("0%");
+      	}
+	}
+	
+	//이전 인센티브
+	function checkPrevIncentive(){
+		var table = new AW.XML.Table;
+		var flag = false;
+		//AD해지 계약Seq가 존재할 경우 gad04mt(임시) 조회/ 없을 경우 gad01mt(기존) 조회
+		var query = $("#adSeq").val().length > 0  ? "AD0200436S" : "AD0200435S";
+		table.setURL("${contextPath}/service/simpleAction/"+query);
+		table.setAsync(false);
+	  	table.setRequestMethod("POST");
+	  	table.setParameter("outParamKey",
+	  			"prevIncentive;");
+	  	table.setParameter("format",
+	  			"str;");
+	  	
+	  	table.setParameter("venueCD", $("#venueCD").val());
+	  	table.setParameter("startDt", $("#startYearCD").val() + $("#startMonthCD").val());
+	  	table.setParameter("endDt", $("#endYearCD").val() + $("#endMonthCD").val());
+	  	table.request();
+      	
+      	var rowCount = table.getCount();
+      	if (rowCount > 0) {
+      		if(table.getData(0,0) == null || table.getData(0,0) == '' || table.getData(0,0) == 'null'){
+      			flag = true;
+      		}else {
+				if(table.getData(0,0) > 0){
+					flag = false;
+				}else{
+					flag = true;
+				}
+      		}
+      	}else{
+      		flag = true;
+      	}
+      	return flag;
+	}
+	
+	function search_prevTargetRate(){
+		var table = new AW.XML.Table;
+		var flag = false;
+		table.setURL("${contextPath}/service/simpleAction/AD0200437S");
+		table.setAsync(false);
+	  	table.setRequestMethod("POST");
+	  	table.setParameter("outParamKey",
+	  			"prevTargetRate;");
+	  	table.setParameter("format",
+	  			"str;");
+	  	
+	  	table.setParameter("venueCD", $("#venueCD").val());
+	  	table.setParameter("startDt", $("#startYearCD").val() + $("#startMonthCD").val());
+	  	table.request();
+      	
+      	var rowCount = table.getCount();
+      	if (rowCount > 0) {
+      		if (table.getData(0,0) < 0){
+      			$("#prevTargetRate").val("N");
+    			$("#prevTargetRateText").text("기존 달성률 없음");
+      		} else{
+      			$("#prevTargetRate").val(table.getData(0,0));
+				$("#prevTargetRateText").text(table.getData(0,0)+"%");
+      		}
+      	} else {
+      		$("#prevTargetRate").val("N");
+			$("#prevTargetRateText").text("기존 달성률 없음");
+      	}
+	}
+	
+	//날짜계산
+	function calculateDate(){
+		var gap = 0;
+// 		var compareStartYm = '';
+// 		var compareEndYm = '';
+		
+// 		if(parseInt($("#startMonthCD").val()) > 6 ){
+// 			compareStartYm = ((parseInt($("#startYearCD").val())-1).toString())+ '07';
+// 			compareEndYm = (parseInt($("#startYearCD").val()).toString()) + '06';
+// 		}else {
+// 			compareStartYm = ((parseInt($("#startYearCD").val())-2).toString())+ '07';
+// 			compareEndYm = ((parseInt($("#startYearCD").val())-1).toString()) + '06';				
+// 		}
+		
+		if($("#endYearCD").val() != "" && $("#endMonthCD").val() != ""){
+			if($("#startYearCD").val() == $("#endYearCD").val()){
+				$("#contractMonth").text(parseInt($("#endMonthCD").val(),'10') - parseInt($("#startMonthCD").val(),'10') + 1); 
+				$("#contractMonth").text($("#contractMonth").text()+" 개월");
+			}else{
+				var yearGap = parseInt($("#endYearCD").val())-parseInt($("#startYearCD").val());
+				$("#contractMonth").text((yearGap * 12) + parseInt($("#endMonthCD").val(),'10') - parseInt($("#startMonthCD").val(),'10') + 1);
+				$("#contractMonth").text($("#contractMonth").text()+" 개월");
+			}
+		}else{
+			$("#contractMonth").text("0 개월");
+		}
+		//$("#compareStartYm").val(compareStartYm);
+		//$("#compareEndYm").val(compareEndYm);
+	}
+	
+	//기존 계약일자 체크
+	function checkContractDate() {
+		var afterEndDate = $("#endYearCD").val() + $("#endMonthCD").val(); 
+		
+		var table = new AW.XML.Table;
+		table.setURL("${contextPath}/service/simpleAction/AD0200439S");
+		table.setAsync(false);
+	  	table.setRequestMethod("POST");
+	  	table.setParameter("outParamKey",
+	  			"endDT;");
+	  	table.setParameter("format",
+	  			"str;");
+	  	
+	  	table.setParameter("adSupportID", $("#adSupportID").val());
+	  	table.request();
+	  	
+      	if (table.getData(0,0) > 0) {
+      		if(parseInt(afterEndDate) > parseInt(table.getData(0,0))) {
+      			alert("기존 계약기간보다 연장하실 수 없습니다.");
+      			return false;
+      		}else {
+      			return true;
+      		}
+      	}else {
+      		return false;	
+      	}
+	}
 	
 	
 	function chainVenueCheck() {
@@ -1237,6 +1749,8 @@
 		 
 	}
 
+
+
 	/***************************************
 	* Button Action
 	****************************************/
@@ -1251,44 +1765,150 @@
 		$("#venue_popup").show();
 	}
 	
-	//계약서                                             b6cq2 aaaaa                                                              
+	//계약서
 	function Contract() {
 		var table = new AW.XML.Table;
-		var templateFile = "";
-		
-		if ($("#buCD_S").val() == "100") { //Local
-			templateFile = "AD01001B";
-		} else if($("#buCD_S").val() == "200") { //int'l
-			templateFile = "AD01001B";
-		} else if($("#buCD_S").val() == "300") { // beer
-			templateFile = "AD01001B_Beer";
-		} else {
-			templateFile = "AD01001B";
-		}
-		
+		//AD해지 계약Seq가 존재할 경우 gad04mt(임시) 조회/ 없을 경우 gad01mt(기존) 조회
+		var query = $("#adSeq").val().length > 0  ? "AD0200434S" : "AD0200433S";
 		table.setURL("${contextPath}/service/simpleExport/jxls");
 		table.setAsync(false); 
 		table.setRequestMethod("POST");
-		table.setParameter("queryKey", "AD0100118S");
+		table.setParameter("queryKey", query);
 		table.setParameter("adSupportID", $("#adSupportID").val());
-		table.setParameter("templateFile", templateFile);
-		table.request();
+		table.setParameter("adSeq", $("#adSeq").val());
 		
-		if (table.getCount() > 0) {
-			if (table.getData(0,0) == "S") {
+		table.setParameter("templateFile", "AD01001B");
+		table.request();
+
+		if(table.getCount() > 0) {
+			if(table.getData(0,0) == "S") {
 			    form.action = "${contextPath}/service/simpleExport/download/?"+
 			    		"tempFile="+table.getData(3,0)+
-			    		"&downloadFile="+encodeURIComponent("광고계약서");
+			    		"&downloadFile=${params.viewName}";
 			    form.target = "_self";
 			    form.submit();
 			}
 		}
 	}
+
 	
+	function Save(){
+		var adSeqCheck = $("#adSeq").val().length;
+		
+		if (!checkContractDate()) {
+			return;
+		}
+		
+		//등록, 반려  저장
+		if (($("#apprStateCD").val() !== "10" && $("#apprStateCD").val() !== "40") && adSeqCheck > 0) {
+			alert("<fmt:message key="AD02004B.msg1"/>");
+			return;
+		}
+		
+		<%--if (maxRow_prd == 0) {--%>
+		<%--	alert("<fmt:message key="info.nullData.save"/>");--%>
+		<%--	return;--%>
+		<%--}--%>
+		
+		if ($("#endYearCD").val() == "" || $("#endMonthCD").val() == "") {
+			alert("<fmt:message key="AD01001B.msg5"/>");
+			return;
+		}
+		
+// 		if ($("#apprStateCD").val() == "40") {
+// 			$("#apprStateCD").val("10") 
+// 			return;
+// 		}
+		
+		if($("#buCD_S").val() == ""){
+			alert("<fmt:message key="AD01001B.msg11"/>");
+			return;
+		}
+		if(!checkRequiredAD()){
+			return;
+		}
+		
+// 		if(parseFloat($("#contractMonth").text().slice(0,-3), "10") < 3){
+//			alert("<fmt:message key="AD01001B.msg6"/>");
+//			return;
+//		}
+// 		if(parseFloat($("#limitGsv").val())/1000>unformatNum($("#GSV2").text())){
+// 			alert("<fmt:message key="AD01001B.msg7"><fmt:param value='"+formatNum($("#limitGsv").val())+"' /></fmt:message>");
+// 			return;
+// 		}
+		calculateDate();
+		
+		var prdCDs = new Array();
+		var prdQtys = new Array();
+		var activeFlgs = new Array();
+		var prdTotalAmt = 0;
+		var count = 0;
+		
+		for (var i=0; i<maxRow_prd; i++) {
+			prdCDs[count] = grid_prd.getCellText(_col_prd.prdCD, i);
+			prdQtys[count] = grid_prd.getCellText(_col_prd.prdQty, i);
+			activeFlgs[count] = grid_prd.getCellText(_col_prd.activeFlg, i);
+			count++;
+		}
+		
+		var table = new AW.XML.Table;
+		table.setURL("${contextPath}/service/ad02/contractTmpSaveAD");
+		table.setAsync(false);
+		table.setRequestMethod("POST");
+		table.setParameter("empID", "${params.empID}");
+		table.setParameter("adSupportID", $("#adSupportID").val());
+		table.setParameter("venueCD", $("#venueCD").val());
+		table.setParameter("startDT", $("#startYearCD").val()+$("#startMonthCD").val());
+		table.setParameter("endDT", $("#endYearCD").val()+$("#endMonthCD").val());
+		table.setParameter("apprStateCD", $("#apprStateCD").val());
+		table.setParameter("contractStateCD", ""); //계약상태
+		table.setParameter("payStateCD", "");	// 지급상태
+		table.setParameter("perfDivCD", $("#perfDivCD").val());
+		table.setParameter("contractDivCD", $("#contractDivCD").val());
+		table.setParameter("dkmdtpCD", "${params.dkmdTpCD}");
+		table.setParameter("contractMonth", parseFloat($("#contractMonth").text().slice(0,-3), "10"));
+		table.setParameter("apAmt", unformatNum($("#APContract").val())*1000);
+		table.setParameter("posmAmt", unformatNum($("#POSM").val())*1000);
+		table.setParameter("incAmt", unformatNum($("#real_threePercentIncentive").val()));
+		table.setParameter("totalAmt", unformatNum($("#real_total").val()));
+		table.setParameter("prdTotalAmt", unformatNum($("#totalVol").text()));
+		table.setParameter("commt", $("#commt").val());
+		table.setParameter("rageSphereCD", $("#rageSphereCD").val());
+		table.setParameter("officeCD", $("#officeCD").val());
+		table.setParameter("apprExpc", $("#apprExpc").val());
+		table.setParameter("expcCommt", $("#expcCommt").val());
+		table.setParameter("seq", $("#seq").val());
+		table.setParameter("prdCDs", prdCDs);
+		table.setParameter("prdQtys", prdQtys);
+		table.setParameter("activeFlgs", activeFlgs);
+		table.setParameter("adSeq", $("#adSeq").val());
+		table.setParameter("adContractDivCD", adContractDivCD);
+		table.setParameter("buCD", $("#buCD_S").val());
+		table.setParameter("requiredADCD1", $("#requiredADCD1_S").val());
+		table.setParameter("requiredADCD2", $("#requiredADCD2_S").val());
+		table.setParameter("requiredADCD3", $("#requiredADCD3_S").val());
+		table.setParameter("amt1", $("#amt1").val());
+		table.setParameter("amt2", $("#amt2").val());
+		table.setParameter("amt3", $("#amt3").val());
+		table.request();
+
+		if(table.getData(0,0) == "S") {
+			top.appCountFun();
+			message(table.getData(1,0));
+			$("#adSupportID").val(table.getData(3,0));
+			$("#adSeq").val(table.getData(4,0));
+			Search();
+   		}
+		else {
+			alert(table.getData(1,0));
+		}
+	}
 	
 	function Search(){
 		var table = new AW.XML.Table;
-		table.setURL("${contextPath}/service/simpleAction/AD0100108S");
+		//AD해지 계약Seq가 존재할 경우 gad04mt(임시) 조회/ 없을 경우 gad01mt(기존) 조회 
+		var query =  $("#adSeq").val().length > 0 ? "AD0200423S" : "AD0200408S";
+		table.setURL("${contextPath}/service/simpleAction/"+query);
 		table.setAsync(false);
 	  	table.setRequestMethod("POST");
 	  	table.setParameter("outParamKey",
@@ -1297,8 +1917,8 @@
 	  			"contractDivCDNm;perfDivCD;perfDivCDNm;contractMonth;APContract;" +
 	  			"POSM;threePercentIncentive;total;totalVol;commt;"+
 	  			"rageSphereCD;officeCD;apprExpc;seq;expcCommt;"+
-	  			"buCD;requiredADCD1;requiredADCD2;requiredADCD3;amt1;"+
-	  			"amt2;amt3;");
+	  			"payStateCD;adSeq;buCD;requiredADCD1;requiredADCD2;"+
+	  			"requiredADCD3;amt1;amt2;amt3;");
 	  	table.setParameter("format",
 	  			"str;str;str;str;str;"+
 	  			"str;str;str;str;str;"+
@@ -1306,20 +1926,24 @@
 	  			"str;str;str;str;str;"+
 	  			"str;str;str;str;str;"+
 	  			"str;str;str;str;str;"+
-	  			"str;str;");
+	  			"str;str;str;str;");
 	  	
 	  	table.setParameter("adSupportID", $("#adSupportID").val());
+	  	table.setParameter("adSeq", $("#adSeq").val());
 	  	table.request();
+      	
       	var rowCount = table.getCount();
       	if (rowCount > 0) {
       			$("#adSupportID").val(table.getData(0,0));
       			$("#venueCD").val(table.getData(1,0));
       			$("#venue").val(table.getData(1,0));
       			$("#venueNm").val(table.getData(2,0));
-      			$("#startYearCD").val(table.getData(3,0).substring(0,4));
-      			$("#startMonthCD").val(table.getData(3,0).substring(4,6));
-      			$("#endYearCD").val(table.getData(4,0).substring(0,4));
-      			$("#endMonthCD").val(table.getData(4,0).substring(4,6));
+	      		$("#startYearCD").val(table.getData(3,0).substring(0,4));
+    	  		$("#startMonthCD").val(table.getData(3,0).substring(4,6));
+      			if($("#adSeq").val().length > 0) {
+      				$("#endYearCD").val(table.getData(4,0).substring(0,4));
+      				$("#endMonthCD").val(table.getData(4,0).substring(4,6));
+      			}
       			$("#apprStateCD").val(table.getData(5,0));
       			$("#apprStateCDName").text(table.getData(6,0));
       			$("#contractStateCD").val(table.getData(7,0));
@@ -1340,13 +1964,7 @@
       			$("#apprExpc").val(table.getData(22,0));
       			$("#seq").val(table.getData(23,0));
       			$("#expcCommt").val(table.getData(24,0));
-				$("#buCD_S").val(table.getData(25,0));
-      			$("#requiredADCD1_S").val(table.getData(26,0));
-      			$("#requiredADCD2_S").val(table.getData(27,0));
-      			$("#requiredADCD3_S").val(table.getData(28,0));
-      			$("#amt1").val(table.getData(29,0));
-      			$("#amt2").val(table.getData(30,0));
-      			$("#amt3").val(table.getData(31,0));
+      			$("#payStateCD").val(table.getData(25,0));
       			if($("#apprStateCD").val() == "50"){
       				btnContract.setControlDisabled(false);
       			}
@@ -1354,9 +1972,19 @@
       				btnContract.setControlDisabled(true);
       			}
       			Search_prd();
+      			calculateDate();
       			Search_venueInfo();
       			Search_prevYearInfo();
-      			//calculateDate();
+      			calculateAD();
+      			settingBu(table.getData(27,0));
+      			getRequiredAD(table.getData(27,0));	// 위치 변경x, selectbox 먼저 setting 후 이후의 값 설정
+      			$("#requiredADCD1_S").val(table.getData(28,0));
+      			$("#requiredADCD2_S").val(table.getData(29,0));
+      			$("#requiredADCD3_S").val(table.getData(30,0));
+      			$("#amt1").val(table.getData(31,0));
+      			$("#amt2").val(table.getData(32,0));
+      			$("#amt3").val(table.getData(33,0));
+      			settingRequiredAD();
       		}
 	}
 	
@@ -1365,11 +1993,14 @@
 		Search_prevYearInfo2();
 		Search_prevYearInfo3();
 		Search_prevYearInfo4();
+		//Search_prevYearInfo5();
+		//Search_prevYearInfo6();
 		calculateAD();
 	}
 	function Search_prevYearInfo1(){
 		var table = new AW.XML.Table;
-		table.setURL("${contextPath}/service/simpleAction/AD0100104S");
+		var query = $("#adSeq").val().length > 0  ? "AD0200419S" : "AD0200404S";
+		table.setURL("${contextPath}/service/simpleAction/"+query);
 		table.setAsync(false);
 	  	table.setRequestMethod("POST");
 	  	table.setParameter("outParamKey",
@@ -1383,6 +2014,7 @@
 	  	table.setParameter("venueCD", $("#venueCD").val());
 	  	table.setParameter("adSupportID", $("#adSupportID").val());
 	  	table.setParameter("startDT", $("#startYearCD").val()+$("#startMonthCD").val());
+	  	table.setParameter("adSeq", $("#adSeq").val());
 	  	table.request();
       	
       	var rowCount = table.getCount();
@@ -1398,7 +2030,9 @@
 	}
 	function Search_prevYearInfo2(){
 		var table = new AW.XML.Table;
-		table.setURL("${contextPath}/service/simpleAction/AD0100105S");
+		//AD해지 계약Seq가 존재할 경우 gad04mt(임시) 조회/ 없을 경우 gad01mt(기존) 조회 
+		var query = $("#adSeq").val().length > 0  ? "AD0200420S" : "AD0200405S";
+		table.setURL("${contextPath}/service/simpleAction/"+query);
 		table.setAsync(false);
 	  	table.setRequestMethod("POST");
 	  	table.setParameter("outParamKey",
@@ -1411,24 +2045,26 @@
 	  	table.setParameter("venueCD", $("#venueCD").val());
 	  	table.setParameter("adSupportID", $("#adSupportID").val());
 	  	table.setParameter("startDT", $("#startYearCD").val()+$("#startMonthCD").val());
+	  	table.setParameter("adSeq", $("#adSeq").val());
 	  	table.request();
       	
       	var rowCount = table.getCount();
       	if (rowCount > 0) {
-      			$("#prevAPamt").val(table.getData(0,0));
-      			$("#prevPosmAmt").val(table.getData(1,0));
-      			$("#prevContractMonth").val(table.getData(2,0));
-      			$("#prevPayAmtSum").val(table.getData(3,0));
-      		}else{
-          		$("#prevAPamt").val(0);
-          		$("#prevPosmAmt").val(0);
-          		$("#prevContractMonth").val(0);
-          		$("#prevPayAmtSum").val(0);
-      		}
+      		$("#prevAPamt").val(table.getData(0,0));
+      		$("#prevPosmAmt").val(table.getData(1,0));
+      		$("#prevContractMonth").val(table.getData(2,0));
+      		$("#prevPayAmtSum").val(table.getData(3,0));
+      	}else{
+        	$("#prevAPamt").val(0);
+        	$("#prevPosmAmt").val(0);
+        	$("#prevContractMonth").val(0);
+        	$("#prevPayAmtSum").val(0);
+      	}
 	}
 	function Search_prevYearInfo3(){
 		var table = new AW.XML.Table;
-		table.setURL("${contextPath}/service/simpleAction/AD0100106S");
+		var query = $("#adSeq").val().length > 0  ? "AD0200421S" : "AD0200406S";
+		table.setURL("${contextPath}/service/simpleAction/" + query);
 		table.setAsync(false);
 	  	table.setRequestMethod("POST");
 	  	table.setParameter("outParamKey",
@@ -1441,6 +2077,7 @@
 	  	table.setParameter("venueCD", $("#venueCD").val());
 	  	table.setParameter("adSupportID", $("#adSupportID").val());
 	  	table.setParameter("startDT", $("#startYearCD").val()+$("#startMonthCD").val());
+	  	table.setParameter("adSeq", $("#adSeq").val());
 	  	table.request();
       	
       	var rowCount = table.getCount();
@@ -1452,7 +2089,8 @@
 	}
 	function Search_prevYearInfo4(){
 		var table = new AW.XML.Table;
-		table.setURL("${contextPath}/service/simpleAction/AD0100107S");
+		var query = $("#adSeq").val().length > 0  ? "AD0200422S" : "AD0200407S";
+		table.setURL("${contextPath}/service/simpleAction/"+query);
 		table.setAsync(false);
 	  	table.setRequestMethod("POST");
 	  	table.setParameter("outParamKey",
@@ -1465,27 +2103,29 @@
 	  	table.setParameter("venueCD", $("#venueCD").val());
 	  	table.setParameter("adSupportID", $("#adSupportID").val());
 	  	table.setParameter("startDT", $("#startYearCD").val()+$("#startMonthCD").val());
+	  	table.setParameter("adSeq", $("#adSeq").val());
 	  	table.request();
       	
       	var rowCount = table.getCount();
       	if (rowCount > 0) {
-      			$("#prevSdxMixRate").val(table.getData(0,0));
-      		}else{
-          		$("#prevSdxMixRate").val(0);
-      		}
+      		$("#prevSdxMixRate").val(table.getData(0,0));
+      	} else {
+          	$("#prevSdxMixRate").val(0);
+      	}
 	}
 	
 	function Search_venueInfo(){
 		Search_venueInfo1();
 		Search_venueInfo2();
-		search_targetRate();
 		search_prevTargetRate();
-		chainTargetRate();
 		calculateAD();
+		chainTargetRate();
 	}
+	
+	//담당자 권역,지점 search
 	function Search_venueInfo1(){
 		var table = new AW.XML.Table;
-		table.setURL("${contextPath}/service/simpleAction/AD0100113S");
+		table.setURL("${contextPath}/service/simpleAction/AD0200413S");
 		table.setAsync(false);
 	  	table.setRequestMethod("POST");
 	  	table.setParameter("outParamKey",
@@ -1502,9 +2142,12 @@
       			$("#officeCD").val(table.getData(1,0));
       		}
 	}
+	
+	//
 	function Search_venueInfo2(){
 		var table = new AW.XML.Table;
-		table.setURL("${contextPath}/service/simpleAction/AD0100114S");
+		//수정여부 N gad01mt(기존) 조회  N gad04mt(임시) 조회 
+		table.setURL("${contextPath}/service/simpleAction/AD0200414S");
 		table.setAsync(false);
 	  	table.setRequestMethod("POST");
 	  	table.setParameter("outParamKey",
@@ -1515,6 +2158,7 @@
 	  	table.setParameter("venueCD", $("#venueCD").val());
 	  	table.setParameter("adSupportID", $("#adSupportID").val());
 	  	table.setParameter("startDT", $("#startYearCD").val()+$("#startMonthCD").val());
+	  	table.setParameter("adSeq", $("#adSeq").val());
 	  	table.request();
       	
       	var rowCount = table.getCount();
@@ -1533,9 +2177,10 @@
       		Search_venueInfo3();
       	}
 	}
+	
 	function Search_venueInfo3(){
 		var table = new AW.XML.Table;
-		table.setURL("${contextPath}/service/simpleAction/AD0100115S");
+		table.setURL("${contextPath}/service/simpleAction/AD0200415S");
 		table.setAsync(false);
 	  	table.setRequestMethod("POST");
 	  	table.setParameter("outParamKey",
@@ -1555,7 +2200,7 @@
       		$("#limitGsv").val(table.getData(3,0));
       		$("#compareChgCost").val(table.getData(4,0));
       		$("#venueDivCD").val(table.getData(5,0));
-      	}else{
+      	} else {
       		$("#compareGSVRate").val("0");
       		$("#compareTargetRate").val("0");
       		$("#compareMinVol").val("0");
@@ -1564,61 +2209,6 @@
       		$("#venueDivCD").val("");
       	}
 	}
-
-	function search_targetRate(){
-		var table = new AW.XML.Table;
-		table.setURL("${contextPath}/service/simpleAction/AD0100111S");
-		table.setAsync(false);
-	  	table.setRequestMethod("POST");
-	  	table.setParameter("outParamKey",
-	  			"targetRate;");
-	  	table.setParameter("format",
-	  			"str;");
-	  	
-	  	table.setParameter("venueCD", $("#venueCD").val());
-	  	table.setParameter("adSupportID", $("#adSupportID").val());
-	  	table.setParameter("startDt", $("#startYearCD").val() + $("#startMonthCD").val());
-	  	table.setParameter("endDt", $("#endYearCD").val() + $("#endMonthCD").val());
-	  	table.request();
-      	
-      	var rowCount = table.getCount();
-      	if (rowCount > 0) {
-			$("#targetRate").text(formatNum(table.getData(0,0)) + "%");
-      	}else{
-      		$("#targetRate").text("0%");
-      	}
-	}
-	
-	function search_prevTargetRate(){
-		var table = new AW.XML.Table;
-		var flag = false;
-		table.setURL("${contextPath}/service/simpleAction/AD0100120S");
-		table.setAsync(false);
-	  	table.setRequestMethod("POST");
-	  	table.setParameter("outParamKey",
-	  			"prevTargetRate;");
-	  	table.setParameter("format",
-	  			"str;");
-	  	
-	  	table.setParameter("venueCD", $("#venueCD").val());
-	  	table.setParameter("startDt", $("#startYearCD").val() + $("#startMonthCD").val());
-	  	table.request();
-      	
-      	var rowCount = table.getCount();
-      	if (rowCount > 0) {
-      		if(table.getData(0,0) < 0){
-      			$("#prevTargetRate").val("N");
-    			$("#prevTargetRateText").text("기존 달성률 없음");
-      		}else{
-      			$("#prevTargetRate").val(table.getData(0,0));
-				$("#prevTargetRateText").text(table.getData(0,0)+"%");
-      		}
-      	}else{
-      		$("#prevTargetRate").val("N");
-			$("#prevTargetRateText").text("기존 달성률 없음");
-      	}
-	}
-	
 	
 	var _i_prd = 0;
 	var _col_prd = {
@@ -1635,9 +2225,12 @@
 		, activeFlg : _i_prd++
     };
 	
+	//제품리스트 search
 	function Search_prd() {
 		var table = new AW.XML.Table;
-		table.setURL("${contextPath}/service/simpleAction/AD0100109S");
+		//AD해지 계약Seq가 존재할 경우 gad04mt(임시) 조회/ 없을 경우 gad01mt(기존) 조회
+		var query = $("#adSeq").val().length > 0 ? "AD0200424S" : "AD0200409S";
+		table.setURL("${contextPath}/service/simpleAction/"+query);
 	  	table.setAsync(false);
 	  	table.setRequestMethod("POST");
 	  	table.setParameter("outParamKey",
@@ -1648,14 +2241,16 @@
 	  			"str;str;str;str;str;");
 	  	table.setParameter("adSupportID", $("#adSupportID").val());
 	  	table.setParameter("seq", $("#seq").val());
+	  	table.setParameter("adSeq", $("#adSeq").val());
 	  	table.request();
       	
       	createGrid_prd();
       	
       	var rowCount = table.getCount();
+      	var data = new Array();
+      	
       	if (rowCount > 0) {
-      		var data = new Array();
-      		for (var i=0; i<rowCount; i++) {
+      		for (var i = 0; i < rowCount; i++) {
       			data[i] = [
 					 table.getData(_col_prd.prdNm,i)
 					, table.getData(_col_prd.prdQty,i)
@@ -1686,8 +2281,8 @@
 	    var columns_prd = [
 	               		 "<fmt:message key="AD01001B.brand"/>"
 	               		, "<fmt:message key="AD01001B.prdQty"/>"
+	               		, "<fmt:message key="AD01001B.deleteBtn"/>"
 	               	];
-	
 	    var grid_prd = null;
 	    
 	    function createGrid_prd() {
@@ -1702,14 +2297,213 @@
 		    for(var i=0;i<columns_prd.length;i++){grid_prd.getHeaderTemplate(i).setStyle("text-align", "center");};
 		    grid_prd.setColumnCount(columns_prd.length);
 		    grid_prd.setCellFormat([str, num]);
-		    grid_prd.setCellEditable(false);
+		    grid_prd.setCellEditable(true);
+		    grid_prd.setCellEditable(false, _col_prd.prdNm);
+		    grid_prd.setCellEditable(false, _col_prd.deleteBtn);
 		    
-	
+		    grid_prd.setCellImage("deleteGrid",_col_prd.deleteBtn);
+		    var deleteFlag = new AW.Templates.Image;
+		    var delImage = deleteFlag.getContent("box/image");
+		    delImage.setTag("a");
+		    delImage.setAttribute("href", function(){
+		    	return "javascript:removeRow(grid_prd.getCurrentRow())";
+		    });
+		    grid_prd.setCellTemplate(deleteFlag, _col_prd.deleteBtn);
+		    
+		    grid_prd.onCellEditStarted = function(text, col, row){
+				if (col == _col_prd.prdQty) {
+					this.setCellText(unformatNum(text), col, row);
+				}
+			};
+			
+			grid_prd.onCellEditEnded = function(text, col, row) {
+		    	if (col == _col_prd.prdQty) {
+		    		this.setCellText(formatNum(unformat(text)), col, row);
+			    	calculateAD();
+		    	}
+			};
+			
+		    grid_prd.onCellValidated = function(text, col, row) {
+		    	if (col == _col_prd.prdQty) {
+		    		this.setCellText(formatNum(unformat(text)), col, row);
+			    	calculateAD();
+		    	}
+		    };
+		    
+		    grid_prd.onCellValidating = function(text, col, row) {
+				if (col == _col_prd.prdQty) {
+					if(unformat(text).length > 6) {
+		    			alert("<fmt:message key="info.validate.numlength"><fmt:param value='6'/></fmt:message>");
+						this.setCellText(unformat(text).substring(0,6),col,row);
+						return;
+					}
+					if (!isDecimal(unformat(text))) {
+					    alert("<fmt:message key="error.noNum" />");
+					    this.setCellText("0",col,row);
+					    return;
+					}
+		    		else if (parseFloat(unformat(text)) < 0) {
+						alert("<fmt:message key="error.noMinusNum" />");
+						this.setCellText("0",col,row);
+						return;
+					}
+					this.setCellText(formatNum(unformat(text)), col, row);
+				}
+		    };
 	    }
 	    
-	    
-	    
-	    
-	    
+    /*****************************************************
+	    *   필수광고물
+	    *****************************************************/
+	
+    var _col_bu = {
+		"code" : 0
+		, "name" : 1
+	}
+    var _col_cd = {
+		"code" : 0
+		, "name" : 1
+	}
+    	
+   	function getRequiredAD(code) {
+    	if(code == "" || code == null){
+			var venueDivCD = $("#venueDivCD").val();
+			if(venueDivCD == "10") code = "200";
+			else if(venueDivCD == "20" || venueDivCD == "40") code = "100";
+			else if(venueDivCD == "30") code = "300";
+			else if(venueDivCD == "50") code = "400";
+		}
+    	
+   		var requiredADSelector = $("[id^=requiredADCD]");
+   		var amtSelector = $("[id^=amt]");
+   		
+   		// selectbox 초기화
+   		requiredADSelector.attr("disabled",false);
+   		amtSelector.attr("disabled",false);
+   		
+   		var table = new AW.XML.Table;
+   		table.setURL("${contextPath}/service/simpleAction/SYS0001S");
+   		table.setAsync(false);
+   		table.setRequestMethod("POST");
+   	  	table.setParameter("languageCD", "${params.languageCD}");
+   	  	table.setParameter("codeDiv", "REQUIREDADCD");
+   	  	table.setParameter("attrib01", code);
+   	  	table.request();
+        	
+       	if(table.getCount() > 0) {
+       		requiredADSelector.find("option").remove().end().append('<option value=""><fmt:message key="select"/></option>');
+  	     	for(var i=0; i<table.getCount(); i++){
+  	   			if(table.getData(_col_cd.code,i)==code){
+  	   				requiredADSelector.append('<option value="'+table.getData(_col_cd.code,i)+'" checked="true">'+table.getData(_col_cd.name,i)+'</option>');
+  	   			} else {
+  	   				requiredADSelector.append('<option value="'+table.getData(_col_cd.code,i)+'">'+table.getData(_col_cd.name,i)+'</option>');
+  	   			}
+  	   		}
+       	}
+   	}
     
+   
+    function settingBu(code){
+    	
+		if(code == "" || code == null){
+			var venueDivCD = $("#venueDivCD").val();
+			if(venueDivCD == "10") code = "200";
+			else if(venueDivCD == "20" || venueDivCD == "40") code = "100";
+			else if(venueDivCD == "30") code = "300";
+			else if(venueDivCD == "50") code = "400";
+		}
+		
+		var requiredADSelector = $("[id^=requiredADCD]");
+		var amtSelector = $("[id^=amt]");
+		
+		var table = new AW.XML.Table;
+		table.setURL("${contextPath}/service/simpleAction/SYS0001S");
+		table.setAsync(false);
+		table.setRequestMethod("POST");
+	  	table.setParameter("languageCD", "${params.languageCD}");
+	  	table.setParameter("codeDiv", "BUCD");
+	  	table.request();
+     	
+     	if(table.getCount() > 0) {
+     		$("#buCD_S").find("option").remove();
+	     	for(var i=0; i<table.getCount(); i++){
+	   			if(table.getData(_col_bu.code,i)==code){
+	   				$("#buCD_S").append('<option value="'+table.getData(_col_bu.code,i)+'" checked="true">'+table.getData(_col_bu.name,i)+'</option>');
+	   			}
+	   		}
+     	}
+	}
+   	
+    function selectRequiredAD(obj, idx){
+    	var code = $(obj).val();
+    	if(code == ""){
+    		$("#requiredAD_td").children('div:gt('+idx+')').find("select,input").val("");
+    		$("#requiredAD_td").children('div:gt('+idx+')').find("select,input").attr("disabled",true);
+    	} else{
+    		// 중복확인
+    		$("[id^=requiredADCD]").each(function(index,item){
+    			if(index != idx && $(this).val() == code){
+    				$(obj).val("");
+    				$(obj).next().val("");
+    				return false;
+    			}
+       		});
+    	}
+    	$(obj).next().val("");
+    }
+   	
+    function selectAmt(obj, idx){
+    	if($(obj).val() != "" && $(obj).prev().val() != ""){
+    		$("#requiredAD_td").children("div").eq(idx+1).find("select,input").attr("disabled",false);
+    	} 
+    }
+   	
+   	function checkRequiredAD(){
+       	var flag = true;
+       	$("[id^=requiredADCD]").each(function(index,item){
+   			if(index == 0){
+   				if($(this).val() == "" || $(this).next().val() == ""){
+   					alert("<fmt:message key="AD01001B.msg12"/>");
+   					flag = false;
+   					return false;
+   				} else{
+					if($(this).next().val() == "0"){
+						alert("<fmt:message key="AD01001B.msg13"/>");
+						flag = false;
+						return false;
+					}
+				}
+   			} else{
+   				if(($(this).val() == "" && $(this).next().val() != "") || ($(this).val() != "" && $(this).next().val() == "")){
+   					alert("<fmt:message key="AD01001B.msg12"/>");
+   					flag = false;
+   					return false;
+   				} else{
+					if($(this).next().val() == "0"){
+						alert("<fmt:message key="AD01001B.msg13"/>");
+						flag = false;
+						return false;
+					}
+				}
+   			}
+   		});
+       	return flag;
+	}
+   	
+   	function settingRequiredAD(){
+       	$("[id^=requiredADCD]").each(function(index,item){
+       		if($(this).val() == ""){
+       			$(this).attr("disabled", true);
+       			$(this).next().attr("disabled", true);
+       		}
+       	});
+       	$("[id^=requiredADCD]").each(function(index,item){
+       		if($(this).is(":disabled")){
+       			$(this).attr("disabled", false);
+       			$(this).next().attr("disabled", false);
+       			return false;
+       		}
+       	});
+	}
+	
 </script>

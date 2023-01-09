@@ -14,7 +14,8 @@
 		 , t1.startdt          as "startDT"      
 	  	 , t1.enddt            as "endDT"        
 	  	 , t1.contractmonth    as "contractMonth"
-		 , trunc(t1.apAmt/1000)    as "apAmt"	
+		 , t1.newcontractYn    as "newcontractYn"
+		, trunc(t1.apAmt/1000)    as "apAmt"
 		 , trunc(decode(
 		 (
 		 	SELECT NVL(sum(a.prdQty*c.efp),0) as GSV
@@ -217,7 +218,8 @@
 				  , e.amt2
 				  , e.requiredadcd3
 				  , e.amt3     
-				  , f.empNm              
+				  , f.empNm
+		          , g.newcontractYn
 				FROM  gad06mt a
 				inner join gad04mt b
 					on a.venueCD = b.venueCD
@@ -231,7 +233,9 @@
 		        	on a.adsupportid = e.adsupportid
 		        	and a.adSeq = e.adSeq
 		        inner join gemp01mt f
-		        	on b.regID = f.empID  
+		        	on b.regID = f.empID
+		        inner join gad01mt g
+		            on a.adsupportid = g.adsupportid
 				WHERE 
 					1=1
 				AND a.empID = #empID#	

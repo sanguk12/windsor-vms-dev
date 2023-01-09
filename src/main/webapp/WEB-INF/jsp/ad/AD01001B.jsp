@@ -649,7 +649,6 @@
 			<input type="hidden" id="chainGSV" name="chainGSV" />
 			<!-- 체인 Result 여부 -->
 			<input type="hidden" id="rltGSV" name="rltGSV" />
-			
 		</form>
 	</body>
 </html>
@@ -692,10 +691,11 @@
 	});
 	
 	$(document).ready(function() {
-
 		window.onload = function() {
 			$("#venue").attr("disabled", true);
-			//createGrid_inputFile();
+
+
+					//createGrid_inputFile();
 			//grid_inputFile.refresh();
 			
 			//createGrid_evidenceFile();
@@ -705,9 +705,12 @@
 			
 			createGrid_prd();
 			grid_prd.refresh();
-			
+
+
+
 			${initScript};
-			
+
+
 			$("#startYearCD").change(function(){
 				if(dateChangeCheck("start")) {
 					calculateDate();
@@ -764,10 +767,16 @@
 				$(this).val( $(this).val().replace(/[^0-9]/gi,"") );
 				$(this).val(formatNum($(this).val()));
 			});
-			
+
+			// iframe parent 의 선택된 행 정보 가져온다.
+			try{
+				$("#adSupportID").val(window.parent.$("#selectAdSupportID").val());
+				$("#venueCD").val(window.parent.$("#selectVenueCD").val());
+			}catch(e){}
+
+			pageInit();
 		}
 });
-	
 	var performance_btn = new AW.UI.Button;
 	performance_btn.setId("performance_btn");
 	//performance_btn.setControlText("<fmt:message key="button.keymanReg" />");
@@ -943,9 +952,9 @@
 				$("#apprStateCD").val('10');
 				$("#apprStateCDName").text('등록');
 				$("#startYearCD").val("${params.clientDate}".substring(0,4));
-				$("#startMonthCD").val("${params.clientDate}".substring(4,6)); 
+				$("#startMonthCD").val("${params.clientDate}".substring(4,6));
 				$("#endYearCD").val("");
-				$("#endMonthCD").val(""); 
+				$("#endMonthCD").val("");
 				$("#buCD_S").val("");
 				$("[id^=requiredADCD]").val("");
 				$("[id^=amt]").val("");
@@ -1010,9 +1019,9 @@
 				$("#endYearCD").attr("disabled", false);
 				$("#endMonthCD").attr("disabled", false);
 				$("#startYearCD").val("${params.clientDate}".substring(0,4));
-				$("#startMonthCD").val("${params.clientDate}".substring(4,6)); 
+				$("#startMonthCD").val("${params.clientDate}".substring(4,6));
 				$("#endYearCD").val("");
-				$("#endMonthCD").val(""); 
+				$("#endMonthCD").val("");
 				//$("#uploaderOverlay_inputFile").show();
 				//$("#uploadFilesLink_inputFile").show();
 				//$("#uploaderOverlay_evidenceFile").show();
@@ -1021,7 +1030,7 @@
 				$("#POSM").attr("disabled", false);
 				$("#commt").attr("disabled", false);
 				$("#buCD_S").attr("disabled", false);
-				
+
 				calculateDate();
 				calculateAD();
 			}

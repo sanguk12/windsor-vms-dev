@@ -19,7 +19,9 @@
 			            <%@include file="../sys3/cms/standardParam.jsp" %>
 						<%@include file="../sys3/cms/functionbar.jsp" %>
 						<%@include file="../sys3/cms/calendar.jsp" %>
-						<input type="hidden" id="appSrc" name="appSrc" value="${contextPath}/service/simpleCommand/?mnuGrpID=${params.mnuGrpID}&pgmID=${params.pgmID}&viewID=AD02004B" />
+						<input type="hidden" id="appSrc2" name="appSrc2" value="${contextPath}/service/simpleCommand/?mnuGrpID=${params.mnuGrpID}&pgmID=${params.pgmID}&viewID=AD02004B" />
+						<input type="hidden" id="appSrc" name="appSrc" value="${contextPath}/service/simpleCommand/?mnuGrpID=${params.mnuGrpID}&pgmID=${params.pgmID}&viewID=AD02004D" />
+
 					</td>
 				</tr>
 				<tr>
@@ -142,6 +144,8 @@
 				<tr>
 					<td height="1">
 						<input type="hidden" id="selectVenueCD" name="selectVenueCD" />
+						<input type="hidden" id="selectAdSupportID" name="selectAdSupportID" />
+						<input type="hidden" id="selectAdSeq" name="selectAdSeq" />
 					</td>
 				</tr>
 			</table>
@@ -424,7 +428,8 @@
 		, file2Cnt : _i++
 		, file3Cnt : _i++
 		, rowNum : _i++
-    };
+		, newcontractYn : _i++
+	};
 	
 	//조회 기능
 	function PagingSearch() {
@@ -443,7 +448,7 @@
 	  			"resultStateName;adHistory;file1;file2;file3;"+
 	  			"apprStateCD;resultStateCD;adSupportID;lapprLevelNo;levelNo;"+
 	  			"lastApprYN;apprExpc;adSeq;adContractDivCD;file1Cnt;"+
-	  			"file2Cnt;file3Cnt;rowNum;");
+	  			"file2Cnt;file3Cnt;rowNum;newcontractYn;");
 	  	table.setParameter("format",
 	  			"str;str;str;str;str;"+
 	  			"str;str;str;str;str;"+
@@ -452,7 +457,7 @@
 	  			"str;str;str;str;str;"+
 	  			"str;str;str;str;str;"+
 	  			"str;str;str;str;str;"+
-	  			"str;str;str;");
+	  			"str;str;str;str;");
 		table.setParameter("startDT", $("#yearFromCD_S").val() + $("#monthFromCD_S").val());
 		table.setParameter("endDT", $("#yearToCD_S").val() + $("#monthToCD_S").val());
 		table.setParameter("empID", "${params.empID}");
@@ -526,7 +531,12 @@
 					, table.getData(_col.apprExpc,i)
 					, table.getData(_col.adSeq,i)
 					, table.getData(_col.adContractDivCD,i)
-      			];
+					, table.getData(_col.file1Cnt,i)
+					, table.getData(_col.file2Cnt,i)
+					, table.getData(_col.file3Cnt,i)
+					, table.getData(_col.rowNum,i)
+					, table.getData(_col.newcontractYn,i)
+				];
       			
       			//승인라인 Exception(_col.apprExpc)에 따라 컬럼 색 적용
       			var apprExpc = table.getData(_col.apprExpc, i);
@@ -881,53 +891,62 @@
 	//그리드 생성
 	function createGrid() {
 		grid = new AW.Grid.Extended;
-		
-	    grid.setId("grid");
-	    grid.setRowCount(0);
-	    grid.setStyle("width","100%");
-	    grid.setStyle("height","100%");
-	    grid.setSelectorVisible(false);
-	    grid.setSelectionMode("single-cell");
-	    grid.setHeaderText(columns);
-	    
-	    for (var i=0;i<columns.length;i++) {
-	    	grid.getHeaderTemplate(i).setStyle("text-align", "center");
-	    }
-	    
-	    grid.setColumnCount(columns.length);
- 	    grid.setCellFormat([
- 	                        str, str, str, str, str
- 	                       , str, str, str, str, str
- 	                       , str, num, str, str, str
- 	                       , str, str, html, str, str
- 	                       , html, html, html, html
- 	                        ]);
-	    
-	    grid.setCellEditable(false); 
-	    grid.setCellEditable(true, _col.apprCommt); //승인자의견 컬럼 활성화 
 
-	    grid.setCellTemplate(new AW.Templates.CheckBox, _col.checkbox);
+		grid.setId("grid");
+		grid.setRowCount(0);
+		grid.setStyle("width", "100%");
+		grid.setStyle("height", "100%");
+		grid.setSelectorVisible(false);
+		grid.setSelectionMode("single-cell");
+		grid.setHeaderText(columns);
+
+		for (var i = 0; i < columns.length; i++) {
+			grid.getHeaderTemplate(i).setStyle("text-align", "center");
+		}
+
+		grid.setColumnCount(columns.length);
+		grid.setCellFormat([
+			str, str, str, str, str
+			, str, str, str, str, str
+			, str, num, str, str, str
+			, str, str, html, str, str
+			, html, html, html, html
+		]);
+
+		grid.setCellEditable(false);
+		grid.setCellEditable(true, _col.apprCommt); //승인자의견 컬럼 활성화
+
+		grid.setCellTemplate(new AW.Templates.CheckBox, _col.checkbox);
 		grid.setCellValue(false, _col.checkbox);
 		grid.setHeaderTemplate(new AW.Templates.CheckBox, _col.checkbox);
 		grid.setCellTemplate(new AW.Templates.CheckBox, _col.checkbox);
-		
-		grid.onHeaderClicked = function(event,col) {
-			
-			if (col == _col.checkbox && this.getHeaderValue(_col.checkbox,0)) {
+
+		grid.onHeaderClicked = function (event, col) {
+
+			if (col == _col.checkbox && this.getHeaderValue(_col.checkbox, 0)) {
 				this.setCellValue(true, _col.checkbox);
-			}
-			else if (col == _col.checkbox && !this.getHeaderValue(_col.checkbox,0)) {
+			} else if (col == _col.checkbox && !this.getHeaderValue(_col.checkbox, 0)) {
 				this.setCellValue(false, _col.checkbox);
 			}
 			return false;
 		};
-		
+
 		//그리드 row 클릭
-	    grid.onRowDoubleClicked = function(event, row){
+		grid.onRowDoubleClicked = function (event, row) {
+			// appletOpen();
+			// $("#_detail")[0].contentWindow.$("#adSeq").val(grid.getCellText(_col.adSeq, row));
+			// $("#_detail")[0].contentWindow.Search();
+			$("#selectAdSeq").val(this.getCellText(_col.adSeq, row));
+			$("#selectAdSupportID").val(this.getCellText(_col.adSupportID, row));
+			$("#selectVenueCD").val(this.getCellText(_col.venueCD, row));
+debugger;
 			appletOpen();
-			$("#_detail")[0].contentWindow.$("#adSeq").val(grid.getCellText(_col.adSeq, row));
-			$("#_detail")[0].contentWindow.Search();
-	    }
-    }
+			if (this.getCellText(_col.newcontractYn, row) == "Y") {
+				$("#_detail").attr("src", $("#appSrc").val());
+			} else {
+				$("#_detail").attr("src", $("#appSrc2").val());
+			}
+		}
+	}
 	
 </script>

@@ -19,7 +19,9 @@
 			            <%@include file="../sys3/cms/standardParam.jsp" %>
 						<%@include file="../sys3/cms/functionbar.jsp" %>
 						<%@include file="../sys3/cms/calendar.jsp" %>
-						<input type="hidden" id="appSrc" name="appSrc" value="${contextPath}/service/simpleCommand/?mnuGrpID=${params.mnuGrpID}&pgmID=${params.pgmID}&viewID=AD02007B" />
+						<input type="hidden" id="appSrc2" name="appSrc2" value="${contextPath}/service/simpleCommand/?mnuGrpID=${params.mnuGrpID}&pgmID=${params.pgmID}&viewID=AD02007B" />
+						<input type="hidden" id="appSrc" name="appSrc" value="${contextPath}/service/simpleCommand/?mnuGrpID=${params.mnuGrpID}&pgmID=${params.pgmID}&viewID=AD02007C" />
+
 					</td>
 				</tr>
 				<tr>
@@ -172,6 +174,7 @@
 						<input type="hidden" id="selectPayStateCD" name="selectPayStateCD" />
 						<input type="hidden" id="selectContractStateCD" name="selectContractStateCD" />
 						<input type="hidden" id="selectApprStateCD" name="selectApprStateCD" />
+						<input type="hidden" id="selectNewcontractYN" name="selectNewcontractYN" />
 					</td>
 				</tr>
 			</table>
@@ -468,7 +471,7 @@
 		, apAmt : _i_srch++
 		, adCostPerGSV : _i_srch++
 		, totalGSV : _i_srch++  
-		, monthGSV : _i_srch++ 
+		, monthGSV : _i_srch++
 		, volume : _i_srch++ 
 		, monthVolume : _i_srch++
 		, commt : _i_srch++
@@ -495,7 +498,8 @@
 		, file2Cnt : _i_srch++
 		, file3Cnt : _i_srch++
 		, rowNum : _i_srch++
-    };
+		, newcontractYn : _i_srch++ //37
+	};
 	
 	//조회
 	function Search_srch() {
@@ -514,7 +518,7 @@
 	  			"requiredADCD3Name;amt3;payStateName;apprStateName;expccommt;"+
 	  			"file1;file2;file3;apprStateCD;contractStateCD;"+
 	  			"payStateCD;adSupportID;apprExpc;file1Cnt;file2Cnt;"+
-	  			"file3Cnt;rowNum;"
+	  			"file3Cnt;rowNum;newcontractYn;"
 	  			);
 	  	table.setParameter("format",
 	  			"str;str;str;str;str;"+
@@ -524,7 +528,7 @@
 	  			"str;str;str;str;str;"+
 	  			"str;str;str;str;str;"+
 	  			"str;str;str;str;str;"+
-	  			"str;str;"			
+	  			"str;str;str;"
 	  			);
 
 		table.setParameter("startDT", $("#yearFromCD_S").val() + $("#monthFromCD_S").val());
@@ -590,7 +594,12 @@
 					, table.getData(_col_srch.payStateCD, i)
 					, table.getData(_col_srch.adSupportID, i)
 					, table.getData(_col_srch.apprExpc, i)
-      			];
+					, table.getData(_col_srch.file1Cnt, i)
+					, table.getData(_col_srch.file2Cnt, i)
+					, table.getData(_col_srch.file3Cnt, i)
+					, table.getData(_col_srch.rowNum, i)
+					, table.getData(_col_srch.newcontractYn, i)
+				];
 
 				//승인라인 Exception(_col_srch.apprExpc)에 따라 컬럼 색 적용
       			var apprExpc = table.getData(_col_srch.apprExpc, i);
@@ -631,7 +640,7 @@
 		, apAmt : _i_dtl++
 		, adCostPerGSV : _i_dtl++
 		, totalGSV : _i_dtl++  
-		, monthGSV : _i_dtl++ 
+		, monthGSV : _i_dtl++
 		, volume : _i_dtl++ 
 		, monthVolume : _i_dtl++
 		, commt : _i_dtl++
@@ -661,7 +670,8 @@
 		, file2Cnt : _i_dtl++
 		, file3Cnt : _i_dtl++
 		, rowNum : _i_dtl++
-    };
+		, newcontractYn : _i_dtl++
+	};
 	
 	//조회
 	function Search_dtl() {
@@ -678,7 +688,7 @@
 				"requiredADCD3Name;amt3;apprStateName;expccommt;adContractDivCD;"+
 	  			"file1;file2;file3;apprStateCD;contractStateCD;"+
 	  			"payStateCD;adSupportID;apprExpc;adSeq;file1Cnt;"+
-	  			"file2Cnt;file3Cnt;rowNum;");
+	  			"file2Cnt;file3Cnt;rowNum;newcontractYn;");
 	  	table.setParameter("format",
 	  			"str;str;str;str;str;"+
 	  			"str;str;str;str;str;"+
@@ -687,7 +697,7 @@
 	  			"str;str;str;str;str;"+
 	  			"str;str;str;str;str;"+
 	  			"str;str;str;str;str;"+
-	  			"str;str;str;");
+	  			"str;str;str;str;");
 		table.setParameter("adSupportID", $("#selectAdSupportID").val());
 	  	table.request();
 	  	
@@ -745,7 +755,12 @@
 					, table.getData(_col_dtl.apprExpc, i)
 					, table.getData(_col_dtl.adSeq, i)
 					, table.getData(_col_dtl.adChgFlg, i)
-      			];
+					, table.getData(_col_dtl.file1Cnt, i)
+					, table.getData(_col_dtl.file2Cnt, i)
+					, table.getData(_col_dtl.file3Cnt, i)
+					, table.getData(_col_dtl.rowNum, i)
+					, table.getData(_col_dtl.newcontractYn, i)
+				];
 
 				//필수광고물만 수정, 승인라인 Exception(_col.apprExpc)에 따라 컬럼 색 적용
 				var adChgFlg = table.getData(_col_dtl.adChgFlg,i)
@@ -804,9 +819,13 @@
 		}
 		
 		$("#selectAdSeq").val("");
+		debugger;
 		appletOpen();
-		$("#_detail")[0].contentWindow.$("#adSupportID").val($("#selectAdSupportID").val());
-		$("#_detail")[0].contentWindow.pageInit();
+		if ($("#selectNewcontractYN").val() == "Y") {
+			$("#_detail").attr("src", $("#appSrc").val());
+		} else {
+			$("#_detail").attr("src", $("#appSrc2").val());
+		}
 	}
 	
 	//업소 팝업 닫을 때
@@ -952,6 +971,8 @@
 			$("#selectPayStateCD").val(this.getCellText(_col_srch.payStateCD, row));
 			$("#selectContractStateCD").val(this.getCellText(_col_srch.contractStateCD, row));
 			$("#selectApprStateCD").val(this.getCellText(_col_srch.apprStateCD, row));
+			$("#selectNewcontractYN").val(this.getCellText(_col_srch.newcontractYn, row));
+
 			Search_dtl();
 	    }
 		
@@ -1019,13 +1040,14 @@
 	    
 		//그리드 row 클릭
 	    grid_dtl.onRowClicked = function(event, row){
-			$("#selectAdSeq").val(this.getCellText(_col_dtl.adSeq, row));
-			
-			
+			$("#selectAdSeq").val(this.getCellText(_col_srch.adSeq, row));
 			appletOpen();
-			$("#_detail")[0].contentWindow.$("#adSupportID").val($("#selectAdSupportID").val());
-			$("#_detail")[0].contentWindow.pageInit();
-	    }
+			if (this.getCellText(_col_srch.newcontractYn, row) == "Y") {
+				$("#_detail").attr("src", $("#appSrc").val());
+			} else {
+				$("#_detail").attr("src", $("#appSrc2").val());
+			}
+		}
 		
    }
 	

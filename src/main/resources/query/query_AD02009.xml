@@ -14,6 +14,7 @@
 		 , t1.startdt          as "startDT"      
 	  	 , t1.enddt            as "endDT"        
 	  	 , t1.contractmonth    as "contractMonth"
+		 , t1.newcontractYn    as "newcontractYn"
 		 , trunc(t1.apAmt/1000)    as "apAmt"	
 		 , trunc(decode(
 		 (
@@ -220,6 +221,7 @@
 				  , d.requiredadcd3
 				  , d.amt3
 				  , f.empNm
+		          , g.newcontractYn
 				FROM  gad06mt a
 				inner join gad04mt b
 					on a.venueCD = b.venueCD
@@ -234,7 +236,10 @@
 		        	on a.venuecd = e.venuecd 
 		        inner join gemp01mt f
 		        	on b.regid = f.empid
-				WHERE 
+		        inner join
+		        GAD01MT g
+		        ON a.ADSUPPORTID = g.ADSUPPORTID
+		WHERE
 					1=1
 				AND a.empID = #empID#	
 				AND (b.startdt between #startDT# AND #endDT# OR b.enddt between #startDT# AND #endDT#)
