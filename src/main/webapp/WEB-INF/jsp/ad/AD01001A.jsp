@@ -19,8 +19,8 @@
 			            <%@include file="../sys3/cms/standardParam.jsp" %>
 						<%@include file="../sys3/cms/functionbar.jsp" %>
 						<%@include file="../sys3/cms/calendar.jsp" %>
-						<input type="hidden" id="appSrc2" name="appSrc2" value="${contextPath}/service/simpleCommand/?mnuGrpID=${params.mnuGrpID}&pgmID=${params.pgmID}&viewID=AD01001B" />
-						<input type="hidden" id="appSrc" name="appSrc" value="${contextPath}/service/simpleCommand/?mnuGrpID=${params.mnuGrpID}&pgmID=${params.pgmID}&viewID=AD01001F" />
+						<input type="hidden" id="appSrcB" name="appSrcB" value="${contextPath}/service/simpleCommand/?mnuGrpID=${params.mnuGrpID}&pgmID=${params.pgmID}&viewID=AD01001B" />
+						<input type="hidden" id="appSrcF" name="appSrcF" value="${contextPath}/service/simpleCommand/?mnuGrpID=${params.mnuGrpID}&pgmID=${params.pgmID}&viewID=AD01001F" />
 					</td>
 				</tr>
 				<tr>
@@ -554,7 +554,7 @@
 		$("#selectVenueCD").val('');
 
 		appletOpen();
-		$("#_detail").attr("src", $("#appSrc").val());
+		$("#_detail").attr("src", $("#appSrcF").val());
 		$("#_detail")[0].contentWindow.$("#adSupportID").val('');
 		$("#_detail")[0].contentWindow.pageInit();
 	}
@@ -666,9 +666,9 @@
 			$("#selectVenueCD").val(this.getCellText(_col.venueCD, row));
 			appletOpen();
 			   if (this.getCellText(_col.newcontractYn, row) == "Y") {
-				$("#_detail").attr("src", $("#appSrc").val());
+				$("#_detail").attr("src", $("#appSrcF").val());
 			} else {
-				$("#_detail").attr("src", $("#appSrc2").val());
+				$("#_detail").attr("src", $("#appSrcB").val());
 			}
 		}
 	}

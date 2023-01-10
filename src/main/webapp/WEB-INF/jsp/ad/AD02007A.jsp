@@ -19,8 +19,8 @@
 			            <%@include file="../sys3/cms/standardParam.jsp" %>
 						<%@include file="../sys3/cms/functionbar.jsp" %>
 						<%@include file="../sys3/cms/calendar.jsp" %>
-						<input type="hidden" id="appSrc2" name="appSrc2" value="${contextPath}/service/simpleCommand/?mnuGrpID=${params.mnuGrpID}&pgmID=${params.pgmID}&viewID=AD02007B" />
-						<input type="hidden" id="appSrc" name="appSrc" value="${contextPath}/service/simpleCommand/?mnuGrpID=${params.mnuGrpID}&pgmID=${params.pgmID}&viewID=AD02007C" />
+						<input type="hidden" id="appSrcB" name="appSrcB" value="${contextPath}/service/simpleCommand/?mnuGrpID=${params.mnuGrpID}&pgmID=${params.pgmID}&viewID=AD02007B" />
+						<input type="hidden" id="appSrcC" name="appSrcC" value="${contextPath}/service/simpleCommand/?mnuGrpID=${params.mnuGrpID}&pgmID=${params.pgmID}&viewID=AD02007C" />
 
 					</td>
 				</tr>
@@ -821,9 +821,9 @@
 		$("#selectAdSeq").val("");
 		appletOpen();
 		if ($("#selectNewcontractYN").val() == "Y") {
-			$("#_detail").attr("src", $("#appSrc").val());
+			$("#_detail").attr("src", $("#appSrcC").val());
 		} else {
-			$("#_detail").attr("src", $("#appSrc2").val());
+			$("#_detail").attr("src", $("#appSrcB").val());
 		}
 	}
 	
@@ -1042,9 +1042,9 @@
 			$("#selectAdSeq").val(this.getCellText(_col_srch.adSeq, row));
 			appletOpen();
 			if (this.getCellText(_col_srch.newcontractYn, row) == "Y") {
-				$("#_detail").attr("src", $("#appSrc").val());
+				$("#_detail").attr("src", $("#appSrcC").val());
 			} else {
-				$("#_detail").attr("src", $("#appSrc2").val());
+				$("#_detail").attr("src", $("#appSrcB").val());
 			}
 		}
 		
