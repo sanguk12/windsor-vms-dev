@@ -943,7 +943,7 @@
 		$("#endMonthCD").val("${params.clientDate}".substring(4,6));
 		
 		$("#APContract").attr("disabled", false);
-		$("#POSM").attr("disabled", false);
+		$("#POSM").attr("disabled", true);
 		$("#commt").attr("disabled", true);
 		$("#adSeq").val(parent.$("#selectAdSeq").val());
 		Search();

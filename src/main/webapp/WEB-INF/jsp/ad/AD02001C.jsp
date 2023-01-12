@@ -819,7 +819,7 @@
 		//$("#uploaderOverlay_evidenceFile").show();
 		//$("#uploadFilesLink_evidenceFile").show();
 		$("#APContract").attr("disabled", false);
-		$("#POSM").attr("disabled", false);
+		$("#POSM").attr("disabled", true);
 		$("#commt").attr("disabled", true);
 		$("#buCD_S").attr("disabled", true);
 		$("[id^=requiredADCD]").attr("disabled", true);

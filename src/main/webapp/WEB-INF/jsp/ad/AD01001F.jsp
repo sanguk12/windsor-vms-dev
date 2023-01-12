@@ -935,7 +935,7 @@
 			$("#endYearCD").attr("disabled", false);
 			$("#endMonthCD").attr("disabled", false);
 			$("#APContract").attr("disabled", false);
-			$("#POSM").attr("disabled", false);
+			$("#POSM").attr("disabled", true);
 			$("#commt").attr("disabled", true);
 			Search();
 			search_targetRate();
@@ -1028,7 +1028,7 @@
 				//$("#uploaderOverlay_evidenceFile").show();
 				//$("#uploadFilesLink_evidenceFile").show();
 				$("#APContract").attr("disabled", false);
-				$("#POSM").attr("disabled", false);
+				$("#POSM").attr("disabled", true);
 				$("#commt").attr("disabled", true);
 				$("#buCD_S").attr("disabled", false);
 
