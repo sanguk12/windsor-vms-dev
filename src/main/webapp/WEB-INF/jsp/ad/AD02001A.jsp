@@ -176,23 +176,23 @@
     .aw-column-11 {width: 75px; text-align:right;}
     .aw-column-12 {width: 90px; text-align:right;}
     .aw-column-13 {width: 90px; text-align:right;}
-    .aw-column-14 {width: 90px; text-align:right;}
-    .aw-column-15 {width: 90px; text-align:right;}
-    .aw-column-16 {width: 90px; text-align:right;}
-    .aw-column-17 {width: 90px; text-align:right;}
-    .aw-column-18 {width: 90px; text-align:right;}
-    .aw-column-19 {width: 200px; text-align:left;}
-    .aw-column-20 {width: 70px; text-align:center;}
-    .aw-column-21 {width: 70px; text-align:center;}
-    .aw-column-22 {width: 75px; text-align:center;}
-    .aw-column-23 {width: 100px; text-align:center;}
-    .aw-column-24 {width: 60px; text-align:center;}
+    .aw-column-14 {width: 200px; text-align:left;}
+    .aw-column-15 {width: 90px; text-align:center;}
+    .aw-column-16 {width: 90px; text-align:center;}
+    .aw-column-17 {width: 90px; text-align:center;}
+    .aw-column-18 {width: 90px; text-align:left;}
+    .aw-column-19 {width: 60px; text-align:right;}
+    .aw-column-20 {width: 100px; text-align:center;}
+    .aw-column-21 {width: 60px; text-align:right;}
+    .aw-column-22 {width: 100px; text-align:center;}
+    .aw-column-23 {width: 60px; text-align:right;}
+    .aw-column-24 {width: 100px; text-align:center;}
     .aw-column-25 {width: 100px; text-align:center;}
-    .aw-column-26 {width: 60px; text-align:center;}
-    .aw-column-27 {width: 100px; text-align:center;}
-    .aw-column-28 {width: 60px; text-align:center;}
-    .aw-column-29 {width: 150px; text-align:left;}
-    .aw-column-30 {width: 200px; text-align:left;}
+    .aw-column-26 {width: 80px; text-align:center;}
+    .aw-column-27 {width: 80px; text-align:center;}
+    .aw-column-28 {width: 80px; text-align:center;}
+    .aw-column-29 {width: 80px; text-align:center;}
+    .aw-column-30 {width: 80px; text-align:center;}
     .aw-column-31 {width: 70px; text-align:center;}
     .aw-column-32 {width: 80px; text-align:center;}
     .aw-column-33 {width: 80px; text-align:center;}
@@ -417,12 +417,12 @@
 		, endDT : _i++
 		, contractMonth : _i++
 		, apAmt : _i++
-		, adCostPerGSV : _i++
+		// , adCostPerGSV : _i++
 		, monthApAmt : _i++
-		, totalGSV : _i++  
-		, monthGSV : _i++ 
-		, totalVolume : _i++ 
-		, monthVolume : _i++  
+		// , totalGSV : _i++
+		// , monthGSV : _i++
+		// , totalVolume : _i++
+		// , monthVolume : _i++
 		, commt : _i++
 		, contractStateName : _i++
 		, payStateName : _i++
@@ -466,8 +466,7 @@
 	  	table.setParameter("outParamKey",
 	  			"checkbox;resultStateName;contractDivCD;venueCD;"+
 	  			"venueNM;chainName;rageSphereName;officeName;empNM;"+
-	  			"startDT;endDT;contractMonth;apAmt;adCostPerGSV;"+
-	  			"monthApAmt;totalGSV;monthGSV;totalVolume;monthVolume;"+
+	  			"startDT;endDT;contractMonth;apAmt;monthApAmt;"+
 				"commt;contractStateName;payStateName;buCDName;requiredADCD1Name;"+
 	  			"amt1;requiredADCD2Name;amt2;requiredADCD3Name;amt3;"+
 	  			"resultCommt;apprCommt;apprStateName;adHistory;file1;"+ 
@@ -536,12 +535,12 @@
 					, formatMonth(table.getData(_col.endDT, i))
       			    , table.getData(_col.contractMonth,i)
 					, table.getData(_col.apAmt,i)
-					, table.getData(_col.adCostPerGSV,i) + "%"
+					// , table.getData(_col.adCostPe				// , table.getData(_col.totalGSV,i)
+					// , table.getData(_col.monthGSV,i)
+					// , table.getData(_col.totalVolume,i)
+					// , table.getData(_col.monthVolume,i)rGSV,i) + "%"
 					, table.getData(_col.monthApAmt,i)
-					, table.getData(_col.totalGSV,i)
-					, table.getData(_col.monthGSV,i)
-					, table.getData(_col.totalVolume,i)
-					, table.getData(_col.monthVolume,i)
+
 					, table.getData(_col.commt,i)
 					, table.getData(_col.contractStateName,i)
 					, table.getData(_col.payStateName,i)
@@ -807,12 +806,12 @@
 			, "<fmt:message key="AD01001A.endDT"/>"
 			, "<fmt:message key="AD01001A.contractCnt"/>"
 			, "<fmt:message key="AD01001B.APContract"/>"
-			, "<fmt:message key="AD01001B.adCostPerGSV"/>"
+			<%--, "<fmt:message key="AD01001B.adCostPerGSV"/>"--%>
 			, "<fmt:message key="AD02002A.monthAdAmt"/>"
-			, "<fmt:message key="AD02002A.totalGSV"/>"
-			, "<fmt:message key="AD02002A.monthGSV"/>"
-			, "<fmt:message key="AD02002A.totalVolume"/>"
-			, "<fmt:message key="AD02002A.monthVolume"/>"
+			<%--, "<fmt:message key="AD02002A.totalGSV"/>"--%>
+			<%--, "<fmt:message key="AD02002A.monthGSV"/>"--%>
+			<%--, "<fmt:message key="AD02002A.totalVolume"/>"--%>
+			<%--, "<fmt:message key="AD02002A.monthVolume"/>"--%>
 			, "<fmt:message key="AD02001A.comment"/>"
 			, "<fmt:message key="AD01001A.contractStateCD"/>"
 			, "<fmt:message key="AD01001A.payStateCD"/>"
@@ -908,12 +907,12 @@
 		, "<fmt:message key="AD01001A.endDT"/>"
 		, "<fmt:message key="AD01001A.contractCnt"/>"
 		, "<fmt:message key="AD01001B.APContract"/>"
-		, "<fmt:message key="AD01001B.adCostPerGSV"/>"
+		<%--, "<fmt:message key="AD01001B.adCostPerGSV"/>"--%>
 		, "<fmt:message key="AD02002A.monthAdAmt"/>"
-		, "<fmt:message key="AD02002A.totalGSV"/>"
-		, "<fmt:message key="AD02002A.monthGSV"/>"
-		, "<fmt:message key="AD02002A.totalVolume"/>"
-		, "<fmt:message key="AD02002A.monthVolume"/>"
+		<%--, "<fmt:message key="AD02002A.totalGSV"/>"--%>
+		<%--, "<fmt:message key="AD02002A.monthGSV"/>"--%>
+		<%--, "<fmt:message key="AD02002A.totalVolume"/>"--%>
+		<%--, "<fmt:message key="AD02002A.monthVolume"/>"--%>
 		, "<fmt:message key="AD02001A.comment"/>"
 		, "<fmt:message key="AD01001A.contractStateCD"/>"
 		, "<fmt:message key="AD01001A.payStateCD"/>"
@@ -953,10 +952,9 @@
 	    
 	    grid.setColumnCount(columns.length);
 	    grid.setCellFormat([
-	                          str, html, str, str
+	                          str, html, str, str, str
 	                        , str, str, str, str, str
-	                        , str, str, str, str, str
-	                        , num, num, num, num, num
+	                        , str, str, str, str ,str
 	                        , str, str, str, str, str
 	                        , str, str, str, str, str
 	                        , str, str, html, html, html
