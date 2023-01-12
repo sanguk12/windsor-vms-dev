@@ -162,42 +162,42 @@
 	.aw-row-selector {text-align: center}
 
 	.aw-column-0 {width: 30px; text-align:center;}
-    .aw-column-1 {width: 110px; text-align:left;}
-    .aw-column-2 {width: 70px; text-align:center;}
-	.aw-column-3 {width: 70px; text-align:center;}
-    .aw-column-4 {width: 100px; text-align:center;}
+    /*.aw-column-1 {width: 110px; text-align:left;}*/
+    .aw-column-1 {width: 70px; text-align:center;}
+	.aw-column-2 {width: 70px; text-align:center;}
+    .aw-column-3 {width: 100px; text-align:center;}
+    .aw-column-4 {width: 140px; text-align:left;}
     .aw-column-5 {width: 140px; text-align:left;}
     .aw-column-6 {width: 140px; text-align:left;}
     .aw-column-7 {width: 140px; text-align:left;}
-    .aw-column-8 {width: 140px; text-align:left;}
-    .aw-column-9 {width: 80px; text-align:center;}
+    .aw-column-8 {width: 80px; text-align:center;}
+    .aw-column-9 {width: 75px; text-align:center;}
     .aw-column-10 {width: 75px; text-align:center;}
-    .aw-column-11 {width: 75px; text-align:center;}
-    .aw-column-12 {width: 75px; text-align:right;}
+    .aw-column-11 {width: 75px; text-align:right;}
+    .aw-column-12 {width: 90px; text-align:right;}
     .aw-column-13 {width: 90px; text-align:right;}
     .aw-column-14 {width: 90px; text-align:right;}
     .aw-column-15 {width: 90px; text-align:right;}
     .aw-column-16 {width: 90px; text-align:right;}
     .aw-column-17 {width: 90px; text-align:right;}
     .aw-column-18 {width: 90px; text-align:right;}
-    .aw-column-19 {width: 90px; text-align:right;}
-    .aw-column-20 {width: 200px; text-align:left;}
+    .aw-column-19 {width: 200px; text-align:left;}
+    .aw-column-20 {width: 70px; text-align:center;}
     .aw-column-21 {width: 70px; text-align:center;}
-    .aw-column-22 {width: 70px; text-align:center;}
-    .aw-column-23 {width: 75px; text-align:center;}
-    .aw-column-24 {width: 100px; text-align:center;}
-    .aw-column-25 {width: 60px; text-align:center;}
-    .aw-column-26 {width: 100px; text-align:center;}
-    .aw-column-27 {width: 60px; text-align:center;}
-    .aw-column-28 {width: 100px; text-align:center;}
-    .aw-column-29 {width: 60px; text-align:center;}
-    .aw-column-30 {width: 150px; text-align:left;}
-    .aw-column-31 {width: 200px; text-align:left;}
-    .aw-column-32 {width: 70px; text-align:center;}
+    .aw-column-22 {width: 75px; text-align:center;}
+    .aw-column-23 {width: 100px; text-align:center;}
+    .aw-column-24 {width: 60px; text-align:center;}
+    .aw-column-25 {width: 100px; text-align:center;}
+    .aw-column-26 {width: 60px; text-align:center;}
+    .aw-column-27 {width: 100px; text-align:center;}
+    .aw-column-28 {width: 60px; text-align:center;}
+    .aw-column-29 {width: 150px; text-align:left;}
+    .aw-column-30 {width: 200px; text-align:left;}
+    .aw-column-31 {width: 70px; text-align:center;}
+    .aw-column-32 {width: 80px; text-align:center;}
     .aw-column-33 {width: 80px; text-align:center;}
     .aw-column-34 {width: 80px; text-align:center;}
     .aw-column-35 {width: 80px; text-align:center;}
-    .aw-column-36 {width: 80px; text-align:center;}
 
 	.aw-grid-cell {border-right: 1px solid threedlightshadow;}
 	.aw-grid-row {border-bottom: 1px solid threedlightshadow;}
@@ -404,7 +404,7 @@
 	
 	var _col = {
 		checkbox : _i++
-		, expccommt : _i++
+		// , expccommt : _i++
 		, resultStateName : _i++
 		, contractDivCD : _i++
 		, venueCD : _i++
@@ -464,7 +464,7 @@
 	  	table.setAsync(false);
 	  	table.setRequestMethod("POST");
 	  	table.setParameter("outParamKey",
-	  			"checkbox;expccommt;resultStateName;contractDivCD;venueCD;"+
+	  			"checkbox;resultStateName;contractDivCD;venueCD;"+
 	  			"venueNM;chainName;rageSphereName;officeName;empNM;"+
 	  			"startDT;endDT;contractMonth;apAmt;adCostPerGSV;"+
 	  			"monthApAmt;totalGSV;monthGSV;totalVolume;monthVolume;"+
@@ -523,7 +523,7 @@
       			
       			data[i] = [
 					""
-					, table.getData(_col.expccommt,i)
+					// , table.getData(_col.expccommt,i)
 					, resultStateName
 					, table.getData(_col.contractDivCD,i)
 					, table.getData(_col.venueCD,i)
@@ -895,7 +895,7 @@
 	*****************************************************/
 	var columns = [
 		""
-		, "<fmt:message key="AD01001A.exceptionCommt"/>"
+		<%--, "<fmt:message key="AD01001A.exceptionCommt"/>"--%>
 		, "<fmt:message key="AD02001A.resultTpCD"/>"
 		, "<fmt:message key="AD01001A.contractDivCD"/>"
 		, "<fmt:message key="AD01001A.venueCD"/>"
@@ -953,7 +953,7 @@
 	    
 	    grid.setColumnCount(columns.length);
 	    grid.setCellFormat([
-	                        str,  str, html, str, str 
+	                          str, html, str, str
 	                        , str, str, str, str, str
 	                        , str, str, str, str, str
 	                        , num, num, num, num, num

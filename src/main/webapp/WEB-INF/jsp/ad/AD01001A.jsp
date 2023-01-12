@@ -201,8 +201,8 @@
 	 * Variable
 	 ****************************************/
 	 var grid_displayNum = "100"; 
-	 var myApprID = "000004";   //AD 승인라인
-	 var myADApprExID = "000006"; // AD Exception2
+	 var myApprID = "000004";   //SimpleAD
+	 var myADApprExID = "000006"; // TLA+RLA
 		 
 	/****************************************
 	 * Function

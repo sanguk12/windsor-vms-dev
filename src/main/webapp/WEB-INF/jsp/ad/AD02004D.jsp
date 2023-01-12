@@ -944,7 +944,7 @@
 		
 		$("#APContract").attr("disabled", false);
 		$("#POSM").attr("disabled", false);
-		$("#commt").attr("disabled", false);
+		$("#commt").attr("disabled", true);
 		$("#adSeq").val(parent.$("#selectAdSeq").val());
 		Search();
 		search_targetRate();
@@ -956,10 +956,15 @@
 		var APContract = unformatNum($("#APContract").val()) == "" ? 0 : parseFloat(unformatNum($("#APContract").val()), "10");
 		var POSM = unformatNum($("#POSM").val()) == "" ? 0 : parseFloat(unformatNum($("#POSM").val()), "10");
 		var contractMonth = parseFloat($("#contractMonth").text().slice(0,-3), "10");
-		var compareGSVRate = parseFloat($("#compareGSVRate").val(), "10");
-		var compareTargetRate = parseFloat($("#compareTargetRate").val(), "10");
-		var compareMinVol = parseFloat($("#compareMinVol").val(), "10");
-		var compareChgCost = parseFloat($("#compareChgCost").val(), "10");
+		// var compareGSVRate = parseFloat($("#compareGSVRate").val(), "10");
+		// var compareTargetRate = parseFloat($("#compareTargetRate").val(), "10");
+		// var compareMinVol = parseFloat($("#compareMinVol").val(), "10");
+		// var compareChgCost = parseFloat($("#compareChgCost").val(), "10");
+
+		var compareGSVRate = 0;
+		var compareTargetRate = 0;
+		var compareMinVol = 0;
+		var compareChgCost = 0;
 		
 		var totalInc = 0;
 		var total = 0;
@@ -1038,47 +1043,47 @@
 		var prevYearChgCost = 0;
 		var minVolYN = 0;
 		
-		for (var i = 0; i < maxRow_prd; i++){
-			if (grid_prd.getCellText(_col_prd.activeFlg,i) != "D") {
-				GSV2 += parseFloat(unformatNum(grid_prd.getCellText(_col_prd.prdQty, i )), "10")*(parseFloat(unformatNum(grid_prd.getCellText(_col_prd.EFP, i)), "10")*100000)/100000;
-				duty2 += parseFloat(unformatNum(grid_prd.getCellText(_col_prd.prdQty, i )), "10")*(parseFloat(unformatNum(grid_prd.getCellText(_col_prd.duty, i)), "10")*100000)/100000;
-				COGS2 += parseFloat(unformatNum(grid_prd.getCellText(_col_prd.prdQty, i )), "10")*(parseFloat(unformatNum(grid_prd.getCellText(_col_prd.COGS, i)), "10")*100000)/100000;
-				euSum += parseFloat(unformatNum(grid_prd.getCellText(_col_prd.prdQty, i )), "10")*(parseFloat(unformatNum(grid_prd.getCellText(_col_prd.eu, i)), "10")*100000)/100000;
-				
-				if (grid_prd.getCellText(_col_prd.sdxYN, i) == 'Y') {
-					sdxPrdVol += parseFloat(unformatNum(grid_prd.getCellText(_col_prd.prdQty, i )), "10");
-				}
-				
-				totalVol += parseFloat(unformatNum(grid_prd.getCellText(_col_prd.prdQty, i )), "10");
-			}
-		}
+		// for (var i = 0; i < maxRow_prd; i++){
+		// 	if (grid_prd.getCellText(_col_prd.activeFlg,i) != "D") {
+		// 		GSV2 += parseFloat(unformatNum(grid_prd.getCellText(_col_prd.prdQty, i )), "10")*(parseFloat(unformatNum(grid_prd.getCellText(_col_prd.EFP, i)), "10")*100000)/100000;
+		// 		duty2 += parseFloat(unformatNum(grid_prd.getCellText(_col_prd.prdQty, i )), "10")*(parseFloat(unformatNum(grid_prd.getCellText(_col_prd.duty, i)), "10")*100000)/100000;
+		// 		COGS2 += parseFloat(unformatNum(grid_prd.getCellText(_col_prd.prdQty, i )), "10")*(parseFloat(unformatNum(grid_prd.getCellText(_col_prd.COGS, i)), "10")*100000)/100000;
+		// 		euSum += parseFloat(unformatNum(grid_prd.getCellText(_col_prd.prdQty, i )), "10")*(parseFloat(unformatNum(grid_prd.getCellText(_col_prd.eu, i)), "10")*100000)/100000;
+		//
+		// 		if (grid_prd.getCellText(_col_prd.sdxYN, i) == 'Y') {
+		// 			sdxPrdVol += parseFloat(unformatNum(grid_prd.getCellText(_col_prd.prdQty, i )), "10");
+		// 		}
+		//
+		// 		totalVol += parseFloat(unformatNum(grid_prd.getCellText(_col_prd.prdQty, i )), "10");
+		// 	}
+		// }
 		
 		$("#real_threePercentIncentive").val(formatNum(Math.floor(GSV2*0.035)));
 		$("#real_total").val(formatNum(Math.floor((GSV2*0.035) + parseFloat(APContract*1000, "10") + parseFloat(POSM*1000, "10"))));
 		
-		GSV1 = parseFloat($("#prevEfpSum").val(), "10");
-		GSV2 = GSV2/1000;
-		GSV3 = GSV2-GSV1; 
-		
-		tradeSpend1 = parseFloat($("#prevPayAmtSum").val(), "10")*-1;
-		tradeSpend2 = GSV2*0.035*-1;
-		tradeSpend3 = tradeSpend2 - tradeSpend1;
-		
-		duty1 = parseFloat($("#prevDutySum").val(), "10");
-		duty2 = duty2/1000;
-		duty3 = duty2 - duty1;
-		
-		NSV1 = GSV1 + tradeSpend1 + duty1;
-		NSV2 = GSV2 + tradeSpend2 + duty2;
-		NSV3 = NSV2 - NSV1;
-		
-		COGS1 = parseFloat($("#prevCogsSum").val(), "10");
-		COGS2 = COGS2/1000;
-		COGS3 = COGS2 - COGS1;
-		
-		GP1 = NSV1 + COGS1;
-		GP2 = NSV2 + COGS2;
-		GP3 = GP2 - GP1;
+		// GSV1 = parseFloat($("#prevEfpSum").val(), "10");
+		// GSV2 = GSV2/1000;
+		// GSV3 = GSV2-GSV1;
+		//
+		// tradeSpend1 = parseFloat($("#prevPayAmtSum").val(), "10")*-1;
+		// tradeSpend2 = GSV2*0.035*-1;
+		// tradeSpend3 = tradeSpend2 - tradeSpend1;
+		//
+		// duty1 = parseFloat($("#prevDutySum").val(), "10");
+		// duty2 = duty2/1000;
+		// duty3 = duty2 - duty1;
+		//
+		// NSV1 = GSV1 + tradeSpend1 + duty1;
+		// NSV2 = GSV2 + tradeSpend2 + duty2;
+		// NSV3 = NSV2 - NSV1;
+		//
+		// COGS1 = parseFloat($("#prevCogsSum").val(), "10");
+		// COGS2 = COGS2/1000;
+		// COGS3 = COGS2 - COGS1;
+		//
+		// GP1 = NSV1 + COGS1;
+		// GP2 = NSV2 + COGS2;
+		// GP3 = GP2 - GP1;
 		
 		// APContract1 = parseFloat($("#prevAPamt").val(), "10")*-1;
 		// APContract2 = APContract * -1;
@@ -1092,40 +1097,40 @@
 		// caap2 = GP2 + APContract2 + APOthers2;
 		// caap3 = caap2 - caap1;
 		
-		bestEstimationMonth1 = parseFloat($("#prevContractMonth").val(), "10") != 0 ? parseFloat($("#prevEuSum").val(), "10") / parseFloat($("#prevContractMonth").val(), "10") : 0;
-		bestEstimationMonth2 = contractMonth != 0 ? euSum/contractMonth : 0;
-		bestEstimationMonth3 = bestEstimationMonth2 - bestEstimationMonth1;
-		bestEstimationMonth4 = bestEstimationMonth1 != 0 ? bestEstimationMonth3 / bestEstimationMonth1 * 100 : 0;
-		
-		gpRate1 = NSV1 != 0 ? GP1/NSV1 * 100 : 0;
-		gpRate2 = NSV2 != 0 ? GP2/NSV2 *100 : 0;
-		gpRate3 = gpRate2 - gpRate1;
-		gpRate4 = gpRate1 != 0 ? gpRate3 / gpRate1 * 100 : 0;
-		
-		costRate1 = GSV1 != 0 ? (tradeSpend1+APContract1+APOthers1)/GSV1*-1*100 : 0;
-		costRate2 = GSV2 != 0 ? (tradeSpend2+APContract2+APOthers2)/GSV2*-1*100 : 0;
-		costRate3 = costRate2 - costRate1;
-		costRate4 = costRate1 != 0 ? costRate3 / costRate1 * 100 : 0;
-		
-		sdxMixRate1 = $("#prevSdxMixRate").val();
-		sdxMixRate2 = totalVol != 0 ? sdxPrdVol / totalVol * 100 : 0;
-		sdxMixRate3 = sdxMixRate2 - sdxMixRate1;
-		sdxMixRate4 = sdxMixRate1 != 0 ? sdxMixRate3 / sdxMixRate1 * 100 : 0;
-		
-		totalCostRate1 = parseFloat($("#prevEuSum").val(), "10") != 0 ? (tradeSpend1 + duty1 + COGS1 + APContract1+APOthers1) / parseFloat($("#prevEuSum").val(), "10")*-1 : 0;
-		totalCostRate2 = euSum != 0 ? (tradeSpend2 + duty2 + COGS2 + APContract2+APOthers2) / euSum *-1 : 0;
-		totalCostRate3 = totalCostRate2 - totalCostRate1;
-		totalCostRate4 = totalCostRate1 != 0 ? totalCostRate3 / totalCostRate1 * 100 : 0;
-		
-		caapPerNSV1 = NSV1 != 0 ? caap1 / NSV1 * 100: 0;
-		caapPerNSV2 = NSV2 != 0 ? caap2 / NSV2 * 100: 0;
-		caapPerNSV3 = caapPerNSV2 - caapPerNSV1;
-		caapPerNSV4 = caapPerNSV1 != 0 ? caapPerNSV3 / caapPerNSV1 * 100 : 0;
-		
-		mThan36MContract = APContract;
-		adCostPerGSV = GSV2 != 0 ? APContract / GSV2 * 100 : 0;
-		prevYearChgCost = costRate3;
-		minVolYN = bestEstimationMonth2;
+		// bestEstimationMonth1 = parseFloat($("#prevContractMonth").val(), "10") != 0 ? parseFloat($("#prevEuSum").val(), "10") / parseFloat($("#prevContractMonth").val(), "10") : 0;
+		// bestEstimationMonth2 = contractMonth != 0 ? euSum/contractMonth : 0;
+		// bestEstimationMonth3 = bestEstimationMonth2 - bestEstimationMonth1;
+		// bestEstimationMonth4 = bestEstimationMonth1 != 0 ? bestEstimationMonth3 / bestEstimationMonth1 * 100 : 0;
+		//
+		// gpRate1 = NSV1 != 0 ? GP1/NSV1 * 100 : 0;
+		// gpRate2 = NSV2 != 0 ? GP2/NSV2 *100 : 0;
+		// gpRate3 = gpRate2 - gpRate1;
+		// gpRate4 = gpRate1 != 0 ? gpRate3 / gpRate1 * 100 : 0;
+		//
+		// costRate1 = GSV1 != 0 ? (tradeSpend1+APContract1+APOthers1)/GSV1*-1*100 : 0;
+		// costRate2 = GSV2 != 0 ? (tradeSpend2+APContract2+APOthers2)/GSV2*-1*100 : 0;
+		// costRate3 = costRate2 - costRate1;
+		// costRate4 = costRate1 != 0 ? costRate3 / costRate1 * 100 : 0;
+		//
+		// sdxMixRate1 = $("#prevSdxMixRate").val();
+		// sdxMixRate2 = totalVol != 0 ? sdxPrdVol / totalVol * 100 : 0;
+		// sdxMixRate3 = sdxMixRate2 - sdxMixRate1;
+		// sdxMixRate4 = sdxMixRate1 != 0 ? sdxMixRate3 / sdxMixRate1 * 100 : 0;
+		//
+		// totalCostRate1 = parseFloat($("#prevEuSum").val(), "10") != 0 ? (tradeSpend1 + duty1 + COGS1 + APContract1+APOthers1) / parseFloat($("#prevEuSum").val(), "10")*-1 : 0;
+		// totalCostRate2 = euSum != 0 ? (tradeSpend2 + duty2 + COGS2 + APContract2+APOthers2) / euSum *-1 : 0;
+		// totalCostRate3 = totalCostRate2 - totalCostRate1;
+		// totalCostRate4 = totalCostRate1 != 0 ? totalCostRate3 / totalCostRate1 * 100 : 0;
+		//
+		// caapPerNSV1 = NSV1 != 0 ? caap1 / NSV1 * 100: 0;
+		// caapPerNSV2 = NSV2 != 0 ? caap2 / NSV2 * 100: 0;
+		// caapPerNSV3 = caapPerNSV2 - caapPerNSV1;
+		// caapPerNSV4 = caapPerNSV1 != 0 ? caapPerNSV3 / caapPerNSV1 * 100 : 0;
+		//
+		// mThan36MContract = APContract;
+		// adCostPerGSV = GSV2 != 0 ? APContract / GSV2 * 100 : 0;
+		// prevYearChgCost = costRate3;
+		// minVolYN = bestEstimationMonth2;
 		
 		//(E열 * 입력수량) 전체합 * 0.035
 		$("#threePercentIncentive").text(formatNum(Math.floor(GSV2*0.035)));
@@ -1541,7 +1546,7 @@
     			$("#prevTargetRateText").text("기존 달성률 없음");
       		} else{
       			$("#prevTargetRate").val(table.getData(0,0));
-				$("#prevTargetRateText").text(table.getData(0,0)+"%");
+				$("#prevTargetRateText").text("0");
       		}
       	} else {
       		$("#prevTargetRate").val("N");
@@ -1741,10 +1746,10 @@
 		if (($("#chainGSV").val() > 0)  
 				&& ($("#rltGSV").val() > 0)) {
 			$("#chainTargetRate").val(unformatNum(Math.floor(($("#rltGSV").val()/$("#chainGSV").val()*100)*10)/10));
-			$("#chainTargetRateNm").text($("#chainTargetRate").val() + "%");
+			$("#chainTargetRateNm").text("0");
 		} else {
 			$("#chainTargetRate").val("0");
-			$("#chainTargetRateNm").text("0%");
+			$("#chainTargetRateNm").text("0");
 		}
 		 
 	}
