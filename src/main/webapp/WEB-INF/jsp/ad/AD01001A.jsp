@@ -169,26 +169,26 @@
     .aw-column-5 {width: 75px; text-align:center;}
     .aw-column-6 {width: 75px; text-align:right;}
     .aw-column-7 {width: 90px; text-align:right;}
-    .aw-column-8 {width: 90px; text-align:right;}
-    .aw-column-9 {width: 90px; text-align:right;} 
-    .aw-column-10 {width: 90px; text-align:right;} 
-    .aw-column-11 {width: 90px; text-align:right;} 
-    .aw-column-12 {width: 90px; text-align:right;} 
-    .aw-column-13 {width: 200px; text-align:left;}
-    .aw-column-14 {width: 70px; text-align:center;}
-    .aw-column-15 {width: 70px; text-align:center;}
-    .aw-column-16 {width: 60px; text-align:center;}
-    .aw-column-17 {width: 100px; text-align:center;}
-    .aw-column-18 {width: 60px; text-align:center;} 
-    .aw-column-19 {width: 100px; text-align:center;}
-    .aw-column-20 {width: 60px; text-align:center;}
-    .aw-column-21 {width: 100px; text-align:left;} 
-    .aw-column-22 {width: 60px; text-align:center;}
-    .aw-column-23 {width: 70px; text-align:center;}
-    .aw-column-24 {width: 120px; text-align:left;}
-    .aw-column-25 {width: 80px; text-align:center;}
-    .aw-column-26 {width: 80px; text-align:center;}
-    .aw-column-27 {width: 80px; text-align:center;}
+    /*.aw-column-8 {width: 90px; text-align:right;}*/
+    /*.aw-column-9 {width: 90px; text-align:right;} */
+    /*.aw-column-10 {width: 90px; text-align:right;} */
+    /*.aw-column-11 {width: 90px; text-align:right;} */
+    /*.aw-column-12 {width: 90px; text-align:right;} */
+    .aw-column-8 {width: 200px; text-align:left;}
+    .aw-column-9 {width: 70px; text-align:center;}
+    .aw-column-10 {width: 70px; text-align:center;}
+    .aw-column-11 {width: 60px; text-align:center;}
+    .aw-column-12 {width: 100px; text-align:center;}
+    .aw-column-13 {width: 60px; text-align:center;}
+    .aw-column-14 {width: 100px; text-align:center;}
+    .aw-column-15 {width: 60px; text-align:center;}
+    .aw-column-16 {width: 100px; text-align:left;}
+    .aw-column-17 {width: 60px; text-align:center;}
+    .aw-column-18 {width: 70px; text-align:center;}
+    .aw-column-19 {width: 120px; text-align:left;}
+    .aw-column-20 {width: 80px; text-align:center;}
+    .aw-column-21 {width: 80px; text-align:center;}
+    .aw-column-22 {width: 80px; text-align:center;}
 
 	.aw-grid-cell {border-right: 1px solid threedlightshadow;}
 	.aw-grid-row {border-bottom: 1px solid threedlightshadow;}
@@ -365,11 +365,11 @@
 		, endDT : _i++
 		, contractMonth : _i++
 		, apAmt : _i++
-		, adCostPerGSV : _i++
-		, totalGSV : _i++  
-		, monthGSV : _i++ 
-		, volume : _i++ 
-		, monthVolume : _i++
+		// , adCostPerGSV : _i++
+		// , totalGSV : _i++
+		// , monthGSV : _i++
+		// , volume : _i++
+		// , monthVolume : _i++
 		, commt : _i++
 		, contractStateName : _i++
 		, payStateName : _i++
@@ -409,8 +409,7 @@
 	  	table.setRequestMethod("POST");
  	  	table.setParameter("outParamKey",
  	  			"contractDivCD;venueCD;venueNM;chainName;startDT;"+
- 	  			"endDT;contractMonth;apAmt;adCostPerGSV;totalGSV;"+
- 	  			"monthGSV;totalVolume;monthVolume;commt;contractStateName;"+
+ 	  			"endDT;contractMonth;apAmt;commt;contractStateName;"+
  	  			"payStateName;buCDName;requiredADCD1Name;amt1;requiredADCD2Name;"+
  	  			"amt2;requiredADCD3Name;amt3;apprStateName;expccommt;" +
  	  			"file1;file2;file3;apprStateCD;contractStateCD;"+
@@ -471,11 +470,11 @@
 					, formatMonth(table.getData(_col.endDT, i))
       			    , table.getData(_col.contractMonth, i)
 					, table.getData(_col.apAmt, i)
-					, table.getData(_col.adCostPerGSV,i) + "%"
-					, table.getData(_col.totalGSV,i)
-					, table.getData(_col.monthGSV,i)
-					, table.getData(_col.volume,i)
-					, table.getData(_col.monthVolume,i)
+					// , table.getData(_col.adCostPerGSV,i) + "%"
+					// , table.getData(_col.totalGSV,i)
+					// , table.getData(_col.monthGSV,i)
+					// , table.getData(_col.volume,i)
+					// , table.getData(_col.monthVolume,i)
 					, table.getData(_col.commt, i)
 					, table.getData(_col.contractStateName, i)
 					, table.getData(_col.payStateName, i)
@@ -608,11 +607,11 @@
 		, "<fmt:message key="AD01001A.endDT"/>"
 		, "<fmt:message key="AD01001A.contractCnt"/>"
 		, "<fmt:message key="AD01001B.APContract"/>"
-		, "<fmt:message key="AD01001B.adCostPerGSV"/>"
-		, "<fmt:message key="AD02002A.totalGSV"/>"
-		, "<fmt:message key="AD02002A.monthGSV"/>"
-		, "<fmt:message key="AD02002A.totalVolume"/>"
-		, "<fmt:message key="AD02002A.monthVolume"/>"
+		<%--, "<fmt:message key="AD01001B.adCostPerGSV"/>"--%>
+		<%--, "<fmt:message key="AD02002A.totalGSV"/>"--%>
+		<%--, "<fmt:message key="AD02002A.monthGSV"/>"--%>
+		<%--, "<fmt:message key="AD02002A.totalVolume"/>"--%>
+		<%--, "<fmt:message key="AD02002A.monthVolume"/>"--%>
 		, "<fmt:message key="AD01001A.comment"/>"
 		, "<fmt:message key="AD01001A.contractStateCD"/>"
 		, "<fmt:message key="AD01001A.payStateCD"/>"
@@ -650,8 +649,7 @@
 		grid.setColumnCount(columns.length);
 		grid.setCellFormat([
 			str, str, str, str, str
-			, str, str, num, str, num
-			, num, num, num, str, str
+			, str, str, num, str, str
 			, str, str, str, str, str
 			, str, str, str, str, str
 			, html, html, html

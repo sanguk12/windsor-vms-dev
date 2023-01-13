@@ -1024,7 +1024,7 @@
 		$("#endYearCD").attr("disabled", false);
 		$("#endMonthCD").attr("disabled", false);
 		$("#APContract").attr("disabled", false);
-		$("#POSM").attr("disabled", false);
+		$("#POSM").attr("disabled", true);
 		$("#commt").attr("disabled", true);
 		productCartPopup_btn.setControlDisabled(false);
 		dateDelay_btn.setControlDisabled(false);
