@@ -806,12 +806,12 @@
 			, "<fmt:message key="AD01001A.endDT"/>"
 			, "<fmt:message key="AD01001A.contractCnt"/>"
 			, "<fmt:message key="AD01001B.APContract"/>"
-			<%--, "<fmt:message key="AD01001B.adCostPerGSV"/>"--%>
+			, "<fmt:message key="AD01001B.adCostPerGSV"/>"
 			, "<fmt:message key="AD02002A.monthAdAmt"/>"
-			<%--, "<fmt:message key="AD02002A.totalGSV"/>"--%>
-			<%--, "<fmt:message key="AD02002A.monthGSV"/>"--%>
-			<%--, "<fmt:message key="AD02002A.totalVolume"/>"--%>
-			<%--, "<fmt:message key="AD02002A.monthVolume"/>"--%>
+			, "<fmt:message key="AD02002A.totalGSV"/>"
+			, "<fmt:message key="AD02002A.monthGSV"/>"
+			, "<fmt:message key="AD02002A.totalVolume"/>"
+			, "<fmt:message key="AD02002A.monthVolume"/>"
 			, "<fmt:message key="AD02001A.comment"/>"
 			, "<fmt:message key="AD01001A.contractStateCD"/>"
 			, "<fmt:message key="AD01001A.payStateCD"/>"
