@@ -85,6 +85,13 @@ public class GAD01MT extends CommonObject implements Model{
 	private String amt2 = "";
 	private String requiredADCD3 = "";
 	private String amt3 = "";
+	private String location1 = "";
+	private String location2 = "";
+	private String location3 = "";
+	private String adProgram = "";
+	private String venueActivity1 = "";
+	private String venueActivity2 = "";
+	private String venueActivity3 = "";
 	
 	//GAD08MT
 	private String adHistoryCD = "";
@@ -860,4 +867,55 @@ public class GAD01MT extends CommonObject implements Model{
 	public void setAdChgFlgs(String[] adChgFlgs) {
 		this.adChgFlgs = adChgFlgs;
 	}
+
+	public String getLocation1() {
+		return location1;
+	}
+	public void setLocation1(String location1) {
+		this.location1 = location1;
+	}
+	public String getLocation2() {
+		return location2;
+	}
+
+	public void setLocation2(String location2) {
+		this.location2 = location2;
+	}
+	public String getLocation3() {
+		return location3;
+	}
+
+	public void setLocation3(String location3) {
+		this.location3 = location3;
+	}
+
+	public String getAdProgram() {
+		return adProgram;
+	}
+	public void setAdProgram(String adProgram) {
+		this.adProgram = adProgram;
+	}
+
+
+	public String getVenueActivity1() {
+		return venueActivity1;
+	}
+	public void setVenueActivity1(String venueActivity1) {
+		this.venueActivity1 = venueActivity1;
+	}
+
+	public String getVenueActivity2() {
+		return venueActivity2;
+	}
+	public void setVenueActivity2(String venueActivity2) {
+		this.venueActivity2 = venueActivity2;
+	}
+	public String getVenueActivity3() {
+		return venueActivity3;
+	}
+	public void setVenueActivity3(String venueActivity3) {
+		this.venueActivity3 = venueActivity3;
+	}
+
+
 }
