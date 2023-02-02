@@ -51,9 +51,9 @@ public class Mdm01ServiceImpl implements Mdm01Service {
 	public void addEmployee(GEMP01MT gemp01mt) throws Exception {
 		//GEMP01MT
 		simpleDao.insert("MDM0100105I", gemp01mt);
-//		simpleDao.insert("MDM0100106I", gemp01mt);
-//		simpleDao.insert("MDM0100107I", gemp01mt);
-//		simpleDao.insert("MDM0100108I", gemp01mt);
+		simpleDao.insert("MDM0100106I", gemp01mt);
+		simpleDao.insert("MDM0100107I", gemp01mt);
+		simpleDao.insert("MDM0100108I", gemp01mt);
 		for(int i=0; i<gemp01mt.getSize(); i++) {
 			simpleDao.insert("MDM0100109I", gemp01mt.getObject_request(i));
 		}
