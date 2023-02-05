@@ -1025,7 +1025,7 @@
 		$("#endMonthCD").attr("disabled", false);
 		$("#APContract").attr("disabled", false);
 		$("#POSM").attr("disabled", true);
-		$("#commt").attr("disabled", true);
+		$("#commt").attr("disabled", false);
 		productCartPopup_btn.setControlDisabled(false);
 		dateDelay_btn.setControlDisabled(false);
 		grid_prd.setCellEditable(true);
@@ -2165,12 +2165,16 @@
 			var prdCDs = new Array();
 			var prdQtys = new Array();
 			var activeFlgs = new Array();
+			var contractMonths = new Array();
+			var apAmts = new Array();
 			var prdTotalAmt = 0;
 			var count = 0;
 			for (var i=0; i<maxRow_prd; i++) {
 				prdCDs[count] = grid_prd.getCellText(_col_prd.prdCD, i);
 				prdQtys[count] = grid_prd.getCellText(_col_prd.prdQty, i);
 				activeFlgs[count] = grid_prd.getCellText(_col_prd.activeFlg, i);
+				contractMonths[count] = grid.getCellText(_col.contractMonth, index[i]);
+				apAmts[count] = grid.getCellText(_col.apAmt, index[i]);
 				count++;
 			}
 
@@ -2214,6 +2218,8 @@
 			table.setParameter("amt2", $("#amt2").val());
 			table.setParameter("amt3", $("#amt3").val());
 			table.setParameter("adChgFlg", "N");
+			table.setParameter("contractMonths", contractMonths);
+			table.setParameter("apAmts", apAmts);
 			table.request();
 
 			if(table.getData(0,0) == "S") {
@@ -2865,7 +2871,7 @@
 			$("#endMonthCD").attr("disabled", true);
 			$("#APContract").attr("disabled", true);
 			$("#POSM").attr("disabled", true);
-			$("#commt").attr("disabled", true);
+			$("#commt").attr("disabled", false);
 			productCartPopup_btn.setControlDisabled(true);
 			dateDelay_btn.setControlDisabled(true);
 			grid_prd.setCellEditable(false);
@@ -2878,7 +2884,7 @@
 			$("#endMonthCD").attr("disabled", false);
 			$("#APContract").attr("disabled", false);
 			$("#POSM").attr("disabled", true);
-			$("#commt").attr("disabled", true);
+			$("#commt").attr("disabled", false);
 			productCartPopup_btn.setControlDisabled(false);
 			dateDelay_btn.setControlDisabled(false);
 			grid_prd.setCellEditable(true);
@@ -2902,7 +2908,7 @@
 					$("#endMonthCD").attr("disabled", true);
 					$("#APContract").attr("disabled", true);
 					$("#POSM").attr("disabled", true);
-					$("#commt").attr("disabled", true);
+					$("#commt").attr("disabled", false);
 					productCartPopup_btn.setControlDisabled(true);
 					dateDelay_btn.setControlDisabled(true);
 					grid_prd.setCellEditable(false);

@@ -53,34 +53,34 @@ import kr.co.nis.waf.view.SimpleDoc;
 public class Ad02Controller extends SimpleMultiActionController {
 
 	protected final Log logger = LogFactory.getLog(getClass());
-	
+
 	@Value("#{system['docLink.realUploadPath']}")
 	private String realUploadPath;
-	
+
 //	@Value("#{system['jXls.templateFilePath']}")
 //	private String templateFilePath;
-	
+
 	@Value("#{appenv['file.prdListUpload']}")
 	private String prdListUpload;
 
 	@Resource
 	private Ad02Service ad02Service;
-	
+
 	@Resource
 	private CodeService codeService;
-	
+
 	@Resource
 	private SimpleService simpleService;
-	
+
 
 	@RequestMapping("/downloadFile")
 	public ModelAndView downloadFile(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		String templateFilePath = request.getServletContext().getRealPath("WEB-INF/excel/");
 		String createTempFilePath = request.getServletContext().getRealPath("WEB-INF/temp/");
 		Map<?, ?> params = new HashMap<Object, Object>();
-		
+
 		bind(request, params);
-		
+
 		Map parameters = new HashMap();
 		parameters.put("fileName", prdListUpload);
 		parameters.put("tempFileName", prdListUpload);
@@ -96,23 +96,43 @@ public class Ad02Controller extends SimpleMultiActionController {
 		SessionManager session = new SessionManager(request, response);
 
 		bind(request, gad01mt);
-		
+
 		try {
+			String[] apAmts = gad01mt.getApAmts();
+			String[] contractMonths = gad01mt.getContractMonths();
+			int monthAdAmt[] = new int[apAmts.length];
+
+			for(int i = 0; i < apAmts.length; i++) {
+				String apAmt = apAmts[i];
+				String contractMonth = contractMonths[i];
+				monthAdAmt[i] = Integer.parseInt(apAmt)/Integer.parseInt(contractMonth);
+			}
+
 			gad01mt.clean();
 			gad01mt.validate(gad01mt.ACTION_SAVE);
-			
+
 			for(int i = 0; i < gad01mt.getSize(); i++) {
 				GAD01MT gad01mt_a = gad01mt.getObject_approval(i);
 				gad01mt_a.setEmailAddr(session.getEmailAddr());
 				gad01mt_a.setEmpNm(session.getEmpNm());
 				gad01mt_a.setClientDate(session.getClientDate());
-				
-				if (gad01mt_a.getApprExpc().equals("2")) {
-					gad01mt_a.setApprTpID("000006");
-				} else {
-					gad01mt_a.setApprTpID("000004");
+
+//				if (gad01mt_a.getApprExpc().equals("2")) {
+//					gad01mt_a.setApprTpID("000006");
+//				} else {
+//					gad01mt_a.setApprTpID("000004");
+//				}
+
+				if (monthAdAmt[i] >= 3000000) {
+					gad01mt_a.setApprTpID("000006"); // TLA
+				} else if(monthAdAmt[i] >= 1000000){
+					gad01mt_a.setApprTpID("000005"); // RLA
+				} else if(monthAdAmt[i] >= 200000){
+					gad01mt_a.setApprTpID("000004"); // Simple AD
+				} else{
+					gad01mt_a.setApprTpID("000004"); // Simple AD
 				}
-			
+
 				if(gad01mt_a.getLastApprYN().equals("Y")) {
 					ad02Service.lastApprovalResultAD(gad01mt_a);
 				}
@@ -120,7 +140,7 @@ public class Ad02Controller extends SimpleMultiActionController {
 					ad02Service.approvalResultAD(gad01mt_a);
 				}
 			}
-			
+
 			rm.setCode(rm.RESULT_SUCCESS);
 			rm.setMessage(getMessageSourceAccessor().getMessage("success.approval"));
 		}
@@ -143,12 +163,13 @@ public class Ad02Controller extends SimpleMultiActionController {
 			rm.setSystemMessage(e.toString());
 		}
 
+
 		ModelAndView mv = new ModelAndView("resultView");
 		mv.addObject("resultMsg", rm);
 
 		return mv;
 	}
-	
+
 	@RequestMapping("/rejectResultAD") //반려
 	public ModelAndView rejectResultVenue(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		GAD01MT gad01mt = new GAD01MT();
@@ -156,25 +177,48 @@ public class Ad02Controller extends SimpleMultiActionController {
 		SessionManager session = new SessionManager(request, response);
 
 		bind(request, gad01mt);
-		
+
 		try {
+
+			String[] apAmts = gad01mt.getApAmts();
+			String[] contractMonths = gad01mt.getContractMonths();
+			int monthAdAmt[] = new int[apAmts.length];
+
+			for(int i = 0; i < apAmts.length; i++) {
+				String apAmt = apAmts[i];
+				String contractMonth = contractMonths[i];
+				monthAdAmt[i] = Integer.parseInt(apAmt)/Integer.parseInt(contractMonth);
+			}
+
 			gad01mt.clean();
 			gad01mt.validate(gad01mt.ACTION_SAVE);
-			
+
 			for(int i = 0; i < gad01mt.getSize(); i++) {
 				GAD01MT gad01mt_a = gad01mt.getObject_reject(i);
 				gad01mt_a.setEmailAddr(session.getEmailAddr());
 				gad01mt_a.setEmpNm(session.getEmpNm());
 				gad01mt_a.setClientDate(session.getClientDate());
-				
-				if(gad01mt_a.getApprExpc().equals("2")) {
-					gad01mt_a.setApprTpID("000006");
-				}else {
-					gad01mt_a.setApprTpID("000004");
+
+//				if(gad01mt_a.getApprExpc().equals("2")) {
+//					gad01mt_a.setApprTpID("000006");
+//				}else {
+//					gad01mt_a.setApprTpID("000004");
+//				}
+
+				if (monthAdAmt[i] >= 3000000) {
+					gad01mt_a.setApprTpID("000006"); // TLA
+				} else if(monthAdAmt[i] >= 1000000){
+					gad01mt_a.setApprTpID("000005"); // RLA
+				} else if(monthAdAmt[i] >= 200000){
+					gad01mt_a.setApprTpID("000004"); // Simple AD
+				} else{
+					gad01mt_a.setApprTpID("000004"); // Simple AD
 				}
+
+
 				ad02Service.rejectResultAD(gad01mt_a);
 			}
-			
+
 			rm.setCode(rm.RESULT_SUCCESS);
 			rm.setMessage(getMessageSourceAccessor().getMessage("success.reject"));
 		}
@@ -202,20 +246,20 @@ public class Ad02Controller extends SimpleMultiActionController {
 
 		return mv;
 	}
-	
+
 	@RequestMapping("/finishContractAD") //계약완료
 	public ModelAndView finishContractAD(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		GAD01MT gad01mt = new GAD01MT();
 		ResultMessage rm = new ResultMessage();
 
 		bind(request, gad01mt);
-		
+
 		try {
 			gad01mt.clean();
 			gad01mt.validate(gad01mt.ACTION_SAVE);
 
 			ad02Service.finishContractAD(gad01mt);
-			
+
 			rm.setCode(rm.RESULT_SUCCESS);
 			rm.setMessage(getMessageSourceAccessor().getMessage("success.finishContract"));
 		}
@@ -250,13 +294,13 @@ public class Ad02Controller extends SimpleMultiActionController {
 		ResultMessage rm = new ResultMessage();
 
 		bind(request, gad01mt);
-		
+
 		try {
 			gad01mt.clean();
 			gad01mt.validate(gad01mt.ACTION_SAVE);
-			
+
 			ad02Service.finishPayAD(gad01mt);
-			
+
 			rm.setCode(rm.RESULT_SUCCESS);
 			rm.setMessage(getMessageSourceAccessor().getMessage("success.finishPay"));
 		}
@@ -284,37 +328,56 @@ public class Ad02Controller extends SimpleMultiActionController {
 
 		return mv;
 	}
-	
-	@RequestMapping("/contractTmpSaveAD") //계약 해지및 수정[임시테이블] 저장 
+
+	@RequestMapping("/contractTmpSaveAD") //계약 해지및 수정[임시테이블] 저장
 	public ModelAndView cancelSaveAD(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		GAD01MT gad01mt = new GAD01MT();
 		ResultMessage rm = new ResultMessage();
-		
+		SessionManager session = new SessionManager(request, response);
+
 		bind(request, gad01mt);
-		
+
 		try {
+			String apAmt = gad01mt.getApAmt();
+			String contractMonth = gad01mt.getContractMonth();
+			int monthAdAmt = 0;
+			monthAdAmt = Integer.valueOf(apAmt)/Integer.valueOf(contractMonth)/1000;
+
 			gad01mt.clean();
 			gad01mt.validate(gad01mt.ACTION_SAVE);
-			
+
 			if(gad01mt.getAdChgFlg().equals("Y")){
 				gad01mt.setApprTpID("000010");
 			} else{
-				if(gad01mt.getApprExpc().equals("2")) {
-					gad01mt.setApprTpID("000006");
-				}else {
-					gad01mt.setApprTpID("000004");
-				}
+
+
+//				if (gad01mt_a.getApprExpc().equals("2")) {
+//					gad01mt_a.setApprTpID("000006");
+//				} else {
+//					gad01mt_a.setApprTpID("000004");
+//				}
+
+					if (monthAdAmt >= 3000000) {
+						gad01mt.setApprTpID("000006"); // TLA
+					} else if(monthAdAmt >= 1000000){
+						gad01mt.setApprTpID("000005"); // RLA
+					} else if(monthAdAmt >= 200000){
+						gad01mt.setApprTpID("000004"); // Simple AD
+					} else{
+						gad01mt.setApprTpID("000004"); // Simple AD
+					}
+
 			}
-			
+
 			if(gad01mt.getAdSeq().length() > 0) {
 				ad02Service.tmpModifySupport(gad01mt);
 			}else {
 				ad02Service.tmpInsertSupport(gad01mt);
 			}
-			
+
 			rm.setParameters(gad01mt.getAdSupportID());
 			rm.setParameters(gad01mt.getAdSeq());
-			
+
 			rm.setCode(rm.RESULT_SUCCESS);
 			rm.setMessage(getMessageSourceAccessor().getMessage("success.save"));
 		}
@@ -336,29 +399,29 @@ public class Ad02Controller extends SimpleMultiActionController {
 			rm.setMessage(getMessageSourceAccessor().getMessage("failure.save"));
 			rm.setSystemMessage(e.toString());
 		}
-		
+
 		ModelAndView mv = new ModelAndView("resultView");
 		mv.addObject("resultMsg", rm);
 
 		return mv;
 	}
-	
+
 	@RequestMapping("/contractTmpSaveRequiredAD") //계약 해지및 수정[임시테이블] 저장 - 필수광고물만 수정시
 	public ModelAndView contractTmpSaveRequiredAD(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		GAD01MT gad01mt = new GAD01MT();
 		ResultMessage rm = new ResultMessage();
-		
+
 		bind(request, gad01mt);
-		
+
 		try {
 			gad01mt.clean();
 			gad01mt.validate(gad01mt.ACTION_SAVE);
-			
+
 			ad02Service.tmpSaveSupportRequestAD(gad01mt);
-			
+
 			rm.setParameters(gad01mt.getAdSupportID());
 			rm.setParameters(gad01mt.getAdSeq());
-			
+
 			rm.setCode(rm.RESULT_SUCCESS);
 			rm.setMessage(getMessageSourceAccessor().getMessage("success.save"));
 		}
@@ -380,30 +443,49 @@ public class Ad02Controller extends SimpleMultiActionController {
 			rm.setMessage(getMessageSourceAccessor().getMessage("failure.save"));
 			rm.setSystemMessage(e.toString());
 		}
-		
+
 		ModelAndView mv = new ModelAndView("resultView");
 		mv.addObject("resultMsg", rm);
 
 		return mv;
 	}
 
-	@RequestMapping("/requestContractAppResultAD") // 계약 해지및 수정 승인요청 
+	@RequestMapping("/requestContractAppResultAD") // 계약 해지및 수정 승인요청
 	public ModelAndView requestContractAppResultAD(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		GAD01MT gad01mt = new GAD01MT();
 		ResultMessage rm = new ResultMessage();
 		SessionManager session = new SessionManager(request, response);
-	
+
 		bind(request, gad01mt);
-		
+
 		try {
+			String[] apAmts = gad01mt.getApAmts();
+			String[] contractMonths = gad01mt.getContractMonths();
+			int monthAdAmt[] = new int[apAmts.length];
+
+			for(int i = 0; i < apAmts.length; i++) {
+				String apAmt = apAmts[i].replace(",", "");
+				String contractMonth = contractMonths[i];
+				monthAdAmt[i] = Integer.parseInt(apAmt) / Integer.parseInt(contractMonth);
+			}
 			gad01mt.clean();
 			gad01mt.validate(gad01mt.ACTION_SAVE);
-			
+
 			for(int i = 0; i < gad01mt.getSize(); i++) {
 				GAD01MT gad01mt_a = gad01mt.getObject_request(i);
 				gad01mt_a.setEmailAddr(session.getEmailAddr());
 				gad01mt_a.setEmpNm(session.getEmpNm());
 				gad01mt_a.setClientDate(session.getClientDate());
+
+				if (monthAdAmt[i] >= 3000000) {
+					gad01mt_a.setApprTpID("000006"); // TLA
+				} else if(monthAdAmt[i] >= 1000000){
+					gad01mt_a.setApprTpID("000005"); // RLA
+				} else if(monthAdAmt[i] >= 200000){
+					gad01mt_a.setApprTpID("000004"); // Simple AD
+				} else{
+					gad01mt_a.setApprTpID("000004"); // Simple AD
+				}
 				ad02Service.requestContractAppResultAD(gad01mt_a);
 			}
 
@@ -423,31 +505,54 @@ public class Ad02Controller extends SimpleMultiActionController {
 				logger.debug(e.toString());
 				e.printStackTrace();
 			}
-	
+
 			rm.setCode(rm.RESULT_ERROR);
 			rm.setMessage(getMessageSourceAccessor().getMessage("failure.requestAppr"));
 			rm.setSystemMessage(e.toString());
 		}
-	
+
 		ModelAndView mv = new ModelAndView("resultView");
 		mv.addObject("resultMsg", rm);
-	
+
 		return mv;
 	}
-	
+
 	@RequestMapping("/clearRequestContractAppResultAD") //계약 해지및 수정 승인요청취소
 	public ModelAndView clearRequestContractAppResultAD(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		GAD01MT gad01mt = new GAD01MT();
 		ResultMessage rm = new ResultMessage();
-	
+
 		bind(request, gad01mt);
-		
+
 		try {
+			String[] apAmts = gad01mt.getApAmts();
+			String[] contractMonths = gad01mt.getContractMonths();
+			int monthAdAmt[] = new int[apAmts.length];
+
+			for(int i = 0; i < apAmts.length; i++) {
+				String apAmt = apAmts[i].replace(",", "");
+				String contractMonth = contractMonths[i];
+				monthAdAmt[i] = Integer.parseInt(apAmt) / Integer.parseInt(contractMonth);
+			}
 			gad01mt.clean();
 			gad01mt.validate(gad01mt.ACTION_SAVE);
-			
+
+			for(int i = 0; i < gad01mt.getSize(); i++) {
+
+				if (monthAdAmt[i] >= 3000000) {
+					gad01mt.setApprTpID("000006"); // TLA
+				} else if (monthAdAmt[i] >= 1000000) {
+					gad01mt.setApprTpID("000005"); // RLA
+				} else if (monthAdAmt[i] >= 200000) {
+					gad01mt.setApprTpID("000004"); // Simple AD
+				} else {
+					gad01mt.setApprTpID("000004"); // Simple AD
+				}
+			}
+
+
 			ad02Service.clearRequestContractAppResultAD(gad01mt);
-			
+
 			rm.setCode(rm.RESULT_SUCCESS);
 			rm.setMessage(getMessageSourceAccessor().getMessage("success.clearRequestAppr"));
 		}
@@ -475,7 +580,7 @@ public class Ad02Controller extends SimpleMultiActionController {
 
 		return mv;
 	}
-	
+
 	@RequestMapping("/contractApprovalAD") // 계약 해지/수정 승인
 	public ModelAndView contractApprovalAD(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		GAD01MT gad01mt = new GAD01MT();
@@ -483,37 +588,56 @@ public class Ad02Controller extends SimpleMultiActionController {
 		SessionManager session = new SessionManager(request, response);
 
 		bind(request, gad01mt);
-		
+
 		try {
+			String[] apAmts = gad01mt.getApAmts();
+			String[] contractMonths = gad01mt.getContractMonths();
+			int monthAdAmt[] = new int[apAmts.length];
+
+			for(int i = 0; i < apAmts.length; i++) {
+				String apAmt = apAmts[i].replace(",", "");
+				String contractMonth = contractMonths[i];
+				monthAdAmt[i] = Integer.parseInt(apAmt) / Integer.parseInt(contractMonth);
+			}
+
 			gad01mt.clean();
 			gad01mt.validate(gad01mt.ACTION_SAVE);
-			
-			
+
+
 			for(int i = 0; i < gad01mt.getSize(); i++) {
 				GAD01MT gad01mt_a = gad01mt.getObject_approval(i);
 				gad01mt_a.setEmailAddr(session.getEmailAddr());
 				gad01mt_a.setEmpNm(session.getEmpNm());
 				gad01mt_a.setClientDate(session.getClientDate());
-				
+
 				if(gad01mt_a.getAdChgFlg().equals("Y")){
 					gad01mt_a.setApprTpID("000010");
 				} else{
-					if(gad01mt_a.getApprExpc().equals("2")) {
-						gad01mt_a.setApprTpID("000006");
-					}else {
-						gad01mt_a.setApprTpID("000004");
+//					if(gad01mt_a.getApprExpc().equals("2")) {
+//						gad01mt_a.setApprTpID("000006");
+//					}else {
+//						gad01mt_a.setApprTpID("000004");
+//					}
+					if (monthAdAmt[i] >= 3000000) {
+						gad01mt_a.setApprTpID("000006"); // TLA
+					} else if (monthAdAmt[i] >= 1000000) {
+						gad01mt_a.setApprTpID("000005"); // RLA
+					} else if (monthAdAmt[i] >= 200000) {
+						gad01mt_a.setApprTpID("000004"); // Simple AD
+					} else {
+						gad01mt_a.setApprTpID("000004"); // Simple AD
 					}
 				}
-				
+
 				if(gad01mt_a.getLastApprYN().equals("Y")) {
 					ad02Service.lastContractApprovalAD(gad01mt_a);
 				}
 				else {
 					ad02Service.contractApprovalAD(gad01mt_a);
 				}
-				
+
 			}
-			
+
 			rm.setCode(rm.RESULT_SUCCESS);
 			rm.setMessage(getMessageSourceAccessor().getMessage("success.approval"));
 		}
@@ -541,7 +665,7 @@ public class Ad02Controller extends SimpleMultiActionController {
 
 		return mv;
 	}
-	
+
 	@RequestMapping("/contractRejectAD") // 계약 해지및 수정 반려
 	public ModelAndView contractRejectAD(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		GAD01MT gad01mt = new GAD01MT();
@@ -549,29 +673,51 @@ public class Ad02Controller extends SimpleMultiActionController {
 		SessionManager session = new SessionManager(request, response);
 
 		bind(request, gad01mt);
-		
+
 		try {
+
+			String[] apAmts = gad01mt.getApAmts();
+			String[] contractMonths = gad01mt.getContractMonths();
+			int monthAdAmt[] = new int[apAmts.length];
+
+			for(int i = 0; i < apAmts.length; i++) {
+				String apAmt = apAmts[i];
+				String contractMonth = contractMonths[i];
+				monthAdAmt[i] = Integer.parseInt(apAmt)/Integer.parseInt(contractMonth);
+			}
+
 			gad01mt.clean();
 			gad01mt.validate(gad01mt.ACTION_SAVE);
-			
+
 			for(int i = 0; i < gad01mt.getSize(); i++) {
 				GAD01MT gad01mt_a = gad01mt.getObject_reject(i);
 				gad01mt_a.setEmailAddr(session.getEmailAddr());
 				gad01mt_a.setEmpNm(session.getEmpNm());
 				gad01mt_a.setClientDate(session.getClientDate());
-				
+
 				if(gad01mt_a.getAdChgFlg().equals("Y")){
 					gad01mt_a.setApprTpID("000010");
 				} else{
-					if(gad01mt_a.getApprExpc().equals("2")) {
-						gad01mt_a.setApprTpID("000006");
-					}else {
-						gad01mt_a.setApprTpID("000004");
+//					if(gad01mt_a.getApprExpc().equals("2")) {
+//						gad01mt_a.setApprTpID("000006");
+//					}else {
+//						gad01mt_a.setApprTpID("000004");
+//					}
+
+					if (monthAdAmt[i] >= 3000000) {
+						gad01mt_a.setApprTpID("000006"); // TLA
+					} else if(monthAdAmt[i] >= 1000000){
+						gad01mt_a.setApprTpID("000005"); // RLA
+					} else if(monthAdAmt[i] >= 200000){
+						gad01mt_a.setApprTpID("000004"); // Simple AD
+					} else{
+						gad01mt_a.setApprTpID("000004"); // Simple AD
 					}
+
 				}
 				ad02Service.contractRejectAD(gad01mt_a);
 			}
-			
+
 			rm.setCode(rm.RESULT_SUCCESS);
 			rm.setMessage(getMessageSourceAccessor().getMessage("success.reject"));
 		}
@@ -599,7 +745,7 @@ public class Ad02Controller extends SimpleMultiActionController {
 
 		return mv;
 	}
-	
+
 	@RequestMapping("/afterDateDelay") // 계약 해지및 수정 반려
 	public ModelAndView afterDateDelay(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		GAD01MT gad01mt = new GAD01MT();
@@ -607,13 +753,13 @@ public class Ad02Controller extends SimpleMultiActionController {
 		SessionManager session = new SessionManager(request, response);
 
 		bind(request, gad01mt);
-		
+
 		try {
 			gad01mt.clean();
 			gad01mt.validate(gad01mt.ACTION_SAVE);
 			gad01mt.setClientDate(session.getClientDate());
 			ad02Service.afterDateDelay(gad01mt);
-			
+
 			rm.setCode(rm.RESULT_SUCCESS);
 			rm.setMessage(getMessageSourceAccessor().getMessage("AD02007A.msg3"));
 		}
@@ -641,5 +787,5 @@ public class Ad02Controller extends SimpleMultiActionController {
 
 		return mv;
 	}
-	
+
 }

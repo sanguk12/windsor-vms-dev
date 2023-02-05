@@ -190,6 +190,9 @@
 	var grid_displayNum = "100";
 	var myApprID = "000004";   //AD 승인라인
 	var myADApprExID = "000006"; // AD Exception2
+	// var myApprIDS = "000004";   //SimpleAD
+	// var myADApprIDR = "000005"; // RLA
+	// var myADApprIDT = "000006"; // TLA
 
 	/****************************************
 	 * Function
@@ -347,6 +350,9 @@
 		grid.refresh();
 		getMyADAppr(myApprID);
 		getMyADAppr(myADApprExID);
+		// getMyADAppr(myApprIDS);
+		// getMyADAppr(myADApprIDR);
+		// getMyADAppr(myADApprIDT);
 
 		//지점 setting
 		officeCDSetting();
@@ -570,6 +576,8 @@
 		var venueCDs = new Array();
 		var adSupportIDs = new Array();
 		var apprExpcs = new Array();
+		var contractMonths = new Array();
+		var apAmts = new Array();
 		var count = 0;
 
 		if (index == "") {
@@ -584,6 +592,8 @@
 				venueCDs[count] = grid.getCellText(_col.venueCD, index[i]);
 				adSupportIDs[count] = grid.getCellText(_col.adSupportID, index[i]);
 				apprExpcs[count] = grid.getCellText(_col.apprExpc, index[i]);
+				contractMonths[count] = grid.getCellText(_col.contractMonth, index[i]);
+				apAmts[count] = grid.getCellText(_col.apAmt, index[i]);
 				count++;
 			}
 		}
@@ -624,6 +634,8 @@
 		table.setParameter("apprExpcs", apprExpcs);
 		table.setParameter("apprStateCD", "20");
 		table.setParameter("venueCDs", venueCDs);
+		table.setParameter("contractMonths", contractMonths);
+		table.setParameter("apAmts", apAmts);
 		table.request();
 
 		if (table.getData(0,0) == "S") {
@@ -640,6 +652,8 @@
 		var venueCDs = new Array();
 		var adSupportIDs = new Array();
 		var apprExpcs = new Array();
+		var contractMonths = new Array();
+		var apAmts = new Array();
 		var count = 0;
 
 		if (index == ""){
@@ -654,6 +668,8 @@
 				venueCDs[count] = grid.getCellText(_col.venueCD, index[i]);
 				adSupportIDs[count] = grid.getCellText(_col.adSupportID, index[i]);
 				apprExpcs[count] = grid.getCellText(_col.apprExpc, index[i]);
+				contractMonths[count] = grid.getCellText(_col.contractMonth, index[i]);
+				apAmts[count] = grid.getCellText(_col.apAmt, index[i]);
 				count++;
 			}
 		}
@@ -686,6 +702,8 @@
 		table.setParameter("apprExpcs", apprExpcs);
 		table.setParameter("apprStateCD", "10");
 		table.setParameter("venueCDs", venueCDs);
+		table.setParameter("contractMonths", contractMonths);
+		table.setParameter("apAmts", apAmts);
 		table.request();
 
 		if (table.getData(0,0) == "S") {
@@ -760,10 +778,13 @@
 
 	//승인상태 팝업
 	function openApprState(i) {
+
+		//여기 하는중
 		var venueCD = grid.getCellText(_col.venueCD,i);
 		var adSupportID = grid.getCellText(_col.adSupportID,i);
 		var apprExpc = grid.getCellText(_col.apprExpc,i);
 		var apprTpIDEx = (apprExpc == "2") ? myADApprExID : myApprID;
+		// var apprTpIDEx = (apprExpc == "2") ? myADApprExID : myApprID;
 
 		var url = "${contextPath}/service/simpleCommand/?mnuGrpID=${params.mnuGrpID}&pgmID=${params.pgmID}&viewID=AD01002B"
 				+"&adSupportID="+adSupportID

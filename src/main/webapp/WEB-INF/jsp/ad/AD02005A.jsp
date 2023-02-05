@@ -580,6 +580,8 @@
 		var adSupportIDs = new Array();
 		var apprExpcs = new Array();
 		var adSeqs = new Array();
+		var contractMonths = new Array();
+		var apAmts = new Array();
 		var count = 0;
 
 		
@@ -596,6 +598,8 @@
 				adSupportIDs[count] = grid.getCellText(_col.adSupportID, index[i]);
 				apprExpcs[count] = grid.getCellText(_col.apprExpc, index[i]);
 				adSeqs[count] = grid.getCellText(_col.adSeq, index[i]);
+				contractMonths[count] = grid.getCellText(_col.contractMonth, index[i]);
+				apAmts[count] = grid.getCellText(_col.apAmt, index[i]);
 				count++;
 			}
 		}
@@ -642,7 +646,9 @@
 		table.setParameter("adSeqs", adSeqs);
 		table.setParameter("apprStateCD", "20");
 		table.setParameter("venueCDs", venueCDs);
-		table.setParameter("adContractDivCD", adContractDivCD); 
+		table.setParameter("adContractDivCD", adContractDivCD);
+		table.setParameter("contractMonths", contractMonths);
+		table.setParameter("apAmts", apAmts);
 		table.request();
 
 		if (table.getData(0,0) == "S") {
@@ -660,6 +666,8 @@
 		var adSupportIDs = new Array();
 		var apprExpcs = new Array();
 		var adSeqs = new Array();
+		var contractMonths = new Array();
+		var apAmts = new Array();
 		var count = 0;
 		
 		if (index == ""){
@@ -675,6 +683,8 @@
 				adSupportIDs[count] = grid.getCellText(_col.adSupportID, index[i]);
 				apprExpcs[count] = grid.getCellText(_col.apprExpc, index[i]);
 				adSeqs[count] = grid.getCellText(_col.adSeq, index[i]);
+				contractMonths[count] = grid.getCellText(_col.contractMonth, index[i]);
+				apAmts[count] = grid.getCellText(_col.apAmt, index[i]);
 				count++;
 			}
 		}
@@ -709,6 +719,8 @@
 		table.setParameter("apprStateCD", "10");
 		table.setParameter("venueCDs", venueCDs);
 		table.setParameter("adContractDivCD", adContractDivCD);
+		table.setParameter("contractMonths", contractMonths);
+		table.setParameter("apAmts", apAmts);
 		table.request();
 
 		if (table.getData(0,0) == "S") {

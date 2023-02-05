@@ -640,6 +640,8 @@
 		var adContractDivCDs = new Array();
 		var apprExpcs = new Array();
 		var adChgFlgs = new Array();
+		var contractMonths = new Array();
+		var apAmts = new Array();
 		var count = 0;
 		
 		if (index == "") {
@@ -660,6 +662,8 @@
 				adContractDivCDs[count] = grid.getCellText(_col.adContractDivCD, index[i]);
 				apprExpcs[count] = grid.getCellText(_col.apprExpc, index[i]);
 				adChgFlgs[count] = grid.getCellText(_col.adChgFlg, index[i]);
+				contractMonths[count] = grid.getCellText(_col.contractMonth, index[i]);
+				apAmts[count] = grid.getCellText(_col.apAmt, index[i]);
 				count++;
 			}
 		}
@@ -699,6 +703,8 @@
 		table.setParameter("adChgFlgs", adChgFlgs);
 		table.setParameter("adContractDivCDs", adContractDivCDs);
 		table.setParameter("adHistoryCD", adHistoryCD);
+		table.setParameter("contractMonths", contractMonths);
+		table.setParameter("apAmts", apAmts);
 		
 		table.request();
 
@@ -721,6 +727,8 @@
 		var apprExpcs = new Array();
 		var adSeqs = new Array();
 		var adChgFlgs = new Array();
+		var contractMonths = new Array();
+		var apAmts = new Array();
 		var count = 0;
 		
 		if (index == "") {
@@ -740,6 +748,8 @@
 				apprExpcs[count] = grid.getCellText(_col.apprExpc, index[i]);
 				adSeqs[count] = grid.getCellText(_col.adSeq, index[i]);
 				adChgFlgs[count] = grid.getCellText(_col.adChgFlg, index[i]);
+				contractMonths[count] = grid.getCellText(_col.contractMonth, index[i]);
+				apAmts[count] = grid.getCellText(_col.apAmt, index[i]);
 				count++;
 			}
 		}
@@ -783,6 +793,8 @@
 		table.setParameter("levelNos", levelNos);
 		table.setParameter("adSeqs", adSeqs);
 		table.setParameter("adChgFlgs", adChgFlgs);
+		table.setParameter("contractMonths", contractMonths);
+		table.setParameter("apAmts", apAmts);
 		table.request();
 
 		if (table.getData(0,0) == "S") {

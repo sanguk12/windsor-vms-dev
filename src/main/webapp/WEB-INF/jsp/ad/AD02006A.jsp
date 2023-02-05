@@ -597,6 +597,8 @@
 		var adSeqs = new Array();
 		var adContractDivCDs = new Array();
 		var apprExpcs = new Array();
+		var contractMonths = new Array();
+		var apAmts = new Array();
 		var count = 0;
 		
 		if (index == "") {
@@ -616,6 +618,8 @@
 				adSeqs[count] = grid.getCellText(_col.adSeq, index[i]);
 				adContractDivCDs[count] = grid.getCellText(_col.adContractDivCD, index[i]);
 				apprExpcs[count] = grid.getCellText(_col.apprExpc, index[i]);
+				contractMonths[count] = grid.getCellText(_col.contractMonth, index[i]);
+				apAmts[count] = grid.getCellText(_col.apAmt, index[i]);
 				count++;
 			}
 		}
@@ -653,6 +657,8 @@
 		table.setParameter("adContractDivCD", adContractDivCD);
 		table.setParameter("adHistoryCD", adHistoryCD);
 		table.setParameter("apprExpcs", apprExpcs);
+		table.setParameter("contractMonths", contractMonths);
+		table.setParameter("apAmts", apAmts);
 		if (lastApprYNs[0] == "Y") { //최종승인자일 경우 계약상태 계약으로 세팅
 			table.setParameter("contractStateCD", "20");
 		}
@@ -677,6 +683,8 @@
 		var apprExpcs = new Array();
 		var adSeqs = new Array();
 		var adContractDivCDs = new Array();
+		var contractMonths = new Array();
+		var apAmts = new Array();
 		var count = 0;
 		
 		if (index == "") {
@@ -696,6 +704,8 @@
 				apprExpcs[count] = grid.getCellText(_col.apprExpc, index[i]);
 				adSeqs[count] = grid.getCellText(_col.adSeq, index[i]);
 				adContractDivCDs[count] = grid.getCellText(_col.adContractDivCD, index[i]);
+				contractMonths[count] = grid.getCellText(_col.contractMonth, index[i]);
+				apAmts[count] = grid.getCellText(_col.apAmt, index[i]);
 				count++;
 			}
 		}
@@ -739,6 +749,8 @@
 		table.setParameter("levelNos", levelNos);
 		table.setParameter("adSeqs", adSeqs);
 		table.setParameter("adContractDivCDs", adContractDivCDs);
+		table.setParameter("contractMonths", contractMonths);
+		table.setParameter("apAmts", apAmts);
 		table.request();
 
 		if (table.getData(0,0) == "S") {
