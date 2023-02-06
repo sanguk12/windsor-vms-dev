@@ -124,7 +124,13 @@
 									<fmt:message key="AD01001A.msg4" />
 								</td>
 								<td class="tit_text01">
-									<span id="myADApprEx2"  style="background-color:#BCF5A9;"  />
+									<span id="myADApprRLA"  style="background-color:#BCF5A9;"  />
+								</td>
+								<td class="tit_text01">
+									<fmt:message key="AD01001A.msg6" />
+								</td>
+								<td class="tit_text01">
+									<span id="myADApprTLA"  style="background-color:#BCF5A9;"  />
 								</td>
 							</tr>
 							</tbody>
@@ -210,8 +216,9 @@
 	 * Variable
 	 ****************************************/
 	var grid_displayNum = "100";
-	var myApprID = "000004";   //AD 승인라인 simple ad
-	var myADApprExID = "000006"; // AD Exception2 RLA + TLA
+	var myApprID = "000004";   //SimpleAD
+	var myADApprRLA = "000005"; // RLA
+	var myADApprTLA = "000006"; // TLA
 	var adHistoryCD = "10"; // AD History "등록"
 
 	/****************************************
@@ -317,10 +324,12 @@
 		table.request();
 
 		if (table.getCount() > 0) {
-			if (apprTpID == myADApprExID) {
-				$("#myADApprEx2").text(table.getData(0,0));
-			} else {
+			if (apprTpID == myApprID) {
 				$("#myAppr").text(table.getData(0,0));
+			} else if(apprTpID == myADApprRLA){
+				$("#myADApprRLA").text(table.getData(0,0));
+			} else{
+				$("#myADApprTLA").text(table.getData(0,0));
 			}
 		}
 	}
@@ -371,7 +380,8 @@
 		grid.refresh();
 
 		getMyADAppr(myApprID);
-		getMyADAppr(myADApprExID);
+		getMyADAppr(myADApprRLA);
+		getMyADAppr(myADApprTLA);
 
 		//지점 disable
 		officeCDSetting();

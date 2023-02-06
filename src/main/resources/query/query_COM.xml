@@ -719,13 +719,21 @@
 		order by activeYN desc, pkeymanYN desc, keymanNm
 	</select>
 	
+<!--	 나의 승인라인 조회 -->
+<!--	<select id="COM03006S" resultClass="java.util.LinkedHashMap" parameterClass="java.util.Map">-->
+<!--		select-->
+<!--			getMyAppr(#empID#, #apprTpID#) as myappr-->
+<!--		from dual-->
+<!--	</select>-->
+
+
 	<!-- 나의 승인라인 조회 -->
 	<select id="COM03006S" resultClass="java.util.LinkedHashMap" parameterClass="java.util.Map">
 		select
-			getMyAppr(#empID#, #apprTpID#) as myappr
+		GETMYAPPR_REGION(#empID#, #apprTpID#) as myappr
 		from dual
 	</select>
-	
+
 	<!-- RFID 실적 I/F 삭제 -->
 	<delete id="COM03001D" parameterClass="com.kia.com.model.GRLT10IF">
 		delete from GRLT10IF

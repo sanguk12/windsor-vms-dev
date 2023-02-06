@@ -123,12 +123,18 @@
 									<td class="tit_text01">
 										<span id="myAppr" style="background-color:#FFFFFF;"/>
 	                                </td>
-	                                <td class="tit_text01">
+									<td class="tit_text01">
 										<fmt:message key="AD01001A.msg4" />
 									</td>
 									<td class="tit_text01">
-										<span id="myADApprEx2"  style="background-color:#BCF5A9;"  />
-	                                </td>
+										<span id="myADApprRLA"  style="background-color:#BCF5A9;"  />
+									</td>
+									<td class="tit_text01">
+										<fmt:message key="AD01001A.msg6" />
+									</td>
+									<td class="tit_text01">
+										<span id="myADApprTLA"  style="background-color:#BCF5A9;"  />
+									</td>
 	                                <td class="tit_text01">
 										<fmt:message key="AD01001A.msg5" />
 									</td>
@@ -258,10 +264,11 @@
 	/****************************************
 	 * Variable
 	 ****************************************/
-	 var grid_displayNum = "100"; 
-	 var myApprID = "000004";   //AD 승인라인
-	 var myADApprExID = "000006"; // AD Exception2
-	 var myCPnAID = "000010";	// AD SP&A 승인라인
+	 var grid_displayNum = "100";
+	var myApprID = "000004";   //SimpleAD
+	var myADApprRLA = "000005"; // RLA
+	var myADApprTLA = "000006"; // TLA
+	var myCPnAID = "000010";	// AD SP&A 승인라인
 	 
 	/****************************************
 	 * Function
@@ -357,13 +364,16 @@
 		table.setParameter("empID", "${params.empID}");
 		table.setParameter("apprTpID", apprTpID);
 		table.request();
-		
-		if(table.getCount() > 0) {
-			if(apprTpID == myADApprExID) {
-				$("#myADApprEx2").text(table.getData(0,0));
-			} else if(apprTpID == myApprID){
+
+		if (table.getCount() > 0) {
+			// if (apprTpID == myADApprExID) {
+			if (apprTpID == myApprID) {
 				$("#myAppr").text(table.getData(0,0));
-			} else{
+			} else if(apprTpID == myADApprRLA){
+				$("#myADApprRLA").text(table.getData(0,0));
+			} else if(apprTpID == myADApprTLA){
+				$("#myADApprTLA").text(table.getData(0,0));
+			}else{
 				$("#myCPnA").text(table.getData(0,0));
 			}
 		}
@@ -409,9 +419,10 @@
 		
 		grid_srch.refresh();
 		grid_dtl.refresh();
-		
+
 		getMyADAppr(myApprID);
-		getMyADAppr(myADApprExID);
+		getMyADAppr(myADApprTLA);
+		getMyADAppr(myADApprRLA);
 		getMyADAppr(myCPnAID);
 
 		//지점 disable
@@ -841,6 +852,20 @@
       	var adSeq = "";
       	var adChgFlg = "";
       	var viewID = "";
+
+		var contractMonth = grid.getCellText(_col.contractMonth, i);
+		var apAmt = grid.getCellText(_col.apAmt, i);
+		var monthAdAmt = apAmt/contractMonth;
+
+		if (monthAdAmt >= 3000000) {
+			apprTpIDEx = myADApprTLA // TLA
+		} else if(monthAdAmt >= 1000000){
+			apprTpIDEx = myADApprRLA // RLA
+		} else if(monthAdAmt >= 200000){
+			apprTpIDEx = myApprID // Simple AD
+		} else{
+			apprTpIDEx = myApprID // Simple AD
+		}
       	
        	//AD계약수정 목록 Grid
 		if(grdDivCD == "srch") {
@@ -859,7 +884,7 @@
       		if(adChgFlg == "Y"){
       			apprTpIDEx = "000010";
       		} else{
-      			apprTpIDEx = (apprExpc == "2") ? myADApprExID : myApprID;
+      			// apprTpIDEx = (apprExpc == "2") ? myADApprExID : myApprID;
       		}
       		viewID = "AD02004C";
 		}

@@ -124,9 +124,14 @@
 									<fmt:message key="AD01001A.msg4" />
 								</td>
 								<td class="tit_text01">
-									<span id="myADApprEx2" style="background-color:#BCF5A9;"  />
+									<span id="myADApprRLA" style="background-color:#BCF5A9;"  />
 								</td>
-
+								<td class="tit_text01">
+									<fmt:message key="AD01001A.msg6" />
+								</td>
+								<td class="tit_text01">
+									<span id="myADApprTLA" style="background-color:#BCF5A9;"  />
+								</td>
 							</tr>
 							</tbody>
 						</table>
@@ -203,7 +208,8 @@
 	 ****************************************/
 	var grid_displayNum = "100";
 	var myApprID = "000004";   //SimpleAD
-	var myADApprExID = "000006"; // TLA+RLA
+	var myADApprRLA = "000005"; // RLA
+	var myADApprTLA = "000006"; // TLA
 	// var myApprIDS = "000004";   //SimpleAD
 	// var myADApprIDR = "000005"; // RLA
 	// var myADApprIDT = "000006"; // TLA
@@ -305,10 +311,12 @@
 
 		if (table.getCount() > 0) {
 			// if (apprTpID == myADApprExID) {
-			if (apprTpID == myADApprExID) {
-				$("#myADApprEx2").text(table.getData(0,0));
-			} else {
+			if (apprTpID == myApprID) {
 				$("#myAppr").text(table.getData(0,0));
+			} else if(apprTpID == myADApprRLA){
+				$("#myADApprRLA").text(table.getData(0,0));
+			} else{
+				$("#myADApprTLA").text(table.getData(0,0));
 			}
 		}
 	}
@@ -336,7 +344,8 @@
 		grid.refresh();
 
 		getMyADAppr(myApprID);
-		getMyADAppr(myADApprExID);
+		getMyADAppr(myADApprTLA);
+		getMyADAppr(myADApprRLA);
 		// getMyADAppr(myApprIDS);
 		// getMyADAppr(myADApprIDR);
 		// getMyADAppr(myADApprIDT);

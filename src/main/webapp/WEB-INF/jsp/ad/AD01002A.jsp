@@ -119,7 +119,13 @@
 							<fmt:message key="AD01001A.msg4" />
 						</td>
 						<td class="tit_text01">
-							<span id="myADApprEx2"  style="background-color:#BCF5A9;"  />
+							<span id="myADApprRLA"  style="background-color:#BCF5A9;"  />
+						</td>
+						<td class="tit_text01">
+							<fmt:message key="AD01001A.msg6" />
+						</td>
+						<td class="tit_text01">
+							<span id="myADApprTLA"  style="background-color:#BCF5A9;"  />
 						</td>
 					</tr>
 					</tbody>
@@ -188,11 +194,11 @@
 	 * Variable
 	 ****************************************/
 	var grid_displayNum = "100";
-	var myApprID = "000004";   //AD 승인라인
-	var myADApprExID = "000006"; // AD Exception2
-	// var myApprIDS = "000004";   //SimpleAD
-	// var myADApprIDR = "000005"; // RLA
-	// var myADApprIDT = "000006"; // TLA
+	// var myApprID = "000004";   //AD 승인라인
+	// var myADApprExID = "000006"; // AD Exception2
+	var myApprID = "000004";   //SimpleAD
+	var myADApprRLA = "000005"; // RLA
+	var myADApprTLA = "000006"; // TLA
 
 	/****************************************
 	 * Function
@@ -295,10 +301,13 @@
 		table.request();
 
 		if (table.getCount() > 0) {
-			if (apprTpID == myADApprExID) {
-				$("#myADApprEx2").text(table.getData(0,0));
-			} else {
+			// if (apprTpID == myADApprExID) {
+			if (apprTpID == myApprID) {
 				$("#myAppr").text(table.getData(0,0));
+			} else if(apprTpID == myADApprRLA){
+				$("#myADApprRLA").text(table.getData(0,0));
+			} else{
+				$("#myADApprTLA").text(table.getData(0,0));
 			}
 		}
 	}
@@ -349,7 +358,8 @@
 		createGrid();
 		grid.refresh();
 		getMyADAppr(myApprID);
-		getMyADAppr(myADApprExID);
+		getMyADAppr(myADApprRLA);
+		getMyADAppr(myADApprTLA);
 		// getMyADAppr(myApprIDS);
 		// getMyADAppr(myADApprIDR);
 		// getMyADAppr(myADApprIDT);
@@ -779,11 +789,23 @@
 	//승인상태 팝업
 	function openApprState(i) {
 
-		//여기 하는중
 		var venueCD = grid.getCellText(_col.venueCD,i);
 		var adSupportID = grid.getCellText(_col.adSupportID,i);
 		var apprExpc = grid.getCellText(_col.apprExpc,i);
-		var apprTpIDEx = (apprExpc == "2") ? myADApprExID : myApprID;
+		var contractMonth = grid.getCellText(_col.contractMonth, i);
+		var apAmt = grid.getCellText(_col.apAmt, i);
+		var monthAdAmt = apAmt/contractMonth;
+		var apprTpIDEx = '';
+
+		if (monthAdAmt >= 3000000) {
+			apprTpIDEx = myADApprTLA // TLA
+		} else if(monthAdAmt >= 1000000){
+			apprTpIDEx = myADApprRLA // RLA
+		} else if(monthAdAmt >= 200000){
+			apprTpIDEx = myApprID // Simple AD
+		} else{
+			apprTpIDEx = myApprID // Simple AD
+		}
 		// var apprTpIDEx = (apprExpc == "2") ? myADApprExID : myApprID;
 
 		var url = "${contextPath}/service/simpleCommand/?mnuGrpID=${params.mnuGrpID}&pgmID=${params.pgmID}&viewID=AD01002B"
