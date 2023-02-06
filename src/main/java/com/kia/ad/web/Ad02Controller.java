@@ -123,11 +123,11 @@ public class Ad02Controller extends SimpleMultiActionController {
 //					gad01mt_a.setApprTpID("000004");
 //				}
 
-				if (monthAdAmt[i] >= 3000000) {
+				if (monthAdAmt[i] >= 3000) {
 					gad01mt_a.setApprTpID("000006"); // TLA
-				} else if(monthAdAmt[i] >= 1000000){
+				} else if(monthAdAmt[i] >= 1000){
 					gad01mt_a.setApprTpID("000005"); // RLA
-				} else if(monthAdAmt[i] >= 200000){
+				} else if(monthAdAmt[i] >= 200){
 					gad01mt_a.setApprTpID("000004"); // Simple AD
 				} else{
 					gad01mt_a.setApprTpID("000004"); // Simple AD
@@ -205,11 +205,11 @@ public class Ad02Controller extends SimpleMultiActionController {
 //					gad01mt_a.setApprTpID("000004");
 //				}
 
-				if (monthAdAmt[i] >= 3000000) {
+				if (monthAdAmt[i] >= 3000) {
 					gad01mt_a.setApprTpID("000006"); // TLA
-				} else if(monthAdAmt[i] >= 1000000){
+				} else if(monthAdAmt[i] >= 1000){
 					gad01mt_a.setApprTpID("000005"); // RLA
-				} else if(monthAdAmt[i] >= 200000){
+				} else if(monthAdAmt[i] >= 200){
 					gad01mt_a.setApprTpID("000004"); // Simple AD
 				} else{
 					gad01mt_a.setApprTpID("000004"); // Simple AD
@@ -357,11 +357,11 @@ public class Ad02Controller extends SimpleMultiActionController {
 //					gad01mt_a.setApprTpID("000004");
 //				}
 
-					if (monthAdAmt >= 3000000) {
+					if (monthAdAmt >= 3000) {
 						gad01mt.setApprTpID("000006"); // TLA
-					} else if(monthAdAmt >= 1000000){
+					} else if(monthAdAmt >= 1000){
 						gad01mt.setApprTpID("000005"); // RLA
-					} else if(monthAdAmt >= 200000){
+					} else if(monthAdAmt >= 200){
 						gad01mt.setApprTpID("000004"); // Simple AD
 					} else{
 						gad01mt.setApprTpID("000004"); // Simple AD
@@ -477,11 +477,11 @@ public class Ad02Controller extends SimpleMultiActionController {
 				gad01mt_a.setEmpNm(session.getEmpNm());
 				gad01mt_a.setClientDate(session.getClientDate());
 
-				if (monthAdAmt[i] >= 3000000) {
+				if (monthAdAmt[i] >= 3000) {
 					gad01mt_a.setApprTpID("000006"); // TLA
-				} else if(monthAdAmt[i] >= 1000000){
+				} else if(monthAdAmt[i] >= 1000){
 					gad01mt_a.setApprTpID("000005"); // RLA
-				} else if(monthAdAmt[i] >= 200000){
+				} else if(monthAdAmt[i] >= 200){
 					gad01mt_a.setApprTpID("000004"); // Simple AD
 				} else{
 					gad01mt_a.setApprTpID("000004"); // Simple AD
@@ -539,11 +539,11 @@ public class Ad02Controller extends SimpleMultiActionController {
 
 			for(int i = 0; i < gad01mt.getSize(); i++) {
 
-				if (monthAdAmt[i] >= 3000000) {
+				if (monthAdAmt[i] >= 3000) {
 					gad01mt.setApprTpID("000006"); // TLA
-				} else if (monthAdAmt[i] >= 1000000) {
+				} else if (monthAdAmt[i] >= 1000) {
 					gad01mt.setApprTpID("000005"); // RLA
-				} else if (monthAdAmt[i] >= 200000) {
+				} else if (monthAdAmt[i] >= 200) {
 					gad01mt.setApprTpID("000004"); // Simple AD
 				} else {
 					gad01mt.setApprTpID("000004"); // Simple AD
@@ -618,11 +618,11 @@ public class Ad02Controller extends SimpleMultiActionController {
 //					}else {
 //						gad01mt_a.setApprTpID("000004");
 //					}
-					if (monthAdAmt[i] >= 3000000) {
+					if (monthAdAmt[i] >= 3000) {
 						gad01mt_a.setApprTpID("000006"); // TLA
-					} else if (monthAdAmt[i] >= 1000000) {
+					} else if (monthAdAmt[i] >= 1000) {
 						gad01mt_a.setApprTpID("000005"); // RLA
-					} else if (monthAdAmt[i] >= 200000) {
+					} else if (monthAdAmt[i] >= 200) {
 						gad01mt_a.setApprTpID("000004"); // Simple AD
 					} else {
 						gad01mt_a.setApprTpID("000004"); // Simple AD
@@ -704,11 +704,11 @@ public class Ad02Controller extends SimpleMultiActionController {
 //						gad01mt_a.setApprTpID("000004");
 //					}
 
-					if (monthAdAmt[i] >= 3000000) {
+					if (monthAdAmt[i] >= 3000) {
 						gad01mt_a.setApprTpID("000006"); // TLA
-					} else if(monthAdAmt[i] >= 1000000){
+					} else if(monthAdAmt[i] >= 1000){
 						gad01mt_a.setApprTpID("000005"); // RLA
-					} else if(monthAdAmt[i] >= 200000){
+					} else if(monthAdAmt[i] >= 200){
 						gad01mt_a.setApprTpID("000004"); // Simple AD
 					} else{
 						gad01mt_a.setApprTpID("000004"); // Simple AD

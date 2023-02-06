@@ -883,11 +883,11 @@
 		// var apprTpIDEx = (apprExpc == "2") ? myADApprExID : myApprID;
 		var apprTpIDEx = "";
 
-		if (monthAdAmt >= 3000000) {
+		if (monthAdAmt >= 3000) {
 			apprTpIDEx = "000006"; // TLA
-		} else if(monthAdAmt >= 1000000){
+		} else if(monthAdAmt >= 1000){
 			apprTpIDEx = "000005"; // RLA
-		} else if(monthAdAmt >= 200000){
+		} else if(monthAdAmt >= 200){
 			apprTpIDEx = "000004"; // Simple AD
 		}
 

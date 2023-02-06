@@ -842,11 +842,11 @@
 		var monthAdAmt = apAmt/contractMonth;
 		var apprTpIDEx = '';
 
-		if (monthAdAmt >= 3000000) {
+		if (monthAdAmt >= 3000) {
 			apprTpIDEx = myADApprTLA // TLA
-		} else if(monthAdAmt >= 1000000){
+		} else if(monthAdAmt >= 1000){
 			apprTpIDEx = myADApprRLA // RLA
-		} else if(monthAdAmt >= 200000){
+		} else if(monthAdAmt >= 200){
 			apprTpIDEx = myApprID // Simple AD
 		} else{
 			apprTpIDEx = myApprID // Simple AD

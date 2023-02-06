@@ -296,11 +296,11 @@ public class Ad02ServiceImpl implements Ad02Service {
 //			} else {
 //				gad01mt_a.setApprTpID("000004"); // No Exception
 //			}
-			if (monthAdAmt[i] >= 3000000) {
+			if (monthAdAmt[i] >= 3000) {
 				gad01mt_a.setApprTpID("000006"); // TLA
-			} else if(monthAdAmt[i] >= 1000000){
+			} else if(monthAdAmt[i] >= 1000){
 				gad01mt_a.setApprTpID("000005"); // RLA
-			} else if(monthAdAmt[i] >= 200000){
+			} else if(monthAdAmt[i] >= 200){
 				gad01mt_a.setApprTpID("000004"); // Simple AD
 			} else{
 				gad01mt_a.setApprTpID("000004"); // Simple AD

@@ -1617,11 +1617,11 @@
 
 
 	function setADProgram(){
-		if(($("#APContract").val()).replace(',','') > 90000000){
+		if(($("#APContract").val()).replace(',','') > 90000){
 			$("#adProgram").val("<fmt:message key="AD01001B.TLA"/>");
-		} else if(($("#APContract").val()).replace(',','') > 1600000){
+		} else if(($("#APContract").val()).replace(',','') > 1600){
 			$("#adProgram").val("<fmt:message key="AD01001B.RLA"/>");
-		} else if(($("#APContract").val()).replace(',','') >= 400000){
+		} else if(($("#APContract").val()).replace(',','') >= 400){
 			$("#adProgram").val("<fmt:message key="AD01001B.simpleAD"/>");
 		} else if(($("#APContract").val()).replace(',','') > 0){
 			$("#adProgram").val("");
@@ -1630,15 +1630,15 @@
 	}
 
 	function setVenueActivity(){
-		if(($("#APContract").val()).replace(',','') > 90000000){
+		if(($("#APContract").val()).replace(',','') > 90000){
 			$("#venueActivity3").val("<fmt:message key="AD01001B.venueActivity3"/>");
 			$("#venueActivity2").val("<fmt:message key="AD01001B.venueActivity2"/>");
 			$("#venueActivity1").val("<fmt:message key="AD01001B.venueActivity1"/>");
-		} else if(($("#APContract").val()).replace(',','') > 1600000){
+		} else if(($("#APContract").val()).replace(',','') > 1600){
 			$("#venueActivity3").val("");
 			$("#venueActivity2").val("<fmt:message key="AD01001B.venueActivity2"/>");
 			$("#venueActivity1").val("<fmt:message key="AD01001B.venueActivity1"/>");
-		} else if(($("#APContract").val()).replace(',','') >= 400000){
+		} else if(($("#APContract").val()).replace(',','') >= 400){
 			$("#venueActivity3").val("");
 			$("#venueActivity2").val("");
 			$("#venueActivity1").val("<fmt:message key="AD01001B.venueActivity1"/>");

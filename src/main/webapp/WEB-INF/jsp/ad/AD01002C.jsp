@@ -98,6 +98,7 @@
     };
 	
 	function Search() {
+		debugger;
 		var table = new AW.XML.Table;
 	  	table.setURL("${contextPath}/service/simpleAction/AD0100207S");
 	  	table.setAsync(false);
