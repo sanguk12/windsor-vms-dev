@@ -188,9 +188,12 @@
 	/****************************************
 	 * Variable
 	 ****************************************/
-	 var grid_displayNum = "100"; 
-	 var myApprID = "000004";   //AD 승인라인
-	 var myADApprExID = "000006"; // AD Exception2
+	 var grid_displayNum = "100";
+	var myApprID = "000004";   //SimpleAD
+	var myADApprRLA = "000005"; // RLA
+	var myADApprTLA = "000006"; // TLA
+	 // var myApprID = "000004";   //AD 승인라인
+	 // var myADApprExID = "000006"; // AD Exception2
 	 var grpID = "000028"; //권한ID 3rd Party
 	 
 	/****************************************
@@ -296,10 +299,12 @@
 		table.request();
 		
 		if (table.getCount() > 0) {
-	 		if (apprTpID == myADApprExID) {
-				$("#myADApprEx2").text(table.getData(0,0));
-			} else {
+			if (apprTpID == myApprID) {
 				$("#myAppr").text(table.getData(0,0));
+			} else if(apprTpID == myADApprRLA){
+				$("#myADApprRLA").text(table.getData(0,0));
+			} else{
+				$("#myADApprTLA").text(table.getData(0,0));
 			}
 		}
 	}
@@ -772,8 +777,22 @@
 		var venueCD = grid.getCellText(_col.venueCD,i);
       	var adSupportID = grid.getCellText(_col.adSupportID,i);
      	var apprExpc = grid.getCellText(_col.apprExpc,i);
-     	var apprTpIDEx = (apprExpc == "2") ? myADApprExID : myApprID; 
-      	
+		var apprTpIDEx = "";
+		var contractMonth = grid.getCellText(_col.contractMonth, i);
+		var apAmt = grid.getCellText(_col.apAmt, i).replaceAll(",", "");
+		var monthAdAmt = apAmt/contractMonth;
+		 // 여기 하는중
+     	// var apprTpIDEx = (apprExpc == "2") ? myADApprExID : myApprID;
+		if (monthAdAmt >= 3000) {
+			apprTpIDEx = myADApprTLA // TLA
+		} else if(monthAdAmt >= 1000){
+			apprTpIDEx = myADApprRLA // RLA
+		} else if(monthAdAmt >= 200){
+			apprTpIDEx = myApprID // Simple AD
+		} else{
+			apprTpIDEx = myApprID // Simple AD
+		}
+
 		var url = "${contextPath}/service/simpleCommand/?mnuGrpID=${params.mnuGrpID}&pgmID=${params.pgmID}&viewID=AD01002B"
 				+"&adSupportID="+adSupportID
 				+"&venueCD="+venueCD

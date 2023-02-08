@@ -834,7 +834,7 @@
       	var adSeq = "";
       	var viewID = "";
 		var contractMonth = grid.getCellText(_col.contractMonth, i);
-		var apAmt = grid.getCellText(_col.apAmt, i);
+		var apAmt = grid.getCellText(_col.apAmt, i).replaceAll(",","");
 		var monthAdAmt = apAmt/contractMonth;
       	
         //AD계약해지 목록 Grid

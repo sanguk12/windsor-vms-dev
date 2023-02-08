@@ -217,6 +217,16 @@
 															<textarea id="commt" name="commt" rows="5" style="width:100%;" maxlength="500" ></textarea>
 														</td>
 													</tr>
+
+													<%--광고 프로그램--%>
+													<tr>
+														<td class="td-cond">
+															<fmt:message key="AD01001B.ADProgram" />
+														</td>
+														<td class="td-report">
+															<input type="text" id="adProgram" name="adProgram" disabled/>
+														</td>
+													</tr>
 													<tr>
 			        						 			<td class="td-cond-required">
 															<fmt:message key="AD01001B.bu" />
@@ -233,14 +243,20 @@
 															<div id="requiredDiv1" style="width:100%;">
 																<nis:selectbox id="requiredADCD1_S" name="requiredADCD1_S" style="width:150px;" defaultText="select" category="REQUIREDADCD" event="onchange" eventproc="selectRequiredAD(this,0);"/>
 																<input type="text" id="amt1" name="amt1" style="text-align:right; width:50px; margin-left:10px;" onkeyup="selectAmt(this,0);">
+																<%--위치작성--%>
+																<input type="text" id="location1" name="location1" style="text-align:left; width:120px; margin-left:10px;" onkeyup="selectAmt(this,0);">
 															</div>
 															<div id="requiredDiv2" style="width:100%;">
 																<nis:selectbox id="requiredADCD2_S" name="requiredADCD2_S" style="width:150px;" defaultText="select" category="REQUIREDADCD" event="onchange" eventproc="selectRequiredAD(this,1);"/>
 																<input type="text" id="amt2" name="amt2" style="text-align:right; width:50px; margin-left:10px;" onkeyup="selectAmt(this,1);">
+																<%--위치작성--%>
+																<input type="text" id="location2" name="location2" style="text-align:left; width:120px; margin-left:10px;" onkeyup="selectAmt(this,0);">
 															</div>
 															<div id="requiredDiv3" style="width:100%;">
 																<nis:selectbox id="requiredADCD3_S" name="requiredADCD3_S" style="width:150px;" defaultText="select" category="REQUIREDADCD" event="onchange" eventproc="selectRequiredAD(this,2);"/>
 																<input type="text" id="amt3" name="amt3" style="text-align:right; width:50px; margin-left:10px;" onkeyup="selectAmt(this,2);">
+																<%--위치작성--%>
+																<input type="text" id="location3" name="location3" style="text-align:left; width:120px; margin-left:10px;" onkeyup="selectAmt(this,0);">
 															</div>
 						                                </td>
 													</tr>
@@ -749,6 +765,8 @@
 					
 			$("#APContract").keyup(function(){
 				calculateAD();
+				setADProgram();
+				setVenueActivity();
 			});
 			$("#POSM").keyup(function(){
 				calculateAD();
@@ -759,6 +777,8 @@
 			$("#APContract").blur(function(){
 				$(this).val( $(this).val().replace(/[^0-9]/gi,"") );
 				$(this).val(formatNum($(this).val()));
+				setADProgram();
+				setVenueActivity();
 			});
 			$("#POSM").focus(function(){
 				$(this).val(unformatNum($(this).val()));
@@ -936,6 +956,10 @@
 			$("#APContract").attr("disabled", false);
 			$("#POSM").attr("disabled", false);
 			$("#commt").attr("disabled", false);
+			$("#adProgram").attr("disabled", true);
+			$("#venueActivity1").attr("disabled", true);
+			$("#venueActivity2").attr("disabled", true);
+			$("#venueActivity3").attr("disabled", true);
 			Search();
 			search_targetRate();
 			search_prevTargetRate();
@@ -948,6 +972,7 @@
 				$("#APContract").val(0);
 				$("#POSM").val(0);
 				$("#commt").val('');
+				$("#adProgram").val('');
 				$("#venue_popup").show();
 				$("#apprStateCD").val('10');
 				$("#apprStateCDName").text('등록');
@@ -1548,7 +1573,42 @@
       		return false;
       	}
 	}
-	
+
+
+	function setADProgram(){
+		if(($("#APContract").val()).replace(',','') > 90000){
+			$("#adProgram").val("<fmt:message key="AD01001B.TLA"/>");
+		} else if(($("#APContract").val()).replace(',','') > 1600){
+			$("#adProgram").val("<fmt:message key="AD01001B.RLA"/>");
+		} else if(($("#APContract").val()).replace(',','') >= 400){
+			$("#adProgram").val("<fmt:message key="AD01001B.simpleAD"/>");
+		} else if(($("#APContract").val()).replace(',','') > 0){
+			$("#adProgram").val("");
+		}
+
+	}
+
+	function setVenueActivity(){
+		if(($("#APContract").val()).replace(',','') > 90000){
+			$("#venueActivity3").val("<fmt:message key="AD01001B.venueActivity3"/>");
+			$("#venueActivity2").val("<fmt:message key="AD01001B.venueActivity2"/>");
+			$("#venueActivity1").val("<fmt:message key="AD01001B.venueActivity1"/>");
+		} else if(($("#APContract").val()).replace(',','') > 1600){
+			$("#venueActivity3").val("");
+			$("#venueActivity2").val("<fmt:message key="AD01001B.venueActivity2"/>");
+			$("#venueActivity1").val("<fmt:message key="AD01001B.venueActivity1"/>");
+		} else if(($("#APContract").val()).replace(',','') >= 400){
+			$("#venueActivity3").val("");
+			$("#venueActivity2").val("");
+			$("#venueActivity1").val("<fmt:message key="AD01001B.venueActivity1"/>");
+		} else if(($("#APContract").val()).replace(',','') > 0){
+			$("#venueActivity3").val("");
+			$("#venueActivity2").val("");
+			$("#venueActivity1").val("");
+		}
+	}
+
+
 	function setCurrContracDt(checkEl, selDt){
 		var table = new AW.XML.Table;
 		table.setURL("${contextPath}/service/simpleAction/AD0100140S");
@@ -2045,6 +2105,14 @@
 		table.setParameter("amt1", $("#amt1").val());
 		table.setParameter("amt2", $("#amt2").val());
 		table.setParameter("amt3", $("#amt3").val());
+		able.setParameter("location1", $("#location1").val());
+		table.setParameter("location2", $("#location2").val());
+		debugger;
+		table.setParameter("location3", $("#location3").val());
+		table.setParameter("adProgram", $("#adProgram").val());
+		table.setParameter("venueActivity1", $("#venueActivity1").val());
+		table.setParameter("venueActivity2", $("#venueActivity2").val());
+		table.setParameter("venueActivity3", $("#venueActivity3").val());
 		table.request();
 
 		if(table.getData(0,0) == "S") {
@@ -2071,7 +2139,7 @@
 	  			"POSM;threePercentIncentive;total;totalVol;commt;"+
 	  			"rageSphereCD;officeCD;apprExpc;seq;expcCommt;"+
 	  			"buCD;requiredADCD1;requiredADCD2;requiredADCD3;amt1;"+
-	  			"amt2;amt3;");
+	  			"amt2;amt3;location1;location2;location3;adProgram;venueActivity1;venueActivity2;venueActivity3;");
 	  	table.setParameter("format",
 	  			"str;str;str;str;str;"+
 	  			"str;str;str;str;str;"+
@@ -2079,7 +2147,7 @@
 	  			"str;str;str;str;str;"+
 	  			"str;str;str;str;str;"+
 	  			"str;str;str;str;str;"+
-	  			"str;str;");
+	  			"str;str;str;str;str;str;str;str;str;");
 	  	
 	  	table.setParameter("adSupportID", $("#adSupportID").val());
 	  	table.request();
@@ -2132,6 +2200,13 @@
       			$("#amt1").val(table.getData(29,0));
       			$("#amt2").val(table.getData(30,0));
       			$("#amt3").val(table.getData(31,0));
+				$("#location1").val(table.getData(32,0));
+				$("#location2").val(table.getData(33,0));
+				$("#location3").val(table.getData(34,0));
+				$("#adProgram").val(table.getData(35,0));
+				$("#venueActivity1").val(table.getData(36,0));
+				$("#venueActivity2").val(table.getData(37,0));
+				$("#venueActivity3").val(table.getData(38,0));
       			settingRequiredAD();
       		}
 	}

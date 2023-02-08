@@ -854,7 +854,7 @@
       	var viewID = "";
 
 		var contractMonth = grid.getCellText(_col.contractMonth, i);
-		var apAmt = grid.getCellText(_col.apAmt, i);
+		var apAmt = grid.getCellText(_col.apAmt, i).replceAll(",","");
 		var monthAdAmt = apAmt/contractMonth;
 
 		if (monthAdAmt >= 3000) {

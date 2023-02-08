@@ -563,7 +563,14 @@
 	    , t.REQUIREDADCD3 as "requiredADCD3"
 	    , t.AMT1 as "amt1"
 	    , t.AMT2 as "amt2"
-	    , t.AMT3 as "amt3" 
+	    , t.AMT3 as "amt3"
+		, t.LOCATION1 as "location1"
+		, t.LOCATION2 as "location2"
+		, t.LOCATION3 as "location3"
+		, t.adProgram as "adProgram"
+		, t.venueActivity1 as "venueActivity1"
+		, t.venueActivity2 as "venueActivity2"
+		, t.venueActivity3 as "venueActivity3"
 	   from(
 			SELECT
 				a.adSupportID 
@@ -594,6 +601,13 @@
                 , c.AMT1
                 , c.AMT2
                 , c.AMT3
+				, c.LOCATION1
+				, c.LOCATION2
+				, c.LOCATION3
+				, c.adProgram
+				, c.venueActivity1
+				, c.venueActivity2
+				, c.venueActivity3
             FROM GAD01MT a
                 INNER JOIN GVEN01MT b
                 ON a.venuecd = b.venuecd
@@ -1415,7 +1429,14 @@
 	    , t.REQUIREDADCD3 as "requiredADCD3"
 	    , t.AMT1 as "amt1"
 	    , t.AMT2 as "amt2"
-	    , t.AMT3 as "amt3"	 
+	    , t.AMT3 as "amt3"
+		, t.LOCATION1 as "location1"
+		, t.LOCATION2 as "location2"
+		, t.LOCATION3 as "location3"
+		, t.adProgram as "adProgram"
+		, t.venueActivity1 as "venueActivity1"
+		, t.venueActivity2 as "venueActivity2"
+		, t.venueActivity3 as "venueActivity3"
 	   from(
 			SELECT
 				a.adSupportID 
@@ -1448,6 +1469,13 @@
                 , c.AMT1
                 , c.AMT2
                 , c.AMT3
+				, c.LOCATION1
+				, c.LOCATION2
+				, c.LOCATION3
+				, c.adProgram
+				, c.venueActivity1
+				, c.venueActivity2
+				, c.venueActivity3
             FROM GAD04MT a
                 INNER JOIN GVEN01MT b
                 ON a.venuecd = b.venuecd
@@ -2281,7 +2309,14 @@
 			, AMT2
 			, REQUIREDADCD3
 			, AMT3
-			, ADSEQ	
+			, ADSEQ
+			, LOCATION1
+			, LOCATION2
+			, LOCATION3
+			, adProgram
+			, venueActivity1
+			, venueActivity2
+			, venueActivity3
 		)
 		values (
 			#adSupportID#
@@ -2293,6 +2328,13 @@
 			, #requiredADCD3#
 			, #amt3#
 			, #adSeq#
+			, #location1#
+			, #location2#
+			, #location3#
+			, #adProgram#
+			, #venueActivity1#
+			, #venueActivity2#
+			, #venueActivity3#
 		)
 	</insert>
 	
@@ -2444,6 +2486,13 @@
 			, AMT1 = #amt1#
 			, AMT2 = #amt2#
 			, AMT3 = #amt3#
+			, LOCATION1 = #location1#
+			, LOCATION2 = #location2#
+			, LOCATION3 = #location3#
+			, adProgram = #adProgram#
+			, venueActivity1 = #venueActivity1#
+			, venueActivity2 = #venueActivity2#
+			, venueActivity3 = #venueActivity3#
 		where ADSUPPORTID = #adSupportID#
 			and ADSEQ = #adSeq#
 	</update>

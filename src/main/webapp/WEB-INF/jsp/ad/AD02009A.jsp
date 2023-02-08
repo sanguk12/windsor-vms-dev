@@ -482,7 +482,7 @@
 	  			"file2;file3;apprStateCD;resultStateCD;adSupportID;"+
 	  			"lapprLevelNo;levelNo;lastApprYN;apprExpc;adSeq;"+
 	  			"adChgFlg;adContractDivCD;file1Cnt;file2Cnt;file3Cnt;"+
-	  			"rowNum;newcontractYn;");
+	  			"rowNum;newcontractYn;location1;location2;location3;adProgram;venueActivity1;venueActivity2;venueActivity3;");
 	  	table.setParameter("format",
 	  			"str;str;str;str;str;"+
 	  			"str;str;str;str;str;"+
@@ -493,7 +493,7 @@
 	  			"str;str;str;str;str;"+
 	  			"str;str;str;str;str;"+
 	  			"str;str;str;str;str;"+
-	  			"str;str;");
+	  			"str;str;str;str;str;str;str;str;str;");
 
 		table.setParameter("startDT", $("#yearFromCD_S").val() + $("#monthFromCD_S").val());
 		table.setParameter("endDT", $("#yearToCD_S").val() + $("#monthToCD_S").val());
@@ -558,6 +558,7 @@
 					, table.getData(_col.amt2,i)
 					, table.getData(_col.requiredADCD3Name,i)
 					, table.getData(_col.amt3,i)
+
 					, table.getData(_col.resultCommt,i)
 					, table.getData(_col.apprCommt,i)
 					, table.getData(_col.apprStateName,i)
@@ -889,10 +890,22 @@
       	var adSeq = grid.getCellText(_col.adSeq,i);
       	var adChgFlg = grid.getCellText(_col.adChgFlg,i);
       	var apprTpIDEx = "";
+		var contractMonth = grid.getCellText(_col.contractMonth, i);
+		var apAmt = grid.getCellText(_col.apAmt, i).replaceAll(",","");
+		var monthAdAmt = apAmt/contractMonth;
       	if(adChgFlg == "Y"){
       		apprTpIDEx = "000010";
       	} else{
-      		apprTpIDEx = (apprExpc == "2") ? "000006" : "000004";
+      		// apprTpIDEx = (apprExpc == "2") ? "000006" : "000004";
+			if (monthAdAmt >= 3000) {
+				apprTpIDEx = myADApprTLA // TLA
+			} else if(monthAdAmt >= 1000){
+				apprTpIDEx = myADApprRLA // RLA
+			} else if(monthAdAmt >= 200){
+				apprTpIDEx = myApprID // Simple AD
+			} else{
+				apprTpIDEx = myApprID // Simple AD
+			}
       	}
       	
     	var url = "${contextPath}/service/simpleCommand/?mnuGrpID=${params.mnuGrpID}&pgmID=${params.pgmID}&viewID=AD02004C"

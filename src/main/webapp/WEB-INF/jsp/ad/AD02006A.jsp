@@ -838,7 +838,7 @@
       	var adSeq = grid.getCellText(_col.adSeq,i);
       	// var apprTpIDEx = (apprExpc == "2") ? myADApprExID : myApprID;
 		var contractMonth = grid.getCellText(_col.contractMonth, i);
-		var apAmt = grid.getCellText(_col.apAmt, i);
+		var apAmt = grid.getCellText(_col.apAmt, i).replaceAll(",","");
 		var monthAdAmt = apAmt/contractMonth;
 		var apprTpIDEx = '';
 

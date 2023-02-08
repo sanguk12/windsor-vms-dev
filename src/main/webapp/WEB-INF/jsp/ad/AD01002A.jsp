@@ -793,7 +793,7 @@
 		var adSupportID = grid.getCellText(_col.adSupportID,i);
 		var apprExpc = grid.getCellText(_col.apprExpc,i);
 		var contractMonth = grid.getCellText(_col.contractMonth, i);
-		var apAmt = grid.getCellText(_col.apAmt, i);
+		var apAmt = grid.getCellText(_col.apAmt, i).replaceAll(",", "");
 		var monthAdAmt = apAmt/contractMonth;
 		var apprTpIDEx = '';
 

@@ -563,6 +563,13 @@
 	    , t.AMT2 as "amt2"
 	    , t.AMT3 as "amt3" 
 	    , t.originContractStateCD as "originContractStateCD"
+		, t.LOCATION1 as "location1"
+		, t.LOCATION2 as "location2"
+		, t.LOCATION3 as "location3"
+		, t.adProgram as "adProgram"
+		, t.venueActivity1 as "venueActivity1"
+		, t.venueActivity2 as "venueActivity2"
+		, t.venueActivity3 as "venueActivity3"
 	   from(
 			SELECT
 				a.adSupportID 
@@ -594,6 +601,13 @@
                 , c.AMT2
                 , c.AMT3
                 , a.contractstatecd		as	originContractStateCD
+				, c.LOCATION1
+				, c.LOCATION2
+				, c.LOCATION3
+				, c.adProgram
+				, c.venueActivity1
+				, c.venueActivity2
+				, c.venueActivity3
             FROM GAD01MT a
                 INNER JOIN GVEN01MT b
                 ON a.venuecd = b.venuecd
@@ -1424,6 +1438,13 @@
 	    , t.AMT3 as "amt3"	 
 	    , t.ADCHGFLG as "adChgFlg"
 	    , t.originContractStateCD as "originContractStateCD"
+		, t.LOCATION1 as "location1"
+		, t.LOCATION2 as "location2"
+		, t.LOCATION3 as "location3"
+		, t.adProgram as "adProgram"
+		, t.venueActivity1 as "venueActivity1"
+		, t.venueActivity2 as "venueActivity2"
+		, t.venueActivity3 as "venueActivity3"
 	   from(
 			SELECT
 				a.adSupportID 
@@ -1458,6 +1479,13 @@
                 , d.AMT3
                 , a.ADCHGFLG
                 , c.contractstatecd		as originContractStateCD
+				, d.LOCATION1
+				, d.LOCATION2
+				, d.LOCATION3
+				, d.adProgram
+				, d.venueActivity1
+				, d.venueActivity2
+				, d.venueActivity3
             FROM GAD04MT a
                 INNER JOIN GVEN01MT b
                 ON a.venuecd = b.venuecd

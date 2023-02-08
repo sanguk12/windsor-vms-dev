@@ -898,6 +898,13 @@
 			, AMT2
 			, REQUIREDADCD3
 			, AMT3
+			, LOCATION1
+			, LOCATION2
+			, LOCATION3
+			, adProgram
+			, venueActivity1
+			, venueActivity2
+			, venueActivity3
 		)
 		select
 			ADSUPPORTID
@@ -908,6 +915,13 @@
 			, AMT2
 			, REQUIREDADCD3
 			, AMT3
+			, LOCATION1
+			, LOCATION2
+			, LOCATION3
+			, adProgram
+			, venueActivity1
+			, venueActivity2
+			, venueActivity3
 		from GAD09MT
 		where
 			ADSUPPORTID = #adSupportID#

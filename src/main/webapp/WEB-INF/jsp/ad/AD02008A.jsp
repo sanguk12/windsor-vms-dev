@@ -843,10 +843,23 @@
       	var adSeq = grid.getCellText(_col.adSeq,i);
       	var adChgFlg = grid.getCellText(_col.adChgFlg,i);
       	var apprTpIDEx = "";
+		debugger;
+		var contractMonth = grid.getCellText(_col.contractMonth, i);
+		var apAmt = grid.getCellText(_col.apAmt, i).replaceAll(",", "");
+		var monthAdAmt = apAmt/contractMonth;
       	if(adChgFlg == "Y"){
       		apprTpIDEx = "000010";
       	} else{
-      		apprTpIDEx = (apprExpc == "2") ? "000006" : "000004";
+      		// apprTpIDEx = (apprExpc == "2") ? "000006" : "000004";
+			if (monthAdAmt >= 3000) {
+				apprTpIDEx = myADApprTLA // TLA
+			} else if(monthAdAmt >= 1000){
+				apprTpIDEx = myADApprRLA // RLA
+			} else if(monthAdAmt >= 200){
+				apprTpIDEx = myApprID // Simple AD
+			} else{
+				apprTpIDEx = myApprID // Simple AD
+			}
       	}
     	
     	var url = "${contextPath}/service/simpleCommand/?mnuGrpID=${params.mnuGrpID}&pgmID=${params.pgmID}&viewID=AD02004C"

@@ -221,6 +221,16 @@
 															<textarea id="commt" name="commt" rows="5" style="width:100%;" maxlength="500" ></textarea>
 														</td>
 													</tr>
+
+													<%--광고 프로그램--%>
+													<tr>
+														<td class="td-cond">
+															<fmt:message key="AD01001B.ADProgram" />
+														</td>
+														<td class="td-report">
+															<input type="text" id="adProgram" name="adProgram" disabled/>
+														</td>
+													</tr>
 													<tr>
 			        						 			<td class="td-cond-required">
 															<fmt:message key="AD01001B.bu" />
@@ -237,17 +247,41 @@
 															<div id="requiredDiv1" style="width:100%;">
 																<nis:selectbox id="requiredADCD1_S" name="requiredADCD1_S" style="width:150px;" defaultText="select" category="REQUIREDADCD" event="onchange" eventproc="selectRequiredAD(this,0);"/>
 																<input type="text" id="amt1" name="amt1" style="text-align:right; width:50px; margin-left:10px;" onkeyup="selectAmt(this,0);">
+																<%--위치작성--%>
+																<input type="text" id="location1" name="location1" style="text-align:left; width:120px; margin-left:10px;" onkeyup="selectAmt(this,0);">
 															</div>
 															<div id="requiredDiv2" style="width:100%;">
 																<nis:selectbox id="requiredADCD2_S" name="requiredADCD2_S" style="width:150px;" defaultText="select" category="REQUIREDADCD" event="onchange" eventproc="selectRequiredAD(this,1);"/>
 																<input type="text" id="amt2" name="amt2" style="text-align:right; width:50px; margin-left:10px;" onkeyup="selectAmt(this,1);">
+																<%--위치작성--%>
+																<input type="text" id="location2" name="location2" style="text-align:left; width:120px; margin-left:10px;" onkeyup="selectAmt(this,0);">
 															</div>
 															<div id="requiredDiv3" style="width:100%;">
 																<nis:selectbox id="requiredADCD3_S" name="requiredADCD3_S" style="width:150px;" defaultText="select" category="REQUIREDADCD" event="onchange" eventproc="selectRequiredAD(this,2);"/>
 																<input type="text" id="amt3" name="amt3" style="text-align:right; width:50px; margin-left:10px;" onkeyup="selectAmt(this,2);">
+																<%--위치작성--%>
+																<input type="text" id="location3" name="location3" style="text-align:left; width:120px; margin-left:10px;" onkeyup="selectAmt(this,0);">
 															</div>
 						                                </td>
 													</tr>
+													<%--업소 활동--%>
+													<tr>
+														<td class="td-cond">
+															<fmt:message key="AD01001B.venueActivity" />
+														</td>
+														<td class="td-report">
+															<div id="venueActivityDiv1" style="width:100%;">
+																<input type="text" id="venueActivity1" name="venueActivity1" disabled/>
+															</div>
+															<div id="venueActivityDiv2" style="width:100%;">
+																<input type="text" id="venueActivity2" name="venueActivity2" disabled/>
+															</div>
+															<div id="venueActivityDiv3" style="width:100%;">
+																<input type="text" id="venueActivity3" name="venueActivity3" disabled/>
+															</div>
+														</td>
+													</tr>
+
 													<tr>
 														<td  class="group-title" style="border:0" height="1">
 															<fmt:message key="AD01001B.prdList" />
@@ -768,6 +802,8 @@
 					
 			$("#APContract").keyup(function(){
 				calculateAD();
+				setADProgram();
+				setVenueActivity();
 			});
 			$("#POSM").keyup(function(){
 				calculateAD();
@@ -778,6 +814,8 @@
 			$("#APContract").blur(function(){
 				$(this).val( $(this).val().replace(/[^0-9]/gi,"") );
 				$(this).val(formatNum($(this).val()));
+				setADProgram();
+				setVenueActivity();
 			});
 			$("#POSM").focus(function(){
 				$(this).val(unformatNum($(this).val()));
@@ -1026,6 +1064,10 @@
 		$("#APContract").attr("disabled", false);
 		$("#POSM").attr("disabled", false);
 		$("#commt").attr("disabled", false);
+		$("#adProgram").attr("disabled", true);
+		$("#venueActivity1").attr("disabled", true);
+		$("#venueActivity2").attr("disabled", true);
+		$("#venueActivity3").attr("disabled", true);
 		productCartPopup_btn.setControlDisabled(false);
 		dateDelay_btn.setControlDisabled(false);
 		grid_prd.setCellEditable(true);
@@ -1556,6 +1598,42 @@
       		return false;
       	}
 	}
+
+	function setADProgram(){
+		if(($("#APContract").val()).replace(',','') > 90000){
+			$("#adProgram").val("<fmt:message key="AD01001B.TLA"/>");
+		} else if(($("#APContract").val()).replace(',','') > 1600){
+			$("#adProgram").val("<fmt:message key="AD01001B.RLA"/>");
+		} else if(($("#APContract").val()).replace(',','') >= 400){
+			$("#adProgram").val("<fmt:message key="AD01001B.simpleAD"/>");
+		} else if(($("#APContract").val()).replace(',','') > 0){
+			$("#adProgram").val("");
+		}
+
+	}
+
+	function setVenueActivity(){
+		if(($("#APContract").val()).replace(',','') > 90000){
+			$("#venueActivity3").val("<fmt:message key="AD01001B.venueActivity3"/>");
+			$("#venueActivity2").val("<fmt:message key="AD01001B.venueActivity2"/>");
+			$("#venueActivity1").val("<fmt:message key="AD01001B.venueActivity1"/>");
+		} else if(($("#APContract").val()).replace(',','') > 1600){
+			$("#venueActivity3").val("");
+			$("#venueActivity2").val("<fmt:message key="AD01001B.venueActivity2"/>");
+			$("#venueActivity1").val("<fmt:message key="AD01001B.venueActivity1"/>");
+		} else if(($("#APContract").val()).replace(',','') >= 400){
+			$("#venueActivity3").val("");
+			$("#venueActivity2").val("");
+			$("#venueActivity1").val("<fmt:message key="AD01001B.venueActivity1"/>");
+		} else if(($("#APContract").val()).replace(',','') > 0){
+			$("#venueActivity3").val("");
+			$("#venueActivity2").val("");
+			$("#venueActivity1").val("");
+		}
+	}
+
+
+
 	function setCurrContracDt(checkEl, selDt){
 		var table = new AW.XML.Table;
 		table.setURL("${contextPath}/service/simpleAction/AD0100140S");
@@ -2056,6 +2134,7 @@
 			table.setURL("${contextPath}/service/ad02/contractTmpSaveRequiredAD");
 			table.setAsync(false);
 			table.setRequestMethod("POST");
+			debugger;
 			table.setParameter("empID", "${params.empID}");
 			table.setParameter("adSupportID", $("#adSupportID").val());
 			table.setParameter("venueCD", $("#venueCD").val());
@@ -2070,6 +2149,13 @@
 			table.setParameter("amt1", $("#amt1").val());
 			table.setParameter("amt2", $("#amt2").val());
 			table.setParameter("amt3", $("#amt3").val());
+			table.setParameter("location1", $("#location1").val());
+			table.setParameter("location2", $("#location2").val());
+			table.setParameter("location3", $("#location3").val());
+			table.setParameter("adProgram", $("#adProgram").val());
+			table.setParameter("venueActivity1", $("#venueActivity1").val());
+			table.setParameter("venueActivity2", $("#venueActivity2").val());
+			table.setParameter("venueActivity3", $("#venueActivity3").val());
 			table.setParameter("adChgFlg", "Y");
 			table.request();
 			
@@ -2202,6 +2288,13 @@
 			table.setParameter("amt1", $("#amt1").val());
 			table.setParameter("amt2", $("#amt2").val());
 			table.setParameter("amt3", $("#amt3").val());
+			table.setParameter("location1", $("#location1").val());
+			table.setParameter("location2", $("#location2").val());
+			table.setParameter("location3", $("#location3").val());
+			table.setParameter("adProgram", $("#adProgram").val());
+			table.setParameter("venueActivity1", $("#venueActivity1").val());
+			table.setParameter("venueActivity2", $("#venueActivity2").val());
+			table.setParameter("venueActivity3", $("#venueActivity3").val());
 			table.setParameter("adChgFlg", "N");
 			table.request();
 	
@@ -2233,7 +2326,7 @@
 	  			"rageSphereCD;officeCD;apprExpc;seq;expcCommt;"+
 	  			"payStateCD;adSeq;buCD;requiredADCD1;requiredADCD2;"+
 	  			"requiredADCD3;amt1;amt2;amt3;adChgFlg;"+
-	  			"originContractStateCD;");
+	  			"originContractStateCD;location1;location2;location3;adProgram;venueActivity1;venueActivity2;venueActivity3;");
 	  	table.setParameter("format",
 	  			"str;str;str;str;str;"+
 	  			"str;str;str;str;str;"+
@@ -2242,7 +2335,7 @@
 	  			"str;str;str;str;str;"+
 	  			"str;str;str;str;str;"+
 	  			"str;str;str;str;str;"+
-	  			"str;");
+	  			"str;str;str;str;str;str;str;str;");
 	  	
 	  	table.setParameter("adSupportID", $("#adSupportID").val());
 	  	table.setParameter("adSeq", $("#adSeq").val());
@@ -2283,6 +2376,13 @@
       			$("#payStateCD").val(table.getData(25,0));
       			$("#adChgFlg").val(table.getData(34,0));
       			$("#originContractStateCD").val(table.getData(35,0));
+				$("#location1").val(table.getData(36,0));
+				$("#location2").val(table.getData(37,0));
+				$("#location3").val(table.getData(38,0));
+				$("#adProgram").val(table.getData(39,0));
+				$("#venueActivity1").val(table.getData(40,0));
+				$("#venueActivity2").val(table.getData(41,0));
+				$("#venueActivity3").val(table.getData(42,0));
       			if($("#apprStateCD").val() == "50"){
       				btnContract.setControlDisabled(false);
       			}
