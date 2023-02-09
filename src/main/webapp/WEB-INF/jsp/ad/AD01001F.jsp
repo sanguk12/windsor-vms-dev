@@ -313,6 +313,8 @@
 	<input type="hidden" id="apprExpc" name="apprExpc" />
 	<!-- Exception 사유 -->
 	<input type="hidden" id="expcCommt" name="expcCommt" />
+	<!-- total 여부 -->
+	<input type="hidden" id="totalVol" name="totalVol" />
 	<!-- M&E RawData 제품 Seq -->
 	<input type="hidden" id="seq" name="seq" />
 	<!-- 계약상태  -->
