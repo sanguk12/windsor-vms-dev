@@ -276,360 +276,362 @@
 															</div>
 														</td>
 													</tr>
-
-<%--													<tr>--%>
-<%--														<td  class="group-title" style="border:0" height="1">--%>
-<%--															<fmt:message key="AD01001B.prdList" />--%>
-<%--														</td>--%>
-<%--						            					<td style="text-align:right; border:0">--%>
-<%--						            					&nbsp;<span id="productCartPopup_btn"></span>--%>
-<%--													</td>--%>
-<%--						           				 </tr>--%>
-<%--						            			<tr>--%>
-<%--													<td height = "*" colspan="2">--%>
-<%--														<span id="grid_prd"></span>--%>
-<%--													</td>--%>
-<%--												</tr>	--%>
-<%--												<tr>--%>
-<%--						            <td height="1" colspan="2">--%>
-<%--						            <table border="0" cellspacing="0" cellpadding="0" width="380px">--%>
-<%--                								<colgroup>--%>
-<%--			        								<col style="width:180px;"></col>--%>
-<%--			        								<col style="width:200px;"></col>--%>
-<%--			        								<col></col>--%>
-<%--			        						</colgroup>--%>
-<%--			        						 	<tbody>--%>
-<%--			        						 		<tr>--%>
-<%--			        						 			<td class="td-report" style="font-weight:bold; text-align:right;">--%>
-<%--															<fmt:message key="AD01001B.total" />&nbsp;&nbsp;--%>
-<%--														</td>--%>
-<%--														<td class="td-report" style="font-weight:bold;text-align:right;">--%>
-<%--															<span id="totalVol"></span>&nbsp;--%>
-<%--														</td>--%>
-<%--													</tr>--%>
-<%--													</tbody>--%>
-<%--												</table>--%>
-<%--												</td>--%>
-<%--												</tr>--%>
+													<%--0210  style="display: none;"--%>
+													<tr style="display: none;">
+															<td  class="group-title" style="border: 0;">
+																<fmt:message key="AD01001B.prdList" />
+															</td>
+															<td style="text-align:right; border:0;">
+															&nbsp;<span id="productCartPopup_btn"></span>
+															</td>
+						           				 	</tr>
+													<tr style="display: none;">
+														<td height = "*" colspan="2">
+															<span id="grid_prd"></span>
+														</td>
+													</tr>
+													<tr style="display: none;">
+														<td height="1" colspan="2">
+															<table border="0" cellspacing="0" cellpadding="0" width="380px">
+																<colgroup>
+																	<col style="width:180px;"></col>
+																	<col style="width:200px;"></col>
+																	<col></col>
+																</colgroup>
+																<tbody>
+																	<tr>
+																		<td class="td-report" style="font-weight:bold; text-align:right;">
+																			<fmt:message key="AD01001B.total" />&nbsp;&nbsp;
+																		</td>
+																		<td class="td-report" style="font-weight:bold;text-align:right;">
+																			<span id="totalVol"></span>&nbsp;
+																		</td>
+																	</tr>
+																</tbody>
+															</table>
+														</td>
+													</tr>
+													<%-- 0210 style="display: none;"--%>
 			        						 	</tbody>
 			        						</table>
 						            	</td>
-<%--						            	<td height="1">--%>
-<%--						            		<table border="0" cellspacing="0" cellpadding="0" width="100%" height="100%">--%>
-<%--                								<colgroup>--%>
-<%--			        								<col style="width:25%;"></col>--%>
-<%--			        								<col style="width:25%;"></col>--%>
-<%--			        								<col style="width:25%;"></col>--%>
-<%--			        								<col style="width:25%;"></col>--%>
-<%--			        								<col></col>--%>
-<%--			        						</colgroup>--%>
-<%--			        						 	<tbody>--%>
-<%--			        						 		<tr>--%>
-<%--			        						 			<td class="td-cond" style="text-align:center;">--%>
-<%--															<fmt:message key="AD01001B.Estimation" />--%>
-<%--														</td>--%>
-<%--														<td class="td-cond" style="text-align:center;">--%>
-<%--															<fmt:message key="AD01001B.prevYear" />--%>
-<%--														</td>--%>
-<%--			        						 			<td class="td-cond" style="text-align:center;">--%>
-<%--															<fmt:message key="AD01001B.contract" />--%>
-<%--														</td>--%>
-<%--														<td class="td-cond" style="text-align:center;">--%>
-<%--															<fmt:message key="AD01001B.gap" />--%>
-<%--														</td>--%>
-<%--													</tr>--%>
-<%--			        						 		<tr>--%>
-<%--			        						 			<td class="td-cond">--%>
-<%--															<fmt:message key="AD01001B.GSV" />--%>
-<%--														</td>--%>
-<%--														<td class="td-report" style="text-align:right;">--%>
-<%--															<span id="GSV1"></span>&nbsp;--%>
-<%--														</td>--%>
-<%--														<td class="td-report" style="text-align:right;">--%>
-<%--															<span id="GSV2"></span>&nbsp;--%>
-<%--														</td>--%>
-<%--														<td class="td-report" style="text-align:right;">--%>
-<%--															<span id="GSV3"></span>&nbsp;--%>
-<%--														</td>--%>
-<%--													</tr>--%>
-<%--			        						 		<tr>--%>
-<%--			        						 			<td class="td-cond">--%>
-<%--															<fmt:message key="AD01001B.tradeSpend" />--%>
-<%--														</td>--%>
-<%--														<td class="td-report" style="text-align:right;">--%>
-<%--															<span id="tradeSpend1"></span>&nbsp;--%>
-<%--														</td>--%>
-<%--														<td class="td-report" style="text-align:right;">--%>
-<%--															<span id="tradeSpend2"></span>&nbsp;--%>
-<%--														</td>--%>
-<%--														<td class="td-report" style="text-align:right;">--%>
-<%--															<span id="tradeSpend3"></span>&nbsp;--%>
-<%--														</td>--%>
-<%--													</tr>--%>
-<%--			        						 		<tr>--%>
-<%--			        						 			<td class="td-cond">--%>
-<%--															<fmt:message key="AD01001B.duty" />--%>
-<%--														</td>--%>
-<%--														<td class="td-report" style="text-align:right;">--%>
-<%--															<span id="duty1"></span>&nbsp;--%>
-<%--														</td>--%>
-<%--														<td class="td-report" style="text-align:right;">--%>
-<%--															<span id="duty2"></span>&nbsp;--%>
-<%--														</td>--%>
-<%--														<td class="td-report" style="text-align:right;">--%>
-<%--															<span id="duty3"></span>&nbsp;--%>
-<%--														</td>--%>
-<%--													</tr>--%>
-<%--			        						 		<tr>--%>
-<%--			        						 			<td class="td-cond">--%>
-<%--															<fmt:message key="AD01001B.NSV" />--%>
-<%--														</td>--%>
-<%--														<td class="td-report" style="text-align:right;">--%>
-<%--															<span id="NSV1"></span>&nbsp;--%>
-<%--														</td>--%>
-<%--														<td class="td-report" style="text-align:right;">--%>
-<%--															<span id="NSV2"></span>&nbsp;--%>
-<%--														</td>--%>
-<%--														<td class="td-report" style="text-align:right;">--%>
-<%--															<span id="NSV3"></span>&nbsp;--%>
-<%--														</td>--%>
-<%--													</tr>--%>
-<%--			        						 		<tr>--%>
-<%--			        						 			<td class="td-cond">--%>
-<%--															<fmt:message key="AD01001B.COGS" />--%>
-<%--														</td>--%>
-<%--														<td class="td-report" style="text-align:right;">--%>
-<%--															<span id="COGS1"></span>&nbsp;--%>
-<%--														</td>--%>
-<%--														<td class="td-report" style="text-align:right;">--%>
-<%--															<span id="COGS2"></span>&nbsp;--%>
-<%--														</td>--%>
-<%--														<td class="td-report" style="text-align:right;">--%>
-<%--															<span id="COGS3"></span>&nbsp;--%>
-<%--														</td>--%>
-<%--													</tr>--%>
-<%--			        						 		<tr>--%>
-<%--			        						 			<td class="td-cond">--%>
-<%--															<fmt:message key="AD01001B.GP" />--%>
-<%--														</td>--%>
-<%--														<td class="td-report" style="text-align:right;">--%>
-<%--															<span id="GP1"></span>&nbsp;--%>
-<%--														</td>--%>
-<%--														<td class="td-report" style="text-align:right;">--%>
-<%--															<span id="GP2"></span>&nbsp;--%>
-<%--														</td>--%>
-<%--														<td class="td-report" style="text-align:right;">--%>
-<%--															<span id="GP3"></span>&nbsp;--%>
-<%--														</td>--%>
-<%--													</tr>--%>
-<%--			        						 		<tr>--%>
-<%--			        						 			<td class="td-cond">--%>
-<%--															<fmt:message key="AD01001B.APContract" />--%>
-<%--														</td>--%>
-<%--														<td class="td-report" style="text-align:right;">--%>
-<%--															<span id="APContract1"></span>&nbsp;--%>
-<%--														</td>--%>
-<%--														<td class="td-report" style="text-align:right;">--%>
-<%--															<span id="APContract2"></span>&nbsp;--%>
-<%--														</td>--%>
-<%--														<td class="td-report" style="text-align:right;">--%>
-<%--															<span id="APContract3"></span>&nbsp;--%>
-<%--														</td>--%>
-<%--													</tr>--%>
-<%--			        						 		<tr>--%>
-<%--			        						 			<td class="td-cond">--%>
-<%--															<fmt:message key="AD01001B.APOthers" />--%>
-<%--														</td>--%>
-<%--														<td class="td-report" style="text-align:right;">--%>
-<%--															<span id="APOthers1"></span>&nbsp;--%>
-<%--														</td>--%>
-<%--														<td class="td-report" style="text-align:right;">--%>
-<%--															<span id="APOthers2"></span>&nbsp;--%>
-<%--														</td>--%>
-<%--														<td class="td-report" style="text-align:right;">--%>
-<%--															<span id="APOthers3"></span>&nbsp;--%>
-<%--														</td>--%>
-<%--													</tr>--%>
-<%--			        						 		<tr>--%>
-<%--			        						 			<td class="td-cond">--%>
-<%--															<fmt:message key="AD01001B.caap" />--%>
-<%--														</td>--%>
-<%--														<td class="td-report" style="text-align:right;">--%>
-<%--															<span id="caap1"></span>&nbsp;--%>
-<%--														</td>--%>
-<%--														<td class="td-report" style="text-align:right;">--%>
-<%--															<span id="caap2"></span>&nbsp;--%>
-<%--														</td>--%>
-<%--														<td class="td-report" style="text-align:right;">--%>
-<%--															<span id="caap3"></span>&nbsp;--%>
-<%--														</td>--%>
-<%--													</tr>--%>
-<%--													<tr>--%>
-<%--														<td height="*" colspan="4">--%>
-<%--						            		<table border="0" cellspacing="0" cellpadding="0" width="100%" style="border-right:0px;border-left:0px;">--%>
-<%--                								<colgroup>--%>
-<%--			        								<col style="width:36%;"></col>--%>
-<%--			        								<col style="width:16%;"></col>--%>
-<%--			        								<col style="width:16%;"></col>--%>
-<%--			        								<col style="width:16%;"></col>--%>
-<%--			        								<col style="width:16%;"></col>--%>
-<%--			        								<col></col>--%>
-<%--			        						</colgroup>--%>
-<%--			        						 	<tbody>--%>
-<%--			        						 		<tr>--%>
-<%--			        						 			<td class="td-cond" style="text-align:center;">--%>
-<%--															<fmt:message key="AD01001B.preMandE" />--%>
-<%--														</td>--%>
-<%--														<td class="td-cond" style="text-align:center;">--%>
-<%--															<fmt:message key="AD01001B.prevYear" />--%>
-<%--														</td>--%>
-<%--			        						 			<td class="td-cond" style="text-align:center;">--%>
-<%--															<fmt:message key="AD01001B.contract" />--%>
-<%--														</td>--%>
-<%--														<td class="td-cond" style="text-align:center;">--%>
-<%--															<fmt:message key="AD01001B.gap" />--%>
-<%--														</td>--%>
-<%--														<td class="td-cond" style="text-align:center;">--%>
-<%--															<fmt:message key="AD01001B.gapRate" />--%>
-<%--														</td>--%>
-<%--													</tr>--%>
-<%--			        						 		<tr>--%>
-<%--			        						 			<td class="td-cond">--%>
-<%--															<fmt:message key="AD01001B.bestEstimationMonth" />--%>
-<%--														</td>--%>
-<%--														<td class="td-report" style="text-align:right;">--%>
-<%--															<span id="bestEstimationMonth1"></span>&nbsp;--%>
-<%--														</td>--%>
-<%--														<td class="td-report" style="text-align:right;">--%>
-<%--															<span id="bestEstimationMonth2"></span>&nbsp;--%>
-<%--														</td>--%>
-<%--														<td class="td-report" style="text-align:right;">--%>
-<%--															<span id="bestEstimationMonth3"></span>&nbsp;--%>
-<%--														</td>--%>
-<%--														<td class="td-report" style="text-align:right;">--%>
-<%--															<span id="bestEstimationMonth4"></span>&nbsp;--%>
-<%--														</td>--%>
-<%--													</tr>--%>
-<%--			        						 		<tr>--%>
-<%--			        						 			<td class="td-cond">--%>
-<%--															<fmt:message key="AD01001B.gpRate" />--%>
-<%--														</td>--%>
-<%--														<td class="td-report" style="text-align:right;">--%>
-<%--															<span id="gpRate1"></span>&nbsp;--%>
-<%--														</td>--%>
-<%--														<td class="td-report" style="text-align:right;">--%>
-<%--															<span id="gpRate2"></span>&nbsp;--%>
-<%--														</td>--%>
-<%--														<td class="td-report" style="text-align:right;">--%>
-<%--															<span id="gpRate3"></span>&nbsp;--%>
-<%--														</td>--%>
-<%--														<td class="td-report" style="text-align:right;">--%>
-<%--															<span id="gpRate4"></span>&nbsp;--%>
-<%--														</td>--%>
-<%--													</tr>--%>
-<%--			        						 		<tr>--%>
-<%--			        						 			<td class="td-cond">--%>
-<%--															<fmt:message key="AD01001B.costRate" />--%>
-<%--														</td>--%>
-<%--														<td class="td-report" style="text-align:right;">--%>
-<%--															<span id="costRate1"></span>&nbsp;--%>
-<%--														</td>--%>
-<%--														<td class="td-report" style="text-align:right;">--%>
-<%--															<span id="costRate2"></span>&nbsp;--%>
-<%--														</td>--%>
-<%--														<td class="td-report" style="text-align:right;">--%>
-<%--															<span id="costRate3"></span>&nbsp;--%>
-<%--														</td>--%>
-<%--														<td class="td-report" style="text-align:right;">--%>
-<%--															<span id="costRate4"></span>&nbsp;--%>
-<%--														</td>--%>
-<%--													</tr>--%>
-<%--			        						 		<tr>--%>
-<%--			        						 			<td class="td-cond">--%>
-<%--															<fmt:message key="AD01001B.sdxMixRate" />--%>
-<%--														</td>--%>
-<%--														<td class="td-report" style="text-align:right;">--%>
-<%--															<span id="sdxMixRate1"></span>&nbsp;--%>
-<%--														</td>--%>
-<%--														<td class="td-report" style="text-align:right;">--%>
-<%--															<span id="sdxMixRate2"></span>&nbsp;--%>
-<%--														</td>--%>
-<%--														<td class="td-report" style="text-align:right;">--%>
-<%--															<span id="sdxMixRate3"></span>&nbsp;--%>
-<%--														</td>--%>
-<%--														<td class="td-report" style="text-align:right;">--%>
-<%--															<span id="sdxMixRate4"></span>&nbsp;--%>
-<%--														</td>--%>
-<%--													</tr>--%>
-<%--			        						 		<tr>--%>
-<%--			        						 			<td class="td-cond">--%>
-<%--															<fmt:message key="AD01001B.totalCostRate" />--%>
-<%--														</td>--%>
-<%--														<td class="td-report" style="text-align:right;">--%>
-<%--															<span id="totalCostRate1"></span>&nbsp;--%>
-<%--														</td>--%>
-<%--														<td class="td-report" style="text-align:right;">--%>
-<%--															<span id="totalCostRate2"></span>&nbsp;--%>
-<%--														</td>--%>
-<%--														<td class="td-report" style="text-align:right;">--%>
-<%--															<span id="totalCostRate3"></span>&nbsp;--%>
-<%--														</td>--%>
-<%--														<td class="td-report" style="text-align:right;">--%>
-<%--															<span id="totalCostRate4"></span>&nbsp;--%>
-<%--														</td>--%>
-<%--													</tr>--%>
-<%--			        						 		<tr>--%>
-<%--			        						 			<td class="td-cond">--%>
-<%--															<fmt:message key="AD01001B.caapPerNSV" />--%>
-<%--														</td>--%>
-<%--														<td class="td-report" style="text-align:right;">--%>
-<%--															<span id="caapPerNSV1"></span>&nbsp;--%>
-<%--														</td>--%>
-<%--														<td class="td-report" style="text-align:right;">--%>
-<%--															<span id="caapPerNSV2"></span>&nbsp;--%>
-<%--														</td>--%>
-<%--														<td class="td-report" style="text-align:right;">--%>
-<%--															<span id="caapPerNSV3"></span>&nbsp;--%>
-<%--														</td>--%>
-<%--														<td class="td-report" style="text-align:right;">--%>
-<%--															<span id="caapPerNSV4"></span>&nbsp;--%>
-<%--														</td>--%>
-<%--													</tr>--%>
-<%--			        						 		<tr>--%>
-<%--			        						 			<td class="td-cond">--%>
-<%--															<fmt:message key="AD01001B.mThan36MContract" />--%>
-<%--														</td>--%>
-<%--														<td class="td-report" style="text-align:right;" id="td_mThan36MContract">--%>
-<%--															<span id="mThan36MContract"></span>&nbsp;--%>
-<%--														</td>--%>
-<%--														<td class="td-cond" colspan="2">--%>
-<%--															<fmt:message key="AD01001B.adCostPerGSV" />--%>
-<%--														</td>--%>
-<%--														<td class="td-report" style="text-align:right;" id="td_adCostPerGSV">--%>
-<%--															<span id="adCostPerGSV"></span>&nbsp;--%>
-<%--														</td>--%>
-<%--													</tr>--%>
-<%--			        						 		<tr>--%>
-<%--			        						 			<td class="td-cond">--%>
-<%--															<fmt:message key="AD01001B.prevYearChgCost" />--%>
-<%--														</td>--%>
-<%--														<td class="td-report" style="text-align:right;" id="td_prevYearChgCost">--%>
-<%--															<span id="prevYearChgCost"></span>&nbsp;--%>
-<%--														</td>--%>
-<%--														<td class="td-cond" colspan="2">--%>
-<%--															<fmt:message key="AD01001B.minVolYN" />--%>
-<%--														</td>--%>
-<%--														<td class="td-report" style="text-align:right;" id="td_minVolYN">--%>
-<%--															<span id="minVolYN"></span>&nbsp;--%>
-<%--														</td>--%>
-<%--													</tr>--%>
-<%--			        						 	</tbody>--%>
-<%--			        						</table>--%>
-<%--						            	</td>--%>
-<%--													</tr>--%>
-<%--			        						 	</tbody>--%>
-<%--			        						</table>--%>
-<%--						            	</td>--%>
+						            	<td height="1" style="display: none;">
+						            		<table border="0" cellspacing="0" cellpadding="0" width="100%" height="100%">
+                								<colgroup>
+			        								<col style="width:25%;"></col>
+			        								<col style="width:25%;"></col>
+			        								<col style="width:25%;"></col>
+			        								<col style="width:25%;"></col>
+			        								<col></col>
+			        						</colgroup>
+			        						 	<tbody>
+			        						 		<tr>
+			        						 			<td class="td-cond" style="text-align:center;">
+															<fmt:message key="AD01001B.Estimation" />
+														</td>
+														<td class="td-cond" style="text-align:center;">
+															<fmt:message key="AD01001B.prevYear" />
+														</td>
+			        						 			<td class="td-cond" style="text-align:center;">
+															<fmt:message key="AD01001B.contract" />
+														</td>
+														<td class="td-cond" style="text-align:center;">
+															<fmt:message key="AD01001B.gap" />
+														</td>
+													</tr>
+			        						 		<tr>
+			        						 			<td class="td-cond">
+															<fmt:message key="AD01001B.GSV" />
+														</td>
+														<td class="td-report" style="text-align:right;">
+															<span id="GSV1"></span>&nbsp;
+														</td>
+														<td class="td-report" style="text-align:right;">
+															<span id="GSV2"></span>&nbsp;
+														</td>
+														<td class="td-report" style="text-align:right;">
+															<span id="GSV3"></span>&nbsp;
+														</td>
+													</tr>
+			        						 		<tr>
+			        						 			<td class="td-cond">
+															<fmt:message key="AD01001B.tradeSpend" />
+														</td>
+														<td class="td-report" style="text-align:right;">
+															<span id="tradeSpend1"></span>&nbsp;
+														</td>
+														<td class="td-report" style="text-align:right;">
+															<span id="tradeSpend2"></span>&nbsp;
+														</td>
+														<td class="td-report" style="text-align:right;">
+															<span id="tradeSpend3"></span>&nbsp;
+														</td>
+													</tr>
+			        						 		<tr>
+			        						 			<td class="td-cond">
+															<fmt:message key="AD01001B.duty" />
+														</td>
+														<td class="td-report" style="text-align:right;">
+															<span id="duty1"></span>&nbsp;
+														</td>
+														<td class="td-report" style="text-align:right;">
+															<span id="duty2"></span>&nbsp;
+														</td>
+														<td class="td-report" style="text-align:right;">
+															<span id="duty3"></span>&nbsp;
+														</td>
+													</tr>
+			        						 		<tr>
+			        						 			<td class="td-cond">
+															<fmt:message key="AD01001B.NSV" />
+														</td>
+														<td class="td-report" style="text-align:right;">
+															<span id="NSV1"></span>&nbsp;
+														</td>
+														<td class="td-report" style="text-align:right;">
+															<span id="NSV2"></span>&nbsp;
+														</td>
+														<td class="td-report" style="text-align:right;">
+															<span id="NSV3"></span>&nbsp;
+														</td>
+													</tr>
+			        						 		<tr>
+			        						 			<td class="td-cond">
+															<fmt:message key="AD01001B.COGS" />
+														</td>
+														<td class="td-report" style="text-align:right;">
+															<span id="COGS1"></span>&nbsp;
+														</td>
+														<td class="td-report" style="text-align:right;">
+															<span id="COGS2"></span>&nbsp;
+														</td>
+														<td class="td-report" style="text-align:right;">
+															<span id="COGS3"></span>&nbsp;
+														</td>
+													</tr>
+			        						 		<tr>
+			        						 			<td class="td-cond">
+															<fmt:message key="AD01001B.GP" />
+														</td>
+														<td class="td-report" style="text-align:right;">
+															<span id="GP1"></span>&nbsp;
+														</td>
+														<td class="td-report" style="text-align:right;">
+															<span id="GP2"></span>&nbsp;
+														</td>
+														<td class="td-report" style="text-align:right;">
+															<span id="GP3"></span>&nbsp;
+														</td>
+													</tr>
+			        						 		<tr>
+			        						 			<td class="td-cond">
+															<fmt:message key="AD01001B.APContract" />
+														</td>
+														<td class="td-report" style="text-align:right;">
+															<span id="APContract1"></span>&nbsp;
+														</td>
+														<td class="td-report" style="text-align:right;">
+															<span id="APContract2"></span>&nbsp;
+														</td>
+														<td class="td-report" style="text-align:right;">
+															<span id="APContract3"></span>&nbsp;
+														</td>
+													</tr>
+			        						 		<tr>
+			        						 			<td class="td-cond">
+															<fmt:message key="AD01001B.APOthers" />
+														</td>
+														<td class="td-report" style="text-align:right;">
+															<span id="APOthers1"></span>&nbsp;
+														</td>
+														<td class="td-report" style="text-align:right;">
+															<span id="APOthers2"></span>&nbsp;
+														</td>
+														<td class="td-report" style="text-align:right;">
+															<span id="APOthers3"></span>&nbsp;
+														</td>
+													</tr>
+			        						 		<tr>
+			        						 			<td class="td-cond">
+															<fmt:message key="AD01001B.caap" />
+														</td>
+														<td class="td-report" style="text-align:right;">
+															<span id="caap1"></span>&nbsp;
+														</td>
+														<td class="td-report" style="text-align:right;">
+															<span id="caap2"></span>&nbsp;
+														</td>
+														<td class="td-report" style="text-align:right;">
+															<span id="caap3"></span>&nbsp;
+														</td>
+													</tr>
+													<tr>
+														<td height="*" colspan="4">
+						            		<table border="0" cellspacing="0" cellpadding="0" width="100%" style="border-right:0px;border-left:0px;">
+                								<colgroup>
+			        								<col style="width:36%;"></col>
+			        								<col style="width:16%;"></col>
+			        								<col style="width:16%;"></col>
+			        								<col style="width:16%;"></col>
+			        								<col style="width:16%;"></col>
+			        								<col></col>
+			        						</colgroup>
+			        						 	<tbody>
+			        						 		<tr>
+			        						 			<td class="td-cond" style="text-align:center;">
+															<fmt:message key="AD01001B.preMandE" />
+														</td>
+														<td class="td-cond" style="text-align:center;">
+															<fmt:message key="AD01001B.prevYear" />
+														</td>
+			        						 			<td class="td-cond" style="text-align:center;">
+															<fmt:message key="AD01001B.contract" />
+														</td>
+														<td class="td-cond" style="text-align:center;">
+															<fmt:message key="AD01001B.gap" />
+														</td>
+														<td class="td-cond" style="text-align:center;">
+															<fmt:message key="AD01001B.gapRate" />
+														</td>
+													</tr>
+			        						 		<tr>
+			        						 			<td class="td-cond">
+															<fmt:message key="AD01001B.bestEstimationMonth" />
+														</td>
+														<td class="td-report" style="text-align:right;">
+															<span id="bestEstimationMonth1"></span>&nbsp;
+														</td>
+														<td class="td-report" style="text-align:right;">
+															<span id="bestEstimationMonth2"></span>&nbsp;
+														</td>
+														<td class="td-report" style="text-align:right;">
+															<span id="bestEstimationMonth3"></span>&nbsp;
+														</td>
+														<td class="td-report" style="text-align:right;">
+															<span id="bestEstimationMonth4"></span>&nbsp;
+														</td>
+													</tr>
+			        						 		<tr>
+			        						 			<td class="td-cond">
+															<fmt:message key="AD01001B.gpRate" />
+														</td>
+														<td class="td-report" style="text-align:right;">
+															<span id="gpRate1"></span>&nbsp;
+														</td>
+														<td class="td-report" style="text-align:right;">
+															<span id="gpRate2"></span>&nbsp;
+														</td>
+														<td class="td-report" style="text-align:right;">
+															<span id="gpRate3"></span>&nbsp;
+														</td>
+														<td class="td-report" style="text-align:right;">
+															<span id="gpRate4"></span>&nbsp;
+														</td>
+													</tr>
+			        						 		<tr>
+			        						 			<td class="td-cond">
+															<fmt:message key="AD01001B.costRate" />
+														</td>
+														<td class="td-report" style="text-align:right;">
+															<span id="costRate1"></span>&nbsp;
+														</td>
+														<td class="td-report" style="text-align:right;">
+															<span id="costRate2"></span>&nbsp;
+														</td>
+														<td class="td-report" style="text-align:right;">
+															<span id="costRate3"></span>&nbsp;
+														</td>
+														<td class="td-report" style="text-align:right;">
+															<span id="costRate4"></span>&nbsp;
+														</td>
+													</tr>
+			        						 		<tr>
+			        						 			<td class="td-cond">
+															<fmt:message key="AD01001B.sdxMixRate" />
+														</td>
+														<td class="td-report" style="text-align:right;">
+															<span id="sdxMixRate1"></span>&nbsp;
+														</td>
+														<td class="td-report" style="text-align:right;">
+															<span id="sdxMixRate2"></span>&nbsp;
+														</td>
+														<td class="td-report" style="text-align:right;">
+															<span id="sdxMixRate3"></span>&nbsp;
+														</td>
+														<td class="td-report" style="text-align:right;">
+															<span id="sdxMixRate4"></span>&nbsp;
+														</td>
+													</tr>
+			        						 		<tr>
+			        						 			<td class="td-cond">
+															<fmt:message key="AD01001B.totalCostRate" />
+														</td>
+														<td class="td-report" style="text-align:right;">
+															<span id="totalCostRate1"></span>&nbsp;
+														</td>
+														<td class="td-report" style="text-align:right;">
+															<span id="totalCostRate2"></span>&nbsp;
+														</td>
+														<td class="td-report" style="text-align:right;">
+															<span id="totalCostRate3"></span>&nbsp;
+														</td>
+														<td class="td-report" style="text-align:right;">
+															<span id="totalCostRate4"></span>&nbsp;
+														</td>
+													</tr>
+			        						 		<tr>
+			        						 			<td class="td-cond">
+															<fmt:message key="AD01001B.caapPerNSV" />
+														</td>
+														<td class="td-report" style="text-align:right;">
+															<span id="caapPerNSV1"></span>&nbsp;
+														</td>
+														<td class="td-report" style="text-align:right;">
+															<span id="caapPerNSV2"></span>&nbsp;
+														</td>
+														<td class="td-report" style="text-align:right;">
+															<span id="caapPerNSV3"></span>&nbsp;
+														</td>
+														<td class="td-report" style="text-align:right;">
+															<span id="caapPerNSV4"></span>&nbsp;
+														</td>
+													</tr>
+			        						 		<tr>
+			        						 			<td class="td-cond">
+															<fmt:message key="AD01001B.mThan36MContract" />
+														</td>
+														<td class="td-report" style="text-align:right;" id="td_mThan36MContract">
+															<span id="mThan36MContract"></span>&nbsp;
+														</td>
+														<td class="td-cond" colspan="2">
+															<fmt:message key="AD01001B.adCostPerGSV" />
+														</td>
+														<td class="td-report" style="text-align:right;" id="td_adCostPerGSV">
+															<span id="adCostPerGSV"></span>&nbsp;
+														</td>
+													</tr>
+			        						 		<tr>
+			        						 			<td class="td-cond">
+															<fmt:message key="AD01001B.prevYearChgCost" />
+														</td>
+														<td class="td-report" style="text-align:right;" id="td_prevYearChgCost">
+															<span id="prevYearChgCost"></span>&nbsp;
+														</td>
+														<td class="td-cond" colspan="2">
+															<fmt:message key="AD01001B.minVolYN" />
+														</td>
+														<td class="td-report" style="text-align:right;" id="td_minVolYN">
+															<span id="minVolYN"></span>&nbsp;
+														</td>
+													</tr>
+			        						 	</tbody>
+			        						</table>
+						            	</td>
+													</tr>
+			        						 	</tbody>
+			        						</table>
+						            	</td>
+<%--										0210 주석끝--%>
 						            </tr>
 			        		</tbody>
 		        		</table>
@@ -685,7 +687,7 @@
 			<!-- 체인 Result 여부 -->
 			<input type="hidden" id="rltGSV" name="rltGSV" />
 			<!-- total 여부 -->
-			<input type="hidden" id="totalVol" name="totalVol" readonly="readonly"/>
+			<input type="hidden" id="totalVol2" name="totalVol2" readonly="readonly"/>
 		</form>
 	</body>
 </html>
@@ -1871,27 +1873,22 @@
 	
 	function Save(){
 		var adSeqCheck = $("#adSeq").val().length;
-		debugger;
 		if (!checkContractDate()) {
 			return;
 		}
-		debugger;
 		//등록, 반려  저장
 		if (($("#apprStateCD").val() !== "10" && $("#apprStateCD").val() !== "40") && adSeqCheck > 0) {
 			alert("<fmt:message key="AD02004B.msg1"/>");
 			return;
 		}
-		debugger;
-		if (maxRow_prd == 0) {
-			alert("<fmt:message key="info.nullData.save"/>");
-			return;
-		}
-		debugger;
+		<%--if (maxRow_prd == 0) {--%>
+		<%--	alert("<fmt:message key="info.nullData.save"/>");--%>
+		<%--	return;--%>
+		<%--}--%>
 		if ($("#endYearCD").val() == "" || $("#endMonthCD").val() == "") {
 			alert("<fmt:message key="AD01001B.msg5"/>");
 			return;
 		}
-		debugger;
 // 		if ($("#apprStateCD").val() == "40") {
 // 			$("#apprStateCD").val("10") 
 // 			return;
@@ -1900,11 +1897,10 @@
 		if($("#buCD_S").val() == ""){
 			alert("<fmt:message key="AD01001B.msg11"/>");
 			return;
-		}debugger;
+		}
 		if(!checkRequiredAD()){
 			return;
 		}
-		debugger;
 // 		if(parseFloat($("#contractMonth").text().slice(0,-3), "10") < 3){
 //			alert("<fmt:message key="AD01001B.msg6"/>");
 //			return;
@@ -1933,7 +1929,6 @@
 		table.setAsync(false);
 		table.setRequestMethod("POST");
 		table.setParameter("empID", "${params.empID}");
-		debugger;
 		table.setParameter("adSupportID", $("#adSupportID").val());
 		table.setParameter("venueCD", $("#venueCD").val());
 		table.setParameter("startDT", $("#startYearCD").val()+$("#startMonthCD").val());
@@ -1958,26 +1953,46 @@
 		table.setParameter("seq", $("#seq").val());
 		table.setParameter("prdCDs", prdCDs);
 		table.setParameter("prdQtys", prdQtys);
+
+		debugger;
 		table.setParameter("activeFlgs", activeFlgs);
+		debugger;
 		table.setParameter("adSeq", $("#adSeq").val());
+		debugger;
 		table.setParameter("adContractDivCD", adContractDivCD);
+		debugger;
 		table.setParameter("buCD", $("#buCD_S").val());
+		debugger;
 		table.setParameter("requiredADCD1", $("#requiredADCD1_S").val());
+		debugger;
 		table.setParameter("requiredADCD2", $("#requiredADCD2_S").val());
+		debugger;
 		table.setParameter("requiredADCD3", $("#requiredADCD3_S").val());
+		debugger;
 		table.setParameter("amt1", $("#amt1").val());
+		debugger;
 		table.setParameter("amt2", $("#amt2").val());
+		debugger;
 		table.setParameter("amt3", $("#amt3").val());
-		able.setParameter("location1", $("#location1").val());
+		debugger;
+		table.setParameter("location1", $("#location1").val());
+		debugger;
 		table.setParameter("location2", $("#location2").val());
+		debugger;
 		table.setParameter("location3", $("#location3").val());
+		debugger;
 		table.setParameter("adProgram", $("#adProgram").val());
+		debugger;
 		table.setParameter("venueActivity1", $("#venueActivity1").val());
+		debugger;
 		table.setParameter("venueActivity2", $("#venueActivity2").val());
+		debugger;
 		table.setParameter("venueActivity3", $("#venueActivity3").val());
+		debugger;
 		table.request();
 
 		if(table.getData(0,0) == "S") {
+			debugger;
 			top.appCountFun();
 			message(table.getData(1,0));
 			$("#adSupportID").val(table.getData(3,0));
@@ -1985,6 +2000,7 @@
 			Search();
    		}
 		else {
+			debugger;
 			alert(table.getData(1,0));
 		}
 	}
