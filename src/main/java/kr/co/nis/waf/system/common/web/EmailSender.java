@@ -29,62 +29,64 @@ public class EmailSender extends AbstractMessageSender {
 	}
 	
 	public void sendMail(Map<String, String> map) {
-		
-		try {
-			if("local".contentEquals(activeProfile) || "dev".contentEquals(activeProfile)){
-				super.sender = super.daumSender;
-			}
-			MimeMessage msg = sender.createMimeMessage();
-			MimeMessageHelper helper = new MimeMessageHelper(msg, true, "utf-8");
-
-			String[] to = map.get("to").toString().split(";");
-			helper.setTo(to);
-			//helper.setFrom(map.get("from").toString());
-			helper.setFrom(mail_sender);
-			helper.setSubject(map.get("subject").toString());
-			
-			if(map.get("addcc")!=null) {
-				helper.addCc(map.get("addcc").toString());		//참조
-			}
-			if(map.get("addbcc")!=null) {
-				helper.addBcc(map.get("addbcc").toString());	//숨은참조
-			}
-
-			StringBuffer sb = new StringBuffer();
-			sb.append(map.get("content").toString());
-			
-			if (logger.isDebugEnabled()) {
-				logger.debug("*************e-mail*************\n");
-				for(int i=0; i<to.length; i++) {
-					logger.debug("to["+i+"] : "+to[i]);
+		if(map.get("to") != null){
+			try {
+				if("local".contentEquals(activeProfile) || "dev".contentEquals(activeProfile)){
+					super.sender = super.daumSender;
 				}
-				//logger.debug("from : "+map.get("from").toString());
-				logger.debug("from : "+mail_sender);
-				logger.debug("subject : "+map.get("subject").toString());
+				MimeMessage msg = sender.createMimeMessage();
+				MimeMessageHelper helper = new MimeMessageHelper(msg, true, "utf-8");
+
+				String[] to = map.get("to").toString().split(";");
+				helper.setTo(to);
+				//helper.setFrom(map.get("from").toString());
+				helper.setFrom(mail_sender);
+				helper.setSubject(map.get("subject").toString());
+
 				if(map.get("addcc")!=null) {
-					logger.debug("addCc : "+map.get("addcc").toString());
+					helper.addCc(map.get("addcc").toString());		//참조
 				}
 				if(map.get("addbcc")!=null) {
-					logger.debug("addbcc : "+map.get("addbcc").toString());
+					helper.addBcc(map.get("addbcc").toString());	//숨은참조
 				}
-				logger.debug("text : "+sb.toString());
-				logger.debug("******************************\n");
-			}
-			
-			helper.setText(sb.toString());
-			msg.setContent(sb.toString(), "text/html; charset=utf-8");
 
-			sender.send(msg);
-			
-		} catch (MessagingException me) {
-			if( logger.isErrorEnabled() ) {
-				logger.error(msAccessor.getMessage("error.emailNotSend"), me);
+				StringBuffer sb = new StringBuffer();
+				sb.append(map.get("content").toString());
+
+				if (logger.isDebugEnabled()) {
+					logger.debug("*************e-mail*************\n");
+					for(int i=0; i<to.length; i++) {
+						logger.debug("to["+i+"] : "+to[i]);
+					}
+					//logger.debug("from : "+map.get("from").toString());
+					logger.debug("from : "+mail_sender);
+					logger.debug("subject : "+map.get("subject").toString());
+					if(map.get("addcc")!=null) {
+						logger.debug("addCc : "+map.get("addcc").toString());
+					}
+					if(map.get("addbcc")!=null) {
+						logger.debug("addbcc : "+map.get("addbcc").toString());
+					}
+					logger.debug("text : "+sb.toString());
+					logger.debug("******************************\n");
+				}
+
+				helper.setText(sb.toString());
+				msg.setContent(sb.toString(), "text/html; charset=utf-8");
+
+				sender.send(msg);
+
+			} catch (MessagingException me) {
+				if( logger.isErrorEnabled() ) {
+					logger.error(msAccessor.getMessage("error.emailNotSend"), me);
+				}
+			} catch (Exception ex) {
+				if( logger.isErrorEnabled() ) {
+					ex.printStackTrace();
+					logger.error(msAccessor.getMessage("error.emailNotSend"), ex);
+				}
 			}
-		} catch (Exception ex) {
-			if( logger.isErrorEnabled() ) {
-				ex.printStackTrace();
-				logger.error(msAccessor.getMessage("error.emailNotSend"), ex);
-			}			
 		}
+
 	}
 }
