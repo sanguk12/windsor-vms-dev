@@ -686,6 +686,8 @@
 			<input type="hidden" id="chainGSV" name="chainGSV" />
 			<!-- 체인 Result 여부 -->
 			<input type="hidden" id="rltGSV" name="rltGSV" />
+			<!-- total 여부 -->
+			<input type="hidden" id="totalVol" name="totalVol" readonly="readonly"/>
 		</form>
 	</body>
 </html>
@@ -1877,7 +1879,7 @@
 	
 	function Save(){
 		var adSeqCheck = $("#adSeq").val().length;
-		
+		debugger;
 		if (!checkContractDate()) {
 			return;
 		}

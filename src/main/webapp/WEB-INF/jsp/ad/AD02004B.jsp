@@ -684,6 +684,8 @@
 			<input type="hidden" id="chainGSV" name="chainGSV" />
 			<!-- 체인 Result 여부 -->
 			<input type="hidden" id="rltGSV" name="rltGSV" />
+			<!-- total 여부 -->
+			<input type="hidden" id="totalVol" name="totalVol" readonly="readonly"/>
 		</form>
 	</body>
 </html>
@@ -1085,11 +1087,11 @@
 				duty2 += parseFloat(unformatNum(grid_prd.getCellText(_col_prd.prdQty, i )), "10")*(parseFloat(unformatNum(grid_prd.getCellText(_col_prd.duty, i)), "10")*100000)/100000;
 				COGS2 += parseFloat(unformatNum(grid_prd.getCellText(_col_prd.prdQty, i )), "10")*(parseFloat(unformatNum(grid_prd.getCellText(_col_prd.COGS, i)), "10")*100000)/100000;
 				euSum += parseFloat(unformatNum(grid_prd.getCellText(_col_prd.prdQty, i )), "10")*(parseFloat(unformatNum(grid_prd.getCellText(_col_prd.eu, i)), "10")*100000)/100000;
-				
+
 				if (grid_prd.getCellText(_col_prd.sdxYN, i) == 'Y') {
 					sdxPrdVol += parseFloat(unformatNum(grid_prd.getCellText(_col_prd.prdQty, i )), "10");
 				}
-				
+
 				totalVol += parseFloat(unformatNum(grid_prd.getCellText(_col_prd.prdQty, i )), "10");
 			}
 		}
@@ -1869,40 +1871,40 @@
 	
 	function Save(){
 		var adSeqCheck = $("#adSeq").val().length;
-		
+		debugger;
 		if (!checkContractDate()) {
 			return;
 		}
-		
+		debugger;
 		//등록, 반려  저장
 		if (($("#apprStateCD").val() !== "10" && $("#apprStateCD").val() !== "40") && adSeqCheck > 0) {
 			alert("<fmt:message key="AD02004B.msg1"/>");
 			return;
 		}
-		
+		debugger;
 		if (maxRow_prd == 0) {
 			alert("<fmt:message key="info.nullData.save"/>");
 			return;
 		}
-		
+		debugger;
 		if ($("#endYearCD").val() == "" || $("#endMonthCD").val() == "") {
 			alert("<fmt:message key="AD01001B.msg5"/>");
 			return;
 		}
-		
+		debugger;
 // 		if ($("#apprStateCD").val() == "40") {
 // 			$("#apprStateCD").val("10") 
 // 			return;
 // 		}
-		
+
 		if($("#buCD_S").val() == ""){
 			alert("<fmt:message key="AD01001B.msg11"/>");
 			return;
-		}
+		}debugger;
 		if(!checkRequiredAD()){
 			return;
 		}
-		
+		debugger;
 // 		if(parseFloat($("#contractMonth").text().slice(0,-3), "10") < 3){
 //			alert("<fmt:message key="AD01001B.msg6"/>");
 //			return;
@@ -2333,12 +2335,12 @@
 	  	table.setParameter("seq", $("#seq").val());
 	  	table.setParameter("adSeq", $("#adSeq").val());
 	  	table.request();
-      	
+
       	createGrid_prd();
-      	
+
       	var rowCount = table.getCount();
       	var data = new Array();
-      	
+
       	if (rowCount > 0) {
       		for (var i = 0; i < rowCount; i++) {
       			data[i] = [
@@ -2356,10 +2358,10 @@
       			];
       		}
       		$("#seq").val(table.getData(_col_prd.seq, 0));
-      		
+
       		grid_prd.setCellData(data);
       		grid_prd.setRowCount(rowCount);
-      		
+
       	}
       	grid_prd.refresh();
       	maxRow_prd = rowCount;
