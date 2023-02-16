@@ -1756,7 +1756,7 @@
 		table.setURL("${contextPath}/service/ad01/saveAD");
 		table.setAsync(false);
 		table.setRequestMethod("POST");
-		table.setParameter("empID", "${params.empID}");
+		table.setParameter("empID", "${params.empID}"); // 가져옴?
 		table.setParameter("adSupportID", $("#adSupportID").val());
 		table.setParameter("venueCD", $("#venueCD").val());
 		table.setParameter("startDT", $("#startYearCD").val()+$("#startMonthCD").val());
