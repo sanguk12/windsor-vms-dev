@@ -639,8 +639,6 @@
 
 	//승인
 	function Approval() {
-
-		debugger;
 		var index = grid.getRowIndices();
 		var venueCDs = new Array();
 		var adSupportIDs = new Array();

@@ -2105,9 +2105,8 @@
 		table.setParameter("amt1", $("#amt1").val());
 		table.setParameter("amt2", $("#amt2").val());
 		table.setParameter("amt3", $("#amt3").val());
-		able.setParameter("location1", $("#location1").val());
+		table.setParameter("location1", $("#location1").val());
 		table.setParameter("location2", $("#location2").val());
-		debugger;
 		table.setParameter("location3", $("#location3").val());
 		table.setParameter("adProgram", $("#adProgram").val());
 		table.setParameter("venueActivity1", $("#venueActivity1").val());

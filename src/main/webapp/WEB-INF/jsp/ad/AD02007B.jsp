@@ -2136,7 +2136,7 @@
 			table.setURL("${contextPath}/service/ad02/contractTmpSaveRequiredAD");
 			table.setAsync(false);
 			table.setRequestMethod("POST");
-			debugger;
+
 			table.setParameter("empID", "${params.empID}");
 			table.setParameter("adSupportID", $("#adSupportID").val());
 			table.setParameter("venueCD", $("#venueCD").val());

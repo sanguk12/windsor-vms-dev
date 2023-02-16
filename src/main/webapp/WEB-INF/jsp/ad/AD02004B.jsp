@@ -1954,45 +1954,45 @@
 		table.setParameter("prdCDs", prdCDs);
 		table.setParameter("prdQtys", prdQtys);
 
-		debugger;
+
 		table.setParameter("activeFlgs", activeFlgs);
-		debugger;
+
 		table.setParameter("adSeq", $("#adSeq").val());
-		debugger;
+
 		table.setParameter("adContractDivCD", adContractDivCD);
-		debugger;
+
 		table.setParameter("buCD", $("#buCD_S").val());
-		debugger;
+
 		table.setParameter("requiredADCD1", $("#requiredADCD1_S").val());
-		debugger;
+
 		table.setParameter("requiredADCD2", $("#requiredADCD2_S").val());
-		debugger;
+
 		table.setParameter("requiredADCD3", $("#requiredADCD3_S").val());
-		debugger;
+
 		table.setParameter("amt1", $("#amt1").val());
-		debugger;
+
 		table.setParameter("amt2", $("#amt2").val());
-		debugger;
+
 		table.setParameter("amt3", $("#amt3").val());
-		debugger;
+
 		table.setParameter("location1", $("#location1").val());
-		debugger;
+
 		table.setParameter("location2", $("#location2").val());
-		debugger;
+
 		table.setParameter("location3", $("#location3").val());
-		debugger;
+
 		table.setParameter("adProgram", $("#adProgram").val());
-		debugger;
+
 		table.setParameter("venueActivity1", $("#venueActivity1").val());
-		debugger;
+
 		table.setParameter("venueActivity2", $("#venueActivity2").val());
-		debugger;
+
 		table.setParameter("venueActivity3", $("#venueActivity3").val());
-		debugger;
+
 		table.request();
 
 		if(table.getData(0,0) == "S") {
-			debugger;
+
 			top.appCountFun();
 			message(table.getData(1,0));
 			$("#adSupportID").val(table.getData(3,0));
@@ -2000,7 +2000,7 @@
 			Search();
    		}
 		else {
-			debugger;
+
 			alert(table.getData(1,0));
 		}
 	}

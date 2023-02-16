@@ -1879,7 +1879,7 @@
 	
 	function Save(){
 		var adSeqCheck = $("#adSeq").val().length;
-		debugger;
+
 		if (!checkContractDate()) {
 			return;
 		}

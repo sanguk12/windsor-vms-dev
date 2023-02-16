@@ -843,7 +843,7 @@
       	var adSeq = grid.getCellText(_col.adSeq,i);
       	var adChgFlg = grid.getCellText(_col.adChgFlg,i);
       	var apprTpIDEx = "";
-		debugger;
+
 		var contractMonth = grid.getCellText(_col.contractMonth, i);
 		var apAmt = grid.getCellText(_col.apAmt, i).replaceAll(",", "");
 		var monthAdAmt = apAmt/contractMonth;
