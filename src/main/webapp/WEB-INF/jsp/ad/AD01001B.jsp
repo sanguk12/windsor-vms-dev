@@ -2731,6 +2731,7 @@
 					}
 				}
 			} else{
+				console.log($(this).next().val(), $(this).val(), "test")
 				if(($(this).val() == "" && $(this).next().val() != "") || ($(this).val() != "" && $(this).next().val() == "")){
 					alert("<fmt:message key="AD01001B.msg12"/>");
 					flag = false;
