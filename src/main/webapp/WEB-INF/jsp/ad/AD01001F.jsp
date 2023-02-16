@@ -1262,11 +1262,11 @@
 
 
 	function setADProgram(){
-		if(($("#APContract").val()).replace(',','') > 90000){
+		if(($("#APContract").val()).replace(',','') > 3000){
 			$("#adProgram").val("<fmt:message key="AD01001B.TLA"/>");
-		} else if(($("#APContract").val()).replace(',','') > 1600){
+		} else if(($("#APContract").val()).replace(',','') > 1000){
 			$("#adProgram").val("<fmt:message key="AD01001B.RLA"/>");
-		} else if(($("#APContract").val()).replace(',','') >= 400){
+		} else if(($("#APContract").val()).replace(',','') >= 200){
 			$("#adProgram").val("<fmt:message key="AD01001B.simpleAD"/>");
 		} else if(($("#APContract").val()).replace(',','') > 0){
 			$("#adProgram").val("");
