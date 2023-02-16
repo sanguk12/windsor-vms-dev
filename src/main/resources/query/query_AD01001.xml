@@ -813,6 +813,16 @@
 		where 
 			empid = #empID#
 	</select>
+
+	<!-- 사원 OfficeCD가 아닌 계약 OfficeCD로 가져오는 쿼리문 -->
+	<select id="AD9100119S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
+		select
+			rageSphereCD as "rageSphereCD",
+			officeCD as "officeCD"
+		from gad01mt
+		where
+			adSupportID = #adSupportID#
+	</select>
 	
 	<select id="AD0100114S" parameterClass="java.util.Map" resultClass="java.util.LinkedHashMap">
 		select

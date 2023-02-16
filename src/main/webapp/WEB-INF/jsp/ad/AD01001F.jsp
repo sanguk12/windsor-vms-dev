@@ -1756,7 +1756,7 @@
 		table.setURL("${contextPath}/service/ad01/saveAD");
 		table.setAsync(false);
 		table.setRequestMethod("POST");
-		table.setParameter("empID", "${params.empID}");
+		table.setParameter("empID", "${params.empID}"); // 가져옴?
 		table.setParameter("adSupportID", $("#adSupportID").val());
 		table.setParameter("venueCD", $("#venueCD").val());
 		table.setParameter("startDT", $("#startYearCD").val()+$("#startMonthCD").val());
@@ -2408,7 +2408,7 @@
 		var flag = true;
 		$("[id^=requiredADCD]").each(function(index,item){
 			if(index == 0){
-				if($(this).val() == "" || $(this).next().val() == ""){
+				if($(this).val() == "" || $(this).next().val() == "" || $(this).next().next().val() == ""){
 					alert("<fmt:message key="AD01001B.msg12"/>");
 					flag = false;
 					return false;
@@ -2418,15 +2418,25 @@
 						flag = false;
 						return false;
 					}
+					if($(this).next().next().val() == ""){
+						alert("<fmt:message key="AD01001B.msg17"/>");
+						flag = false;
+						return false;
+					}
 				}
-			} else{
-				if(($(this).val() == "" && $(this).next().val() != "") || ($(this).val() != "" && $(this).next().val() == "")){
+			} else if (index >= 1 && $(this).val() != "") {
+				if(($(this).val() == "" && $(this).next().val() != "" && $(this).next().next().val() != "") || ($(this).val() != "" && $(this).next().val() == ""  && $(this).next().next().val() != "")){
 					alert("<fmt:message key="AD01001B.msg12"/>");
 					flag = false;
 					return false;
 				} else{
 					if($(this).next().val() == "0"){
 						alert("<fmt:message key="AD01001B.msg13"/>");
+						flag = false;
+						return false;
+					}
+					if($(this).next().next().val() == ""){
+						alert("<fmt:message key="AD01001B.msg17"/>");
 						flag = false;
 						return false;
 					}

@@ -445,7 +445,7 @@
 
 		table.setParameter("startDT", $("#yearFromCD_S").val() + $("#monthFromCD_S").val());
 		table.setParameter("endDT", $("#yearToCD_S").val() + $("#monthToCD_S").val());
-		table.setParameter("empID", "${params.empID}");
+		table.setParameter("empID", "${params.empID}"); // 가져옴?
 		table.setParameter("rageSphereCD", $("#rageSphereCD_S").val());
 		table.setParameter("officeCD", $("#officeCD_S").val());
 		table.setParameter("venueGradCD", $("#venueGradCD_S").val());

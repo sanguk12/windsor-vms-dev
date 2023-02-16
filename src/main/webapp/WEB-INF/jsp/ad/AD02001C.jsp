@@ -1358,6 +1358,7 @@
 		table.setParameter("adSupportID", $("#adSupportID").val());
 		table.request();
 		var rowCount = table.getCount();
+		debugger;
 		if (rowCount > 0) {
 			$("#adSupportID").val(table.getData(0,0));
 			$("#venueCD").val(table.getData(1,0));
@@ -1537,17 +1538,17 @@
 		chainTargetRate();
 		calculateAD();
 	}
+	// table.setParameter("adSupportID", $("#adSupportID").val());
 	function Search_venueInfo1(){
 		var table = new AW.XML.Table;
-		table.setURL("${contextPath}/service/simpleAction/AD0100113S");
+		table.setURL("${contextPath}/service/simpleAction/AD9100119S");
 		table.setAsync(false);
 		table.setRequestMethod("POST");
 		table.setParameter("outParamKey",
 				"rageSphereCD;officeCD;");
 		table.setParameter("format",
 				"str;str;");
-
-		table.setParameter("empID", "${params.empID}");
+		table.setParameter("adSupportID", $("#adSupportID").val());
 		table.request();
 
 		var rowCount = table.getCount();
@@ -1556,6 +1557,27 @@
 			$("#officeCD").val(table.getData(1,0));
 		}
 	}
+
+	<%--function Search_venueInfo1(){--%>
+	<%--	var table = new AW.XML.Table;--%>
+	<%--	table.setURL("${contextPath}/service/simpleAction/AD0100113S");--%>
+	<%--	table.setAsync(false);--%>
+	<%--	table.setRequestMethod("POST");--%>
+	<%--	table.setParameter("outParamKey",--%>
+	<%--			"rageSphereCD;officeCD;");--%>
+	<%--	table.setParameter("format",--%>
+	<%--			"str;str;");--%>
+
+	<%--	table.setParameter("empID", "${params.empID}");--%>
+	<%--	table.request();--%>
+
+	<%--	var rowCount = table.getCount();--%>
+	<%--	if (rowCount > 0) {--%>
+	<%--		$("#rageSphereCD").val(table.getData(0,0));--%>
+	<%--		$("#officeCD").val(table.getData(1,0));--%>
+	<%--	}--%>
+	<%--}--%>
+
 	function Search_venueInfo2(){
 		var table = new AW.XML.Table;
 		table.setURL("${contextPath}/service/simpleAction/AD0100114S");
@@ -1764,6 +1786,6 @@
 
 
 
-
+	// C
 
 </script>
