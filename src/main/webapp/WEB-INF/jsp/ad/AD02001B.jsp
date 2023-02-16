@@ -191,7 +191,7 @@
 															<input type="text" id="POSM" name="POSM" />
 														</td>
 													</tr>
-			        						 		<tr>
+			        						 		<tr style="display:none;">
 			        						 			<td class="td-cond">
 															<fmt:message key="AD01001B.threePercentIncentive" />
 														</td>
