@@ -1275,11 +1275,11 @@
 	}
 
 	function setVenueActivity(){
-		if(($("#APContract").val()).replace(',','') > 3000){
+		if(($("#APContract").val()).replace(',','') >= 3000){
 			$("#venueActivity3").val("<fmt:message key="AD01001B.venueActivity3"/>");
 			$("#venueActivity2").val("<fmt:message key="AD01001B.venueActivity2"/>");
 			$("#venueActivity1").val("<fmt:message key="AD01001B.venueActivity1"/>");
-		} else if(($("#APContract").val()).replace(',','') > 1000){
+		} else if(($("#APContract").val()).replace(',','') >= 1000){
 			$("#venueActivity3").val("");
 			$("#venueActivity2").val("<fmt:message key="AD01001B.venueActivity2"/>");
 			$("#venueActivity1").val("<fmt:message key="AD01001B.venueActivity1"/>");
